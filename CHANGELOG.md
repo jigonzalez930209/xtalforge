@@ -9,6 +9,17 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 3 Task 3.7: the `.xtalproj` ZIP container with independent
+  `format_version`, readable parts and a newer-version gate.
+- Phase 3 Task 3.8.2: `symmetry`, `pxrd` and `uff` parameter presets shared by
+  the CLI, Python and WASM schemas.
+- Phase 3 Task 3.10.7: `SetCharges`, `Interpenetrate` and
+  `MarkConnectionPoints` commands.
+- Phase 3 Task 3.12.3: in-memory workspace archives for WASM and on-disk
+  workspace binding for Python.
+- Phase 3 Task 3.16: `formats`, `params`, `project`, `trajectory` and `script`
+  CLI commands; Python `Document`/project/workspace bindings; WASM
+  `WasmDocument` plus project and workspace exports; the editor demo.
 - Phase 4 Task 4.8: Gamma-point Hessian, vibrational modes, IR spectrum,
   Gamma-point phonons, harmonic/ideal-gas thermochemistry and the
   quasi-harmonic free-energy scan.
