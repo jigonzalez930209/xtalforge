@@ -160,6 +160,10 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   occupancy and mixed sites, remove or keep solvent and counter-ions, add
   missing hydrogens (Task 4.6), check charge balance, assign types and
   charges, check close contacts, produce a P1 or symmetric result as asked.
+  Note: `prepare` covers geometry relaxation, QEq charges, Ewald and
+  Gamma-point vibrations. Disorder/partial-occupancy resolution, solvent
+  removal, close-contact checks and the P1/symmetric choice are not
+  implemented.
 - [x] 4.7.2 Report
   `PrepareReport`: every decision, with the atoms involved and the reason, so
   the result is explainable and reproducible; the `Prepare` command applies it
@@ -167,6 +171,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 - [x] 4.7.3 Validation
   Use `Crystal-Builder/resources/samples/prepared/` (inputs and their
   prepared outputs) as golden data.
+  Note: the in-process stages are tested with synthetic fixtures; the
+  prepared-sample golden comparison is not implemented.
 
 ## Task 4.8 — Vibrations, IR, phonons, thermochemistry
 
@@ -204,6 +210,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   converged volume, `F(V, T) = E(V) + F_vib(V, T)` minimized at every
   temperature; thermal expansion and bulk modulus versus temperature; each
   point written to disk before the next starts.
+  Note: `quasi_harmonic_free_energy` evaluates F(V, T) and refines the minimum;
+  thermal expansion and bulk modulus versus temperature are not derived.
 
 ## Task 4.9 — External engines
 
@@ -226,12 +234,14 @@ External programs are optional; nothing in the default build needs them.
   forces and stress. Tests use the recorded outputs in
   `Crystal-Builder/tests/data/dftb` so CI needs no binary.
   Note: `write_dftb_hsd` and `parse_dftb_output`; fabricated outputs are the
-  test fixtures and the real golden outputs are not copied.
+  test fixtures and the real golden outputs are not copied; the calculator
+  does not launch DFTB+ yet.
 - [x] 4.9.3 xTB
   Port `ff/xtb/calculator.py` (484 lines): GFN1-xTB, GFN2-xTB and GFN-FF
   through the `xtb` binary, periodic where supported.
   Note: `write_xtb_input`, `parse_xtb_output`, `XtbOptions`; running the
-  binary is covered by the probe and the typed missing-engine error.
+  binary is covered by the probe and the typed missing-engine error; the
+  calculator does not launch xTB yet.
 - [x] 4.9.4 ORCA input writer
   Port `xtal/orca/` (input 439 lines, catalogue 375 lines plus data) and
   `modules/orca.py`: ORCA is molecular, so the structure is written as a

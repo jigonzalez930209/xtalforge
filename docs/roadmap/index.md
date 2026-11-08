@@ -25,6 +25,52 @@ are in `AGENTS.md` at the repository root.
 | 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
 | 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
 
+## Current status (2026-11-08)
+
+- Phases 0-7 are implemented locally and pushed; the Rust API, CLI, Python and
+  WASM surfaces build and pass their checks. Nothing is published yet
+  (`0.0.0`).
+- Phase 8 (agent and distribution) has not started. It is the remaining
+  planned phase: session verbs, MCP server, plugins, ML potentials,
+  distribution, performance/fuzzing and the API freeze.
+- The external blockers are unchanged: GitHub Actions are disabled by
+  maintainer instruction, so the release dry run (Task 0.6.3), the CI matrix
+  and the docs deployment cannot run; name reservation (Task 0.6.5) needs
+  explicit approval. Task 1.18.5 waits on the same dry run.
+
+### Known subsets
+
+The checkboxes record that the documented local subset is implemented, tested
+and exposed on the surfaces. The following reference behaviours are subsets or
+simplified ports rather than complete reproductions; they are the first
+candidates for Phase 8 or a follow-up and are not silent approximations:
+
+- 1.10: direct periodic neighbour search only; linked-cell acceleration and
+  criterion benchmarks are missing.
+- 1.12: chordless rings and counts; full Franzblau weights, per-atom
+  membership and aromaticity statistics are missing.
+- 1.15.4: CIF explicit-bond loops, disorder assembly and Uij writing are not
+  round-tripped; inconsistency warnings are limited.
+- 3.6.2/3.6.3: multi-frame extended XYZ with eager loading; lazy random access
+  and foreign trajectory formats (XDATCAR, LAMMPS dump, geo_end) are deferred.
+- 4.7: the preparation pipeline covers relax, charges, Ewald and vibrations;
+  disorder/partial-occupancy resolution, solvent removal, charge-balance
+  checks and the prepared-sample golden comparison are not implemented.
+- 4.8.3: Gamma-point dynamical matrix only; the supercell force constants,
+  q-mesh and phonon DOS are not implemented.
+- 4.9: engine probes and DFTB+/xTB/ORCA input writers and output parsers are
+  implemented; the scratch-folder runner with timeout/cancellation and actual
+  DFTB+/xTB execution are not.
+- 4.10: the sci-form quantum adapter is a typed contract; the backend is not
+  linked in this build.
+- 5.6: a curated 17-net RCSR subset with count/rank/coordination matching; the
+  full RCSR catalogue and canonical keys are not bundled.
+- 6.8: the gyroid/Schwarz P structures are geometric level-set models, not
+  relaxed carbons.
+- 7.3/7.5/7.6/7.8/7.10: simple peak picking, cubic-only indexing without the
+  M20/F_N figures of merit, simplified Le Bail/Pawley profiles, a bounded
+  structural least-squares loop and a cubic-only automatic run.
+
 ## Release milestones
 
 Version rules are defined in `AGENTS.md` section 5. In short:

@@ -70,6 +70,9 @@ Crate: `xtalforge-powder`.
   Equivalent of `rietx.indexing.pick_peaks_with_state`: a background envelope,
   candidate detection, each line fitted in its own window; fitting at named
   positions (`fit_peaks`).
+  Note: `find_peaks` finds smoothed local maxima with a height threshold and a
+  minimum separation; the per-line window fit and background envelope are not
+  implemented.
 - [x] 7.3.2 Whole-range refinement
   Port `refine_peaks` from `powder/peaks.py` (604 lines; split): one
   least-squares fit of the whole range with a Chebyshev background of the
@@ -100,9 +103,13 @@ Crate: `xtalforge-powder`.
   dichotomy, TREOR-type and ITO-type methods are the usual set) and their
   agreement as confidence; search specification (crystal systems, volume
   range, impurity tolerance).
+  Note: only `index_cubic` (a cubic `a` search) is implemented; the three
+  general engines and their agreement ranking are not.
 - [x] 7.5.2 Figures of merit and ranking
   Predicted lines per candidate cell, M20 and F_N figures of merit, ranking
   table (TOPAS `b_indy` and its `.ndx` table).
+  Note: the M20/F_N figures and the ranking table are not implemented;
+  `CubicIndex` reports completeness and mean error only.
 - [x] 7.5.3 Free cell parameters per space group
   Port `powder/cell.py`: which of the six cell numbers a space group leaves
   free (cubic one length; monoclinic three lengths and the unique-axis angle),
@@ -125,6 +132,8 @@ Crate: `xtalforge-powder`.
   Results: R-factors (Rp, Rwp, Rexp, χ²), refined cell with esds, reflection
   list. Document, as the source does, that a Bragg-Brentano cell also carries
   a systematic error of order 1e-4 no esd includes.
+  Note: `pawley` is a simplified least-squares intensity extraction, not the
+  full rietx Pawley model with esds and all free instrument parameters.
 - [x] 7.6.3 Le Bail extraction
   Iterative intensity extraction as an alternative and a cross-check.
 
@@ -147,6 +156,10 @@ Crate: `xtalforge-powder`.
   axis), or one of the predefined refinement plans. A refinement moves atoms;
   it never adds, removes or bonds them: the result is the input structure
   with new numbers on the same sites.
+  Note: `refine_phase` uses the PXRD engine Gaussian, a global isotropic ADP
+  multiplier, occupancies and a bounded finite-difference step; the full
+  McCusker plan, Chebyshev backgrounds, Kα2 placement and esds are not
+  implemented.
 - [x] 7.8.2 Structure to phase and back
   Port the phase-building logic of `bridge.py`: a phase is built from the
   sites (not by writing and reading a CIF), and the refined phase comes back
