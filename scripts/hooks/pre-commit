@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# xtalforge-managed hook (installed by scripts/install-hooks.sh).
+#
+# Runs the repository rules, the formatting check and clippy on the crates
+# touched by the commit. CI runs the full matrix; this hook is a fast local
+# guard. Remove it or run `git commit --no-verify` to skip it.
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+
+scripts/check-rules.sh
+cargo fmt --check
+
+changed=$(git diff --cached --name-only --diff-filter=ACMRD)
+if [ -z "$changed" ]; then
+  exit 0
+fi
+
+# AGENTS.md section 2.1: one directory per commit. The root and intermediate
+# directories count for their own files, never for files in child directories.
+dirs=$(printf '%s\n' "$changed" | while IFS= read -r file; do
+  [ -z "$file" ] && continue
+  case "$file" in
+    */*) printf '%s\n' "${file%/*}" ;;
+    *) printf '.\n' ;;
+  esac
+done | sort -u)
+dir_count=$(printf '%s\n' "$dirs" | sed '/^$/d' | wc -l)
+if [ "$dir_count" -gt 1 ]; then
+  echo "Rejected: one commit may only touch one directory (AGENTS.md 2.1)." >&2
+  printf '%s\n' "$dirs" | sed 's/^/    /' >&2
+  exit 1
+fi
+
+# Directory names under crates/ match package names by convention.
+crates=$(printf '%s\n' "$changed" | sed -n 's#^crates/\([^/]*\)/.*#\1#p' | sort -u)
+root_inputs=$(printf '%s\n' "$changed" \
+  | grep -E '^(Cargo\.toml|Cargo\.lock|rust-toolchain\.toml|rustfmt\.toml|deny\.toml|\.cargo/)' \
+  || true)
+
+if [ -n "$root_inputs" ]; then
+  cargo clippy --workspace --all-targets -- -D warnings
+elif [ -n "$crates" ]; then
+  for crate in $crates; do
+    [ -d "crates/$crate" ] || continue
+    cargo clippy -p "$crate" --all-targets -- -D warnings
+  done
+fi

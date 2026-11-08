@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# xtalforge-managed hook (installed by scripts/install-hooks.sh).
+#
+# Checks the commit message convention: feat(<scope>): or ref(<scope>): in the
+# subject and a hardest-to-easiest task list in the body. Run
+# `git commit --no-verify` only when the maintainer explicitly asks for it.
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+exec "$root/scripts/check-commit-msg.sh" "$1"
