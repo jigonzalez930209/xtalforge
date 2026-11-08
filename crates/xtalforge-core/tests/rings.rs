@@ -49,6 +49,15 @@ fn triangle_is_a_ring() {
 }
 
 #[test]
+fn membership_and_aromaticity() {
+    let structure = hexagon();
+    let membership = xtalforge_core::ring_membership(&structure, 8).unwrap();
+    assert_eq!(membership, vec![1, 1, 1, 1, 1, 1]);
+    let ring = &rings(&structure, 8).unwrap()[0];
+    assert!(xtalforge_core::is_aromatic(&structure, ring).unwrap());
+}
+
+#[test]
 fn size_limit_is_validated() {
     let structure = hexagon();
     assert!(rings(&structure, 2).is_err());
