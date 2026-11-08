@@ -16,6 +16,7 @@ mod phase3;
 mod phase4;
 mod phase5;
 mod phase6;
+mod phase6_extra;
 mod phase7;
 mod structures;
 mod symmetry;
@@ -35,6 +36,7 @@ use phase5::{
     add_hydrogens, net_invariants, net_overlay, porosity, rcsr_names, zeo_parse, zeo_run,
 };
 use phase6::{build_mof, mof_blocks, mof_topologies};
+use phase6_extra::{build_c20, build_polymer, build_schwarzite, build_ztc, ribbon, twist};
 use phase7::{powder_automatic, powder_cells, powder_refine, powder_supported_groups, rietx};
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
@@ -312,6 +314,12 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(mof_topologies, module)?)?;
     module.add_function(wrap_pyfunction!(mof_blocks, module)?)?;
     module.add_function(wrap_pyfunction!(build_mof, module)?)?;
+    module.add_function(wrap_pyfunction!(build_c20, module)?)?;
+    module.add_function(wrap_pyfunction!(twist, module)?)?;
+    module.add_function(wrap_pyfunction!(ribbon, module)?)?;
+    module.add_function(wrap_pyfunction!(build_ztc, module)?)?;
+    module.add_function(wrap_pyfunction!(build_schwarzite, module)?)?;
+    module.add_function(wrap_pyfunction!(build_polymer, module)?)?;
     module.add_function(wrap_pyfunction!(powder_automatic, module)?)?;
     module.add_function(wrap_pyfunction!(powder_refine, module)?)?;
     module.add_function(wrap_pyfunction!(powder_cells, module)?)?;
