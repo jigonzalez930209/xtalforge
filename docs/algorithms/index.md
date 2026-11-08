@@ -20,6 +20,7 @@ Pages are added with the feature that introduces them:
 - [Periodic neighbor search](./neighbors) (Task 1.10)
 - [Bond perception](./bonding) (Task 1.11)
 - [Primitive rings](./rings) (Task 1.12)
+- [Functional groups](./groups) (Task 1.13)
 - [Measures](./measures) (Task 1.14)
 - [CIF parsing](./cif) (Task 1.15)
 - [POSCAR and XYZ](./formats) (Task 1.16)

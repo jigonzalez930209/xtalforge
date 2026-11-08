@@ -13,6 +13,14 @@ must record the reason in the algorithm page.
 | Atom sets | up to translation and permutation | 1e-6 fractional | 1 |
 | Bond length | absolute | 1e-4 Angstrom | 1 |
 | Bond order | absolute | 1e-3 | 1 |
+| Bond count | exact | 0 (MOF-5 and Si golden) | 1 |
+| Ring size/count | exact | 0 | 1 |
+| Minimum-image distance | absolute | 1e-9 Angstrom | 1 |
+| CIF cell parameters | absolute | 1e-6 Angstrom / degree | 1 |
+| CIF atom count | exact | 0 | 1 |
+| POSCAR/XYZ round trip | absolute | 1e-9 Angstrom | 1 |
+| Neighbor distance | absolute | 1e-9 Angstrom | 1 |
+| Slab atoms per layer | exact | 0 | 1 |
 | Ring paths | atom indices and images | exact after atom mapping | 1 |
 | Functional groups | atom sets | exact after atom mapping | 1 |
 | Space group number / Hall number | exact | exact | 2 |
