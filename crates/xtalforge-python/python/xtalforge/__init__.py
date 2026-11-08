@@ -10,6 +10,7 @@ from ._xtalforge import (
     lattice_minimum_image,
     limits_bounds,
     limits_check,
+    structure_info,
     version,
 )
 
@@ -23,5 +24,6 @@ __all__ = [
     "lattice_minimum_image",
     "limits_bounds",
     "limits_check",
+    "structure_info",
     "version",
 ]
