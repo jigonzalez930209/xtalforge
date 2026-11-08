@@ -225,3 +225,16 @@ def test_python_classes() -> None:
     assert structure.supercell(2, 2, 2).p1().n_atoms == 64
     assert structure.to_format("xyz").startswith("8")
     assert "schema_version" in structure.to_json()
+
+
+def test_detect_symmetry_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    dataset = xtalforge.detect_symmetry(text, symprec=0.001)
+    assert dataset["number"] == 227
+    assert dataset["hall_number"] == 525
+    assert len(dataset["operations"]) == 192
+    assert dataset["wyckoffs"] == ["b"] * 8
+    assert dataset["orbits"] == [0] * 8
+    assert len(dataset["std_lattice"]) == 3
