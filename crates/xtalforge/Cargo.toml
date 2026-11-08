@@ -16,6 +16,8 @@ description = "Pure Rust library for building, manipulating, analysing and expor
 xtalforge-core = { workspace = true }
 xtalforge-io = { workspace = true }
 xtalforge-symmetry = { workspace = true }
+xtalforge-view = { workspace = true }
+xtalforge-commands = { workspace = true }
 
 [features]
 default = ["parallel"]
