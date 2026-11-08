@@ -243,12 +243,11 @@ Independent version numbers that do NOT follow the crate version:
 - Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
   Actions are disabled at repository level until the maintainer enables them
   explicitly (2026-11-08).
-- Current phase: Phase 1 — Core (`docs/roadmap/phase-01-core.md`). Phase 0 is
-  implemented locally; its remaining external work is tracked in
-  `docs/roadmap/phase-00-status.md`. Tasks 1.1 (elements), 1.2 (lattice) and
-  1.3 (limits), 1.4 (sites and structures), 1.5 (serialization schema) and
-  1.6 (P1 expansion), 1.7 (supercells), 1.8 (slabs), 1.9 (finite cell and
-  transforms) and 1.10 (neighbor search) are complete; Task 1.11 (bonding)
+- Current phase: Phase 1 — Core (`docs/roadmap/phase-01-core.md`) is complete
+  locally; Phase 0 external work is tracked in
+  `docs/roadmap/phase-00-status.md`. Every Phase 1 task is implemented,
+  tested and committed; Task 1.18.5 waits on the Phase 0 release dry run,
+  which needs GitHub Actions enabled by the maintainer. Phase 2 (symmetry)
   is next.
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
