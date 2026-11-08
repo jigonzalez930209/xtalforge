@@ -91,6 +91,8 @@ essential release, then `0.x.y`).
   fitting/alignment and displacement ellipsoids.
 - Phase 1 Task 1.10: periodic neighbor search with images, distances and
   deterministic ordering; `neighbors` and `neighbors_of`.
+- Phase 1 Task 1.11.1/1.11.4: distance-based bond perception with covalent
+  radii, dummy exclusion, bond images and the connectivity graph.
 
 ### Changed
 
