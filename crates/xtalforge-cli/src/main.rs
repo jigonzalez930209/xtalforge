@@ -40,6 +40,11 @@ enum Command {
         /// Element symbol or atomic number.
         input: String,
     },
+    /// Print a summary of a structure JSON document.
+    Info {
+        /// Input path, or `-` for standard input.
+        path: String,
+    },
     /// Build a cell from its six parameters.
     Cell {
         /// a, b, c in Angstrom and alpha, beta, gamma in degrees.
@@ -158,6 +163,44 @@ fn run(cli: &Cli) -> Result<(), CliError> {
                     element.mass,
                     element.covalent_radius,
                     element.vdw_radius
+                );
+            }
+            Ok(())
+        }
+        Command::Info { path } => {
+            let text = if path == "-" {
+                let mut buffer = String::new();
+                std::io::Read::read_to_string(&mut std::io::stdin(), &mut buffer).map_err(
+                    |error| CliError::input(format!("could not read standard input: {error}")),
+                )?;
+                buffer
+            } else {
+                std::fs::read_to_string(path)
+                    .map_err(|error| CliError::input(format!("could not read {path}: {error}")))?
+            };
+            let summary = xtalforge::core::structure_info(&text).map_err(|error| CliError {
+                code: error.code(),
+                message: error.message(),
+                exit_code: 3,
+            })?;
+            if cli.json {
+                let payload = serde_json::to_string(&summary).map_err(|error| CliError {
+                    code: "json_error",
+                    message: error.to_string(),
+                    exit_code: 4,
+                })?;
+                println!("{payload}");
+            } else {
+                println!(
+                    "{}: {} [{}] sites={} volume={:.3} A^3 density={:.4} g/cm^3 charge={:.3} p1={}",
+                    summary.name,
+                    summary.formula,
+                    summary.hall,
+                    summary.n_sites,
+                    summary.volume,
+                    summary.density,
+                    summary.total_charge,
+                    summary.is_p1
                 );
             }
             Ok(())
