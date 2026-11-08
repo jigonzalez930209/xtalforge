@@ -9,6 +9,7 @@ members = [
   "crates/xtalforge-core",
   "crates/xtalforge-ff",
   "crates/xtalforge-io",
+  "crates/xtalforge-mof",
   "crates/xtalforge-modules",
   "crates/xtalforge-python",
   "crates/xtalforge-symmetry",
@@ -35,6 +36,7 @@ xtalforge = { version = "=0.0.0", path = "crates/xtalforge" }
 xtalforge-core = { version = "=0.0.0", path = "crates/xtalforge-core" }
 xtalforge-ff = { version = "=0.0.0", path = "crates/xtalforge-ff" }
 xtalforge-io = { version = "=0.0.0", path = "crates/xtalforge-io" }
+xtalforge-mof = { version = "=0.0.0", path = "crates/xtalforge-mof" }
 xtalforge-modules = { version = "=0.0.0", path = "crates/xtalforge-modules" }
 xtalforge-analysis = { version = "=0.0.0", path = "crates/xtalforge-analysis" }
 xtalforge-build = { version = "=0.0.0", path = "crates/xtalforge-build" }

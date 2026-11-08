@@ -1151,6 +1151,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "xtalforge-mof"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror",
+ "xtalforge-core",
+ "xtalforge-io",
+]
+
+[[package]]
 name = "xtalforge-python"
 version = "0.0.0"
 dependencies = [

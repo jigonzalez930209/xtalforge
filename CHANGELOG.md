@@ -9,6 +9,14 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 4 Task 4.3.3: native EEQ-style charges.
+- Phase 4 Task 4.6: hydrogen placement.
+- Phase 4 Task 4.7: the preparation pipeline and report.
+- Phase 4 Task 4.9: engine probes plus DFTB+, xTB and ORCA input writers and
+  output parsers.
+- Phase 4 Task 4.10: the sci-form adapter contract and capability limits.
+- Phase 4 Task 4.12: `ff` CLI commands, Python/WASM force-field surfaces and
+  the algorithm pages.
 - Phase 3 Task 3.7: the `.xtalproj` ZIP container with independent
   `format_version`, readable parts and a newer-version gate.
 - Phase 3 Task 3.8.2: `symmetry`, `pxrd` and `uff` parameter presets shared by
