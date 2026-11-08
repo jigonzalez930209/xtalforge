@@ -245,8 +245,8 @@ Independent version numbers that do NOT follow the crate version:
   explicitly (2026-11-08).
 - Current phase: Phase 1 — Core (`docs/roadmap/phase-01-core.md`). Phase 0 is
   implemented locally; its remaining external work is tracked in
-  `docs/roadmap/phase-00-status.md`. Tasks 1.1 (elements) and 1.2 (lattice) are
-  complete; Task 1.3 (limits) is next.
+  `docs/roadmap/phase-00-status.md`. Tasks 1.1 (elements), 1.2 (lattice) and
+  1.3 (limits) are complete; Task 1.4 (sites and structures) is next.
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
   instruction. Task 0.6.5 (name reservation) waits for explicit approval; the

@@ -70,6 +70,10 @@ essential release, then `0.x.y`).
   normals, coordinate conversions, wrapping, exact minimum-image search,
   transforms, strain, volume scaling and validation; `cell --params` in the
   CLI and `lattice_info`/`lattice_minimum_image` in Python and WASM.
+- Phase 1 Task 1.3: the limits model with Standard/Generous/WarnOnly
+  profiles, soft and hard verdicts, drawn/supercell/grid/phonon/Hessian
+  estimates, `Error::LimitExceeded`, and `limits_bounds`/`limits_check` in
+  Rust, Python and WASM.
 
 ### Changed
 
