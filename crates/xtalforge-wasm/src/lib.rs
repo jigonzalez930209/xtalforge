@@ -12,15 +12,29 @@ use wasm_bindgen::prelude::*;
 mod common;
 #[cfg(target_arch = "wasm32")]
 mod phase1;
+#[cfg(target_arch = "wasm32")]
+mod symmetry;
+#[cfg(target_arch = "wasm32")]
+mod symmetry_analysis;
 
 #[cfg(target_arch = "wasm32")]
 use common::{array3, array6, set, to_js_error};
 
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
-    angle, asymmetrize_info, bonds, convert_structure, detect_symmetry, distance, groups,
-    neighbors, read_cif, read_structure, rings, set_space_group_info, slab_info, slab_text,
-    supercell_info, supercell_text, to_p1_info, torsion,
+    bonds, convert_structure, groups, neighbors, read_cif, read_structure, rings, slab_info,
+    slab_text, supercell_info, supercell_text,
+};
+#[cfg(target_arch = "wasm32")]
+pub use symmetry::{
+    angle, asymmetrize_info, detect_symmetry, distance, lower_to_subgroup_info,
+    set_space_group_info, subgroups_info, to_p1_info, torsion,
+};
+#[cfg(target_arch = "wasm32")]
+pub use symmetry_analysis::{
+    brillouin_zone, change_setting_info, diagnose_info, kpath_info, layer_group_info,
+    magnetic_group_info, pointgroup_info, primitive_info, reduce_info, standardize_info,
+    tolerance_ladder_info, wyckoff_info,
 };
 
 /// Installs the panic hook in debug builds only.
