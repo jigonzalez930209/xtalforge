@@ -315,3 +315,28 @@ C2 C 0.5 0.5 0
     dataset = xtalforge.detect_layer_symmetry(text, 0.001)
     assert 1 <= dataset["number"] <= 80
     assert dataset["operations"]
+
+
+def test_view_scene_and_stl() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    scene = xtalforge.scene_summary(text, "space-fill", 1.0)
+    assert scene["atoms"] == 8
+    assert scene["cell_edges"] == 12
+    stl = xtalforge.mesh_stl(text, "space-fill")
+    assert stl.startswith("solid")
+    assert "facet normal" in stl
+
+
+def test_pxrd_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    pattern = xtalforge.pxrd(text, max_two_theta=60.0)
+    assert pattern["reflections"]
+    assert len(pattern["points"]) > 100
+    assert all(b[0] <= b[1] for b in zip(
+        [point[0] for point in pattern["points"]],
+        [point[0] for point in pattern["points"][1:]],
+    ))
