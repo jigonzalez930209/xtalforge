@@ -70,11 +70,11 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.3 — Substitution and clearance
 
-- [ ] 6.3.1 Clearance
+- [x] 6.3.1 Clearance
   Port `build/clearance.py`: how much room a group of atoms has in a periodic
   cell at a given rotation angle; used to turn a linker about its axis
   (Task 6.13.1) and a substituent about its bond.
-- [ ] 6.3.2 Substitute
+- [x] 6.3.2 Substitute
   Port `build/substitute.py` (464 lines): replace a hydrogen (or any terminal
   atom on one bond, for example the C-F edges of a ZTC) by a group (amino,
   methoxy, nitro, halogens, library fragments), aligned on the bond and turned
@@ -83,11 +83,11 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.4 — Guest filling
 
-- [ ] 6.4.1 Guest extraction
+- [x] 6.4.1 Guest extraction
   Port `guest_molecules` from `build/fill.py` (718 lines; split): lift every
   discrete molecule out of a structure (a solvent drawn in its own box becomes
   a placeable guest).
-- [ ] 6.4.2 Placement
+- [x] 6.4.2 Placement
   Place copies in the empty space of a host: random positions and
   orientations in the accessible region (distance grid of Task 5.2), clash
   rejection with periodic images, target count or loading, seeded RNG for

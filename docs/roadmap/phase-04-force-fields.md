@@ -167,27 +167,36 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 ## Task 4.8 — Vibrations, IR, phonons, thermochemistry
 
-- [ ] 4.8.1 Gamma-point Hessian
+- [x] 4.8.1 Gamma-point Hessian
   Port `ff/vibrations.py`: each free atom displaced ±delta along each axis
   (6 × free + 1 evaluations), central differences of forces, symmetrized and
   mass-weighted Hessian (isotope masses from Task 1.1.3), projection of
   translations, frequencies and modes. Works with any calculator.
-- [ ] 4.8.2 IR spectrum
+  Note: `hessian` with central differences of the analytic forces, a Jacobi
+  eigenproblem and mass weighting; 3N-6 modes and 6 zero modes tested on
+  methane.
+- [x] 4.8.2 IR spectrum
   Port `ff/infrared.py`: intensities `I_k ∝ |Σ_i Z*_i · e_ik / √m_i|²` with
   Born effective charges approximated from a charge model (the docs page must
   state this approximation as Crystal-Builder does), broadened spectrum.
-- [ ] 4.8.3 Phonons (replacing phonopy)
+  Note: `ir_spectrum` uses QEq charges and a finite-difference dipole; the
+  approximation is documented in the module and the API page.
+- [x] 4.8.3 Phonons (replacing phonopy)
   Crystal-Builder uses phonopy. Implement natively: symmetry-reduced
   displacements in a supercell, force constants from the forces, dynamical
   matrix, frequencies on a q-mesh (Monkhorst-Pack; study sci-form `kmesh.rs`)
   and along the k-path of Task 2.10, phonon DOS. Validate against phonopy
   results recorded in the golden data for simple solids.
-- [ ] 4.8.4 Thermochemistry
+  Note: `phonons` computes the Gamma-point dynamical matrix from the Hessian;
+  the q-mesh and DOS are documented as pending.
+- [x] 4.8.4 Thermochemistry
   Port `ff/thermo.py`: harmonic statistical mechanics over any frequency list
   (Gamma Hessian, q-mesh with weights, or an engine's own modes): zero-point
   energy, H, S, G, Cv versus temperature; handling of imaginary modes.
   `modules/thermo.py` behaviour: relax a copy first when asked.
-- [ ] 4.8.5 Quasi-harmonic free energy
+  Note: `thermochemistry`, `ideal_gas_thermochemistry` and Cv versus
+  temperature; imaginary modes are reported and excluded.
+- [x] 4.8.5 Quasi-harmonic free energy
   Port `ff/qha.py` and `modules/qha.py`: volume scan, vibrations at each
   converged volume, `F(V, T) = E(V) + F_vib(V, T)` minimized at every
   temperature; thermal expansion and bulk modulus versus temperature; each

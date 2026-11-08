@@ -127,7 +127,7 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.7 — Parameter sets
 
-- [ ] 7.7.1 Persistent parameters
+- [x] 7.7.1 Persistent parameters
   Port `powder/parameters.py` (517 lines; split): a `ParameterSet` keeps
   every number (value, free or fixed, bounds, esd) between runs, so a Pawley
   fit's peak shape carries into the Rietveld step instead of restarting from
@@ -136,7 +136,7 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.8 — Rietveld
 
-- [ ] 7.8.1 Structural model
+- [x] 7.8.1 Structural model
   Port `powder/rietveld.py`: refine in McCusker's order (background, line
   positions, cell number by number, widths, then the structure: coordinates
   along each site's symmetry-allowed directions (Wyckoff free parameters,
@@ -144,7 +144,7 @@ Crate: `xtalforge-powder`.
   axis), or one of the predefined refinement plans. A refinement moves atoms;
   it never adds, removes or bonds them: the result is the input structure
   with new numbers on the same sites.
-- [ ] 7.8.2 Structure to phase and back
+- [x] 7.8.2 Structure to phase and back
   Port the phase-building logic of `bridge.py`: a phase is built from the
   sites (not by writing and reading a CIF), and the refined phase comes back
   onto the same sites with esds.
