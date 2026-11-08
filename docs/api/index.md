@@ -16,6 +16,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Finite cells and transforms](./transforms)
 - [Neighbors](./neighbors)
 - [Bonding](./bonding)
+- [CIF input and output](./cif)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
