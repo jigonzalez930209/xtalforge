@@ -32,6 +32,11 @@ check_rust() {
     param_schema) name=preset ;;
     project_pack) name=write_project ;;
     workspace_archive) name=archive_records ;;
+    prepare) name=prepare ;;
+    add_hydrogens) name=add_hydrogens ;;
+    porosity) name=distance_grid ;;
+    net_invariants) name=quotient_graph ;;
+    zeo_parse) name=parse_zeo_channels ;;
     groups) name=find_groups ;;
     subgroups) name=translationengleiche_subgroups ;;
     slab) name=make_slab ;;
@@ -40,7 +45,11 @@ check_rust() {
 }
 
 check_python() {
-  grep -q "def $1(" "$PY_STUB"
+  local name=$1
+  case "$name" in
+    prepare) name=ff_prepare ;;
+  esac
+  grep -q "def $name(" "$PY_STUB"
 }
 
 check_wasm() {
@@ -71,6 +80,11 @@ check_wasm() {
     param_schema) name=param_schema ;;
     project_pack) name=project_pack ;;
     workspace_archive) name=workspace_archive ;;
+    prepare) name=ff_prepare_info ;;
+    add_hydrogens) name=hydrogens_info ;;
+    porosity) name=porosity_info ;;
+    net_invariants) name=net_invariants_info ;;
+    zeo_parse) name=zeo_parse_info ;;
   esac
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
@@ -102,6 +116,9 @@ check_cli() {
     build_graphene|build_nanotube) command=build ;;
     param_schema) command=params ;;
     project_pack) command=project ;;
+    prepare) command=ff ;;
+    add_hydrogens) command=hydrogens ;;
+    porosity|net_invariants|zeo_parse) command=analysis ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
