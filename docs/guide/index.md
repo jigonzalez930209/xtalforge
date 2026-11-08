@@ -3,8 +3,11 @@
 `xtalforge` is a pure Rust library for crystal structures. This guide is filled
 in as each roadmap phase lands; see the [roadmap](/roadmap/) for the schedule.
 
-Start with the project rules and the local workflow:
+Start with the quick start and the concepts:
 
+- [Quick start](./quickstart)
+- [Concepts](./concepts)
+- [File formats](./formats)
 - [Contributing](./contributing)
 - [Cargo features](./features)
 - [Data bundles](./data)
