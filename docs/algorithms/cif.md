@@ -15,8 +15,10 @@
 The operation loop is the setting when present; the Hall symbol is stored for
 the space-group identity; an H-M symbol alone cannot fix the operations, so the
 reader records a `symmetry_warning` and the P1 expansion uses the identity.
-This is the first pass of the Crystal-Builder priority rule; inconsistency
-warnings and the full Hall lookup arrive with moyo in Task 2.1.
+This is the implemented Crystal-Builder priority rule. The Hall lookup is
+available through `xtalforge-symmetry` when a caller needs to turn a symbol into
+operations; inconsistency warnings beyond the missing-operation warning are
+still limited.
 
 ## Numbers
 

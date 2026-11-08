@@ -47,11 +47,11 @@ bindings expose the same Rust engine and need NumPy only for arrays.
 | spglib | BSD-3-Clause | Golden-data generator and audit comparison only | verified, not redistributed |
 | numpy | BSD-3-Clause | Golden-data generator only | verified, not redistributed |
 | scipy | BSD-3-Clause | Golden-data generator only; algorithms reimplemented from papers | verified, not redistributed |
-| ASE | LGPL-2.1-or-later | Reference for k-paths; no code ported | verified, no port |
-| phonopy | BSD-3-Clause | Reference outputs; algorithms ported with attribution when they land | verified, planned |
+| ASE | LGPL-2.1-or-later | Reference for k-paths and C60 coordinates; the tables are redistributed as derived data, no code ported | verified, derived data |
+| phonopy | BSD-3-Clause | Reference outputs only; the Gamma-point phonon path is native | verified, not redistributed |
 | RDKit | BSD-3-Clause | Replaced by sci-form's MIT code | verified, not ported |
-| rietx | MIT (stated in Crystal-Builder's `pyproject.toml`; no license field on PyPI) | Reference for Phase 7 | to verify before porting |
-| matplotlib | Matplotlib license (PSF-based and BSD-compatible) | Colormap samples as data | verified, planned |
+| rietx | MIT (stated in Crystal-Builder's `pyproject.toml`; no license field on PyPI) | Inventory only; no code or data copied | verified from the note, not redistributed |
+| matplotlib | Matplotlib license (PSF-based and BSD-compatible) | Colormap anchor colours written by hand | verified, not redistributed |
 
 Ported code and data are recorded in `THIRD_PARTY.md` before they are merged.
 Where a license is unclear, the algorithm is reimplemented from the paper

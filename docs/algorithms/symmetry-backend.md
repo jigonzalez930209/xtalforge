@@ -61,18 +61,19 @@ compares:
   spglib idealizes to its own standard setting. The test records these four
   cases as known exceptions.
 
-The comparison uses `Setting::Spglib`; this is the setting the wrapper will
-expose by default to match Crystal-Builder's spglib behaviour.
+The comparison uses `Setting::Spglib`; this is the setting the wrapper exposes
+by default to match Crystal-Builder's spglib behaviour.
 
 ## Verification notes
 
 - `std_cell` refines both the lattice and the positions to the detected
   symmetry; it does not only apply the transformation. This matches spglib's
-  idealization and is what the Phase 2 API will expose.
+  idealization and is what the Phase 2 API exposes through `standardize`.
 - `moyo::base::Cell` takes atomic numbers (or integer species ids), not
   occupancies. Partial occupancy must therefore be encoded as distinct species
   (for example a split-site species id per component) before detection; the
-  wrapper will do this conversion and document the species mapping.
+  wrapper performs this conversion and documents the species mapping in
+  `xtalforge-symmetry::convert`.
 - `Setting::Spglib` reproduces spglib's Hall number on the audit corpus;
   `Setting::default` chooses origin choice 2 for Si (Hall 526) instead of
   spglib's 525. The origin choice also explains the `8a`/`8b` Wyckoff
@@ -97,14 +98,13 @@ expose by default to match Crystal-Builder's spglib behaviour.
   `union-find`; no duplicate `nalgebra`, `serde` or `thiserror`.
 - Release compile of `xtalforge-symmetry` with moyo on this machine: about
   45 seconds; the incremental check is much faster.
-- WASM package: 41 KiB after the audit build. The current hello-world exports
-  only call `xtalforge-core`, so the linker removes the unused moyo code; the
-  size will grow when the Phase 2 exports use it, and the budget is checked in
-  Task 0.8.3.
+- WASM package: the full release is about 2905 KiB, including the symmetry
+  tables, force fields, analysis, builders and powder surfaces, inside the
+  3584 KiB budget checked by `scripts/check-wasm-size.sh`.
 
 ## Isolation
 
-`xtalforge-symmetry` will define:
+`xtalforge-symmetry` defines:
 
 - `SpaceGroup`: number, Hall number, Hermann-Mauguin symbol, setting and
   operations, independent of `moyo` types;

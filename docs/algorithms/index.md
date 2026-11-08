@@ -25,6 +25,10 @@ Pages are added with the feature that introduces them:
 - [CIF parsing](./cif) (Task 1.15)
 - [POSCAR and XYZ](./formats) (Task 1.16)
 - [Symmetry detection](./symmetry) (Task 2.1)
+- [UFF and UFF4MOF](./uff) (Task 4.2)
+- [Charges and electrostatics](./charges) (Task 4.3)
+- [Optimization, scans and EOS](./optimization) (Task 4.4-4.5)
+- [Vibrations and thermodynamics](./vibrations) (Task 4.8)
 - [Machine-learning backend](./ml-backend) (Task 4.11)
 - [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
 - [Validation and tolerances](./validation) (Task 0.9.4)
@@ -32,4 +36,6 @@ Pages are added with the feature that introduces them:
 - [sci-form reuse](./sci-form-reuse) (Task 0.4)
 - [Dependency replacement map](./dependency-map) (Task 0.10)
 
-Neighbor search, bond detection and ring perception follow in Task 1.15.2.
+The neighbor-search page records the direct algorithm; the linked-cell
+acceleration and the criterion benchmarks are still listed as remaining work
+in Phase 1.

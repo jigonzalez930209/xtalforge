@@ -35,6 +35,13 @@ must record the reason in the algorithm page.
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |
+| SMILES round trip | graph and charges | exact after atom mapping | 6 |
+| Embedding bond length | absolute | 0.3 Angstrom for ring closure | 6 |
+| MOF assembly | atom count and finite coordinates | exact/deterministic | 6 |
+| Powder position | absolute | 0.1 degree 2-theta | 7 |
+| Rietveld scale/background | relative | 1e-3 | 7 |
+| Structural refinement | Rwp | non-increasing over accepted steps | 7 |
+| Instrument doublet | ratio | 1e-9 | 7 |
 
 ## Rules
 

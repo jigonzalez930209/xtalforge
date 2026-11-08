@@ -31,6 +31,7 @@ a coarser grid, or fewer atoms).
 ## Validation
 
 The table and profiles are covered by `crates/xtalforge-core/tests/limits.rs`.
-The surfaces are checked by the Python and WASM tests. The builder-specific
-estimates are added with their builders in Phase 6; the budgets are fixed now
-so their callers cannot invent different numbers.
+The surfaces are checked by the Python and WASM tests. The carbon, nanotube,
+graphene, phonon and Hessian budgets are fixed in the table; a caller decides
+which generic check (`check_supercell`, `check_grid`, `check_phonons`,
+`check_hessian`) matches its allocation.

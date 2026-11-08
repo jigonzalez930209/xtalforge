@@ -11,9 +11,9 @@ the element and its bonded neighbours, then applies the catalogue:
 | fluoride | F with one neighbour |
 
 A match is `GroupMatch { kind, atoms }`, sorted and deduplicated.
-`group_counts` aggregates by kind. The catalogue is a fixed enum now; it
-becomes data-driven with the remaining Crystal-Builder patterns and their
-framework tests.
+`group_counts` aggregates by kind. The catalogue is a fixed enum with these
+four patterns; the remaining Crystal-Builder patterns and their framework
+tests are not implemented.
 
 The matcher is deterministic because the bond graph and atom order are
 deterministic. It runs on the P1 cell, so a group crossing a cell boundary is
