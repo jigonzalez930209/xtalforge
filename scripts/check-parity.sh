@@ -65,6 +65,7 @@ check_cli() {
     lattice_minimum_image) command=cell ;;
     structure_info) command=info ;;
     read_cif|read_structure) command=info ;;
+    detect_symmetry) command=symmetry ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
