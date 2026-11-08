@@ -13,6 +13,7 @@ mod format;
 mod input;
 mod measure;
 mod output;
+mod spacegroup;
 mod symmetry;
 
 use clap::{Parser, Subcommand, ValueEnum};
@@ -179,6 +180,11 @@ enum Command {
         /// Third atom index.
         k: usize,
     },
+    /// Browse the space-group catalogue.
+    Spacegroup {
+        #[command(subcommand)]
+        action: SpacegroupAction,
+    },
     /// Detect the space group and Wyckoff positions.
     Symmetry {
         #[command(subcommand)]
@@ -200,6 +206,32 @@ enum Command {
 }
 
 #[derive(Debug, Subcommand)]
+enum SpacegroupAction {
+    /// Show one space group by symbol, Hall symbol or number.
+    Show {
+        /// H-M symbol, Hall symbol or number.
+        symbol: String,
+    },
+    /// List catalogue entries.
+    List {
+        /// Filter by crystal system.
+        #[arg(long)]
+        system: Option<String>,
+        /// Filter by centering letter.
+        #[arg(long)]
+        centering: Option<char>,
+        /// Filter by point-group symbol.
+        #[arg(long)]
+        point_group: Option<String>,
+    },
+    /// Search by symbol or number substring.
+    Search {
+        /// Text to search for.
+        text: String,
+    },
+}
+
+#[derive(Debug, Subcommand)]
 enum SymmetryAction {
     /// Detect the symmetry of a structure.
     Detect {
@@ -214,6 +246,47 @@ enum SymmetryAction {
         /// Preferred Hall number (1 to 530).
         #[arg(long, value_name = "N")]
         hall_number: Option<u32>,
+    },
+    /// Expand a structure to P1.
+    P1 {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Reduce a structure to its detected asymmetric unit.
+    Asymmetrize {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, value_name = "A", default_value_t = 1e-3)]
+        symprec: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Apply a space group to a structure.
+    Set {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// H-M symbol, Hall symbol or number.
+        symbol: String,
+        /// `reinterpret` or `impose`.
+        #[arg(long, default_value = "reinterpret")]
+        mode: String,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
     },
 }
 
@@ -366,6 +439,15 @@ fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Neighbors { path, cutoff } => analyze::neighbors(cli, path, *cutoff),
         Command::Distance { path, i, j } => measure::distance(cli, path, *i, *j),
         Command::Angle { path, i, j, k } => measure::angle(cli, path, *i, *j, *k),
+        Command::Spacegroup { action } => match action {
+            SpacegroupAction::Show { symbol } => spacegroup::show(cli, symbol),
+            SpacegroupAction::List {
+                system,
+                centering,
+                point_group,
+            } => spacegroup::list(cli, system.as_deref(), *centering, point_group.as_deref()),
+            SpacegroupAction::Search { text } => spacegroup::search(cli, text),
+        },
         Command::Symmetry { action } => match action {
             SymmetryAction::Detect {
                 path,
@@ -379,6 +461,22 @@ fn run(cli: &Cli) -> Result<(), CliError> {
                 angle_tolerance.map(f64::to_radians),
                 *hall_number,
             ),
+            SymmetryAction::P1 { path, out, format } => {
+                symmetry::p1(cli, path, out.as_deref(), *format)
+            }
+            SymmetryAction::Asymmetrize {
+                path,
+                symprec,
+                out,
+                format,
+            } => symmetry::asymmetrize(cli, path, *symprec, out.as_deref(), *format),
+            SymmetryAction::Set {
+                path,
+                symbol,
+                mode,
+                out,
+                format,
+            } => symmetry::set(cli, path, symbol, mode, out.as_deref(), *format),
         },
         Command::Torsion { path, i, j, k, l } => measure::torsion(cli, path, *i, *j, *k, *l),
     }

@@ -84,6 +84,9 @@ fn read_format(text: &str, format: &str) -> Result<Structure, Error> {
 }
 
 fn detect(text: &str) -> Result<Structure, Error> {
+    if text.trim_start().starts_with('{') {
+        return structure_from_json(text);
+    }
     let readers: [Reader; 3] = [read_cif, read_poscar, read_xyz];
     let mut last = None;
     for reader in readers {
