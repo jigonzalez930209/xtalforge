@@ -20,6 +20,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [POSCAR and XYZ](./formats)
 - [Measures, scalars and descriptions](./measure)
 - [Functional groups](./groups)
+- [Rings](./rings)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
