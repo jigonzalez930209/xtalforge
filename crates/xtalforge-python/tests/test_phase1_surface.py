@@ -340,3 +340,49 @@ def test_pxrd_surface() -> None:
         [point[0] for point in pattern["points"]],
         [point[0] for point in pattern["points"][1:]],
     ))
+
+
+def test_phase3_document_and_project_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    document = xtalforge.Document(text)
+    assert document.can_undo is False
+    document.move_sites([0], [0.01, 0.0, 0.0])
+    assert document.can_undo is True
+    assert document.dirty is True
+    assert document.history == ["Move site"]
+    document.undo()
+    assert document.can_redo is True
+    document.redo()
+    assert document.can_redo is False
+
+    archive = xtalforge.project_pack(text)
+    assert archive[:2] == b"PK"
+    payload = xtalforge.project_read(archive)
+    assert payload["formula"] == "Si"
+
+    schema = xtalforge.param_schema("symmetry")
+    assert schema["properties"]["symprec"]["type"] == "number"
+
+
+def test_workspace_surface(tmp_path: Path) -> None:
+    import json
+
+    root = tmp_path / "workspace"
+    xtalforge.workspace_open(str(root))
+    record = {
+        "id": "run-1",
+        "module": "demo",
+        "input": "Si.cif",
+        "status": "Done",
+        "outputs": [],
+        "data": {},
+        "created": 1,
+    }
+    path = xtalforge.workspace_write_run(str(root), json.dumps(record))
+    assert Path(path).exists()
+    assert xtalforge.workspace_runs(str(root)) == ["run-1"]
+    assert json.loads(xtalforge.workspace_read_run(str(root), "run-1"))["module"] == "demo"
+    archive = xtalforge.workspace_archive(json.dumps([record]))
+    assert xtalforge.workspace_read_archive(archive) == ["run-1"]
