@@ -14,7 +14,7 @@ Pages are added with the feature that introduces them:
 - [Lattice conventions](./lattice) (Task 1.2.5)
 - [Limits model](./limits) (Task 1.3)
 - [P1 expansion with provenance](./p1) (Task 1.6)
-- [Supercells and origin shifts](./supercell) (Task 1.7)
+- [Supercells and origin shifts](/api/supercell) (Task 1.7)
 - [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
 - [Validation and tolerances](./validation) (Task 0.9.4)
 - [Golden data](./golden-data) (Task 0.9.3)
