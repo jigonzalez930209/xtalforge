@@ -7,16 +7,22 @@
 
 pub mod fit;
 pub mod grid;
+pub mod indexing;
 pub mod isosurface;
+pub mod lebail;
 pub mod nets;
+pub mod pareto;
 pub mod peaks;
 pub mod profiles;
 pub mod pxrd;
 
 pub use fit::{FitOptions, FitResult, least_squares};
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
+pub use indexing::{CubicIndex, IndexedPeak, index_cubic};
 pub use isosurface::{TriangleMesh, isosurface};
+pub use lebail::{LebailOptions, LebailResult, le_bail, pawley};
 pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, quotient_graph};
+pub use pareto::pareto_front;
 pub use peaks::{Peak, PeakOptions, find_peaks};
 pub use profiles::{Background, Profile, ProfileKind};
 pub use pxrd::{Pattern, PatternPoint, PxrdOptions, Radiation, Reflection, calculate_pxrd};
