@@ -12,4 +12,17 @@ pub mod command;
 pub mod document;
 mod edit;
 pub mod groups;
+pub mod later;
 pub mod symmetry;
+
+pub use atoms::{AddSites, DeleteSites, MoveSites, SetElement, SetOccupancy};
+pub use bonds::{AddBond, RemoveBond, SetBondRules};
+pub use cell::{PositionPolicy, SetLattice, ShiftOrigin, Supercell, WrapIntoCell};
+pub use clipboard::{Fragment, PasteFragment, copy_selection};
+pub use command::{
+    Command, CommandRecord, CommandStack, MacroCommand, Origin, ReplaceStructure, SnapshotEdit,
+    StructureOperation,
+};
+pub use document::Document;
+pub use groups::{AtomGroup, GroupStore};
+pub use later::{Interpenetrate, MarkConnectionPoints, SetCharges};

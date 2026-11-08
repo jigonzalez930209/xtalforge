@@ -192,6 +192,12 @@ impl Document {
         self.groups.get(index)
     }
 
+    /// Command log of the document.
+    #[must_use]
+    pub fn history(&self) -> &[crate::command::CommandRecord] {
+        self.stack.log()
+    }
+
     /// Whether at least one structure or group edit can be undone.
     #[must_use]
     pub fn can_undo(&self) -> bool {
