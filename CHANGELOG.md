@@ -87,6 +87,8 @@ essential release, then `0.x.y`).
   metadata/site-property preservation and the supercell limit check.
 - Phase 1 Task 1.8: surface bases for arbitrary Miller planes, slab
   construction with layers, vacuum and P1 output, and plane angles.
+- Phase 1 Task 1.9: finite-cell images, Cartesian point transforms, plane
+  fitting/alignment and displacement ellipsoids.
 
 ### Changed
 
