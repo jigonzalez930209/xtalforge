@@ -44,9 +44,10 @@ verify the deployed URL from the repository Pages settings.
 
 ## 0.8.1–0.8.5 Continuous integration
 
-`.github/workflows/ci.yml` contains the Rust matrix (Linux/macOS arm64/Windows,
-stable/MSRV 1.89), Python 3.9/3.14, WASM, docs, caches and path filters. The
-rules workflow remains separate. **No job has run.**
+The CI, rules and manual docs workflows were removed by maintainer decision on
+2026-11-08 to avoid runner cost. The local check list in `AGENTS.md` section
+5.4 is the gate. The only workflow left is the tag-driven `release.yml`. **No
+CI job runs.**
 
 To close it:
 

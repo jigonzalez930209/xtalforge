@@ -33,10 +33,12 @@ are in `AGENTS.md` at the repository root.
 - Phase 8 (agent and distribution) has not started. It is the remaining
   planned phase: session verbs, MCP server, plugins, ML potentials,
   distribution, performance/fuzzing and the API freeze.
-- The external blockers are unchanged: GitHub Actions are disabled by
-  maintainer instruction, so the release dry run (Task 0.6.3), the CI matrix
-  and the docs deployment cannot run; name reservation (Task 0.6.5) needs
-  explicit approval. Task 1.18.5 waits on the same dry run.
+- The release workflow is the only GitHub Actions workflow; the CI, rules and
+  manual docs workflows were removed by maintainer decision (2026-11-08) to
+  avoid runner cost. The release runs on a version tag: three CLI packages,
+  PyPI/npm/crates.io from `ubuntu-24.04`, then the docs deployment. Name
+  reservation (Task 0.6.5) still needs explicit approval; Task 1.18.5 waits on
+  the first release run.
 
 ### Known subsets
 

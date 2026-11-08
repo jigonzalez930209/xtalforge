@@ -109,9 +109,8 @@ reservations of Task 0.6.5.
 - [x] 0.2.4 CI job for rules
   A CI job that runs `check-rules.sh` and the self-test on every push and pull
   request; it is a required status check.
-  Note: implemented in `.github/workflows/rules.yml` as `Rules / Repository
-  rules`; enabling it as a required check is a repository setting that must be
-  done once the remote exists.
+  Note: the workflow was removed by maintainer decision (2026-11-08) together
+  with the rest of CI; run `scripts/check-rules.sh` locally.
 
 ## Task 0.3 — moyo capability audit (decision gate)
 
@@ -387,16 +386,14 @@ duplicating.
   check; TypeScript type check of the generated definitions.
 - [ ] 0.8.4 Docs CI
   VitePress build, dead-link check, rules script, parity script.
-  Note: `.github/workflows/ci.yml` builds the site with the WASM package and
-  runs the parity script; the tag deployment lives in `release.yml` and reuses
-  the `wasm` artifact.
+  Note: the CI workflow was removed by maintainer decision (2026-11-08). The
+  tag deployment lives in `release.yml` and reuses the `wasm` artifact.
 - [ ] 0.8.5 Speed
   `Swatinem/rust-cache`, sharing build artifacts between jobs, path filters
   so documentation-only changes skip the heavy jobs; target under 15 minutes.
-  Note: `.github/workflows/ci.yml` has the Rust/Python/WASM/docs matrix, caches
-  and path filters. GitHub Actions are disabled by explicit maintainer
-  instruction, so no job has run; the local equivalents pass. Enable Actions
-  and run the workflows before ticking 0.8.1 to 0.8.5.
+  Note: the CI workflow was removed by maintainer decision (2026-11-08);
+  `release.yml` keeps the Rust caches and builds the CLI/package/docs jobs in
+  parallel where possible. This task stays open because no CI matrix runs.
 
 ## Task 0.9 — Golden-data oracle from Crystal-Builder
 
