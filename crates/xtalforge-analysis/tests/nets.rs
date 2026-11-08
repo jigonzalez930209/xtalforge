@@ -86,3 +86,13 @@ fn net_index_and_components() {
     assert_eq!(matches, vec!["square"]);
     assert_eq!(graph.components(), vec![vec![0, 1, 2, 3]]);
 }
+
+#[test]
+fn interpenetration_creates_two_components() {
+    let graph = quotient_graph(&square_net(), 1e-6).unwrap();
+    let double = xtalforge_analysis::interpenetrate(&graph, [0, 0, 1]).unwrap();
+    assert_eq!(double.nodes.len(), 8);
+    assert_eq!(double.edges.len(), 10);
+    assert_eq!(double.components().len(), 2);
+    assert!(xtalforge_analysis::interpenetrate(&graph, [0, 0, 1]).is_ok());
+}
