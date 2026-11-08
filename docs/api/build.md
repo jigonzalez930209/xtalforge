@@ -26,5 +26,9 @@ become sites and edges become topology bonds (kept separate from chemistry).
 branches, ring closures, bond orders and bracket charges. 3D embedding is not
 implemented yet.
 
+`fragments()` returns the embedded library (water, methanol, acetone and
+others) with name, SMILES, category and description; `find_fragment` looks one
+up by name.
+
 The remaining builders (SMILES molecules, fragments, fullerenes, amorphous
 carbon, polymers) are later Phase 6 tasks.
