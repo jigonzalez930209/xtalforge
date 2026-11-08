@@ -1,0 +1,47 @@
+"""Integration tests for the Python hello-world surface."""
+
+import json
+from pathlib import Path
+
+import pytest
+import xtalforge
+
+VECTORS = json.loads(
+    (Path(__file__).parents[3] / "tests" / "vectors" / "hello_world.json").read_text(
+        encoding="utf-8"
+    )
+)
+
+
+def test_version_matches_the_package() -> None:
+    assert xtalforge.version() == xtalforge.__version__
+    assert isinstance(xtalforge.version(), str)
+    assert xtalforge.version()
+
+
+def test_cell_volume_shared_vectors() -> None:
+    for case in VECTORS["cell_volume"]:
+        got = xtalforge.cell_volume(
+            case["a"],
+            case["b"],
+            case["c"],
+            case["alpha"],
+            case["beta"],
+            case["gamma"],
+        )
+        assert abs(got - case["expected"]) <= case["tolerance"]
+
+
+def test_keyword_arguments() -> None:
+    got = xtalforge.cell_volume(
+        a=1.0, b=1.0, c=1.0, alpha=90.0, beta=90.0, gamma=90.0
+    )
+    assert abs(got - 1.0) < 1e-12
+
+
+def test_invalid_cell_raises_input_error() -> None:
+    with pytest.raises(xtalforge.InputError) as caught:
+        xtalforge.cell_volume(0.0, 1.0, 1.0, 90.0, 90.0, 90.0)
+    assert caught.value.args[0] == "invalid_input"
+    assert "invalid input" in caught.value.args[1]
+    assert isinstance(caught.value, xtalforge.XtalforgeError)
