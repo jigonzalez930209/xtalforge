@@ -24,6 +24,12 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 `Pattern { points, reflections }` carries the sampled curve and the peak list;
 `Reflection { hkl, d, two_theta, multiplicity, intensity }`.
 
+## Profiles and background
+
+`Profile { kind, center, fwhm, eta, height }` evaluates Gaussian, Lorentzian
+and pseudo-Voigt peaks and samples a range. `Background::{Constant, Linear,
+Quadratic}` are the background models.
+
 ## Least squares
 
 `least_squares(initial, &FitOptions, residuals)` is a Levenberg-Marquardt fit
