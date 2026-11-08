@@ -256,7 +256,11 @@ Independent version numbers that do NOT follow the crate version:
   progress: the format registry, atomic writes, the extra formats, grids,
   trajectories, commands/document, selection/tracking, workspace/modules,
   view data and STL are implemented; project files, parameter surface
-  generation and the Python/WASM command surface remain.
+  generation and the Python/WASM command surface remain. Phase 4 has the
+  Calculator API and native UFF/UFF4MOF with analytic gradients; Phase 5 has
+  PXRD, porosity, isosurfaces, net quotient graphs and peak finding; Phase 6
+  has graphene, nanotubes and C60. Charges/Ewald/optimizers, the remaining
+  nets/MOF builders and powder refinement are in progress.
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
   instruction. Task 0.6.5 (name reservation) waits for explicit approval; the
