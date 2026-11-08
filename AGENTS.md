@@ -72,7 +72,8 @@ free on 2026-11-08. Reserve them early (Task 0.6.5).
     warning with `#[allow(dead_code)]`, `#[allow(unused_*)]`,
     `#[allow(warnings)]`, `#[expect(...)]` or an equivalent tag; fix the cause.
     `scripts/check-rules.sh` rejects these attributes. The test-only clippy
-    configuration at each crate root is the only exception.
+    allowances and the documented `unsafe_code` relaxation in the pyo3 binding
+    crate are the only exceptions.
 
 ### 2.1 Commit discipline (mandatory for every code agent)
 
@@ -96,6 +97,20 @@ free on 2026-11-08. Reserve them early (Task 0.6.5).
   one-directory rule (pre-commit), the subject format and the task list
   (commit-msg). Agents must not use `git commit --no-verify` unless the
   maintainer explicitly asks.
+
+### 2.2 Test layout (mandatory for every code agent)
+
+- Every Rust library crate keeps its tests in `crates/<crate>/tests/`, one
+  file per functionality or module. Tests use the public API only.
+- Do not put `#[cfg(test)]` unit-test modules in `src/`; the test list of a
+  library is independent of its source files.
+- Fixtures live in `crates/<crate>/tests/fixtures/` and are loaded with
+  `include_bytes!` or `include_str!` from the test file.
+- Every public operation has at least one test, including its error paths.
+- Test-only clippy allowances may be declared at the top of each test file;
+  they are the only `allow` attributes accepted in the repository.
+- Integration tests for the CLI, Python and WASM live in the same
+  `crates/<crate>/tests/` directory, next to the Rust tests of that surface.
 
 ## 3. Roadmap workflow
 
@@ -227,10 +242,15 @@ Independent version numbers that do NOT follow the crate version:
 - Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
   Actions are disabled at repository level until the maintainer enables them
   explicitly (2026-11-08).
-- Current phase: Phase 0 — Foundations (`docs/roadmap/phase-00-foundations.md`);
-  Tasks 0.1 (workspace, toolchain, license, facade, contributor guide) and 0.2
-  (rule tooling, hooks, data loader, CI rules job) are done. Task 0.3 (moyo
-  audit) is next.
+- Current phase: Phase 0 — Foundations (`docs/roadmap/phase-00-foundations.md`).
+  Tasks 0.1 to 0.7, 0.9 and 0.10 are implemented locally. Tasks 0.6.3, 0.7.5
+  and 0.8.1 to 0.8.5 have their workflows committed but have not run because
+  GitHub Actions are disabled by maintainer instruction. Task 0.6.5 (name
+  reservation) waits for explicit approval; the names were free on 2026-11-08.
+- Testing: integration tests live in `crates/<crate>/tests/` (AGENTS.md
+  section 2.2). Shared vectors are in `tests/vectors/`, the curated corpus in
+  `tests/corpus/`, and the Crystal-Builder golden data in `tests/golden/`
+  (Phase 1 generated; later phases add their own directories).
 - Data policy: embedded bundles live inside the owning crate
   (`crates/<crate>/data/`) so `cargo package` carries them; the workspace
   `data/` holds canonical files, external bundles and repository-only assets.

@@ -23,6 +23,7 @@ ignore = []
 allow = [
   "MIT",
   "Apache-2.0",
+  "Apache-2.0 WITH LLVM-exception",
   "BSD-2-Clause",
   "BSD-3-Clause",
   "ISC",
@@ -40,10 +41,12 @@ highlight = "all"
 workspace-default-features = "allow"
 external-default-features = "allow"
 deny = [
-  { crate = "cc", reason = "C toolchains must never enter the default build (AGENTS.md rule 3)" },
+  { crate = "cc", wrappers = ["minicov"], reason = "C toolchains stay test-only (minicov is a wasm-bindgen-test build dependency)" },
   { crate = "cmake", reason = "native builds must stay behind optional features (AGENTS.md rule 3)" },
 ]
-skip = []
+skip = [
+  { crate = "syn", reason = "proc-macro build-time duplicate: moyo needs syn 2, clap/pyo3/serde need syn 3" },
+]
 skip-tree = []
 
 [sources]

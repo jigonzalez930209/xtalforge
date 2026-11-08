@@ -4,10 +4,22 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: bootstrap (`0.0.0`). The Cargo workspace, lint configuration and
-> contributor documentation exist; nothing is released yet. The plan is in
+> Status: Phase 0 complete locally (`0.0.0`, nothing published). The workspace,
+> rule tooling, hello-world in the four surfaces, corpus and golden data, docs
+> site and dependency map are in place. GitHub Actions remain disabled until
+> the maintainer enables them. The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
+
+## Install
+
+Nothing is published yet. After the first release the commands will be:
+
+```bash
+cargo add xtalforge@0.0.0
+pip install xtalforge==0.0.0
+npm install xtalforge-wasm@0.0.0
+```
 
 ## Goals
 

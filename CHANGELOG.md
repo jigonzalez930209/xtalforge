@@ -39,6 +39,29 @@ essential release, then `0.x.y`).
   bundles for WASM and large databases.
 - Data policy page and the `data/` directory convention, including the gzip
   fixture and checksum tests for the loader.
+- moyo audit (Task 0.3): requirements matrix, gap decisions, eight-structure
+  spglib comparison at four tolerances, wasm/pyo3 build check, and the report
+  in `docs/algorithms/symmetry-backend.md`.
+- sci-form reuse audit (Task 0.4): verified inventory, port quality gate,
+  overlap decisions and the `sci-form` feature policy in
+  `docs/algorithms/sci-form-reuse.md`.
+- Hello-world slice (Task 0.5): `version()` and `cell_volume()` in the Rust
+  API, CLI, Python wheel and WASM package; shared vectors, API pages, parity
+  check, binding architecture and error mapping.
+- Version and release tooling (Task 0.6): `scripts/sync-version.sh` with a
+  self-test, agent-version check, pull request template and release workflow.
+- Documentation site (Task 0.7): edit links, search, repository link, API and
+  algorithm pages, four-surface code groups, KaTeX, and an offline cell-volume
+  WASM demo.
+- CI workflows (Task 0.8): Rust matrix, Python, WASM, docs, caching and path
+  filters, plus the existing rules job.
+- Golden-data oracle (Task 0.9): curated `tests/corpus/` with provenance,
+  Phase 1 generator and data, Crystal-Builder test-data inventory,
+  `xtalforge-testkit` and the regeneration policy.
+- Dependency replacement map (Task 0.10): import survey, replacement
+  decisions and license status for every Python dependency.
+- Mandatory test layout (AGENTS.md section 2.2): Rust tests live in
+  `crates/<crate>/tests/`, independent of the source files.
 
 ### Changed
 
@@ -54,3 +77,7 @@ essential release, then `0.x.y`).
   `feat(<scope>):` or `ref(<scope>):` subjects, and the completed tasks listed
   from hardest to easiest in the body. The optional pre-commit and commit-msg
   hooks enforce the directory scope and the message format.
+- Workspace `unsafe_code` changed from `forbid` to `deny` so the pyo3 binding
+  crate can relax it locally with a comment, as the roadmap allows.
+- GitHub Actions workflows are committed but disabled at repository level by
+  maintainer instruction; they have not run yet.
