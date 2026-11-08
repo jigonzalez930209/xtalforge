@@ -14,8 +14,9 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
     angle, bonds, cell_volume, convert_structure, distance, element_info, groups, lattice_info,
-    lattice_minimum_image, limits_bounds, limits_check, neighbors, read_cif, read_structure, rings,
-    slab_info, slab_text, structure_info, supercell_info, supercell_text, torsion, version,
+    lattice_minimum_image, limits_bounds, limits_check, mesh_stl, neighbors, pxrd_info, read_cif,
+    read_structure, rings, scene_summary, slab_info, slab_text, structure_info, supercell_info,
+    supercell_text, torsion, version,
 };
 
 const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
@@ -397,4 +398,25 @@ fn phase_one_writers_return_text() {
     assert!(cell.starts_with("data_"));
     let slab = slab_text(NACL_CIF, 1, 0, 0, 1, 10.0).expect("slab text");
     assert!(slab.starts_with("data_"));
+}
+
+#[wasm_bindgen_test]
+fn view_scene_and_stl_exports() {
+    let scene = scene_summary(NACL_CIF, "space-fill", 1.0).expect("scene");
+    assert_eq!(property(&scene, "atoms").as_f64(), Some(8.0));
+    assert_eq!(property(&scene, "cell_edges").as_f64(), Some(12.0));
+    let stl = mesh_stl(NACL_CIF, "space-fill", 1.0).expect("stl");
+    assert!(stl.starts_with("solid"));
+    assert!(stl.contains("facet normal"));
+}
+
+#[wasm_bindgen_test]
+fn pxrd_export() {
+    let pattern = pxrd_info(NACL_CIF, "cu-ka", 60.0, 0.02).expect("pxrd");
+    let reflections = property(&pattern, "reflections");
+    let reflections: js_sys::Array = reflections.unchecked_into();
+    assert!(reflections.length() > 0);
+    let points = property(&pattern, "points");
+    let points: js_sys::Array = points.unchecked_into();
+    assert!(points.length() > 100);
 }
