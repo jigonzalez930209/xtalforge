@@ -40,6 +40,9 @@ check_wasm() {
   case "$name" in
     supercell) name=supercell_info ;;
     slab) name=slab_info ;;
+    asymmetrize) name=asymmetrize_info ;;
+    to_p1) name=to_p1_info ;;
+    set_space_group) name=set_space_group_info ;;
   esac
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
@@ -65,7 +68,7 @@ check_cli() {
     lattice_minimum_image) command=cell ;;
     structure_info) command=info ;;
     read_cif|read_structure) command=info ;;
-    detect_symmetry) command=symmetry ;;
+    detect_symmetry|asymmetrize|to_p1|set_space_group) command=symmetry ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
