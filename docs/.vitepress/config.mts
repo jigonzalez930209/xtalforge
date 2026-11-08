@@ -66,6 +66,7 @@ export default defineConfig({
             { text: 'Bonding', link: '/api/bonding' },
             { text: 'CIF', link: '/api/cif' },
             { text: 'POSCAR and XYZ', link: '/api/formats' },
+            { text: 'Measures and scalars', link: '/api/measure' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
