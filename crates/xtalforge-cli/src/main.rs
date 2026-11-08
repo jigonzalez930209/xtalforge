@@ -35,6 +35,11 @@ struct Cli {
 enum Command {
     /// Print the xtalforge version.
     Version,
+    /// Print reference data for an element.
+    Element {
+        /// Element symbol or atomic number.
+        input: String,
+    },
     /// Compute the volume of a cell from its six parameters.
     CellVolume {
         /// Cell length a in Angstrom.
@@ -107,6 +112,47 @@ fn run(cli: &Cli) -> Result<(), CliError> {
                 println!("{version}");
             } else {
                 println!("xtalforge {version}");
+            }
+            Ok(())
+        }
+        Command::Element { input } => {
+            let element = xtalforge::core::element_info(input).map_err(|error| CliError {
+                code: error.code(),
+                message: error.message(),
+                exit_code: 3,
+            })?;
+            if cli.json {
+                println!(
+                    "{}",
+                    serde_json::json!({
+                        "z": element.z,
+                        "symbol": element.symbol,
+                        "name": element.name,
+                        "mass": element.mass,
+                        "covalent_radius": element.covalent_radius,
+                        "vdw_radius": element.vdw_radius,
+                        "color": element.color,
+                        "is_metal": element.is_metal,
+                        "valence": element.valence,
+                        "electronegativity": element.electronegativity,
+                        "pyykko_single": element.pyykko_single,
+                        "pyykko_double": element.pyykko_double,
+                        "pyykko_aromatic": element.pyykko_aromatic,
+                    })
+                );
+            } else if cli.quiet {
+                println!("{}", element.symbol);
+            } else {
+                let [red, green, blue] = element.color;
+                println!(
+                    "{} {} (Z={}) mass={:.4} covalent={:.3} vdw={:.3} color=#{red:02X}{green:02X}{blue:02X}",
+                    element.symbol,
+                    element.name,
+                    element.z,
+                    element.mass,
+                    element.covalent_radius,
+                    element.vdw_radius
+                );
             }
             Ok(())
         }
