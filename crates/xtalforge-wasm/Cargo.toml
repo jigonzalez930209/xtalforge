@@ -31,7 +31,7 @@ serde_json = { workspace = true }
 wasm-bindgen-test = { workspace = true }
 
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = false
+wasm-opt = ["-Oz"]
 
 [package.metadata.wasm-pack.profile.dev]
 wasm-opt = false
