@@ -24,6 +24,24 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 `Pattern { points, reflections }` carries the sampled curve and the peak list;
 `Reflection { hkl, d, two_theta, multiplicity, intensity }`.
 
+## Pareto front
+
+`pareto_front(points)` returns the indices of the non-dominated `(energy,
+residual)` points, minimising both objectives.
+
+## Le Bail
+
+`le_bail(structure, observed, &LebailOptions)` partitions the observed
+intensity among overlapping reflections and iterates the profile sum, returning
+`LebailResult { intensities, positions, pattern, r_factor }`.
+
+## Cubic indexing
+
+`index_cubic(peaks, wavelength, max_index, tolerance)` searches cubic `a`,
+indexes each peak and returns `CubicIndex { a, peaks, completeness,
+mean_error }`. It is the first indexing engine; non-cubic cells and figures of
+merit are later Task 7.5 work.
+
 ## Profiles and background
 
 `Profile { kind, center, fwhm, eta, height }` evaluates Gaussian, Lorentzian

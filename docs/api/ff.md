@@ -23,3 +23,23 @@ Dummy `X` atoms are excluded from the energy and return a zero force.
 The UFF table covers the 218 Rappe/UFF4MOF types; the typer uses element and
 bond geometry, with UFF4MOF metal types for framework nodes. Charges, Ewald,
 optimizers and thermochemistry are later Phase 4 tasks.
+
+## Charges
+
+`qeq_charges(structure, &ChargeOptions)` and `eqeq_charges` solve charge
+equilibration and return `Charges { per_atom, total }`; `apply_charges` writes
+them into the sites. `EwaldOptions` and the Ewald energy/forces provide the
+periodic electrostatic term.
+
+## Optimizers
+
+`minimize(structure, calculator, &OptimizeOptions)` runs FIRE or L-BFGS over
+the P1 coordinates (asymmetric mode keeps the asymmetric unit) and returns
+`OptimizationResult { structure, energy, max_force, steps, converged }`.
+`apply_optimized_geometry` writes the result back. `fit_eos` fits a
+Birch-Murnaghan or Murnaghan equation of state from energy-volume points.
+
+## Scans
+
+`ScanCoordinate` and `Constraint` describe a distance/angle/torsion scan; the
+driver steps the coordinate and relaxes the rest.

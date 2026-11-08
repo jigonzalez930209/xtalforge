@@ -19,5 +19,12 @@ and cell dimensions.
 `fullerene(60)` builds C60 from the embedded ASE-derived coordinates; the
 result is a padded molecule with 60 atoms and 90 perceived bonds.
 
+`build_net(&CgdEntry, "C")` turns a CGD net into a P1 structure: vertices
+become sites and edges become topology bonds (kept separate from chemistry).
+
+`parse_smiles` builds the organic-subset graph: atoms, aromatic atoms,
+branches, ring closures, bond orders and bracket charges. 3D embedding is not
+implemented yet.
+
 The remaining builders (SMILES molecules, fragments, fullerenes, amorphous
 carbon, polymers) are later Phase 6 tasks.
