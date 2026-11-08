@@ -5,6 +5,13 @@
 //! Crystal-Builder `xtal/ff/uff/` (MIT) and keeps the reference units
 //! (Angstrom, degrees, kcal/mol) internally; the public API reports energies
 //! in eV, forces in eV/Angstrom and stress in GPa.
+//!
+//! [`vibrations`] builds on that boundary: a Gamma-point Hessian from central
+//! differences of analytic forces, mass-weighted modes through a Jacobi
+//! eigensolver, IR intensities from a documented fixed-charge dipole model,
+//! Gamma-point phonons, harmonic thermochemistry and a sampled-volume
+//! quasi-harmonic free energy.  Every approximation is named in the module
+//! that makes it.
 
 pub mod calculator;
 pub mod charges;
@@ -12,6 +19,7 @@ pub mod optimize;
 pub mod registry;
 pub mod scan;
 pub mod uff;
+pub mod vibrations;
 
 mod math;
 mod structure_util;
@@ -36,6 +44,13 @@ pub use uff::calculator::UffCalculator;
 pub use uff::model::UffModel;
 pub use uff::params::{ParameterSet, UffParams};
 pub use uff::typer::{AtomType, Confidence, Typing};
+pub use vibrations::{
+    Broadening, CM_PER_SQRT_EV_PER_A2_AMU, CM_TO_EV, DEFAULT_HESSIAN_STEP, DisplacementMode,
+    Hessian, HessianOptions, IMAGINARY_BELOW_CM, IrOptions, IrPeak, IrSpectrum, PhononOptions,
+    PhononResult, QhaFreeEnergy, QhaPoint, QhaResult, ThermoOptions, ThermoResult,
+    VibrationalModes, ZERO_MODE_TOLERANCE_CM, hessian, ideal_gas_thermochemistry, ir_spectrum,
+    phonons, quasi_harmonic_free_energy, thermochemistry, vibrational_modes,
+};
 
 /// Errors returned by force-field operations.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]

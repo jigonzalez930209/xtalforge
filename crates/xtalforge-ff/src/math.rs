@@ -141,6 +141,138 @@ pub(crate) fn mat3_scale(matrix: [[f64; 3]; 3], factor: f64) -> [[f64; 3]; 3] {
     result
 }
 
+/// Reads one element of a row-major square matrix, or zero out of range.
+fn matrix_get(values: &[f64], n: usize, row: usize, column: usize) -> f64 {
+    row.checked_mul(n)
+        .and_then(|base| base.checked_add(column))
+        .and_then(|index| values.get(index))
+        .copied()
+        .unwrap_or(0.0)
+}
+
+/// Writes one element of a row-major square matrix, ignoring out-of-range.
+fn matrix_set(values: &mut [f64], n: usize, row: usize, column: usize, value: f64) {
+    if let Some(index) = row.checked_mul(n).and_then(|base| base.checked_add(column))
+        && let Some(slot) = values.get_mut(index)
+    {
+        *slot = value;
+    }
+}
+
+/// Eigenvalues and eigenvectors of a real symmetric matrix by cyclic Jacobi
+/// rotations.
+///
+/// Returns `None` unless `matrix` is square.  Eigenvalues come out in
+/// ascending order and `vectors[mode][component]` is the corresponding
+/// eigenvector with unit Euclidean norm.  Degenerate eigenvalues are resolved
+/// deterministically by the column order they acquire during the sweeps, so
+/// the same matrix always gives the same vectors on every platform.
+pub(crate) fn symmetric_eigen(matrix: &[Vec<f64>]) -> Option<(Vec<f64>, Vec<Vec<f64>>)> {
+    let n = matrix.len();
+    if matrix.iter().any(|row| row.len() != n) {
+        return None;
+    }
+    if n == 0 {
+        return Some((Vec::new(), Vec::new()));
+    }
+    let mut values = Vec::with_capacity(n * n);
+    let mut vectors = vec![0.0; n * n];
+    let mut largest: f64 = 0.0;
+    for (row, entries) in matrix.iter().enumerate() {
+        for (column, value) in entries.iter().enumerate() {
+            if !value.is_finite() {
+                return None;
+            }
+            values.push(*value);
+            largest = largest.max(value.abs());
+            if row == column {
+                matrix_set(&mut vectors, n, row, column, 1.0);
+            }
+        }
+    }
+    let tolerance = 1e-14 * largest.max(1.0);
+    let mut converged = false;
+    for _sweep in 0..100 {
+        let mut off_diagonal = 0.0;
+        for row in 0..n {
+            for column in (row + 1)..n {
+                off_diagonal += matrix_get(&values, n, row, column).abs();
+            }
+        }
+        if off_diagonal <= tolerance {
+            converged = true;
+            break;
+        }
+        for p in 0..n {
+            for q in (p + 1)..n {
+                let apq = matrix_get(&values, n, p, q);
+                if apq.abs() <= tolerance * 1e-3 {
+                    continue;
+                }
+                let app = matrix_get(&values, n, p, p);
+                let aqq = matrix_get(&values, n, q, q);
+                let theta = (aqq - app) / (2.0 * apq);
+                let t = if theta >= 0.0 {
+                    1.0 / (theta + (theta * theta + 1.0).sqrt())
+                } else {
+                    -1.0 / (-theta + (theta * theta + 1.0).sqrt())
+                };
+                let cosine = 1.0 / (t * t + 1.0).sqrt();
+                let sine = t * cosine;
+                for row in 0..n {
+                    if row == p || row == q {
+                        continue;
+                    }
+                    let arp = matrix_get(&values, n, row, p);
+                    let arq = matrix_get(&values, n, row, q);
+                    let new_p = cosine * arp - sine * arq;
+                    let new_q = sine * arp + cosine * arq;
+                    matrix_set(&mut values, n, row, p, new_p);
+                    matrix_set(&mut values, n, row, q, new_q);
+                    matrix_set(&mut values, n, p, row, new_p);
+                    matrix_set(&mut values, n, q, row, new_q);
+                }
+                let new_pp = cosine * cosine * app - 2.0 * sine * cosine * apq + sine * sine * aqq;
+                let new_qq = sine * sine * app + 2.0 * sine * cosine * apq + cosine * cosine * aqq;
+                matrix_set(&mut values, n, p, p, new_pp);
+                matrix_set(&mut values, n, q, q, new_qq);
+                matrix_set(&mut values, n, p, q, 0.0);
+                matrix_set(&mut values, n, q, p, 0.0);
+                for row in 0..n {
+                    let vrp = matrix_get(&vectors, n, row, p);
+                    let vrq = matrix_get(&vectors, n, row, q);
+                    matrix_set(&mut vectors, n, row, p, cosine * vrp - sine * vrq);
+                    matrix_set(&mut vectors, n, row, q, sine * vrp + cosine * vrq);
+                }
+            }
+        }
+    }
+    if !converged && n > 1 {
+        return None;
+    }
+    let mut order: Vec<usize> = (0..n).collect();
+    order.sort_by(|first, second| {
+        let a = matrix_get(&values, n, *first, *first);
+        let b = matrix_get(&values, n, *second, *second);
+        a.partial_cmp(&b)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then(first.cmp(second))
+    });
+    let eigenvalues = order
+        .iter()
+        .map(|index| matrix_get(&values, n, *index, *index))
+        .collect();
+    let eigenvectors = order
+        .iter()
+        .map(|index| {
+            (0..n)
+                .map(|row| matrix_get(&vectors, n, row, *index))
+                .collect()
+        })
+        .collect();
+    Some((eigenvalues, eigenvectors))
+}
+
 /// Solves `matrix * x = right` by Gaussian elimination with partial pivoting.
 ///
 /// `matrix` and `right` are modified in place.  Returns `None` when the
