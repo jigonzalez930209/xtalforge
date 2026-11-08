@@ -15,7 +15,10 @@
 
 pub mod calculator;
 pub mod charges;
+pub mod external;
 pub mod optimize;
+pub mod prepare;
+pub mod quantum;
 pub mod registry;
 pub mod scan;
 pub mod uff;
@@ -29,13 +32,21 @@ pub use calculator::{
     CalculatorRegistry, RunRecord,
 };
 pub use charges::{
-    ChargeOptions, Charges, EwaldOptions, EwaldResult, apply_charges, eqeq_charges, ewald_energy,
-    ewald_energy_forces, qeq_charges,
+    ChargeOptions, Charges, EwaldOptions, EwaldResult, apply_charges, eeq_charges, eqeq_charges,
+    ewald_energy, ewald_energy_forces, qeq_charges,
+};
+pub use external::{
+    BOHR_TO_ANGSTROM, DftbOptions, EngineKind, EngineResult, EngineStatus,
+    HARTREE_PER_BOHR_TO_EV_PER_ANGSTROM, HARTREE_PER_BOHR3_TO_GPA, HARTREE_TO_EV, OrcaOptions,
+    XtbOptions, orca_catalogue, parse_dftb_output, parse_xtb_output, probe, probe_binary,
+    write_dftb_hsd, write_orca_input, write_xtb_input,
 };
 pub use optimize::{
     EosFit, EosForm, Minimizer, OptimizationResult, OptimizeOptions, RelaxMode,
     apply_optimized_geometry, birch_murnaghan, fire, fit_eos, lbfgs, minimize, murnaghan,
 };
+pub use prepare::{PrepareOptions, PrepareReport, PrepareStep, prepare};
+pub use quantum::{QuantumAdapter, QuantumCapabilities, QuantumMethod, adapter, capabilities};
 pub use registry::builtin_registry;
 pub use scan::{
     Constraint, ScanAxis, ScanCoordinate, ScanOptions, ScanPoint, ScanResult, relaxed_scan,
