@@ -1,6 +1,6 @@
 //! Atomic charges and periodic electrostatics (Tasks 4.3.1 to 4.3.5).
 //!
-//! Three entry points share one [`Charges`] result and one periodic-image
+//! Four entry points share one [`Charges`] result and one periodic-image
 //! convention:
 //!
 //! * [`qeq_charges`] — Rappé-Goddard charge equilibration with the UFF
@@ -8,6 +8,8 @@
 //! * [`eqeq_charges`] — EQeq, the same solver with each element expanded
 //!   about its usual oxidation state and measured ionisation energies
 //!   (Task 4.3.2).
+//! * [`eeq_charges`] — EEQ-style equilibration with an Ohno-Klopman kernel
+//!   and an explicit Coulomb radius per element (Task 4.3.3).
 //! * [`ewald_energy_forces`] — converged periodic Coulomb energy and forces
 //!   for a set of point charges (Task 4.3.5).
 //!
@@ -27,6 +29,7 @@ use crate::Error;
 use crate::structure_util::rebuild;
 
 pub(crate) mod data;
+pub(crate) mod eeq;
 pub(crate) mod eqeq;
 pub mod ewald;
 pub(crate) mod periodic;
@@ -279,6 +282,29 @@ pub fn qeq_charges(structure: &Structure, options: &ChargeOptions) -> Result<Cha
 pub fn eqeq_charges(structure: &Structure, options: &ChargeOptions) -> Result<Charges, Error> {
     options.validate()?;
     eqeq::solve(structure, options)
+}
+
+/// EEQ-style charges for a structure (Task 4.3.3).
+///
+/// The diagonal is each element's chemical hardness and the off-diagonal is
+/// the Ohno-Klopman kernel with an explicit Coulomb radius per element; the
+/// total charge enters through one Lagrange multiplier and every periodic
+/// image inside `options.cutoff` is summed.
+///
+/// The module documents the approximation precisely: sci-form's fitted EEQ2019
+/// parameter table is not vendored here, so `chi` and `J` come from the local
+/// QEq table and the radius is the Ohno radius implied by that hardness.  The
+/// default dielectric of one therefore reproduces [`qeq_charges`]; use
+/// [`ChargeOptions::eqeq`] (dielectric 1.2) for the screened EEQ-style result.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for bad options or a singular system,
+/// [`Error::UnknownElement`] for an element outside the local table, and a
+/// core error when the P1 expansion fails.
+pub fn eeq_charges(structure: &Structure, options: &ChargeOptions) -> Result<Charges, Error> {
+    options.validate()?;
+    eeq::solve(structure, options)
 }
 
 /// Applies charges to a structure's sites.
