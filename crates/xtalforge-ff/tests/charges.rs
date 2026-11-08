@@ -14,7 +14,7 @@
 
 use xtalforge_core::{Lattice, Site, Structure, StructureBuilder};
 use xtalforge_ff::charges::{COULOMB_EV_ANGSTROM, ChargeOptions, EwaldOptions};
-use xtalforge_ff::{eqeq_charges, ewald_energy_forces, qeq_charges};
+use xtalforge_ff::{eeq_charges, eqeq_charges, ewald_energy_forces, qeq_charges};
 
 fn molecule(name: &str, atoms: &[(&str, [f64; 3])]) -> Structure {
     let points: Vec<(String, [f64; 3])> = atoms
@@ -151,6 +151,74 @@ fn eqeq_nacl_gives_ions_with_the_reference_dielectric() {
     assert!(charges.total.abs() < 1e-9);
     assert!(charges.per_atom[0] > 0.5);
     assert!(charges.per_atom[1] < -0.5);
+}
+
+#[test]
+fn eeq_nacl_gives_ions() {
+    let charges = eeq_charges(&nacl_molecule(), &ChargeOptions::default()).unwrap();
+    assert_eq!(charges.per_atom.len(), 2);
+    assert!(charges.total.abs() < 1e-10);
+    assert!(
+        charges.per_atom[0] > 0.5,
+        "sodium should be positive, got {}",
+        charges.per_atom[0]
+    );
+    assert!(
+        charges.per_atom[1] < -0.5,
+        "chloride should be negative, got {}",
+        charges.per_atom[1]
+    );
+}
+
+#[test]
+fn eeq_water_is_neutral_and_polar() {
+    let charges = eeq_charges(&water(), &ChargeOptions::default()).unwrap();
+    assert_eq!(charges.per_atom.len(), 3);
+    assert!(charges.total.abs() < 1e-9);
+    assert!(
+        charges.per_atom[0] < -0.2,
+        "oxygen should be negative, got {}",
+        charges.per_atom[0]
+    );
+    assert!(charges.per_atom[1] > 0.1 && charges.per_atom[2] > 0.1);
+}
+
+#[test]
+fn eeq_sums_to_the_requested_total_charge() {
+    let options = ChargeOptions {
+        total_charge: 1.0,
+        ..ChargeOptions::default()
+    };
+    let charges = eeq_charges(&water(), &options).unwrap();
+    let sum: f64 = charges.per_atom.iter().sum();
+    assert!((sum - 1.0).abs() < 1e-8, "sum {sum}");
+    assert!((charges.recompute_total() - 1.0).abs() < 1e-8);
+}
+
+#[test]
+fn eeq_ordering_against_qeq_is_sane() {
+    let structure = nacl_molecule();
+    let eeq = eeq_charges(&structure, &ChargeOptions::eqeq()).unwrap();
+    let qeq = qeq_charges(&structure, &ChargeOptions::default()).unwrap();
+    assert!(eeq.per_atom[0] > 0.5 && qeq.per_atom[0] > 0.5);
+    assert!(eeq.per_atom[1] < -0.5 && qeq.per_atom[1] < -0.5);
+    // Screening with the EQeq dielectric weakens the ionic separation slightly
+    // without changing its direction.
+    assert!(
+        eeq.per_atom[0] <= qeq.per_atom[0] + 1e-8,
+        "EEQ {} should not exceed QEq {}",
+        eeq.per_atom[0],
+        qeq.per_atom[0]
+    );
+}
+
+#[test]
+fn eeq_rejects_an_invalid_total_charge() {
+    let options = ChargeOptions {
+        total_charge: f64::NAN,
+        ..ChargeOptions::default()
+    };
+    assert!(eeq_charges(&water(), &options).is_err());
 }
 
 #[test]
