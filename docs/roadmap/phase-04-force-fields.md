@@ -23,21 +23,21 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 ## Task 4.1 — Calculator API, registry and run records
 
-- [ ] 4.1.1 `Calculator` trait
+- [x] 4.1.1 `Calculator` trait
   Port `ff/api.py`: a calculator is built once for one structure (typing,
   topology, parameters happen at construction) and then answers repeatedly:
   given Cartesian positions and a cell, return energy, forces and, when
   supported, stress. Capability flags: periodic, needs charges, supports
   stress, in-process or external, thread-safe. Units: eV, eV/Angstrom, GPa.
-- [ ] 4.1.2 Registry and availability
+- [x] 4.1.2 Registry and availability
   Port `ff/registry.py`: name to calculator factory, the list read by the CLI
   `--engine`, the Python API and the agent tools. Availability probing returns
   a reason when an engine cannot run (binary missing, feature not compiled,
   model weights absent).
-- [ ] 4.1.3 Dummy atoms excluded from energies
+- [x] 4.1.3 Dummy atoms excluded from energies
   Port `ff/markers.py`: dummy atoms (connection points, markers) never enter
   an energy; calculators see a filtered view with index maps back.
-- [ ] 4.1.4 Run record
+- [x] 4.1.4 Run record
   Port `ff/record.py` (339 lines): what a run writes down while it runs
   (engine, options, per-step energies and forces, timings, warnings, final
   result), serializable into the workspace run folder (Task 3.12) and the
@@ -45,31 +45,31 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 ## Task 4.2 — UFF and UFF4MOF
 
-- [ ] 4.2.1 Parameters
+- [x] 4.2.1 Parameters
   Port `ff/uff/params.py` (559 lines) including the UFF4MOF extension types.
   Tables to `data/uff.json` with citations (Rappé et al. 1992; Addicoat et
   al. 2014 and Coupry et al. 2016 for UFF4MOF). Compare with sci-form UFF
   parameters and record any difference.
-- [ ] 4.2.2 Atom typing
+- [x] 4.2.2 Atom typing
   Port `ff/uff/typer.py` (850 lines; split into perception, rules, metals,
   reasons). Typing is where wrong answers come from, so every assignment
   carries a **reason** string (for example "C_R: in an aromatic ring of 6");
   missing hydrogens show up in the reasons. Metal and cluster types for
   UFF4MOF (paddlewheels, Zn4O, Zr6 nodes). User overrides via `SetAtomTypes`.
-- [ ] 4.2.3 Energy terms and analytic gradients
+- [x] 4.2.3 Energy terms and analytic gradients
   Port `ff/uff/terms.py` (783 lines): one type per term (bond, angle with its
   coordination-specific forms, torsion, inversion, van der Waals), each
   holding index arrays and parallel parameter arrays and returning
   `(E, dE/dx)` for the whole crystal at once. Cell gradient (virial) for
   stress. Validate every gradient against finite differences (sci-form
   `fd_gradient.rs`).
-- [ ] 4.2.4 UFF calculator
+- [x] 4.2.4 UFF calculator
   Port `ff/uff/calculator.py` (752 lines): build once (typing, angle and
   torsion enumeration over the periodic bond graph, van der Waals pair lists
   across images with a cutoff and neighbour-list skin), then evaluate cheaply
   as the geometry moves under fixed topology. Optional electrostatics with
   charges from Task 4.3.
-- [ ] 4.2.5 Validation
+- [x] 4.2.5 Validation
   Energies, forces and stress against Crystal-Builder golden data for small
   molecules, molecular crystals and the corpus MOFs; tolerance documented.
 

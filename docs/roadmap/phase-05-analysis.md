@@ -20,36 +20,36 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.1 — Calculated powder diffraction
 
-- [ ] 5.1.1 Reflections
+- [x] 5.1.1 Reflections
   Enumerate (hkl) up to a maximum 2θ for the chosen wavelength; d-spacings;
   systematic absences from the space group operations (not from hard-coded
   rules); multiplicities by grouping symmetry-equivalent reflections (Friedel
   pairs merged).
-- [ ] 5.1.2 Structure factors
+- [x] 5.1.2 Structure factors
   Atomic form factors from Cromer-Mann/Waasmaier-Kirfel coefficients (port
   sci-form `scattering_factors.rs`, coefficients to `data/`), occupancies,
   isotropic and anisotropic Debye-Waller factors, |F|².
-- [ ] 5.1.3 Intensity corrections and profiles
+- [x] 5.1.3 Intensity corrections and profiles
   Port `analysis/pxrd.py`, whose science came from the same author's
   `DataPlotter` application: Lorentz-polarization factor (with the
   monochromator angle option), multiplicity, Debye-Waller attenuation,
   pseudo-Voigt profile with the Caglioti width relation (U, V, W) and mixing
   parameter; continuous pattern on a 2θ grid; tick marks list with (hkl), d,
   2θ, intensity.
-- [ ] 5.1.4 Radiation
+- [x] 5.1.4 Radiation
   Cu Kα1, Cu Kα1+Kα2 doublet with ratio, Mo, Co, Cr, Fe, Ag and arbitrary
   wavelength; output in 2θ, d or Q.
-- [ ] 5.1.5 Module and outputs
+- [x] 5.1.5 Module and outputs
   Port `modules/pxrd.py`: the calculation as a module run that leaves the
   pattern as `.xy` (Task 3.5.3) and a reflection table in the run folder, plus
   a report with a `Curve` block (Task 5.10.4).
-- [ ] 5.1.6 Validation
+- [x] 5.1.6 Validation
   Peak positions and normalized intensities against Crystal-Builder golden
   patterns and published patterns (NaCl, Si, α-quartz, HKUST-1).
 
 ## Task 5.2 — Distance grid
 
-- [ ] 5.2.1 Surface-distance field
+- [x] 5.2.1 Surface-distance field
   Port `analysis/grid.py`: on a regular grid in fractional coordinates, the
   distance from each point to the surface of the nearest atom (centre
   distance minus that atom's radius). Its zero set is the van der Waals
@@ -58,7 +58,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   on real MOFs (documented in the source). Use the neighbor machinery of
   Task 1.10 instead of a k-d tree; parallel over grid slabs with a
   deterministic result.
-- [ ] 5.2.2 Radii sets and limits
+- [x] 5.2.2 Radii sets and limits
   Radii sets (UFF van der Waals, CCDC, Zeo++ default radii from
   `tests/data/zeo_radii.cc` once its license is checked); grid spacing with
   the memory estimate of Task 1.3 (a 0.2 Angstrom grid of MFU-4l is 3.8 M
@@ -66,30 +66,30 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.3 — Accessibility of voids
 
-- [ ] 5.3.1 Accessible versus inaccessible space
+- [x] 5.3.1 Accessible versus inaccessible space
   Port `analysis/voids.py` (481 lines): which of the space a probe fits into
   it can reach from outside, by periodic connected-component labelling of the
   grid region where the probe fits, and testing which components percolate
   through the cell (channel dimensionality 0D to 3D).
-- [ ] 5.3.2 Pore volume, surface area, pore sizes from the grid
+- [x] 5.3.2 Pore volume, surface area, pore sizes from the grid
   Port `modules/poregrid.py`: the faster grid-based twins of Zeo++ `-sa` and
   `-vol`/`-volpo` (accessible surface area per volume and per mass, accessible
   and probe-occupiable pore volume, void fraction), and the largest included
   sphere and largest free sphere from the distance grid.
-- [ ] 5.3.3 Validation
+- [x] 5.3.3 Validation
   Compare with Zeo++ reference values in `Crystal-Builder/tests/data/zeopp_reference.json`
   with tolerances documented per quantity.
 
 ## Task 5.4 — Isosurfaces
 
-- [ ] 5.4.1 Periodic marching tetrahedra
+- [x] 5.4.1 Periodic marching tetrahedra
   Port `analysis/isosurface.py`: grid plus level plus lattice to points and
   triangles in fractional coordinates. **Marching tetrahedra, not marching
   cubes**: 14 of the 256 cube patterns are ambiguous and wrong choices leave
   holes; tetrahedra have no ambiguous case. Periodic closure across cell
   faces, vertex welding, normals. sci-form's marching cubes is not used for
   this reason (keep it in mind only for non-periodic orbital surfaces).
-- [ ] 5.4.2 Mesh output
+- [x] 5.4.2 Mesh output
   Mesh type (vertices, indices, normals) with JSON, OBJ and binary buffer
   output, typed arrays in WASM.
 

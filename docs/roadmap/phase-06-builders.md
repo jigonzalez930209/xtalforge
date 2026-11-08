@@ -95,12 +95,12 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.5 — Honeycomb sheets and graphene
 
-- [ ] 6.5.1 Shared honeycomb recipe
+- [x] 6.5.1 Shared honeycomb recipe
   Port `carbon/honeycomb.py` and `carbon/lattice.py`: element validation,
   bond length typed or taken from the elements (Pyykko aromatic radii,
   Task 1.1.3), X-H cap length, and the record turned into a structure; shared
   by the graphene, nanotube, fullerene and carbon builders.
-- [ ] 6.5.2 Graphene and stacks
+- [x] 6.5.2 Graphene and stacks
   Port `graphene/build.py` (390 lines) and `modules/graphene.py`: sheets of
   carbon, BN or any two elements (two atoms in a hexagonal cell, A at
   (1/3, 2/3), B at (2/3, 1/3), bonds stated, never perceived), one layer or
@@ -114,10 +114,10 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.6 — Nanotubes
 
-- [ ] 6.6.1 Roll-up geometry
+- [x] 6.6.1 Roll-up geometry
   Port `nanotube/geometry.py`: chiral vector (n, m), diameter, chiral angle,
   translational period, atoms per period, for C, BN or any two elements.
-- [ ] 6.6.2 Builder
+- [x] 6.6.2 Builder
   Port `nanotube/build.py` (472 lines) and `modules/nanotube.py`: periodic
   along c (length rounded to whole periods) or a finite tube cut to length
   with its open ends capped (H) or left; bonds stated; a measured report
