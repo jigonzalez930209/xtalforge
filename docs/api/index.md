@@ -14,6 +14,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Supercells and origin shifts](./supercell)
 - [Slabs](./slab)
 - [Finite cells and transforms](./transforms)
+- [Neighbors](./neighbors)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
