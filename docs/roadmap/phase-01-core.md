@@ -407,21 +407,26 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.16 — POSCAR and XYZ
 
-- [ ] 1.16.1 POSCAR/CONTCAR
+- [x] 1.16.1 POSCAR/CONTCAR
   Port `io/poscar.py`: comment line, scale (including negative scale meaning
   volume), lattice rows, species line and counts, `Selective dynamics`,
   Direct or Cartesian. A file without a species line is refused with a clear
   message, as Crystal-Builder does (VASP 4 files carry species only in
   POTCAR).
-- [ ] 1.16.2 Extended XYZ
+  Note: `read_poscar`/`write_poscar` in `xtalforge-io::poscar`; positive and
+  negative scale, species/counts, selective dynamics and Cartesian input.
+- [x] 1.16.2 Extended XYZ
   Port `io/xyz.py`: extended XYZ with `Lattice="…"` and `Properties=` (what
   ASE, OVITO and VMD write) round-trips the cell; plain XYZ without a cell is
   read into a P1 box padded around the atoms. This is also the clipboard text
   format (Task 3.10.6). Multi-frame reading is Task 3.6.
-- [ ] 1.16.3 Minimal dispatch
+  Note: `read_xyz`/`write_xyz` in `xtalforge-io::xyz`; the writer emits the
+  extended form and the round trip preserves the cell.
+- [x] 1.16.3 Minimal dispatch
   `read_structure(text, format_hint)` and `write_structure(structure,
   format)` dispatching by name or extension; replaced by the registry of
   Task 3.1 without changing these signatures.
+  Note: `xtalforge-io::dispatch` supports cif, poscar/vasp and xyz.
 
 ## Task 1.17 — CLI, Python and WASM for Phase 1
 
