@@ -134,14 +134,16 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.4 — Sites, Structure and properties
 
-- [ ] 1.4.1 `Site`
+- [x] 1.4.1 `Site`
   Port `core/site.py`: label, element (or species list with occupancies for
   mixed sites), fractional coordinates, occupancy, isotropic or anisotropic
   displacement parameters (Uiso, Uij), formal charge, disorder assembly and
   group, and `props`, an open map of typed extension values (UFF type,
   refinement flags, computed charge, Zeo++ label) so later phases never have
   to change the struct. Validation on construction.
-- [ ] 1.4.2 `Structure`
+  Note: `Site` in `xtalforge-core::site`; label, canonical element, fractional
+  coordinates, occupancy, Uiso/Uij, charge, disorder group and props.
+- [x] 1.4.2 `Structure`
   Port `core/structure.py` (939 lines; split into model, construction,
   validation, queries): name, lattice, space group (Hall symbol plus explicit
   operations), asymmetric-unit sites, explicit bonds (stored against the
@@ -149,18 +151,25 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   crate-private; the public mutation path is the command layer of Phase 3, as
   in Crystal-Builder, so undo is always possible. Until Phase 3 exists, a
   `StructureBuilder` creates structures and pure functions return new ones.
-- [ ] 1.4.3 Molecule in a box
+  Note: `Structure`/`StructureBuilder` in `xtalforge-core::structure`; the
+  asymmetric-unit/P1 split is extended by Task 1.6.
+- [x] 1.4.3 Molecule in a box
   Port `core/molecule.py`: a non-periodic molecule stored as a structure in a
   padded P1 box, made whole across boundaries, with conversion both ways. Its
   point-group analysis is Task 2.8.3.
-- [ ] 1.4.4 Structure properties
+  Note: `Structure::molecule` builds the padded box and fractional sites.
+- [x] 1.4.4 Structure properties
   Port `core/properties.py`: formula (sum and per formula unit), Z, molar
   mass, density, cell contents, total charge and charge balance, counted on
   the P1 cell with occupancies.
-- [ ] 1.4.5 Surfaces and docs
+  Note: `cell_contents`, `formula`, `cell_mass`, `molar_mass`, `density`, `z`,
+  `total_charge` and `charge_balance`; `z` is 1 until P1 expansion refines it.
+- [x] 1.4.5 Surfaces and docs
   `Structure` handle in Python and WASM with accessors (lattice, sites,
   P1 positions as arrays, properties), CLI `info` printing the same summary as
   Crystal-Builder `xtal info` (cell, formula, density).
+  Note: CLI `info` reads the Phase 1 structure JSON bridge and prints the
+  summary; Python/WASM `structure_info` return the same object.
 
 ## Task 1.5 — Serialization schema
 
