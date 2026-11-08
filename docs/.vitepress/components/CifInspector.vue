@@ -33,6 +33,9 @@ const text = ref(SILICON)
 const summary = ref(null)
 const bonds = ref([])
 const ringCounts = ref([])
+const symmetry = ref(null)
+const wyckoff = ref([])
+const zone = ref(null)
 const error = ref('')
 const na = ref(2)
 const nb = ref(2)
@@ -67,6 +70,9 @@ function inspect() {
       counts.set(ring.size, (counts.get(ring.size) ?? 0) + 1)
     }
     ringCounts.value = [...counts.entries()].sort((a, b) => a[0] - b[0])
+    symmetry.value = wasm.value.detect_symmetry(text.value, 0.001)
+    wyckoff.value = wasm.value.wyckoff_info(text.value, 0.001)
+    zone.value = wasm.value.brillouin_zone(text.value)
     error.value = ''
   } catch (caught) {
     summary.value = null
@@ -135,6 +141,10 @@ function downloadSlab() {
         <div><dt>P1 atoms</dt><dd>{{ summary.n_atoms }}</dd></div>
         <div><dt>Bonds</dt><dd>{{ bonds.length }}</dd></div>
         <div><dt>Rings (≤ 8)</dt><dd>{{ ringSummary }}</dd></div>
+        <div><dt>Space group</dt><dd>{{ symmetry.number }} {{ symmetry.hm_symbol }}</dd></div>
+        <div><dt>Hall number</dt><dd>{{ symmetry.hall_number }}</dd></div>
+        <div><dt>Wyckoff</dt><dd>{{ wyckoff.map((item) => item.letter).join(' ') }}</dd></div>
+        <div><dt>Brillouin zone</dt><dd>{{ zone.faces.length }} faces / {{ zone.vertices.length }} vertices</dd></div>
       </dl>
     </section>
 
