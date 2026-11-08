@@ -40,6 +40,12 @@ enum Command {
         /// Element symbol or atomic number.
         input: String,
     },
+    /// Build a cell from its six parameters.
+    Cell {
+        /// a, b, c in Angstrom and alpha, beta, gamma in degrees.
+        #[arg(long, num_args = 6, value_names = ["a", "b", "c", "alpha", "beta", "gamma"])]
+        params: Vec<f64>,
+    },
     /// Compute the volume of a cell from its six parameters.
     CellVolume {
         /// Cell length a in Angstrom.
@@ -153,6 +159,46 @@ fn run(cli: &Cli) -> Result<(), CliError> {
                     element.covalent_radius,
                     element.vdw_radius
                 );
+            }
+            Ok(())
+        }
+        Command::Cell { params } => {
+            let [a, b, c, alpha, beta, gamma] = match params.as_slice() {
+                [a, b, c, alpha, beta, gamma] => [*a, *b, *c, *alpha, *beta, *gamma],
+                _ => {
+                    return Err(CliError::input(
+                        "cell needs six parameters: a b c alpha beta gamma",
+                    ));
+                }
+            };
+            let lattice =
+                xtalforge::core::lattice_info(a, b, c, alpha, beta, gamma).map_err(|error| {
+                    CliError {
+                        code: error.code(),
+                        message: error.message(),
+                        exit_code: 3,
+                    }
+                })?;
+            if cli.json {
+                println!(
+                    "{}",
+                    serde_json::json!({
+                        "parameters": lattice.parameters(),
+                        "volume": lattice.volume(),
+                        "matrix": lattice.matrix(),
+                        "right_handed": lattice.is_right_handed(),
+                    })
+                );
+            } else {
+                let [a, b, c, alpha, beta, gamma] = lattice.parameters();
+                println!(
+                    "a={a:.6} b={b:.6} c={c:.6} alpha={alpha:.6} beta={beta:.6} gamma={gamma:.6} volume={:.6}",
+                    lattice.volume()
+                );
+                for row in lattice.matrix() {
+                    let [x, y, z] = row;
+                    println!("{x:12.6} {y:12.6} {z:12.6}");
+                }
             }
             Ok(())
         }
