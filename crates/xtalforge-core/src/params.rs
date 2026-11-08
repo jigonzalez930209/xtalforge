@@ -256,3 +256,36 @@ impl ParamType {
         object
     }
 }
+
+impl ParamSet {
+    /// Serializes the descriptions and current values.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] when serialization fails.
+    pub fn to_json(&self) -> Result<String, Error> {
+        serde_json::to_string_pretty(self).map_err(|error| {
+            Error::InvalidInput(format!("could not serialize parameters: {error}"))
+        })
+    }
+
+    /// Parses a stored parameter set and validates every value.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for invalid JSON, unknown fields or a
+    /// value that violates its specification.
+    pub fn from_json(text: &str) -> Result<Self, Error> {
+        let set: Self = serde_json::from_str(text)
+            .map_err(|error| Error::InvalidInput(format!("invalid parameters: {error}")))?;
+        for (name, value) in &set.values {
+            let spec = set
+                .specs
+                .iter()
+                .find(|spec| spec.name == *name)
+                .ok_or_else(|| Error::InvalidInput(format!("unknown parameter {name}")))?;
+            spec.validate(value)?;
+        }
+        Ok(set)
+    }
+}
