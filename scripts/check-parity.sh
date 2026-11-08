@@ -26,6 +26,9 @@ check_rust() {
   case "$name" in
     bonds) name=bond_graph ;;
     pxrd) name=calculate_pxrd ;;
+    build_graphene) name=graphene ;;
+    build_nanotube) name=nanotube ;;
+    build_c60) name=fullerene ;;
     groups) name=find_groups ;;
     subgroups) name=translationengleiche_subgroups ;;
     slab) name=make_slab ;;
@@ -59,6 +62,9 @@ check_wasm() {
     band_path) name=kpath_info ;;
     molecular_point_group) name=pointgroup_info ;;
     pxrd) name=pxrd_info ;;
+    build_graphene) name=build_graphene_info ;;
+    build_nanotube) name=build_nanotube_info ;;
+    build_c60) name=build_c60_info ;;
   esac
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
@@ -87,6 +93,7 @@ check_cli() {
     detect_symmetry|asymmetrize|to_p1|set_space_group|subgroups|lower_to_subgroup|standardize|primitive_cell|reduce_structure|wyckoff_assignments|tolerance_ladder|diagnose|brillouin_zone|detect_layer_symmetry|detect_magnetic_symmetry|change_setting|band_path|molecular_point_group) command=symmetry ;;
     scene_summary|mesh_stl) command=mesh ;;
     pxrd) command=pxrd ;;
+    build_graphene|build_nanotube) command=build ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
