@@ -42,4 +42,5 @@ pub mod prelude {
         Element, Error, Lattice, Structure, cell_volume, element_info, lattice_info,
         lattice_minimum_image, structure_info, version,
     };
+    pub use crate::symmetry::{SymmetryDataset, SymmetryOptions, detect_symmetry};
 }
