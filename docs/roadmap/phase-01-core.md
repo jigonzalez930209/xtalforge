@@ -188,27 +188,34 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.6 — P1 expansion
 
-- [ ] 1.6.1 `P1Cell` with provenance
+- [x] 1.6.1 `P1Cell` with provenance
   Port `core/p1.py` (443 lines). For each P1 atom keep `site_idx`, `op_idx`
   and the lattice shift `tau` such that
   `frac[k] = ops[op_idx[k]].apply(sites[site_idx[k]].frac) + tau[k]`.
   This provenance is what lets later code map a drawn atom back to its
   asymmetric site and propagate an edit to the whole orbit.
-- [ ] 1.6.2 Deduplication and special positions
+  Note: `P1Cell`/`P1Atom` in `xtalforge-core::p1`; `Structure::p1()` uses the
+  default 0.05 A tolerance.
+- [x] 1.6.2 Deduplication and special positions
   Merge images that coincide within a tolerance (periodic distance); the
   number of distinct images equals the Wyckoff multiplicity. Warn when a
   file's own symmetry repeats its atoms (Crystal-Builder
   `_warn_if_coincident` in `io/registry.py`): this signals a file listing
   the whole cell under a non-P1 group.
-- [ ] 1.6.3 Symmetry operations type
+- [x] 1.6.3 Symmetry operations type
   `SymOp` with exact rational rotation (integers) and translation (rationals
   with denominator 1, 2, 3, 4, 6, 12), parsing and printing of `-x+1/2,y,z`
   forms, composition, inverse, application to fractional points and to Uij
   tensors.
-- [ ] 1.6.4 Tests
+  Note: `SymOp` in `xtalforge-core::symop`; parse/triplet, apply, compose and
+  inverse are tested; Uij application follows with the anisotropic tools.
+- [x] 1.6.4 Tests
   Golden comparison on the corpus: P1 atom counts, positions up to lattice
   translation and permutation, provenance consistency (re-applying the
   recorded operation reproduces the position).
+  Note: `crates/xtalforge-core/tests/p1.rs` covers the group arithmetic,
+  provenance, special positions and the identity case; the corpus comparison
+  runs with the CIF reader in Task 1.15.
 
 ## Task 1.7 — Supercells and cell transformations
 
