@@ -61,6 +61,7 @@ export default defineConfig({
             { text: 'P1 expansion', link: '/api/p1' },
             { text: 'Supercells', link: '/api/supercell' },
             { text: 'Slabs', link: '/api/slab' },
+            { text: 'Finite cells and transforms', link: '/api/transforms' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
