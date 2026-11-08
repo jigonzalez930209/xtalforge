@@ -28,8 +28,9 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 
 `quotient_graph(&CgdEntry, tolerance)` reduces a CGD net to nodes, edges and
 lattice shifts; `NetInvariants` reports node/edge counts, cycle rank and
-coordination, and `shift_map` groups shifts by node pair. RCSR identification
-and canonical keys are later Task 5.6 work.
+coordination, and `shift_map` groups shifts by node pair. `NetIndex` indexes a CGD file and searches by invariants; `components` finds
+connected components (interpenetration candidates). RCSR identification and
+canonical keys are later Task 5.6 work.
 
 ## Isosurfaces
 
