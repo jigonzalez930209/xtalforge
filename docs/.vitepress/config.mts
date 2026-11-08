@@ -57,6 +57,7 @@ export default defineConfig({
             { text: 'Lattice', link: '/api/lattice' },
             { text: 'Limits', link: '/api/limits' },
             { text: 'Structures and sites', link: '/api/structure' },
+            { text: 'Structure schema', link: '/api/schema' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
