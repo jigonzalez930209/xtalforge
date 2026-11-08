@@ -7,11 +7,14 @@
 pub mod bonding;
 pub mod cell;
 pub mod data;
+pub mod describe;
 pub mod elements;
 pub mod lattice;
 pub mod limits;
+pub mod measure;
 pub mod neighbors;
 pub mod p1;
+pub mod scalars;
 pub mod site;
 pub mod slab;
 pub mod structure;
@@ -21,11 +24,14 @@ pub mod transforms;
 
 pub use bonding::{Bond, BondGraph, BondRules, perceive_bonds};
 pub use cell::cell_volume;
+pub use describe::describe_atom;
 pub use elements::{Element, Isotope, element_info};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
 pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
+pub use measure::{angle, centroid, distance, interplanar_angle, torsion};
 pub use neighbors::{Neighbor, neighbors, neighbors_of};
 pub use p1::{P1Atom, P1Cell};
+pub use scalars::{atom_charges, atom_masses, bond_lengths, coordination_numbers};
 pub use site::Site;
 pub use slab::{Slab, make_slab, plane_angle, surface_basis};
 pub use structure::{
