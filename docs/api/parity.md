@@ -14,6 +14,7 @@ compares this table with the symbols each surface actually exports.
 | `lattice_minimum_image` | 1 | done | n/a | done | done | Rust, Python and WASM; the CLI reports geometry through `cell` |
 | `limits_bounds` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
 | `limits_check` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
+| `structure_info` | 1 | done | done | done | done | Structure summary (Task 1.4.5); JSON bridge until CIF lands |
 
 ## Planned exceptions
 
