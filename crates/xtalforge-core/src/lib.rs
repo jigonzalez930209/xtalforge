@@ -91,6 +91,9 @@ pub enum Error {
     /// A size limit would be exceeded; the verdict explains what would fit.
     #[error("{0}")]
     LimitExceeded(crate::limits::Verdict),
+    /// A symmetry search or space-group lookup failed.
+    #[error("symmetry: {0}")]
+    Symmetry(String),
 }
 
 impl Error {
@@ -106,6 +109,7 @@ impl Error {
             Self::DataDigest { .. } => "data_digest",
             Self::DataJson { .. } => "data_json",
             Self::LimitExceeded(_) => "limit_exceeded",
+            Self::Symmetry(_) => "symmetry",
         }
     }
 
