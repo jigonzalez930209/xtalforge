@@ -65,7 +65,8 @@ and a minimum separation, returning `Peak { two_theta, intensity, fwhm }`.
 `quotient_graph(&CgdEntry, tolerance)` reduces a CGD net to nodes, edges and
 lattice shifts; `NetInvariants` reports node/edge counts, cycle rank and
 coordination, and `shift_map` groups shifts by node pair. `NetIndex` indexes a CGD file and searches by invariants; `components` finds
-connected components (interpenetration candidates). RCSR identification and
+connected components (interpenetration candidates) and `interpenetrate` duplicates
+a net at a shift. RCSR identification and
 canonical keys are later Task 5.6 work.
 
 ## Isosurfaces
