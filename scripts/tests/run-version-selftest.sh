@@ -19,6 +19,8 @@ xtalforge = { version = "=0.0.0", path = "crates/xtalforge" }
 xtalforge-core = { version = "=0.0.0", path = "crates/xtalforge-core" }
 xtalforge-io = { version = "=0.0.0", path = "crates/xtalforge-io" }
 xtalforge-symmetry = { version = "=0.0.0", path = "crates/xtalforge-symmetry" }
+xtalforge-ff = { version = "=0.0.0", path = "crates/xtalforge-ff" }
+xtalforge-mof = { version = "=0.0.0", path = "crates/xtalforge-mof" }
 EOF
 
 cat > "$tmp/docs/package.json" <<'EOF'
@@ -36,6 +38,10 @@ cat > "$tmp/docs/package-lock.json" <<'EOF'
   "packages": {
     "": {
       "name": "xtalforge-docs",
+      "version": "0.0.0"
+    },
+    "../crates/xtalforge-wasm/pkg": {
+      "name": "xtalforge-wasm",
       "version": "0.0.0"
     }
   }
@@ -71,6 +77,8 @@ if "$SYNC" "$tmp" > /dev/null; then pass "write mode runs"; else fail "write mod
 
 grep -q 'version = "=1.2.3"' "$tmp/Cargo.toml" && pass "internal pins updated" \
   || fail "internal pins updated"
+grep -q 'xtalforge-ff = { version = "=1.2.3"' "$tmp/Cargo.toml" && pass "all internal pins updated" \
+  || fail "all internal pins updated"
 grep -q '"version": "1.2.3"' "$tmp/docs/package.json" && pass "docs package updated" \
   || fail "docs package updated"
 grep -q '"version": "1.2.3"' "$tmp/crates/xtalforge-wasm/pkg/package.json" \
