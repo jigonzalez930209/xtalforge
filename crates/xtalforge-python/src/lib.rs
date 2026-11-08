@@ -102,6 +102,32 @@ fn lattice_minimum_image<'py>(
     Ok(dict)
 }
 
+/// Soft and hard bounds for a profile and budget.
+#[pyfunction]
+fn limits_bounds(profile: &str, budget: &str) -> PyResult<(u64, Option<u64>)> {
+    xtalforge::core::limits_bounds(profile, budget).map_err(map_error)
+}
+
+/// Generic limit check for a profile, budget and estimate.
+#[pyfunction]
+fn limits_check<'py>(
+    py: Python<'py>,
+    profile: &str,
+    budget: &str,
+    estimate: u64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let verdict = xtalforge::core::limits_check(profile, budget, estimate).map_err(map_error)?;
+    let refused = verdict.refused();
+    let warned = verdict.warned();
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("level", verdict.level.name())?;
+    dict.set_item("estimate", verdict.estimate)?;
+    dict.set_item("sentence", &verdict.sentence)?;
+    dict.set_item("refused", refused)?;
+    dict.set_item("warned", warned)?;
+    Ok(dict)
+}
+
 /// Reference data for an element by symbol or atomic number.
 #[pyfunction]
 fn element_info<'py>(
@@ -141,5 +167,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(element_info, module)?)?;
     module.add_function(wrap_pyfunction!(lattice_info, module)?)?;
     module.add_function(wrap_pyfunction!(lattice_minimum_image, module)?)?;
+    module.add_function(wrap_pyfunction!(limits_bounds, module)?)?;
+    module.add_function(wrap_pyfunction!(limits_check, module)?)?;
     Ok(())
 }
