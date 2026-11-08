@@ -21,6 +21,8 @@ mod phase1;
 #[cfg(target_arch = "wasm32")]
 mod phase3;
 #[cfg(target_arch = "wasm32")]
+mod phase6_export;
+#[cfg(target_arch = "wasm32")]
 mod powder_export;
 #[cfg(target_arch = "wasm32")]
 mod symmetry;
@@ -49,6 +51,10 @@ pub use phase1::{
 pub use phase3::{
     WasmDocument, param_schema, project_info, project_pack, workspace_archive,
     workspace_read_archive,
+};
+#[cfg(target_arch = "wasm32")]
+pub use phase6_export::{
+    build_c20_info, polymer_info, ribbon_info, schwarzite_info, twist_info, ztc_info,
 };
 #[cfg(target_arch = "wasm32")]
 pub use powder_export::{
