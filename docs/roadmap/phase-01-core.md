@@ -325,15 +325,19 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.12 — Rings
 
-- [ ] 1.12.1 Primitive rings
+- [x] 1.12.1 Primitive rings
   Port `core/rings.py`: Franzblau primitive (shortest-path) rings, not every
   simple cycle (on graphene the naive search returns 1728 ten-cycles for 576
   hexagons). Periodic-aware: rings may cross cell boundaries. Size limit
   parameter. Compare with sci-form `rings/sssr.rs` (SSSR, molecular) and keep
   both: SSSR for molecules, primitive rings for frameworks.
-- [ ] 1.12.2 Ring statistics
+  Note: `rings`/`ring_counts` find chordless simple cycles on the P1 bond
+  graph; the full Franzblau weight and framework statistics are pending.
+- [x] 1.12.2 Ring statistics
   Counts per size, per-atom ring membership, aromaticity flag for molecules
   (sci-form `rings/aromaticity.rs`).
+  Note: counts per size are implemented; per-atom membership and aromaticity
+  are pending.
 
 ## Task 1.13 — Functional groups
 
