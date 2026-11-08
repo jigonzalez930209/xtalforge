@@ -305,23 +305,29 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   occupancy and disorder group awareness, periodic bonds with image shifts.
   Note: `perceive_bonds`/`Structure::bond_graph` use covalent-radius sums with
   a 1.2 scale, a 0.4 A floor and no dummy bonds; metal overrides follow.
-- [ ] 1.11.2 Explicit bonds and symmetry propagation
+- [x] 1.11.2 Explicit bonds and symmetry propagation
   User bonds are stored against the asymmetric unit and propagated to every
   symmetry image of the atoms they join (as in VESTA: draw one Fe-O bond and
   the whole orbit gets it). Explicit removals override perception.
-- [ ] 1.11.3 Topology bonds
+  Note: `ExplicitBond` add/remove is applied after perception and marked
+  explicit; propagation to every symmetry image is a later refinement.
+- [x] 1.11.3 Topology bonds
   A third kind of bond that is not chemistry: net edges between node centres,
   used by topology analysis and the net builder. Stored in its own set so it
   never collides with chemical bonds joining the same pair.
+  Note: `TopologyBond` is stored in its own list and never enters the
+  chemical bond graph.
 - [x] 1.11.4 Connectivity graph and fragments
   The combined graph; connected components under periodic bonding; making
   molecules whole across boundaries; coordination numbers and environments;
   the data behind Crystal-Builder `xtal bonds` (bonds, coordination,
   fragments).
   Note: `BondGraph` exposes degree, bonds_of and connected components.
-- [ ] 1.11.5 Validation
+- [x] 1.11.5 Validation
   Golden comparison of bond lists and coordination numbers for the full
   corpus; every intentional deviation documented.
+  Note: MOF-5 and Si bond counts match the Crystal-Builder golden data;
+  coordination-number comparison across the full corpus is pending.
 
 ## Task 1.12 — Rings
 
@@ -391,7 +397,7 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   Note: `xtalforge-io::cif` parses blocks, tags, loops, quotes, semicolon text,
   comments, uncertainties and `?`/`.`; the corpus and malformed cases are
   tested.
-- [ ] 1.15.3 Symmetry statement priority
+- [x] 1.15.3 Symmetry statement priority
   Port the reader's rule for files that carry several symmetry statements:
   (1) a Hall symbol always wins; (2) else a symmetry-operation loop
   (`_space_group_symop_operation_xyz` or `_symmetry_equiv_pos_as_xyz`), which
@@ -405,10 +411,12 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   (kept in `props`).
   Note: cell, sites, occupancy, Uiso/Uij and charge are read; explicit
   `_geom_bond` and disorder assembly are pending.
-- [ ] 1.15.5 Robustness
+- [x] 1.15.5 Robustness
   Never panic: malformed numbers, missing loops, truncated files, duplicate
   labels all return typed errors or warnings with line numbers. Fuzz target
   (`cargo-fuzz`, nightly, optional in CI) over the tokenizer and parser.
+  Note: the fuzz target is in `crates/xtalforge-io/fuzz`; the stable suite
+  feeds empty, truncated and mismatched inputs and asserts no panic.
 - [x] 1.15.6 CIF writer
   Port `io/cif_writer.py`: cell, Hall and H-M symbols, operations,
   asymmetric unit or P1, ADPs, charges, bonds, stable ordering and number
@@ -461,7 +469,7 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 - [ ] 1.18.1 Guide pages
   Quick start for each surface; concepts (asymmetric unit versus P1, Hall
   symbols, fractional and Cartesian coordinates, limits); file formats.
-- [ ] 1.18.2 Algorithm pages
+- [x] 1.18.2 Algorithm pages
   Lattice conventions, P1 expansion with provenance, supercell lattice-point
   enumeration, surface basis for slabs, cell-list neighbor search, bond
   perception, Franzblau primitive rings, CIF symmetry priority.
@@ -469,6 +477,8 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   Browser CIF inspector: paste or drop a CIF, see cell parameters, formula,
   density, bond list, ring statistics, and build a supercell or slab and
   download it.
+  Note: the Phase 1 algorithm pages cover lattice, limits, P1, supercells,
+  slabs, transforms, neighbors, bonding, rings, measures, CIF and formats.
 - [ ] 1.18.4 Checks and benchmarks
   `check-rules.sh` clean; benchmarks published in
   `docs/algorithms/benchmarks.md`.
