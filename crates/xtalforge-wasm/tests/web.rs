@@ -9,8 +9,9 @@
 )]
 
 use serde::Deserialize;
+use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
-use xtalforge_wasm::{cell_volume, version};
+use xtalforge_wasm::{cell_volume, element_info, version};
 
 #[derive(Debug, Deserialize)]
 struct Vectors {
@@ -27,6 +28,18 @@ struct Case {
     gamma: f64,
     expected: f64,
     tolerance: f64,
+}
+
+#[derive(Debug, Deserialize)]
+struct ElementVectors {
+    elements: Vec<ElementCase>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ElementCase {
+    input: String,
+    symbol: String,
+    z: u8,
 }
 
 #[wasm_bindgen_test]
@@ -51,4 +64,28 @@ fn cell_volume_shared_vectors() {
 #[wasm_bindgen_test]
 fn invalid_cell_returns_an_error() {
     assert!(cell_volume(0.0, 1.0, 1.0, 90.0, 90.0, 90.0).is_err());
+}
+
+fn property(value: &JsValue, name: &str) -> JsValue {
+    js_sys::Reflect::get(value, &JsValue::from_str(name)).expect("property must exist")
+}
+
+#[wasm_bindgen_test]
+fn element_info_shared_vectors() {
+    let vectors: ElementVectors =
+        serde_json::from_str(include_str!("../../../tests/vectors/elements.json"))
+            .expect("element vectors must be valid JSON");
+    for case in vectors.elements {
+        let value = element_info(&case.input).expect("valid element input");
+        assert_eq!(
+            property(&value, "symbol").as_string().as_deref(),
+            Some(case.symbol.as_str())
+        );
+        assert_eq!(property(&value, "z").as_f64(), Some(f64::from(case.z)));
+    }
+}
+
+#[wasm_bindgen_test]
+fn invalid_element_returns_an_error() {
+    assert!(element_info("Zz").is_err());
 }
