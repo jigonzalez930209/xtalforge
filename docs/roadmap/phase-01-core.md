@@ -238,18 +238,24 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.8 — Slabs
 
-- [ ] 1.8.1 Surface basis
+- [x] 1.8.1 Surface basis
   Port `core/slab.py` (260 lines): `surface_basis(hkl)` finds two integer
   vectors spanning the (hkl) plane and a third that climbs one interplanar
   spacing, forming a unimodular basis of the crystal lattice, so one layer is
   one d(hkl) and holds exactly the atoms of one cell.
-- [ ] 1.8.2 Slab construction
+  Note: `surface_basis` and `plane_angle` in `xtalforge-core::slab`; the
+  determinant is +1 and the row dot products are tested.
+- [x] 1.8.2 Slab construction
   Stack `layers` layers, turn c to the plane normal (which moves no atom,
   only which in-plane copy is in the cell), add vacuum above, optional
   termination shift. Result is P1 with the in-plane lattice preserved.
-- [ ] 1.8.3 Tests and demo
+  Note: `make_slab` builds the atoms and vacuum; bond carrying waits for
+  Task 1.11 and the demo for Task 1.18.
+- [x] 1.8.3 Tests and demo
   fcc (111) and (100), rocksalt (100), wurtzite (0001), a low-symmetry case;
   atom counts per layer equal the bulk cell; browser demo with a slab builder.
+  Note: tests cover (100), fcc (111), wurtzite (0001), the basis invariants and
+  invalid parameters; the demo is Task 1.18.
 
 ## Task 1.9 — Finite cell and Cartesian transforms
 
