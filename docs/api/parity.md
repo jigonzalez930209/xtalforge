@@ -44,6 +44,9 @@ compares this table with the symbols each surface actually exports.
 | `change_setting` | 2 | done | done | done | done | Setting change (Task 2.3.5); WASM `change_setting_info` |
 | `band_path` | 2 | done | done | done | done | Bravais/k-path (Task 2.10.2-2.10.4); WASM `kpath_info` |
 | `molecular_point_group` | 2 | done | done | done | done | Point groups (Task 2.8.3); WASM `pointgroup_info` |
+| `scene_summary` | 3 | done | done | done | done | View data (Task 3.14.4); CLI `mesh` |
+| `mesh_stl` | 3 | done | done | done | done | ASCII STL (Task 3.15.1); CLI `mesh` |
+| `pxrd` | 5 | done | done | done | done | Calculated PXRD (Task 5.1); Rust `calculate_pxrd`, WASM `pxrd_info` |
 
 ## Planned exceptions
 

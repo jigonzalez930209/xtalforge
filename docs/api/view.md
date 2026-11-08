@@ -23,6 +23,10 @@ background, colormap, hide_hydrogens }` with `sanitize`. `DrawStyle` is
 
 ## Scene
 
+`scene_summary` returns atom, bond and cell-edge counts plus the element
+list and radii for the CLI, Python and WASM. `mesh_stl` returns the full ASCII
+STL string.
+
 `SceneData { atoms, bonds, cell_edges, settings }`: atoms carry element,
 Cartesian position, display radius, colour, index and a hidden flag; bonds
 carry endpoints, radius, colour and order; cell edges are 12 Cartesian

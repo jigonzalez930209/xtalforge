@@ -30,7 +30,8 @@ occupancy, ADPs, charges, bonds, labels, frames), and `losses(from, to)` names
 the data a conversion drops.
 
 Built-in formats: CIF, POSCAR, XYZ, pymatgen JSON (`.json`), CSSR (`.cssr`),
-DFTB+ GEN (`.gen`). LAMMPS data, SHELX and PDB are added with Task 3.3.
+DFTB+ GEN (`.gen`), LAMMPS data (`.data`, `.lmp`), SHELX (`.res`, `.ins`) and
+write-only PDB (`.pdb`).
 
 ## pymatgen JSON
 
@@ -44,6 +45,20 @@ partial occupancy. No pymatgen import is needed.
 whole cell. `read_cssr` accepts fractional or Cartesian coordinates; `read_gen`
 accepts `C` (cluster, padded box), `S` (Cartesian supercell) and `F`
 (fractional supercell).
+
+## LAMMPS, SHELX and PDB
+
+`read_lammps`/`write_lammps` cover `atom_style full` with the triclinic box,
+masses, charges and explicit bonds. `read_shelx`/`write_shelx` cover CELL,
+LATT, SYMM, SFAC, FVAR, atom records and PART (as the disorder group);
+free-variable expressions are resolved. `write_pdb` writes HETATM/CONECT for
+Blender and is write-only.
+
+## CGD nets
+
+`read_cgd`/`write_cgd` cover the Systre/RCSR `CRYSTAL ... END` blocks with
+nodes and edge endpoint pairs. Broken blocks are collected in
+`CgdFile::problems` rather than aborting the whole file.
 
 ## Atomic writes
 

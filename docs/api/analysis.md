@@ -1,0 +1,43 @@
+# Powder patterns and porosity
+
+`xtalforge-analysis` starts with calculated PXRD (Task 5.1) and the periodic
+surface-distance grid with porosity numbers (Tasks 5.2/5.3).
+
+## PXRD
+
+The Rust entry point is `calculate_pxrd`; Python exposes `pxrd`, WASM
+`pxrd_info` and the CLI `xtalforge pxrd`.
+
+```rust
+use xtalforge_analysis::{PxrdOptions, Radiation, calculate_pxrd};
+
+let pattern = calculate_pxrd(&structure, &PxrdOptions {
+    radiation: Radiation::CuKa,
+    ..PxrdOptions::default()
+})?;
+```
+
+`Radiation` carries the wavelengths (CuKa, CuKa1, MoKa, CoKa, FeKa, CrKa,
+AgKa). `calculate_pxrd` enumerates hkl reflections in the requested 2-theta
+range, computes `d = 1/|hkl @ reciprocal|`, structure factors from the P1
+atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
+`Pattern { points, reflections }` carries the sampled curve and the peak list;
+`Reflection { hkl, d, two_theta, multiplicity, intensity }`.
+
+## Isosurfaces
+
+`isosurface(&Grid3, value)` extracts a `TriangleMesh { vertices, triangles }`
+with marching tetrahedra (six tetrahedra per cell, no ambiguous marching-cube
+cases). It rejects grids with fewer than two samples along an axis.
+
+## Distance grid
+
+`distance_grid(structure, radii, spacing)` returns a `DistanceGrid` wrapping
+`xtalforge_io::grid::Grid3`. The value is the distance to the nearest atom
+surface (negative inside an atom), using minimum images. `contact_surface`,
+`accessible_volume(probe)`, `pore_volume`, `surface_area`,
+`largest_included_diameter` and `pore_diameter(bin_width)` are the porosity
+numbers. `default_radii` uses the element van der Waals radii.
+
+All operations return typed errors for non-positive spacing, missing radii or
+invalid probe values.
