@@ -7,14 +7,31 @@
 //! in eV, forces in eV/Angstrom and stress in GPa.
 
 pub mod calculator;
+pub mod charges;
+pub mod optimize;
 pub mod registry;
+pub mod scan;
 pub mod uff;
+
+mod math;
+mod structure_util;
 
 pub use calculator::{
     Availability, Calculator, CalculatorCapabilities, CalculatorInfo, CalculatorOptions,
     CalculatorRegistry, RunRecord,
 };
+pub use charges::{
+    ChargeOptions, Charges, EwaldOptions, EwaldResult, apply_charges, eqeq_charges, ewald_energy,
+    ewald_energy_forces, qeq_charges,
+};
+pub use optimize::{
+    EosFit, EosForm, Minimizer, OptimizationResult, OptimizeOptions, RelaxMode,
+    apply_optimized_geometry, birch_murnaghan, fire, fit_eos, lbfgs, minimize, murnaghan,
+};
 pub use registry::builtin_registry;
+pub use scan::{
+    Constraint, ScanAxis, ScanCoordinate, ScanOptions, ScanPoint, ScanResult, relaxed_scan,
+};
 pub use uff::calculator::UffCalculator;
 pub use uff::model::UffModel;
 pub use uff::params::{ParameterSet, UffParams};
