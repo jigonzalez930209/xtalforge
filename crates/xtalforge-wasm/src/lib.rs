@@ -15,9 +15,13 @@ mod common;
 #[cfg(target_arch = "wasm32")]
 mod forcefield;
 #[cfg(target_arch = "wasm32")]
+mod mof_export;
+#[cfg(target_arch = "wasm32")]
 mod phase1;
 #[cfg(target_arch = "wasm32")]
 mod phase3;
+#[cfg(target_arch = "wasm32")]
+mod powder_export;
 #[cfg(target_arch = "wasm32")]
 mod symmetry;
 #[cfg(target_arch = "wasm32")]
@@ -34,6 +38,8 @@ pub use forcefield::{
     ff_types_info, ff_vibrations_info,
 };
 #[cfg(target_arch = "wasm32")]
+pub use mof_export::{build_mof_info, mof_blocks_info, mof_topologies_info};
+#[cfg(target_arch = "wasm32")]
 pub use phase1::{
     bonds, build_c60_info, build_graphene_info, build_nanotube_info, convert_structure, groups,
     mesh_stl, neighbors, pxrd_info, read_cif, read_structure, rings, scene_summary, slab_info,
@@ -43,6 +49,10 @@ pub use phase1::{
 pub use phase3::{
     WasmDocument, param_schema, project_info, project_pack, workspace_archive,
     workspace_read_archive,
+};
+#[cfg(target_arch = "wasm32")]
+pub use powder_export::{
+    powder_automatic_info, powder_cells_info, powder_refine_info, rietx_inventory_info,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{
