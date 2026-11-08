@@ -39,6 +39,30 @@ def test_keyword_arguments() -> None:
     assert abs(got - 1.0) < 1e-12
 
 
+def test_element_info_shared_vectors() -> None:
+    vectors = json.loads(
+        (Path(__file__).parents[3] / "tests" / "vectors" / "elements.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for case in vectors["elements"]:
+        info = xtalforge.element_info(case["input"])
+        assert info["symbol"] == case["symbol"]
+        assert info["z"] == case["z"]
+        assert abs(info["mass"] - case["mass"]) <= case["tolerance"]
+
+
+def test_element_info_accepts_an_atomic_number() -> None:
+    info = xtalforge.element_info(26)
+    assert info["symbol"] == "Fe"
+
+
+def test_invalid_element_raises_input_error() -> None:
+    with pytest.raises(xtalforge.InputError) as caught:
+        xtalforge.element_info("Zz")
+    assert caught.value.args[0] == "invalid_input"
+
+
 def test_invalid_cell_raises_input_error() -> None:
     with pytest.raises(xtalforge.InputError) as caught:
         xtalforge.cell_volume(0.0, 1.0, 1.0, 90.0, 90.0, 90.0)
