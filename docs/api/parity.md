@@ -50,6 +50,11 @@ compares this table with the symbols each surface actually exports.
 | `param_schema` | 3 | done | done | done | done | Parameter presets (Task 3.8.2); Rust `preset`, CLI `params` |
 | `project_pack` | 3 | done | done | done | done | Project archives (Task 3.7); Rust `write_project`, CLI `project` |
 | `workspace_archive` | 3 | done | n/a | done | done | In-memory workspace (Task 3.12.3); the CLI reads `run.json` directly |
+| `prepare` | 4 | done | done | done | done | Preparation pipeline (Task 4.7); Python `ff_prepare`, WASM `ff_prepare_info` |
+| `add_hydrogens` | 4 | done | done | done | done | Hydrogen placement (Task 4.6) |
+| `porosity` | 5 | done | done | done | done | Distance grid (Task 5.2/5.3); Rust `distance_grid` |
+| `net_invariants` | 5 | done | done | done | done | Quotient graphs (Task 5.6/5.7); Rust `quotient_graph` |
+| `zeo_parse` | 5 | done | done | done | done | Zeo++ output parser (Task 5.5); Rust `parse_zeo_channels` |
 | `build_graphene` | 6 | done | done | done | done | Carbon builders (Task 6.5); Rust `graphene`, WASM `build_graphene_info` |
 | `build_nanotube` | 6 | done | done | done | done | Carbon builders (Task 6.6); Rust `nanotube`, WASM `build_nanotube_info` |
 | `build_c60` | 6 | done | n/a | done | done | C60 (Task 6.7); no CLI command yet |

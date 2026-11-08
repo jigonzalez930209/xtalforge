@@ -93,3 +93,19 @@ numbers. `default_radii` uses the element van der Waals radii.
 
 All operations return typed errors for non-positive spacing, missing radii or
 invalid probe values.
+
+## Zeo++, RCSR and overlays
+
+`run_zeo(structure, &ZeoOptions)` probes `zeo++` and parses its `Channels`
+output (`parse_zeo_channels`, `parse_zeo_volume`); without the binary it
+returns a typed error. `write_zeo_inputs` writes the CSSR and the network
+arguments.
+
+`RcsrIndex::from_subset()` holds a curated 17-net subset (the full RCSR
+database is an external bundle); `identify` matches by node/edge counts, cycle
+rank and coordination and `validate` checks the subset. `merge_nets` joins two
+quotient graphs and `overlay_net` turns one into an `Overlay`.
+
+`xtalforge analysis {porosity,nets,zeo,overlay}`, Python `porosity`,
+`net_invariants`, `zeo_parse` and the WASM equivalents expose the same
+operations.

@@ -61,3 +61,24 @@ the q-mesh and DOS are pending. `thermochemistry(&modes, &ThermoOptions)` and
 are excluded and reported. `quasi_harmonic_free_energy(&points, options)`
 minimizes `F(V, T) = E(V) + F_vib(V, T)` by a parabola through the best sampled
 volume.
+
+## Preparation pipeline
+
+`prepare(&calculator, &structure, &PrepareOptions)` runs the optional stages in
+order: FIRE relaxation, QEq charges, periodic Ewald and Gamma frequencies.
+`PrepareReport` records every step, including skipped ones, plus energy, total
+charge, Ewald energy and frequencies.
+
+## External engines
+
+`probe(EngineKind)` checks a binary by running `--version`; on WASM it reports
+`Missing`. `write_dftb_hsd`, `write_xtb_input` and `write_orca_input` prepare
+inputs; `parse_dftb_output` and `parse_xtb_output` read energies, forces and
+stress. ORCA is input-only and `orca_catalogue` lists the bundled methods.
+
+## Quantum adapter
+
+`quantum::adapter(method)` is the reserved in-process sci-form path. Without
+the `sci-form` feature it returns a typed error that names the feature;
+`capabilities` records periodic/forces/stress so a future adapter cannot
+silently overclaim.

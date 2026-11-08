@@ -39,5 +39,9 @@ every atom keeps the requested periodic clearance from the host.
 The same builders are `build_graphene`/`build_nanotube`/`build_c60` in Python
 and `build_graphene_info`/`build_nanotube_info`/`build_c60_info` in WASM.
 
+`add_hydrogens(structure, &HydrogenOptions)` fills the missing valences from
+the perceived bond graph with deterministic geometry (C 4, N 3, O 2, B/P/S 3
+or 2). The CLI exposes it as `xtalforge hydrogens`.
+
 The remaining builders (SMILES molecules, fragments, fullerenes, amorphous
 carbon, polymers) are later Phase 6 tasks.
