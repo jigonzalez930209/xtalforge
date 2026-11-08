@@ -30,6 +30,12 @@ check_rust() {
     build_nanotube) name=nanotube ;;
     build_c60) name=fullerene ;;
     build_mof) name=build_mof ;;
+    build_c20) name=face_spiral ;;
+    twist) name=commensurate_twist ;;
+    ribbon) name=nanoribbon ;;
+    build_ztc) name=build_ztc ;;
+    build_schwarzite) name=build_schwarzite ;;
+    build_polymer) name=build_polymer ;;
     run_automatic) name=run_automatic ;;
     refine_phase) name=refine_phase ;;
     param_schema) name=preset ;;
@@ -83,6 +89,12 @@ check_wasm() {
     build_nanotube) name=build_nanotube_info ;;
     build_c60) name=build_c60_info ;;
     build_mof) name=build_mof_info ;;
+    build_c20) name=build_c20_info ;;
+    twist) name=twist_info ;;
+    ribbon) name=ribbon_info ;;
+    build_ztc) name=ztc_info ;;
+    build_schwarzite) name=schwarzite_info ;;
+    build_polymer) name=polymer_info ;;
     run_automatic) name=powder_automatic_info ;;
     refine_phase) name=powder_refine_info ;;
     param_schema) name=param_schema ;;
@@ -121,7 +133,7 @@ check_cli() {
     detect_symmetry|asymmetrize|to_p1|set_space_group|subgroups|lower_to_subgroup|standardize|primitive_cell|reduce_structure|wyckoff_assignments|tolerance_ladder|diagnose|brillouin_zone|detect_layer_symmetry|detect_magnetic_symmetry|change_setting|band_path|molecular_point_group) command=symmetry ;;
     scene_summary|mesh_stl) command=mesh ;;
     pxrd) command=pxrd ;;
-    build_graphene|build_nanotube) command=build ;;
+    build_graphene|build_nanotube|build_c20|build_c60|twist|ribbon|build_ztc|build_schwarzite|build_polymer) command=build ;;
     build_mof) command=mof ;;
     run_automatic|refine_phase) command=powder ;;
     param_schema) command=params ;;
