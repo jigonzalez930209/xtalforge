@@ -76,7 +76,7 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.4 — Least-squares engine
 
-- [ ] 7.4.1 Optimizer
+- [x] 7.4.1 Optimizer
   Levenberg-Marquardt with bounds, parameter constraints (equalities, linear
   relations), analytic derivatives where cheap and finite differences
   otherwise, convergence and divergence handling, covariance and esds.
