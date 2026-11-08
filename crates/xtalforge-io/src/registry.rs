@@ -1,0 +1,353 @@
+//! Format registry, capabilities and loss warnings (Task 3.1).
+//!
+//! One list drives the CLI, the bindings, conversion and any future file
+//! dialog. A format declares its name, extensions, optional reader/writer and
+//! what it preserves, so a conversion can report the data it loses.
+
+use xtalforge_core::{Error, Structure};
+
+use crate::gencodec::{read_gen, write_gen};
+use crate::{
+    read_cif, read_cssr, read_lammps, read_pmg_json, read_poscar, read_shelx, read_xyz, write_cif,
+    write_cssr, write_lammps, write_pdb, write_pmg_json, write_poscar, write_shelx, write_xyz,
+};
+
+/// What a format preserves.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Capabilities {
+    /// Cell parameters.
+    pub cell: bool,
+    /// Space-group identity and operations.
+    pub symmetry: bool,
+    /// Partial occupancies.
+    pub occupancy: bool,
+    /// Anisotropic displacement parameters.
+    pub anisotropic_adp: bool,
+    /// Formal charges.
+    pub charges: bool,
+    /// Explicit bonds.
+    pub bonds: bool,
+    /// Site labels.
+    pub labels: bool,
+    /// Multiple frames.
+    pub frames: bool,
+}
+
+/// A structure reader.
+pub type Reader = fn(&str) -> Result<Structure, Error>;
+/// A structure writer.
+pub type Writer = fn(&Structure) -> Result<String, Error>;
+
+/// One registered format.
+#[derive(Clone, Copy)]
+pub struct FormatSpec {
+    /// Stable format name.
+    pub name: &'static str,
+    /// Lower-case extensions, with the leading dot.
+    pub extensions: &'static [&'static str],
+    /// Reader, when the format can be read.
+    pub read: Option<Reader>,
+    /// Writer, when the format can be written.
+    pub write: Option<Writer>,
+    /// Preserved features.
+    pub capabilities: Capabilities,
+}
+
+const EMPTY: Capabilities = Capabilities {
+    cell: false,
+    symmetry: false,
+    occupancy: false,
+    anisotropic_adp: false,
+    charges: false,
+    bonds: false,
+    labels: false,
+    frames: false,
+};
+
+/// The built-in registry.
+pub const FORMATS: &[FormatSpec] = &[
+    FormatSpec {
+        name: "cif",
+        extensions: &[".cif", ".mcif"],
+        read: Some(read_cif),
+        write: Some(write_cif),
+        capabilities: Capabilities {
+            cell: true,
+            symmetry: true,
+            occupancy: true,
+            anisotropic_adp: true,
+            charges: true,
+            bonds: false,
+            labels: true,
+            frames: false,
+        },
+    },
+    FormatSpec {
+        name: "poscar",
+        extensions: &[".poscar", ".vasp", ".contcar"],
+        read: Some(read_poscar),
+        write: Some(write_poscar),
+        capabilities: Capabilities {
+            cell: true,
+            symmetry: false,
+            occupancy: false,
+            anisotropic_adp: false,
+            charges: false,
+            bonds: false,
+            labels: true,
+            frames: false,
+        },
+    },
+    FormatSpec {
+        name: "pmg-json",
+        extensions: &[".json"],
+        read: Some(read_pmg_json),
+        write: Some(write_pmg_json),
+        capabilities: Capabilities {
+            cell: true,
+            occupancy: true,
+            labels: true,
+            ..EMPTY
+        },
+    },
+    FormatSpec {
+        name: "cssr",
+        extensions: &[".cssr"],
+        read: Some(read_cssr),
+        write: Some(write_cssr),
+        capabilities: Capabilities {
+            cell: true,
+            ..EMPTY
+        },
+    },
+    FormatSpec {
+        name: "gen",
+        extensions: &[".gen"],
+        read: Some(read_gen),
+        write: Some(write_gen),
+        capabilities: Capabilities {
+            cell: true,
+            labels: true,
+            ..EMPTY
+        },
+    },
+    FormatSpec {
+        name: "lammps-data",
+        extensions: &[".data", ".lmp"],
+        read: Some(read_lammps),
+        write: Some(write_lammps),
+        capabilities: Capabilities {
+            cell: true,
+            charges: true,
+            bonds: true,
+            ..EMPTY
+        },
+    },
+    FormatSpec {
+        name: "shelx",
+        extensions: &[".res", ".ins"],
+        read: Some(read_shelx),
+        write: Some(write_shelx),
+        capabilities: Capabilities {
+            cell: true,
+            occupancy: true,
+            labels: true,
+            ..EMPTY
+        },
+    },
+    FormatSpec {
+        name: "pdb",
+        extensions: &[".pdb"],
+        read: None,
+        write: Some(write_pdb),
+        capabilities: Capabilities {
+            bonds: true,
+            labels: true,
+            ..EMPTY
+        },
+    },
+    FormatSpec {
+        name: "xyz",
+        extensions: &[".xyz", ".extxyz"],
+        read: Some(read_xyz),
+        write: Some(write_xyz),
+        capabilities: Capabilities {
+            cell: true,
+            symmetry: false,
+            occupancy: false,
+            anisotropic_adp: false,
+            charges: false,
+            bonds: false,
+            labels: false,
+            frames: false,
+        },
+    },
+];
+
+/// Finds a format by name or extension (case-insensitive).
+#[must_use]
+pub fn find(name_or_extension: &str) -> Option<&'static FormatSpec> {
+    let wanted = name_or_extension.trim().to_ascii_lowercase();
+    let wanted = if wanted.starts_with('.') {
+        wanted
+    } else {
+        format!(".{wanted}")
+    };
+    FORMATS.iter().find(|format| {
+        format.name == wanted.trim_start_matches('.')
+            || format
+                .extensions
+                .iter()
+                .any(|extension| *extension == wanted)
+    })
+}
+
+/// Reads text with an explicit format name or extension.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for an unknown format or a reader failure.
+pub fn read_with(text: &str, hint: &str) -> Result<Structure, Error> {
+    let format = find(hint)
+        .ok_or_else(|| Error::InvalidInput(format!("unknown structure format: {hint}")))?;
+    let reader = format
+        .read
+        .ok_or_else(|| Error::InvalidInput(format!("format {} is write-only", format.name)))?;
+    reader(text)
+}
+
+/// Writes a structure with an explicit format name or extension.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for an unknown format or a writer failure.
+pub fn write_with(structure: &Structure, hint: &str) -> Result<String, Error> {
+    let format = find(hint)
+        .ok_or_else(|| Error::InvalidInput(format!("unknown structure format: {hint}")))?;
+    let writer = format
+        .write
+        .ok_or_else(|| Error::InvalidInput(format!("format {} is read-only", format.name)))?;
+    writer(structure)
+}
+
+/// Detects the format from the content.
+#[must_use]
+pub fn sniff(text: &str) -> Option<&'static FormatSpec> {
+    let trimmed = text.trim_start_matches('\u{feff}').trim_start();
+    if trimmed.starts_with("data_")
+        || text.contains("_atom_site_")
+        || text.contains("_cell_length_")
+    {
+        return find("cif");
+    }
+    if trimmed.starts_with('{') && text.contains("@module") {
+        return find("pmg-json");
+    }
+    let mut lines = trimmed.lines().filter(|line| !line.trim().is_empty());
+    let first = lines.next().unwrap_or("").trim();
+    let second = lines.next().unwrap_or("").trim();
+    if first.parse::<usize>().is_ok() && second.split_whitespace().count() >= 1 {
+        return find("xyz");
+    }
+    None
+}
+
+/// Names of the features a conversion loses.
+#[must_use]
+pub fn losses(from: Capabilities, to: Capabilities) -> Vec<&'static str> {
+    let mut lost = Vec::new();
+    for (kept, name) in [
+        (from.symmetry && !to.symmetry, "space-group symmetry"),
+        (from.occupancy && !to.occupancy, "partial occupancy"),
+        (
+            from.anisotropic_adp && !to.anisotropic_adp,
+            "anisotropic ADPs",
+        ),
+        (from.charges && !to.charges, "formal charges"),
+        (from.bonds && !to.bonds, "explicit bonds"),
+        (from.labels && !to.labels, "site labels"),
+        (from.frames && !to.frames, "multiple frames"),
+    ] {
+        if kept {
+            lost.push(name);
+        }
+    }
+    lost
+}
+
+/// What a file leaving the library should contain (Task 3.1.4).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ExportPolicy {
+    /// Write the full P1 cell instead of the asymmetric unit.
+    pub expand_to_p1: bool,
+    /// Keep hydrogen sites.
+    pub keep_hydrogens: bool,
+    /// Keep the dummy `X` connection points.
+    pub keep_dummy: bool,
+    /// Keep explicit bonds and removals.
+    pub keep_explicit_bonds: bool,
+}
+
+impl Default for ExportPolicy {
+    fn default() -> Self {
+        Self {
+            expand_to_p1: false,
+            keep_hydrogens: true,
+            keep_dummy: true,
+            keep_explicit_bonds: true,
+        }
+    }
+}
+
+impl ExportPolicy {
+    /// Applies the policy to a structure.
+    ///
+    /// # Errors
+    ///
+    /// Returns the errors of the P1 expansion.
+    pub fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        let mut source = if self.expand_to_p1 {
+            let p1 = structure.p1()?;
+            let mut builder = xtalforge_core::StructureBuilder::new(structure.name(), p1.lattice);
+            for atom in &p1.atoms {
+                builder = builder.site(
+                    xtalforge_core::Site::new(atom.label.clone(), &atom.element, atom.frac)?
+                        .with_occupancy(atom.occupancy)?,
+                );
+            }
+            builder.build()?
+        } else {
+            structure.clone()
+        };
+        if !self.keep_hydrogens || !self.keep_dummy || !self.keep_explicit_bonds {
+            let sites: Vec<xtalforge_core::Site> = source
+                .sites()
+                .iter()
+                .filter(|site| {
+                    (self.keep_hydrogens || !matches!(site.element(), "H" | "D"))
+                        && (self.keep_dummy || site.element() != "X")
+                })
+                .cloned()
+                .collect();
+            let mut builder =
+                xtalforge_core::StructureBuilder::new(source.name(), *source.lattice())
+                    .hall(source.hall().to_owned());
+            for operation in source.operations() {
+                builder = builder.operation(*operation);
+            }
+            for site in sites {
+                builder = builder.site(site);
+            }
+            if self.keep_explicit_bonds {
+                for bond in source.explicit_bonds() {
+                    builder = builder.explicit_bond(*bond);
+                }
+            }
+            for (key, value) in source.metadata() {
+                builder = builder.metadata(key.clone(), value.clone());
+            }
+            source = builder.build()?;
+        }
+        Ok(source)
+    }
+}
