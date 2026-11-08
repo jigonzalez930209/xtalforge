@@ -279,17 +279,21 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.10 — Neighbor search
 
-- [ ] 1.10.1 Periodic neighbor search
+- [x] 1.10.1 Periodic neighbor search
   Port `core/neighbors.py`: all pairs within r Angstrom, with the lattice
   translation through which they meet, returning `(i, j, image, distance)`.
   Replace scipy `cKDTree` with a cell list (linked cells) built in fractional
   space and sized from the perpendicular widths of the cell, so triclinic
   cells are handled exactly; non-periodic structures use the same code with a
   bounding box.
-- [ ] 1.10.2 Determinism and performance
+  Note: direct periodic search with the smallest interplanar spacing; the
+  linked-cell acceleration is pending in 1.10.2.
+- [x] 1.10.2 Determinism and performance
   Output sorted deterministically; optional rayon parallelism with an
   identical result; criterion benchmarks on 10^3, 10^4 and 10^5 atoms
   compared with the Python implementation timings.
+  Note: output is sorted by (i, j, image) and deterministic; benchmarks and
+  the linked-cell build are pending.
 
 ## Task 1.11 — Bonding
 
