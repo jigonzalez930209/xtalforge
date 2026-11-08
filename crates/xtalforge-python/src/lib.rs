@@ -15,6 +15,8 @@ mod classes;
 mod phase3;
 mod phase4;
 mod phase5;
+mod phase6;
+mod phase7;
 mod structures;
 mod symmetry;
 mod symmetry_analysis;
@@ -32,6 +34,8 @@ use phase4::{
 use phase5::{
     add_hydrogens, net_invariants, net_overlay, porosity, rcsr_names, zeo_parse, zeo_run,
 };
+use phase6::{build_mof, mof_blocks, mof_topologies};
+use phase7::{powder_automatic, powder_cells, powder_refine, powder_supported_groups, rietx};
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
 };
@@ -68,6 +72,14 @@ fn map_error(error: xtalforge::core::Error) -> PyErr {
     let args = (error.code(), error.message());
     match error {
         xtalforge::core::Error::InvalidInput(_) => InputError::new_err(args),
+        _ => XtalforgeError::new_err(args),
+    }
+}
+
+fn map_mof_error(error: xtalforge::mof::Error) -> PyErr {
+    let args = (error.code(), error.message());
+    match error {
+        xtalforge::mof::Error::InvalidInput(_) => InputError::new_err(args),
         _ => XtalforgeError::new_err(args),
     }
 }
@@ -297,5 +309,13 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(net_overlay, module)?)?;
     module.add_function(wrap_pyfunction!(rcsr_names, module)?)?;
     module.add_function(wrap_pyfunction!(add_hydrogens, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_topologies, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_blocks, module)?)?;
+    module.add_function(wrap_pyfunction!(build_mof, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_automatic, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_refine, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_cells, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_supported_groups, module)?)?;
+    module.add_function(wrap_pyfunction!(rietx, module)?)?;
     Ok(())
 }
