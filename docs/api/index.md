@@ -23,6 +23,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Rings](./rings)
 - [Symmetry](./symmetry)
 - [Typed parameters](./params)
+- [Projects and workspaces](./project)
 - [View data](./view)
 - [Carbon builders](./build)
 - [Powder and porosity](./analysis)
