@@ -73,6 +73,37 @@ fn parser_handles_comments_quotes_and_uncertainties() {
 }
 
 #[test]
+fn symmetry_priority_and_missing_operations_warn() {
+    let text = "data_warn\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                _symmetry_space_group_name_H-M 'P 21/c'\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                C1 C 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    assert_eq!(structure.hall(), "P 21/c");
+    assert!(structure.metadata().contains_key("symmetry_warning"));
+}
+
+#[test]
+fn malformed_inputs_never_panic() {
+    for text in [
+        "",
+        "data_",
+        "loop_",
+        "loop_\n_atom_site_label\nC1",
+        "data_x\n_cell_length_a 4\n",
+        "data_x\nloop_\n_a\n_b\n1\n",
+        "data_x\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
+         _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+         loop_\n_atom_site_label\n_atom_site_type_symbol\n_atom_site_fract_x\n\
+         _atom_site_fract_y\n_atom_site_fract_z\nC1 C 0 0\n",
+    ] {
+        let _ = read_cif(text);
+    }
+}
+
+#[test]
 fn writer_round_trips_a_p1_structure() {
     let structure = StructureBuilder::new("C", Lattice::cubic(4.0).unwrap())
         .site(
