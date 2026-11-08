@@ -13,6 +13,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [P1 expansion](./p1)
 - [Supercells and origin shifts](./supercell)
 - [Slabs](./slab)
+- [Finite cells and transforms](./transforms)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
