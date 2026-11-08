@@ -268,6 +268,7 @@ fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
         .loop_with("_atom_site_fract_x")
         .ok_or_else(|| Error::InvalidInput("CIF has no _atom_site loop".to_owned()))?;
     let mut sites = Vec::new();
+    let mut occupancy_clamped = 0u32;
     for row in 0..atoms.rows.len() {
         let label = atoms
             .value(row, "_atom_site_label")
@@ -280,7 +281,11 @@ fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
             .ok_or_else(|| missing("_atom_site_fract_y"))?;
         let z = number(atoms.value(row, "_atom_site_fract_z"))
             .ok_or_else(|| missing("_atom_site_fract_z"))?;
-        let occupancy = number(atoms.value(row, "_atom_site_occupancy")).unwrap_or(1.0);
+        let raw_occupancy = number(atoms.value(row, "_atom_site_occupancy")).unwrap_or(1.0);
+        let occupancy = raw_occupancy.clamp(0.0, 1.0);
+        if (occupancy - raw_occupancy).abs() > 1e-9 {
+            occupancy_clamped += 1;
+        }
         let mut site = Site::new(label, element, [x, y, z])?.with_occupancy(occupancy)?;
         if let Some(u_iso) = number(atoms.value(row, "_atom_site_U_iso_or_equiv")) {
             site = site.with_u_iso(u_iso)?;
@@ -335,6 +340,12 @@ fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
         builder = builder.site(site);
     }
     builder = builder.metadata("cif_block", serde_json::Value::String(block.name.clone()));
+    if occupancy_clamped > 0 {
+        builder = builder.metadata(
+            "occupancy_clamped",
+            serde_json::Value::from(occupancy_clamped),
+        );
+    }
     builder.build()
 }
 
