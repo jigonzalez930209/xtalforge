@@ -5,6 +5,8 @@ use clap::Subcommand;
 use crate::analysis_commands::AnalysisAction;
 use crate::ff_commands::FfAction;
 use crate::format::StructureFormat;
+use crate::mof_commands::MofAction;
+use crate::powder_commands::PowderAction;
 use crate::spacegroup;
 use crate::symmetry::SymmetryAction;
 
@@ -50,6 +52,16 @@ pub(crate) enum Command {
         /// Output format; defaults to the output extension or CIF.
         #[arg(long, value_enum)]
         format: Option<StructureFormat>,
+    },
+    /// Powder refinement: indexing, Le Bail/Pawley, Rietveld and cells.
+    Powder {
+        #[command(subcommand)]
+        action: PowderAction,
+    },
+    /// MOF topologies, blocks and framework assembly.
+    Mof {
+        #[command(subcommand)]
+        action: MofAction,
     },
     /// Porosity, nets and Zeo++ analysis.
     Analysis {

@@ -2,8 +2,8 @@
 
 use crate::{
     Cli, CliError, analysis_commands, analyze, args, args::Command, basic, build, build_structures,
-    commands_extra, convert, ff_commands, measure, mesh, pxrd, spacegroup, symmetry,
-    symmetry::SymmetryAction, symmetry_analysis,
+    commands_extra, convert, ff_commands, measure, mesh, mof_commands, powder_commands, pxrd,
+    spacegroup, symmetry, symmetry::SymmetryAction, symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -19,6 +19,8 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             out,
             format,
         } => build_structures::hydrogens(cli, path, *distance, out.as_deref(), *format),
+        Command::Powder { action } => powder_commands::run(cli, action),
+        Command::Mof { action } => mof_commands::run(cli, action),
         Command::Analysis { action } => analysis_commands::run(cli, action),
         Command::Ff { action } => ff_commands::run(cli, action),
         Command::Formats => commands_extra::formats(cli),

@@ -21,7 +21,9 @@ mod input;
 mod limits;
 mod measure;
 mod mesh;
+mod mof_commands;
 mod output;
+mod powder_commands;
 mod pxrd;
 mod spacegroup;
 mod symmetry;
@@ -90,6 +92,10 @@ impl CliError {
     }
 
     pub(crate) fn analysis(error: xtalforge::analysis::Error) -> Self {
+        Self::new(error.code(), error.message())
+    }
+
+    pub(crate) fn mof(error: xtalforge::mof::Error) -> Self {
         Self::new(error.code(), error.message())
     }
 }

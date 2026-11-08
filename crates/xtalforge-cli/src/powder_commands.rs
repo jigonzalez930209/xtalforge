@@ -1,0 +1,279 @@
+//! The `powder` command family (Phase 7).
+
+use clap::Subcommand;
+use serde_json::json;
+use xtalforge::analysis::{
+    AutomaticOptions, LebailOptions, PeakOptions, RefineOptions, RietveldOptions,
+    extinction_symbol, find_peaks, free_cell_parameters, index_cubic, le_bail, pawley,
+    refine_phase, rietx_inventory, run_automatic,
+};
+
+use crate::{Cli, CliError, input};
+
+/// Subcommands of `xtalforge powder`.
+#[derive(Debug, Subcommand)]
+pub(crate) enum PowderAction {
+    /// Find peaks and index a cubic cell.
+    Index {
+        /// Measured XY pattern.
+        pattern: String,
+        /// Wavelength in Angstrom.
+        #[arg(long, default_value_t = 1.54184)]
+        wavelength: f64,
+        /// Largest hkl index.
+        #[arg(long, default_value_t = 6)]
+        max_index: i32,
+        /// Position tolerance in degrees.
+        #[arg(long, default_value_t = 0.1)]
+        tolerance: f64,
+    },
+    /// Le Bail intensity extraction.
+    Lebail {
+        /// Structure path.
+        structure: String,
+        /// Measured XY pattern.
+        pattern: String,
+    },
+    /// Pawley intensity extraction.
+    Pawley {
+        /// Structure path.
+        structure: String,
+        /// Measured XY pattern.
+        pattern: String,
+    },
+    /// Rietveld scale/background or structural refinement.
+    Rietveld {
+        /// Structure path.
+        structure: String,
+        /// Measured XY pattern.
+        pattern: String,
+        /// Refine positions, ADPs and occupancies.
+        #[arg(long)]
+        refine: bool,
+    },
+    /// Automatic peaks, indexing, Le Bail and Rietveld run.
+    Automatic {
+        /// Structure path.
+        structure: String,
+        /// Measured XY pattern.
+        pattern: String,
+    },
+    /// Free cell parameters and extinction symbol.
+    Cells {
+        /// Space-group number (1 to 230).
+        number: u32,
+    },
+    /// Print the rietx bridge inventory.
+    Rietx,
+}
+
+/// Runs one `powder` action.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for read, analysis or output failures.
+pub(crate) fn run(cli: &Cli, action: &PowderAction) -> Result<(), CliError> {
+    match action {
+        PowderAction::Index {
+            pattern,
+            wavelength,
+            max_index,
+            tolerance,
+        } => index(cli, pattern, *wavelength, *max_index, *tolerance),
+        PowderAction::Lebail { structure, pattern } => lebail(cli, structure, pattern, false),
+        PowderAction::Pawley { structure, pattern } => lebail(cli, structure, pattern, true),
+        PowderAction::Rietveld {
+            structure,
+            pattern,
+            refine,
+        } => rietveld(cli, structure, pattern, *refine),
+        PowderAction::Automatic { structure, pattern } => automatic(cli, structure, pattern),
+        PowderAction::Cells { number } => cells(cli, *number),
+        PowderAction::Rietx => {
+            let bridge = rietx_inventory();
+            if cli.json {
+                println!(
+                    "{}",
+                    json!({
+                        "name": bridge.name,
+                        "capabilities": bridge.capabilities,
+                        "license": bridge.license,
+                        "source": bridge.source,
+                    })
+                );
+            } else {
+                println!("{} ({})", bridge.name, bridge.license);
+                println!("source: {}", bridge.source);
+                for capability in bridge.capabilities {
+                    println!("  {capability}");
+                }
+            }
+            Ok(())
+        }
+    }
+}
+
+fn pattern(path: &str) -> Result<Vec<xtalforge::io::PatternPoint>, CliError> {
+    let text = input::read_source(path).map_err(CliError::core)?;
+    xtalforge::io::read_xy(&text).map_err(CliError::core)
+}
+
+fn index(
+    cli: &Cli,
+    path: &str,
+    wavelength: f64,
+    max_index: i32,
+    tolerance: f64,
+) -> Result<(), CliError> {
+    let points = pattern(path)?;
+    let peaks = find_peaks(&points, &PeakOptions::default()).map_err(CliError::analysis)?;
+    let index =
+        index_cubic(&peaks, wavelength, max_index, tolerance).map_err(CliError::analysis)?;
+    if cli.json {
+        println!("{}", json!({"peaks": peaks, "index": index}));
+    } else {
+        println!("{} peaks", peaks.len());
+        match index {
+            Some(index) => {
+                println!(
+                    "a = {:.6} A, completeness {:.2}, mean error {:.4} deg",
+                    index.a, index.completeness, index.mean_error
+                );
+            }
+            None => println!("no cubic candidate"),
+        }
+    }
+    Ok(())
+}
+
+fn lebail(
+    cli: &Cli,
+    structure_path: &str,
+    pattern_path: &str,
+    use_pawley: bool,
+) -> Result<(), CliError> {
+    let structure = input::read_structure_path(structure_path).map_err(CliError::core)?;
+    let points = pattern(pattern_path)?;
+    let result = if use_pawley {
+        pawley(&structure, &points, &LebailOptions::default())
+    } else {
+        le_bail(&structure, &points, &LebailOptions::default())
+    }
+    .map_err(CliError::analysis)?;
+    if cli.json {
+        println!(
+            "{}",
+            json!({
+                "intensities": result.intensities,
+                "positions": result.positions,
+                "r_factor": result.r_factor,
+            })
+        );
+    } else {
+        println!(
+            "{} reflections, R = {:.4}",
+            result.intensities.len(),
+            result.r_factor
+        );
+    }
+    Ok(())
+}
+
+fn rietveld(
+    cli: &Cli,
+    structure_path: &str,
+    pattern_path: &str,
+    refine: bool,
+) -> Result<(), CliError> {
+    let structure = input::read_structure_path(structure_path).map_err(CliError::core)?;
+    let points = pattern(pattern_path)?;
+    let options = RietveldOptions::default();
+    if refine {
+        let result = refine_phase(
+            &structure,
+            &points,
+            &options,
+            &RefineOptions {
+                max_iterations: 20,
+                refine_positions: true,
+                ..RefineOptions::default()
+            },
+        )
+        .map_err(CliError::analysis)?;
+        if cli.json {
+            println!(
+                "{}",
+                json!({
+                    "rwp": result.rwp,
+                    "converged": result.converged,
+                    "iterations": result.iterations,
+                    "parameters": result.parameters,
+                })
+            );
+        } else {
+            println!(
+                "Rwp {:.4}, converged {}, {} iterations",
+                result.rwp, result.converged, result.iterations
+            );
+            for (name, value) in &result.parameters {
+                println!("  {name} = {value:.6}");
+            }
+        }
+    } else {
+        let phase = xtalforge::analysis::fit_phase(&structure, &points, &options)
+            .map_err(CliError::analysis)?;
+        if cli.json {
+            println!(
+                "{}",
+                json!({"scale": phase.scale, "background": phase.background, "rwp": phase.rwp})
+            );
+        } else {
+            println!(
+                "scale {:.6}, background {:.6}, Rwp {:.4}",
+                phase.scale, phase.background, phase.rwp
+            );
+        }
+    }
+    Ok(())
+}
+
+fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), CliError> {
+    let structure = input::read_structure_path(structure_path).map_err(CliError::core)?;
+    let points = pattern(pattern_path)?;
+    let result = run_automatic(&structure, &points, &AutomaticOptions::default())
+        .map_err(CliError::analysis)?;
+    if cli.json {
+        println!(
+            "{}",
+            json!({
+                "peaks": result.peaks.len(),
+                "index": result.index,
+                "lebail": result.lebail.as_ref().map(|lebail| lebail.r_factor),
+                "rwp": result.phase.as_ref().map(|phase| phase.rwp),
+                "steps": result.steps,
+            })
+        );
+    } else {
+        for step in &result.steps {
+            println!("{step}");
+        }
+    }
+    Ok(())
+}
+
+fn cells(cli: &Cli, number: u32) -> Result<(), CliError> {
+    let parameters = free_cell_parameters(number).map_err(CliError::analysis)?;
+    let extinction = extinction_symbol(number).map_err(CliError::analysis)?;
+    if cli.json {
+        println!(
+            "{}",
+            json!({"number": number, "free_parameters": parameters, "extinction": extinction})
+        );
+    } else {
+        println!(
+            "space group {number}: free parameters {}, extinction {extinction}",
+            parameters.join(", ")
+        );
+    }
+    Ok(())
+}
