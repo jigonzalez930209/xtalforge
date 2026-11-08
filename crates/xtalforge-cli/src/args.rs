@@ -2,6 +2,8 @@
 
 use clap::Subcommand;
 
+use crate::analysis_commands::AnalysisAction;
+use crate::ff_commands::FfAction;
 use crate::format::StructureFormat;
 use crate::spacegroup;
 use crate::symmetry::SymmetryAction;
@@ -35,6 +37,30 @@ pub(crate) enum ProjectAction {
 pub(crate) enum Command {
     /// Print the xtalforge version.
     Version,
+    /// Add the hydrogens an X-ray structure is missing.
+    Hydrogens {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// X-H distance in Angstrom.
+        #[arg(long, default_value_t = 1.09)]
+        distance: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Porosity, nets and Zeo++ analysis.
+    Analysis {
+        #[command(subcommand)]
+        action: AnalysisAction,
+    },
+    /// Force-field energies, optimizers, charges and vibrations.
+    Ff {
+        #[command(subcommand)]
+        action: FfAction,
+    },
     /// List the format registry.
     Formats,
     /// List parameter presets or print one schema.

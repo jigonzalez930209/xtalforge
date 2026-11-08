@@ -5,6 +5,7 @@
 //! flags, emits one JSON value in `--json` mode and reports runtime failures
 //! with exit code 3.
 
+mod analysis_commands;
 mod analyze;
 mod args;
 mod basic;
@@ -13,6 +14,8 @@ mod build_structures;
 mod commands_extra;
 mod convert;
 mod dispatch;
+mod engine_commands;
+mod ff_commands;
 mod format;
 mod input;
 mod limits;
@@ -79,6 +82,14 @@ impl CliError {
     }
 
     pub(crate) fn core(error: xtalforge::core::Error) -> Self {
+        Self::new(error.code(), error.message())
+    }
+
+    pub(crate) fn ff(error: xtalforge::ff::Error) -> Self {
+        Self::new(error.code(), error.message())
+    }
+
+    pub(crate) fn analysis(error: xtalforge::analysis::Error) -> Self {
         Self::new(error.code(), error.message())
     }
 }

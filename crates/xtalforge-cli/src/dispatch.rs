@@ -1,9 +1,9 @@
 //! Command dispatch for the CLI.
 
 use crate::{
-    Cli, CliError, analyze, args, args::Command, basic, build, build_structures, commands_extra,
-    convert, measure, mesh, pxrd, spacegroup, symmetry, symmetry::SymmetryAction,
-    symmetry_analysis,
+    Cli, CliError, analysis_commands, analyze, args, args::Command, basic, build, build_structures,
+    commands_extra, convert, ff_commands, measure, mesh, pxrd, spacegroup, symmetry,
+    symmetry::SymmetryAction, symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -13,6 +13,14 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         return Err(CliError::input("--threads must be a positive number"));
     }
     match &cli.command {
+        Command::Hydrogens {
+            path,
+            distance,
+            out,
+            format,
+        } => build_structures::hydrogens(cli, path, *distance, out.as_deref(), *format),
+        Command::Analysis { action } => analysis_commands::run(cli, action),
+        Command::Ff { action } => ff_commands::run(cli, action),
         Command::Formats => commands_extra::formats(cli),
         Command::Params { name } => commands_extra::params(cli, name.as_deref()),
         Command::Project { action } => match action {

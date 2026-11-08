@@ -102,3 +102,28 @@ pub(crate) fn nanotube(
     let structure = xtalforge::build::nanotube(n, m, length, vacuum).map_err(CliError::core)?;
     output::emit_structure(cli, &structure, out, format)
 }
+
+/// Adds the missing hydrogens.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a read or builder failure.
+pub(crate) fn hydrogens(
+    cli: &Cli,
+    path: &str,
+    distance: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    use xtalforge::build::hydrogens::{HydrogenOptions, add_hydrogens};
+    let structure = crate::input::read_structure_path(path).map_err(CliError::core)?;
+    let filled = add_hydrogens(
+        &structure,
+        &HydrogenOptions {
+            distance,
+            ..Default::default()
+        },
+    )
+    .map_err(CliError::core)?;
+    output::emit_structure(cli, &filled, out, format)
+}
