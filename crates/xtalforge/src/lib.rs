@@ -38,5 +38,5 @@ pub use xtalforge_symmetry as symmetry;
 
 /// Common imports for typical xtalforge programs.
 pub mod prelude {
-    pub use crate::core::{Error, cell_volume, version};
+    pub use crate::core::{Element, Error, cell_volume, element_info, version};
 }
