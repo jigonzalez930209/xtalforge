@@ -21,6 +21,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Measures, scalars and descriptions](./measure)
 - [Functional groups](./groups)
 - [Rings](./rings)
+- [Symmetry](./symmetry)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 

@@ -26,6 +26,7 @@ compares this table with the symbols each surface actually exports.
 | `distance` | 1 | done | done | done | done | Measures (Task 1.14) |
 | `angle` | 1 | done | done | done | done | Measures (Task 1.14) |
 | `torsion` | 1 | done | done | done | done | Measures (Task 1.14) |
+| `detect_symmetry` | 2 | done | done | done | done | Symmetry search (Task 2.1.4); CLI `symmetry detect` |
 
 ## Planned exceptions
 
