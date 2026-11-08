@@ -247,3 +247,135 @@ pub fn slab_text(
         .map_err(to_js_error)?;
     xtalforge::io::write_structure(&slab.structure, "cif").map_err(to_js_error)
 }
+
+/// Summarizes a scene for the given draw style.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or an unknown style.
+#[wasm_bindgen]
+pub fn scene_summary(text: &str, style: &str, scale: f64) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let style = view_style(style)?;
+    let settings = xtalforge::view::ViewSettings {
+        style,
+        atom_scale: scale,
+        ..Default::default()
+    };
+    let scene = xtalforge::view::build_scene(&structure, &settings).map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(
+        &object,
+        "atoms",
+        JsValue::from_f64(scene.atoms.len() as f64),
+    );
+    set(
+        &object,
+        "bonds",
+        JsValue::from_f64(scene.bonds.len() as f64),
+    );
+    set(
+        &object,
+        "cell_edges",
+        JsValue::from_f64(scene.cell_edges.len() as f64),
+    );
+    Ok(object.into())
+}
+
+/// Builds an ASCII STL string.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or an unknown style.
+#[wasm_bindgen]
+pub fn mesh_stl(text: &str, style: &str, scale: f64) -> Result<String, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let style = view_style(style)?;
+    let settings = xtalforge::view::ViewSettings {
+        style,
+        atom_scale: scale,
+        ..Default::default()
+    };
+    let scene = xtalforge::view::build_scene(&structure, &settings).map_err(to_js_error)?;
+    Ok(xtalforge::view::write_stl(
+        &xtalforge::view::build_mesh(&scene),
+        structure.name(),
+    ))
+}
+
+fn view_style(name: &str) -> Result<xtalforge::view::DrawStyle, JsValue> {
+    match name {
+        "ball-stick" | "ball_stick" => Ok(xtalforge::view::DrawStyle::BallStick),
+        "space-fill" | "space_fill" => Ok(xtalforge::view::DrawStyle::SpaceFill),
+        "wireframe" => Ok(xtalforge::view::DrawStyle::Wireframe),
+        "sticks" => Ok(xtalforge::view::DrawStyle::Sticks),
+        other => Err(JsValue::from_str(&format!(
+            "invalid_input: unknown draw style {other:?}"
+        ))),
+    }
+}
+
+/// Calculates a PXRD pattern.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text, radiation or options.
+#[wasm_bindgen]
+pub fn pxrd_info(
+    text: &str,
+    radiation: &str,
+    max_two_theta: f64,
+    step: f64,
+) -> Result<JsValue, JsValue> {
+    use xtalforge::analysis::{PxrdOptions, Radiation, calculate_pxrd};
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let radiation = match radiation {
+        "cu-ka" | "cuka" => Radiation::CuKa,
+        "cu-ka1" | "cuka1" => Radiation::CuKa1,
+        "mo-ka" | "moka" => Radiation::MoKa,
+        "co-ka" | "coka" => Radiation::CoKa,
+        "fe-ka" | "feka" => Radiation::FeKa,
+        "cr-ka" | "crka" => Radiation::CrKa,
+        "ag-ka" | "agka" => Radiation::AgKa,
+        other => {
+            return Err(JsValue::from_str(&format!(
+                "invalid_input: unknown radiation {other:?}"
+            )));
+        }
+    };
+    let pattern = calculate_pxrd(
+        &structure,
+        &PxrdOptions {
+            radiation,
+            two_theta_range: [5.0, max_two_theta],
+            step,
+            ..PxrdOptions::default()
+        },
+    )
+    .map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    let reflections = js_sys::Array::new();
+    for reflection in &pattern.reflections {
+        let item = js_sys::Object::new();
+        set(&item, "hkl", array_i32(reflection.hkl).into());
+        set(&item, "d", JsValue::from_f64(reflection.d));
+        set(&item, "two_theta", JsValue::from_f64(reflection.two_theta));
+        set(
+            &item,
+            "multiplicity",
+            JsValue::from_f64(reflection.multiplicity as f64),
+        );
+        set(&item, "intensity", JsValue::from_f64(reflection.intensity));
+        reflections.push(&item.into());
+    }
+    set(&object, "reflections", reflections.into());
+    let points = js_sys::Array::new();
+    for point in &pattern.points {
+        let pair = js_sys::Array::new();
+        pair.push(&JsValue::from_f64(point.two_theta));
+        pair.push(&JsValue::from_f64(point.intensity));
+        points.push(&pair.into());
+    }
+    set(&object, "points", points.into());
+    Ok(object.into())
+}
