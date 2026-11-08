@@ -169,3 +169,16 @@ def detect_symmetry(
     angle_tolerance: float | None = None,
     hall_number: int | None = None,
 ) -> dict[str, object]: ...
+
+def asymmetrize(
+    text: str,
+    format_hint: str | None = None,
+    symprec: float = 1e-3,
+) -> StructureDict: ...
+def to_p1(text: str, format_hint: str | None = None) -> StructureDict: ...
+def set_space_group(
+    text: str,
+    symbol: str,
+    mode: str = "reinterpret",
+    format_hint: str | None = None,
+) -> StructureDict: ...
