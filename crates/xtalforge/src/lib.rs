@@ -32,6 +32,8 @@
 //! assert_eq!(error.code(), "invalid_input");
 //! ```
 
+pub use xtalforge_analysis as analysis;
+pub use xtalforge_build as build;
 pub use xtalforge_commands as commands;
 pub use xtalforge_core as core;
 pub use xtalforge_io as io;
