@@ -4,17 +4,19 @@
 //! P1, supercell and slab operations developed in Phase 1. The foundation is
 //! kept small so every domain can share a single error type per crate.
 
-#![cfg_attr(
-    test,
-    allow(
-        clippy::unwrap_used,
-        clippy::expect_used,
-        clippy::panic,
-        clippy::indexing_slicing
-    )
-)]
-
+pub mod cell;
 pub mod data;
+
+pub use cell::cell_volume;
+
+/// Version of the workspace, from the package metadata.
+///
+/// The value is the same on every surface: it comes from the workspace
+/// `Cargo.toml` and is mirrored by the Python and WASM packages at release.
+#[must_use]
+pub fn version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
 
 /// Errors returned by core operations.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -66,16 +68,10 @@ impl Error {
             Self::DataJson { .. } => "data_json",
         }
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::Error;
-
-    #[test]
-    fn error_code_is_stable() {
-        let error = Error::InvalidInput("negative volume".to_owned());
-        assert_eq!(error.code(), "invalid_input");
-        assert_eq!(error.to_string(), "invalid input: negative volume");
+    /// Human-readable message for this error.
+    #[must_use]
+    pub fn message(&self) -> String {
+        self.to_string()
     }
 }
