@@ -128,6 +128,22 @@ fn limits_check<'py>(
     Ok(dict)
 }
 
+/// Summary of a structure JSON document.
+#[pyfunction]
+fn structure_info<'py>(py: Python<'py>, text: &str) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let summary = xtalforge::core::structure_info(text).map_err(map_error)?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("name", summary.name)?;
+    dict.set_item("formula", summary.formula)?;
+    dict.set_item("hall", summary.hall)?;
+    dict.set_item("n_sites", summary.n_sites)?;
+    dict.set_item("volume", summary.volume)?;
+    dict.set_item("density", summary.density)?;
+    dict.set_item("total_charge", summary.total_charge)?;
+    dict.set_item("is_p1", summary.is_p1)?;
+    Ok(dict)
+}
+
 /// Reference data for an element by symbol or atomic number.
 #[pyfunction]
 fn element_info<'py>(
@@ -169,5 +185,6 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(lattice_minimum_image, module)?)?;
     module.add_function(wrap_pyfunction!(limits_bounds, module)?)?;
     module.add_function(wrap_pyfunction!(limits_check, module)?)?;
+    module.add_function(wrap_pyfunction!(structure_info, module)?)?;
     Ok(())
 }
