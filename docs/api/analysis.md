@@ -24,6 +24,12 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 `Pattern { points, reflections }` carries the sampled curve and the peak list;
 `Reflection { hkl, d, two_theta, multiplicity, intensity }`.
 
+## Least squares
+
+`least_squares(initial, &FitOptions, residuals)` is a Levenberg-Marquardt fit
+with finite-difference Jacobians. `FitResult { parameters, residuals,
+chi_squared, iterations, converged }` is the result.
+
 ## Measured patterns and peaks
 
 `xtalforge_io::read_xy` reads a measured pattern; `find_peaks(&points,
