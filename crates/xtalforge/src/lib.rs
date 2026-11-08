@@ -32,21 +32,11 @@
 //! assert_eq!(error.code(), "invalid_input");
 //! ```
 
-#![cfg_attr(
-    test,
-    allow(
-        clippy::unwrap_used,
-        clippy::expect_used,
-        clippy::panic,
-        clippy::indexing_slicing
-    )
-)]
-
 pub use xtalforge_core as core;
 pub use xtalforge_io as io;
 pub use xtalforge_symmetry as symmetry;
 
 /// Common imports for typical xtalforge programs.
 pub mod prelude {
-    pub use crate::core::Error;
+    pub use crate::core::{Error, cell_volume, version};
 }
