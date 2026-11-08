@@ -1,8 +1,7 @@
 //! Undoable commands and document state for xtalforge (Phase 3).
 //!
-//! Every mutation goes through a [`Command`](command::Command); the
-//! [`Document`](document::Document) owns the structure, the undo stack, the
-//! selection and the atom groups.
+//! Every mutation goes through a [`Command`]; the [`Document`] owns the
+//! structure, the undo stack, the selection and the atom groups.
 
 pub mod atoms;
 pub mod bonds;
