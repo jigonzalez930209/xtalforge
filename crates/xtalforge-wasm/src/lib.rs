@@ -166,6 +166,36 @@ pub fn limits_check(profile: &str, budget: &str, estimate: f64) -> Result<JsValu
     Ok(object.into())
 }
 
+/// Summary of a structure JSON document.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` with a stable `code` property for invalid
+/// input.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn structure_info(text: &str) -> Result<JsValue, JsValue> {
+    let summary = xtalforge::core::structure_info(text).map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(&object, "name", JsValue::from_str(&summary.name));
+    set(&object, "formula", JsValue::from_str(&summary.formula));
+    set(&object, "hall", JsValue::from_str(&summary.hall));
+    set(
+        &object,
+        "n_sites",
+        JsValue::from_f64(summary.n_sites as f64),
+    );
+    set(&object, "volume", JsValue::from_f64(summary.volume));
+    set(&object, "density", JsValue::from_f64(summary.density));
+    set(
+        &object,
+        "total_charge",
+        JsValue::from_f64(summary.total_charge),
+    );
+    set(&object, "is_p1", JsValue::from_bool(summary.is_p1));
+    Ok(object.into())
+}
+
 /// Reference data for an element by symbol or atomic number.
 ///
 /// # Errors
