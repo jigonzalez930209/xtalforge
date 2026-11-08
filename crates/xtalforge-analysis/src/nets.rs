@@ -236,3 +236,41 @@ impl QuotientGraph {
         components
     }
 }
+
+/// Duplicates a quotient graph at a lattice shift, producing two interpenetrating
+/// components. The result keeps the two copies as disconnected components.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for a non-finite shift.
+pub fn interpenetrate(graph: &QuotientGraph, shift: [i32; 3]) -> Result<QuotientGraph, Error> {
+    let count = graph.nodes.len();
+    let mut nodes = graph.nodes.clone();
+    let mut labels = graph.labels.clone();
+    for (index, node) in graph.nodes.iter().enumerate() {
+        nodes.push([
+            (node[0] + f64::from(shift[0])).rem_euclid(1.0),
+            (node[1] + f64::from(shift[1])).rem_euclid(1.0),
+            (node[2] + f64::from(shift[2])).rem_euclid(1.0),
+        ]);
+        labels.push(format!(
+            "{}{}",
+            graph.labels.get(index).cloned().unwrap_or_default(),
+            "'"
+        ));
+    }
+    let mut edges = graph.edges.clone();
+    for edge in &graph.edges {
+        edges.push(NetEdge {
+            a: edge.a + count,
+            b: edge.b + count,
+            shift: edge.shift,
+        });
+    }
+    edges.sort();
+    Ok(QuotientGraph {
+        nodes,
+        edges,
+        labels,
+    })
+}

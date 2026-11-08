@@ -21,7 +21,7 @@ pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
 pub use indexing::{CubicIndex, IndexedPeak, index_cubic};
 pub use isosurface::{TriangleMesh, isosurface};
 pub use lebail::{LebailOptions, LebailResult, le_bail, pawley};
-pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, quotient_graph};
+pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, interpenetrate, quotient_graph};
 pub use pareto::pareto_front;
 pub use peaks::{Peak, PeakOptions, find_peaks};
 pub use profiles::{Background, Profile, ProfileKind};
