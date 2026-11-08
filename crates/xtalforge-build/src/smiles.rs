@@ -77,6 +77,15 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
             '#' => order = 3.0,
             ':' => order = 1.5,
             '/' | '\\' => order = 1.0,
+            '.' => {
+                if previous.is_none() || !rings.is_empty() {
+                    return Err(Error::InvalidInput(
+                        "a component separator needs a finished component".to_owned(),
+                    ));
+                }
+                previous = None;
+                order = 1.0;
+            }
             '1'..='9' => {
                 let Some(current) = previous else {
                     return Err(Error::InvalidInput(
@@ -191,11 +200,26 @@ fn bracket_atom(inner: &str) -> Result<SmilesAtom, Error> {
     let first = characters
         .next()
         .ok_or_else(|| Error::InvalidInput("empty bracket atom".to_owned()))?;
-    let (element, aromatic) = if first.is_ascii_lowercase() {
-        (first.to_ascii_uppercase().to_string(), true)
+    if !first.is_ascii_alphabetic() {
+        return Err(Error::InvalidInput("bad bracket element".to_owned()));
+    }
+    let aromatic = first.is_ascii_lowercase();
+    let mut element = String::new();
+    element.push(if aromatic {
+        first.to_ascii_uppercase()
     } else {
-        (first.to_string(), false)
-    };
+        first
+    });
+    while element.len() < 2 {
+        let Some(next) = characters.peek().copied() else {
+            break;
+        };
+        if !next.is_ascii_lowercase() {
+            break;
+        }
+        element.push(next);
+        characters.next();
+    }
     if !element.chars().all(|value| value.is_ascii_alphabetic()) {
         return Err(Error::InvalidInput("bad bracket element".to_owned()));
     }
