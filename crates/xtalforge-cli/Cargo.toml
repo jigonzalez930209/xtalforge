@@ -36,6 +36,7 @@ assets = [
   ["../../target/release/xtalforge", "usr/bin/", "755"],
   ["../../assets/xtalforge.desktop", "usr/share/applications/", "644"],
   ["../../assets/xtalforge.png", "usr/share/icons/hicolor/256x256/apps/xtalforge.png", "644"],
+  ["../../assets/io.github.jigonzalez930209.xtalforge.appdata.xml", "usr/share/metainfo/io.github.jigonzalez930209.xtalforge.appdata.xml", "644"],
 ]
 
 [package.metadata.generate-rpm]
@@ -46,4 +47,5 @@ assets = [
   { source = "../../target/release/xtalforge", dest = "/usr/bin/xtalforge", mode = "755" },
   { source = "../../assets/xtalforge.desktop", dest = "/usr/share/applications/xtalforge.desktop", mode = "644" },
   { source = "../../assets/xtalforge.png", dest = "/usr/share/icons/hicolor/256x256/apps/xtalforge.png", mode = "644" },
+  { source = "../../assets/io.github.jigonzalez930209.xtalforge.appdata.xml", dest = "/usr/share/metainfo/io.github.jigonzalez930209.xtalforge.appdata.xml", mode = "644" },
 ]
