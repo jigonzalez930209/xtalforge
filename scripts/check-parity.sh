@@ -22,7 +22,13 @@ trim() {
 }
 
 check_rust() {
-  grep -Rq "pub fn $1(" crates/xtalforge-core/src
+  local name=$1
+  case "$name" in
+    bonds) name=bond_graph ;;
+    groups) name=find_groups ;;
+    slab) name=make_slab ;;
+  esac
+  grep -Rq "pub fn $name(" crates/*/src
 }
 
 check_python() {
@@ -30,10 +36,15 @@ check_python() {
 }
 
 check_wasm() {
+  local name=$1
+  case "$name" in
+    supercell) name=supercell_info ;;
+    slab) name=slab_info ;;
+  esac
   if [ -f "$WASM_TS" ]; then
-    grep -q "function $1(" "$WASM_TS"
+    grep -q "function $name(" "$WASM_TS"
   else
-    grep -q "pub fn $1(" "$WASM_SRC"
+    grep -q "pub fn $name(" "$WASM_SRC"
   fi
 }
 
@@ -53,6 +64,7 @@ check_cli() {
     lattice_info) command=cell ;;
     lattice_minimum_image) command=cell ;;
     structure_info) command=info ;;
+    read_cif|read_structure) command=info ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
