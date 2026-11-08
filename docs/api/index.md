@@ -6,6 +6,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Binding architecture](./bindings)
 - [Core API](./core)
 - [Elements](./elements)
+- [Lattice](./lattice)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
