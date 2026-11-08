@@ -32,3 +32,17 @@ Notes:
 These are process-level numbers, useful for the release gate. Function-level
 criterion benchmarks are added with the analysis phases, where the hot paths
 (PXRD, grids, force fields) justify the dependency.
+
+## Symmetry detection
+
+Release CLI, median of five whole-process runs at `--symprec 0.001`:
+
+| Structure | Command | Median | Minimum |
+|---|---|---|---|
+| Si (8 P1 atoms) | `symmetry detect` | 3.3 ms | 3.1 ms |
+| MOF-5 (asymmetric unit) | `symmetry detect` | 20.7 ms | 19.6 ms |
+
+The larger MOF structures in the corpus take seconds to minutes at very small
+tolerances; the corpus sweep is an ignored test and the release gate uses the
+small-corpus set. The WebAssembly package with the symmetry search and the
+space-group tables is about 952 KiB, inside the 1 MiB budget.

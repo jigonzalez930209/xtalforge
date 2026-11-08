@@ -79,6 +79,24 @@ The search is moyo's iterative algorithm; it is not linear in the atom count
 for large disordered cells. The small-corpus test runs in seconds; the full
 sweep is `#[ignore]` and run manually before a release.
 
+## Band paths
+
+The 14 Bravais entries and their special points come from ASE 3.29
+(`data/kpaths.json`). A conventional cell alone cannot reveal centering, so
+`band_path_for_structure` uses the detected space group's Bravais class. The
+points are fractional reciprocal coordinates; multiplying by the user's
+reciprocal basis (with `2 pi`) gives the Cartesian `k` axis, and the cumulative
+distance is the path abscissa.
+
+## Molecular point groups
+
+The detector takes a non-collinear pair of atom vectors as a frame, maps it
+onto every pair with the same element pattern and both normal orientations,
+and keeps the rotations that permute the molecule. Proper rotations, mirrors
+and the inversion are counted and mapped to a Schoenflies symbol. The table
+covers the common crystallographic and molecular groups; linear molecules and
+groups outside the table are rejected.
+
 ## Reduction
 
 The structure-level reduction converts every P1 atom to Cartesian, then to the
