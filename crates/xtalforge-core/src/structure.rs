@@ -9,6 +9,7 @@ use crate::Error;
 use crate::Lattice;
 use crate::elements::element_by_symbol;
 use crate::site::Site;
+use crate::symop::SymOp;
 
 /// A crystal structure.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -17,6 +18,8 @@ pub struct Structure {
     lattice: Lattice,
     hall: String,
     sites: Vec<Site>,
+    #[serde(default)]
+    operations: Vec<SymOp>,
     metadata: BTreeMap<String, Value>,
 }
 
@@ -43,6 +46,12 @@ impl Structure {
     #[must_use]
     pub fn sites(&self) -> &[Site] {
         &self.sites
+    }
+
+    /// Explicit symmetry operations; empty means identity only.
+    #[must_use]
+    pub fn operations(&self) -> &[SymOp] {
+        &self.operations
     }
 
     /// Open structure metadata.
@@ -359,6 +368,7 @@ pub struct StructureBuilder {
     lattice: Lattice,
     hall: String,
     sites: Vec<Site>,
+    operations: Vec<SymOp>,
     metadata: BTreeMap<String, Value>,
 }
 
@@ -371,6 +381,7 @@ impl StructureBuilder {
             lattice,
             hall: "P 1".to_owned(),
             sites: Vec::new(),
+            operations: Vec::new(),
             metadata: BTreeMap::new(),
         }
     }
@@ -386,6 +397,13 @@ impl StructureBuilder {
     #[must_use]
     pub fn site(mut self, site: Site) -> Self {
         self.sites.push(site);
+        self
+    }
+
+    /// Adds an explicit symmetry operation.
+    #[must_use]
+    pub fn operation(mut self, operation: SymOp) -> Self {
+        self.operations.push(operation);
         self
     }
 
@@ -413,6 +431,7 @@ impl StructureBuilder {
             lattice: self.lattice,
             hall: self.hall,
             sites: self.sites,
+            operations: self.operations,
             metadata: self.metadata,
         })
     }

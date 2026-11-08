@@ -9,18 +9,22 @@ pub mod data;
 pub mod elements;
 pub mod lattice;
 pub mod limits;
+pub mod p1;
 pub mod site;
 pub mod structure;
+pub mod symop;
 
 pub use cell::cell_volume;
 pub use elements::{Element, Isotope, element_info};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
 pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
+pub use p1::{P1Atom, P1Cell};
 pub use site::Site;
 pub use structure::{
     SCHEMA_VERSION, Structure, StructureBuilder, StructureDocument, StructureSummary,
     structure_info,
 };
+pub use symop::SymOp;
 
 /// Version of the workspace, from the package metadata.
 ///
