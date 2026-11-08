@@ -161,3 +161,11 @@ def torsion(
     l: int,
     format_hint: str | None = None,
 ) -> float: ...
+
+def detect_symmetry(
+    text: str,
+    format_hint: str | None = None,
+    symprec: float = 1e-3,
+    angle_tolerance: float | None = None,
+    hall_number: int | None = None,
+) -> dict[str, object]: ...
