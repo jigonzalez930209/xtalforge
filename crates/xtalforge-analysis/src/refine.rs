@@ -8,7 +8,7 @@
 //! * one global isotropic ADP multiplier applied to every site's `U_iso`,
 //! * one occupancy per asymmetric site.
 //!
-//! The structure is edited through [`StructureBuilder`] with the original
+//! The structure is edited through [`xtalforge_core::StructureBuilder`] with the original
 //! Hall symbol, lattice and symmetry operations, so the space group is kept and
 //! the result is the input structure with new numbers on the same sites. Atoms
 //! are never added, removed or bonded.
