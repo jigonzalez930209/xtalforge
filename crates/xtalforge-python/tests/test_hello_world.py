@@ -57,6 +57,34 @@ def test_element_info_accepts_an_atomic_number() -> None:
     assert info["symbol"] == "Fe"
 
 
+def test_lattice_shared_vectors() -> None:
+    lattice_vectors = json.loads(
+        (Path(__file__).parents[3] / "tests" / "vectors" / "lattice.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    for case in lattice_vectors["cases"]:
+        info = xtalforge.lattice_info(
+            case["a"],
+            case["b"],
+            case["c"],
+            case["alpha"],
+            case["beta"],
+            case["gamma"],
+        )
+        assert abs(info["volume"] - case["volume"]) <= 1e-9
+        result = xtalforge.lattice_minimum_image(
+            case["a"],
+            case["b"],
+            case["c"],
+            case["alpha"],
+            case["beta"],
+            case["gamma"],
+            case["minimum_image"]["delta"],
+        )
+        assert abs(result["distance"] - case["minimum_image"]["distance"]) <= 1e-9
+
+
 def test_invalid_element_raises_input_error() -> None:
     with pytest.raises(xtalforge.InputError) as caught:
         xtalforge.element_info("Zz")
