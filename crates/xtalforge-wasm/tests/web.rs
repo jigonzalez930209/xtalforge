@@ -13,10 +13,11 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
-    angle, bonds, cell_volume, convert_structure, distance, element_info, groups, lattice_info,
-    lattice_minimum_image, limits_bounds, limits_check, mesh_stl, neighbors, pxrd_info, read_cif,
-    read_structure, rings, scene_summary, slab_info, slab_text, structure_info, supercell_info,
-    supercell_text, torsion, version,
+    angle, bonds, build_c60_info, build_graphene_info, build_nanotube_info, cell_volume,
+    convert_structure, distance, element_info, groups, lattice_info, lattice_minimum_image,
+    limits_bounds, limits_check, mesh_stl, neighbors, pxrd_info, read_cif, read_structure, rings,
+    scene_summary, slab_info, slab_text, structure_info, supercell_info, supercell_text, torsion,
+    version,
 };
 
 const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
@@ -419,4 +420,14 @@ fn pxrd_export() {
     let points = property(&pattern, "points");
     let points: js_sys::Array = points.unchecked_into();
     assert!(points.length() > 100);
+}
+
+#[wasm_bindgen_test]
+fn carbon_builder_exports() {
+    let graphene = build_graphene_info(2, 2, 1, 3.35, 15.0).expect("graphene");
+    assert_eq!(property(&graphene, "n_sites").as_f64(), Some(8.0));
+    let tube = build_nanotube_info(5, 5, 2, 10.0).expect("nanotube");
+    assert!(property(&tube, "n_sites").as_f64().unwrap_or(0.0) > 0.0);
+    let c60 = build_c60_info().expect("c60");
+    assert_eq!(property(&c60, "n_sites").as_f64(), Some(60.0));
 }
