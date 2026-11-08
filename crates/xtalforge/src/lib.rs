@@ -39,7 +39,7 @@ pub use xtalforge_symmetry as symmetry;
 /// Common imports for typical xtalforge programs.
 pub mod prelude {
     pub use crate::core::{
-        Element, Error, Lattice, cell_volume, element_info, lattice_info, lattice_minimum_image,
-        version,
+        Element, Error, Lattice, Structure, cell_volume, element_info, lattice_info,
+        lattice_minimum_image, structure_info, version,
     };
 }
