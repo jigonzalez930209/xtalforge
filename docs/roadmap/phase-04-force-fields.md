@@ -75,64 +75,64 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 ## Task 4.3 — Charges and electrostatics
 
-- [ ] 4.3.1 QEq
+- [x] 4.3.1 QEq
   Port `ff/uff/qeq.py`: Rappé-Goddard charge equilibration with UFF's
   parameter table, for structures without charges.
-- [ ] 4.3.2 EQeq
+- [x] 4.3.2 EQeq
   Port `ff/charges/eqeq.py`: extended charge equilibration (Wilmer, Kim and
   Snurr 2012) with measured ionization energies (data file from
   `ff/charges/data`), periodic, validated against `Crystal-Builder/tests/data/eqeq`.
 - [ ] 4.3.3 EEQ from sci-form
   Port sci-form EEQ as a third method (`eeq`), with its parameters as a data
   file; compare with EQeq on the corpus and document when each is preferable.
-- [ ] 4.3.4 Charges per site
+- [x] 4.3.4 Charges per site
   Port `ff/charges/sites.py`: charges computed on the P1 cell become charges
   per asymmetric site (mean over images) so they can be stored
   (`SetCharges`) and written to CIF `_atom_site_charge` or LAMMPS.
-- [ ] 4.3.5 Ewald summation
+- [x] 4.3.5 Ewald summation
   Port `ff/ewald.py`: real-space plus reciprocal-space sums with the
   splitting parameter and cutoffs chosen from a target accuracy; energy,
   forces, stress; deterministic summation order.
 
 ## Task 4.4 — Optimizers
 
-- [ ] 4.4.1 Symmetry-respecting degrees of freedom
+- [x] 4.4.1 Symmetry-respecting degrees of freedom
   Port the core idea of `ff/optimize.py`: **the variables are the asymmetric
   unit, not the P1 cell**. The calculator works on P1, forces are projected
   onto the symmetry-allowed displacements of each Wyckoff site, and the space
   group is preserved on every step so the result can be written with its
   symmetry. P1 optimization is the special case.
-- [ ] 4.4.2 Cell degrees of freedom
+- [x] 4.4.2 Cell degrees of freedom
   Port `CellFreedom`: which cell quantities are held (any of a, b, c, alpha,
   beta, gamma, or the volume). Nothing held is the ordinary variable cell
   whose projector is the space group's own; holding the volume while the
   shape relaxes is the scan used for flexible frameworks. External pressure.
-- [ ] 4.4.3 FIRE and L-BFGS
+- [x] 4.4.3 FIRE and L-BFGS
   Port `fire` and `lbfgs` (and compare with sci-form `geometry_opt.rs`,
   `variable_cell.rs`, `minimizer.rs`): convergence on fmax and energy
   change, maximum step, line search for L-BFGS, restarts, cancellation token,
   progress callback with per-step data, trajectory written as extended XYZ.
-- [ ] 4.4.4 Applying the result
+- [x] 4.4.4 Applying the result
   `ApplyOptimizedGeometry` command: the optimized asymmetric unit and cell
   replace the old ones in one undoable step.
-- [ ] 4.4.5 Equation of state
+- [x] 4.4.5 Equation of state
   Port `ff/eos.py`: fit Birch-Murnaghan (and Murnaghan, Vinet) to the points of
   a constant-volume scan (each point relaxed with shape and atoms free) to get
   the bulk modulus and its derivative, with fit quality.
 
 ## Task 4.5 — Coordinates, constraints and relaxed scans
 
-- [ ] 4.5.1 Scan coordinates
+- [x] 4.5.1 Scan coordinates
   Port `ff/coordinates.py` (571 lines): distance, angle, torsion, angle
   between two planes, and the cell's own parameters and volume. An endpoint is
   a **group of atoms** (a group of one is an atom; a group of many is its
   centroid, recomputed each step), not a dummy atom.
-- [ ] 4.5.2 Constraints
+- [x] 4.5.2 Constraints
   Port `ff/constraints.py`: hold a coordinate while everything else relaxes
   by projecting out its gradient rather than freezing the atoms that define it
   (freezing four atoms to hold one dihedral removes twelve degrees of freedom
   to constrain one). Also fixed atoms and fixed Cartesian components.
-- [ ] 4.5.3 Relaxed scan driver
+- [x] 4.5.3 Relaxed scan driver
   Port `ff/scan.py` (862 lines; split) and `modules/scan.py`: for each value of
   an axis set the coordinate, relax the rest, record energy and geometry,
   write each point to disk before starting the next (`scan.csv`, per-point

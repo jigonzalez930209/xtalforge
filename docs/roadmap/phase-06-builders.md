@@ -30,7 +30,7 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.1 — Molecules from SMILES
 
-- [ ] 6.1.1 SMILES parser and molecular graph
+- [x] 6.1.1 SMILES parser and molecular graph
   Port sci-form `smiles.rs` (875 lines), `graph.rs` (627) and the needed parts
   of `stereo.rs` (1121), each split under 500 lines: atoms, bonds,
   aromaticity, charges, isotopes, explicit and implicit hydrogens, ring
@@ -47,7 +47,7 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   its bonded atoms are placed on an ideal polyhedron (linear, trigonal,
   tetrahedral, square planar, trigonal bipyramidal, square pyramidal,
   octahedral, …) and the rest of the molecule follows.
-- [ ] 6.1.4 Built molecule type
+- [x] 6.1.4 Built molecule type
   Port `build/molecule.py`: a fragment plus which of its atoms are connection
   points; converts to a `Structure` (molecule in a box) or a clipboard
   `Fragment`.
@@ -185,7 +185,7 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.10 — Nets drawn as structures
 
-- [ ] 6.10.1 Net builder
+- [x] 6.10.1 Net builder
   Port `build/topology.py` and `modules/net.py`: an RCSR net as a structure
   (vertices as dummy or chosen atoms, edges as topology bonds) so it can be
   viewed, measured and used as a template. No optional dependency.

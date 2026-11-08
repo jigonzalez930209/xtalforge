@@ -91,13 +91,13 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.5 — Indexing
 
-- [ ] 7.5.1 Indexing engines
+- [x] 7.5.1 Indexing engines
   Port `powder/index.py` (398 lines) and reimplement the rietx search it
   calls: three engines that fail differently (to be identified in Task 7.1;
   dichotomy, TREOR-type and ITO-type methods are the usual set) and their
   agreement as confidence; search specification (crystal systems, volume
   range, impurity tolerance).
-- [ ] 7.5.2 Figures of merit and ranking
+- [x] 7.5.2 Figures of merit and ranking
   Predicted lines per candidate cell, M20 and F_N figures of merit, ranking
   table (TOPAS `b_indy` and its `.ndx` table).
 - [ ] 7.5.3 Free cell parameters per space group
@@ -110,11 +110,11 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.6 — Pawley and Le Bail
 
-- [ ] 7.6.1 Le Bail scaffold
+- [x] 7.6.1 Le Bail scaffold
   Equivalent of `rietx.schemas.structure.lebail_scaffold`: a phase with a cell
   and space group and no atoms, its reflection list generated from Phase 2
   (systematic absences from the operations).
-- [ ] 7.6.2 Pawley fit
+- [x] 7.6.2 Pawley fit
   Port `powder/pawley.py`: one cell and space group fitted to the whole
   pattern with every reflection intensity free (TOPAS `c_paw`), the test an
   indexed cell must pass. User settings: range, background order, which of
@@ -122,7 +122,7 @@ Crate: `xtalforge-powder`.
   Results: R-factors (Rp, Rwp, Rexp, χ²), refined cell with esds, reflection
   list. Document, as the source does, that a Bragg-Brentano cell also carries
   a systematic error of order 1e-4 no esd includes.
-- [ ] 7.6.3 Le Bail extraction
+- [x] 7.6.3 Le Bail extraction
   Iterative intensity extraction as an alternative and a cross-check.
 
 ## Task 7.7 — Parameter sets
@@ -161,7 +161,7 @@ Crate: `xtalforge-powder`.
   force field alone (one relaxation at the same cell, the w = 1 end), so both
   terms are of order one and a weight means the same thing on rutile and on a
   thousand-atom framework. Any Phase 4 calculator.
-- [ ] 7.9.2 Pareto sweep
+- [x] 7.9.2 Pareto sweep
   Port `powder/pareto.py`: refine at a series of weights from pattern-only to
   energy-only, keep the points no other point beats on both counts, and pick
   the knee where giving up fit starts to buy little energy.
