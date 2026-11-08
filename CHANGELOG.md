@@ -9,6 +9,9 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 4 Task 4.8: Gamma-point Hessian, vibrational modes, IR spectrum,
+  Gamma-point phonons, harmonic/ideal-gas thermochemistry and the
+  quasi-harmonic free-energy scan.
 - Phase 4 Task 4.3-4.5: QEq/EQeq charges, per-site charges, Ewald energy and
   forces, FIRE/L-BFGS optimization (P1/asymmetric, optional cell), equations of
   state and relaxed scans.
