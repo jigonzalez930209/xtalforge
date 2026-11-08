@@ -54,7 +54,7 @@ report() {
 
 check_pins() {
   local pins
-  pins=$(grep -E '^xtalforge(-core|-io|-symmetry)? = \{ version = "=' "$CARGO" \
+  pins=$(grep -E '^xtalforge(-[a-z]+)* = \{ version = "=' "$CARGO" \
     | sed -E 's/.*version = "=([^"]+)".*/\1/')
   if [ -z "$pins" ]; then
     report "no internal crate pins found in $CARGO"
@@ -76,7 +76,7 @@ check_json() {
 check_lock() {
   [ -f "$DOCS_LOCK" ] || return 0
   local values
-  values=$(sed -n 's/^[[:space:]]*"version": "\([^"]*\)".*/\1/p' "$DOCS_LOCK" | head -n 2)
+  values=$(sed -n 's/^[[:space:]]*"version": "\([^"]*\)".*/\1/p' "$DOCS_LOCK" | head -n 3)
   for found in $values; do
     [ "$found" = "$version" ] || report "docs/package-lock.json version $found should be $version"
   done
@@ -100,7 +100,7 @@ check_pyproject() {
 }
 
 write_pins() {
-  sed -i -E "s#^(xtalforge(-core|-io|-symmetry)? = \{ version = \")=[^\"]+\"#\1=$version\"#" "$CARGO"
+  sed -i -E "s#^(xtalforge(-[a-z]+)* = \{ version = \")=[^\"]+\"#\1=$version\"#" "$CARGO"
 }
 
 write_json_versions() {
@@ -146,7 +146,7 @@ fi
 
 write_pins
 write_json_versions "$DOCS_PKG" 1
-write_json_versions "$DOCS_LOCK" 2
+write_json_versions "$DOCS_LOCK" 3
 write_readme
 write_json_versions "$WASM_PKG" 1
 check_pyproject
