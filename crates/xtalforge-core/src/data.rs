@@ -194,14 +194,13 @@ fn decode_digest(name: &str, hex: &str) -> Result<[u8; 32], Error> {
     }
 
     let mut digest = [0u8; 32];
-    for (slot, pair) in digest.iter_mut().zip(bytes.chunks_exact(2)) {
+    for (slot, pair) in digest.iter_mut().zip(bytes.as_chunks::<2>().0) {
         let invalid = || Error::DataDigest {
             name: name.to_owned(),
         };
-        let (high, rest) = pair.split_first().ok_or_else(invalid)?;
-        let low = rest.first().ok_or_else(invalid)?;
-        let high = hex_nibble(*high).ok_or_else(invalid)?;
-        let low = hex_nibble(*low).ok_or_else(invalid)?;
+        let [high, low] = *pair;
+        let high = hex_nibble(high).ok_or_else(invalid)?;
+        let low = hex_nibble(low).ok_or_else(invalid)?;
         *slot = (high << 4) | low;
     }
     Ok(digest)
