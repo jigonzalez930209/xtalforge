@@ -177,12 +177,12 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.10 — Modules, jobs, run records, reports
 
-- [ ] 5.10.1 Module registry
+- [x] 5.10.1 Module registry
   Port `modules/registry.py`: what can be run, as data (module name, label,
   actions, parameters from Task 3.8, whether it needs a structure, an
   availability check). The CLI `modules` and `run` commands, the Python API
   and the agent tools all read it.
-- [ ] 5.10.2 Jobs
+- [x] 5.10.2 Jobs
   Port `modules/job.py`: a module's `run` gets one `Job` argument (structure,
   parameters, run folder, cancellation token, progress sink, log) and returns
   a `JobResult` (sentence, optional new structure, report). A `Job` can grow
