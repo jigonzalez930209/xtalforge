@@ -108,7 +108,7 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.3 — Limits
 
-- [ ] 1.3.1 Limits model
+- [x] 1.3.1 Limits model
   Port `core/limits.py`: every size estimate is arithmetic made **before**
   anything is built (supercell atoms = cell atoms × |det P|; grid points =
   product of the grid shape; drawn atoms = atoms × range volume). Two levels:
@@ -117,14 +117,20 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   says what would fit. Profiles: `Standard` (8 GB class machine), `Generous`
   (every limit doubled), `WarnOnly` (never refuses). The numbers come from the
   Crystal-Builder table.
-- [ ] 1.3.2 Verdict type
+  Note: `xtalforge_core::limits`; builder-specific carbon/nanotube/graphene
+  estimates land with their builders in Phase 6, the budgets are fixed.
+- [x] 1.3.2 Verdict type
   `Verdict { fits, level, estimate, limit, suggestion }` returned by every
   `estimate_*` function; operations take a `&Limits` and return
   `Error::LimitExceeded(Verdict)` when refused.
-- [ ] 1.3.3 Surfaces
+  Note: `Verdict { level, estimate, sentence }`; `refused()` and `warned()`,
+  and `Error::LimitExceeded` with code `limit_exceeded`.
+- [x] 1.3.3 Surfaces
   Global `--limits` flag in the CLI; `limits=` keyword in Python; an options
   field in WASM; documented defaults per surface (WASM defaults to `Standard`
   because browser memory is small).
+  Note: `limits_bounds`/`limits_check` in Rust, Python and WASM; the CLI has
+  the global `--limits` flag; `docs/api/limits.md` documents the defaults.
 
 ## Task 1.4 — Sites, Structure and properties
 
