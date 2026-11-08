@@ -6,8 +6,10 @@
 
 pub mod cell;
 pub mod data;
+pub mod elements;
 
 pub use cell::cell_volume;
+pub use elements::{Element, Isotope, element_info};
 
 /// Version of the workspace, from the package metadata.
 ///
