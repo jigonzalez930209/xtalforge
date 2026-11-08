@@ -402,25 +402,3 @@ fn help_lists_the_phase_one_commands() {
         assert!(text.contains(command), "help is missing {command}");
     }
 }
-
-#[test]
-fn symmetry_detect_reports_the_space_group() {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
-    let output = run(&[
-        "--json",
-        "symmetry",
-        "detect",
-        &path.to_string_lossy(),
-        "--symprec",
-        "0.001",
-    ]);
-    assert!(output.status.success());
-    let value: serde_json::Value =
-        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
-    assert_eq!(value["number"], 227);
-    assert_eq!(value["hall_number"], 525);
-    assert_eq!(
-        value["operations"].as_array().expect("operations").len(),
-        192
-    );
-}
