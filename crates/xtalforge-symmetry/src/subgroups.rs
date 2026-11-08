@@ -30,6 +30,10 @@ pub struct Subgroup {
     pub operations: Vec<SymOp>,
     /// Number of conjugates in the class.
     pub conjugates: usize,
+    /// Identified space-group number, when moyo could name the subgroup.
+    pub subgroup_number: Option<u32>,
+    /// Identified Hall number, when moyo could name the subgroup.
+    pub subgroup_hall_number: Option<u32>,
 }
 
 /// Primitive operations of a Hall setting.
@@ -67,13 +71,17 @@ pub fn translationengleiche_subgroups(
     let mut groups = Vec::new();
     for class in classes {
         let representative = class.representative;
+        let operations = operations_from_moyo(&representative.operations)?;
+        let identification = identify_space_group(&operations).ok();
         groups.push(Subgroup {
             kind: SubgroupKind::Translationengleiche,
             parent_hall_number: hall_number,
             index: representative.translationengleiche_index,
             depth: representative.depth,
-            operations: operations_from_moyo(&representative.operations)?,
+            operations,
             conjugates: class.conjugates.len(),
+            subgroup_number: identification.map(|value| value.0),
+            subgroup_hall_number: identification.map(|value| value.1),
         });
     }
     Ok(groups)
@@ -111,13 +119,17 @@ pub fn klassengleiche_subgroups(
     let mut groups = Vec::new();
     for class in classes {
         let representative = class.representative;
+        let operations = operations_from_moyo(&representative.parent_operations)?;
+        let identification = identify_space_group(&operations).ok();
         groups.push(Subgroup {
             kind: SubgroupKind::Klassengleiche,
             parent_hall_number: hall_number,
             index: representative.klassengleiche_index,
             depth: 1,
-            operations: operations_from_moyo(&representative.parent_operations)?,
+            operations,
             conjugates: class.conjugates.len(),
+            subgroup_number: identification.map(|value| value.0),
+            subgroup_hall_number: identification.map(|value| value.1),
         });
     }
     Ok(groups)

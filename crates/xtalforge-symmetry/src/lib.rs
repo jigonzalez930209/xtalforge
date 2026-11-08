@@ -10,6 +10,10 @@ pub mod brillouin;
 pub mod convert;
 pub mod dataset;
 pub mod diagnostics;
+pub mod kpath;
+pub mod layer;
+pub mod magnetic;
+pub mod molecular;
 pub mod reduction;
 pub mod spacegroup;
 pub mod standardize;
@@ -23,6 +27,10 @@ pub use diagnostics::{
     AtomDeviation, DEFAULT_LADDER, SymmetryDiagnostics, ToleranceRange, ToleranceSample, diagnose,
     tolerance_ladder, tolerance_samples,
 };
+pub use kpath::{KPath, band_path, band_path_for_structure, classify_bravais};
+pub use layer::{LayerDataset, detect_layer_symmetry};
+pub use magnetic::{MagneticDataset, MagneticOperation, detect_magnetic_symmetry};
+pub use molecular::{MolecularPointGroup, molecular_point_group};
 pub use reduction::{
     ReducedStructure, Reduction, lattices_equivalent, reduce_lattice, reduce_structure,
 };
@@ -30,12 +38,15 @@ pub use spacegroup::{
     SpaceGroup, SpaceGroupFilter, WyckoffPosition, all_settings, catalogue, crystal_system,
     lattice_system, laue_class,
 };
-pub use standardize::{StandardizedStructure, idealize, primitive_cell, standardize};
+pub use standardize::{
+    StandardizedStructure, change_setting, idealize, primitive_cell, standardize,
+};
 pub use subgroups::{
     Subgroup, SubgroupKind, identify_space_group, klassengleiche_subgroups, primitive_operations,
     translationengleiche_subgroups,
 };
 pub use workflow::{
     SetMode, SetReport, SetSummary, SymmetryResult, WyckoffAssignment, asymmetrize,
-    detect_and_symmetrize, free_parameters, set_space_group, to_p1, wyckoff_assignments,
+    detect_and_symmetrize, free_parameters, lower_to_subgroup, set_space_group, to_p1,
+    wyckoff_assignments,
 };

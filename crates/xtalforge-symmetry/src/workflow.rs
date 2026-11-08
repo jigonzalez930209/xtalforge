@@ -394,3 +394,86 @@ pub fn free_parameters(coordinates: &str, frac: [f64; 3]) -> Vec<(char, f64)> {
     }
     parameters
 }
+
+/// Lowers a structure to a subgroup identified by its space-group number.
+///
+/// The subgroup operations are taken in the default setting of
+/// `subgroup_number`; atoms are grouped by matching the operation images to the
+/// current P1 atoms and the first atom of every orbit is kept.
+///
+/// # Errors
+///
+/// Returns [`Error::Symmetry`] when the subgroup has no identified number or
+/// when the tolerance is invalid.
+pub fn lower_to_subgroup(
+    structure: &Structure,
+    subgroup_number: u32,
+    tolerance: f64,
+) -> Result<Structure, Error> {
+    if !tolerance.is_finite() || tolerance <= 0.0 {
+        return Err(Error::Symmetry(format!(
+            "subgroup tolerance must be positive, got {tolerance}"
+        )));
+    }
+    let group = SpaceGroup::from_number(subgroup_number)?;
+    lower_with_group(structure, &group, tolerance)
+}
+
+fn lower_with_group(
+    structure: &Structure,
+    group: &SpaceGroup,
+    tolerance: f64,
+) -> Result<Structure, Error> {
+    let p1 = structure.p1()?;
+    let mut assigned = vec![false; p1.atoms.len()];
+    let mut builder =
+        StructureBuilder::new(structure.name(), p1.lattice).hall(group.hall_symbol.clone());
+    for operation in &group.operations {
+        builder = builder.operation(*operation);
+    }
+    for (index, atom) in p1.atoms.iter().enumerate() {
+        if assigned.get(index).copied().unwrap_or(true) {
+            continue;
+        }
+        if let Some(slot) = assigned.get_mut(index) {
+            *slot = true;
+        }
+        for operation in &group.operations {
+            let image = operation.apply(atom.frac);
+            let mut best: Option<(f64, usize)> = None;
+            for (other_index, other) in p1.atoms.iter().enumerate() {
+                if other.element != atom.element {
+                    continue;
+                }
+                let distance = p1.lattice.distance(image, other.frac);
+                if distance <= tolerance && best.is_none_or(|(value, _)| distance < value) {
+                    best = Some((distance, other_index));
+                }
+            }
+            if let Some((_, other_index)) = best
+                && let Some(slot) = assigned.get_mut(other_index)
+            {
+                *slot = true;
+            }
+        }
+        let parent = structure.sites().get(atom.site_idx);
+        let mut site = Site::new(atom.label.clone(), &atom.element, atom.frac)?
+            .with_occupancy(atom.occupancy)?;
+        if let Some(parent) = parent {
+            if let Some(u_iso) = parent.u_iso() {
+                site = site.with_u_iso(u_iso)?;
+            }
+            if let Some(charge) = parent.charge() {
+                site = site.with_charge(charge)?;
+            }
+            for (key, value) in parent.props() {
+                site = site.with_prop(key.clone(), value.clone());
+            }
+        }
+        builder = builder.site(site);
+    }
+    for (key, value) in structure.metadata() {
+        builder = builder.metadata(key.clone(), value.clone());
+    }
+    builder.build()
+}

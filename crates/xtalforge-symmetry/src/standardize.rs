@@ -135,3 +135,30 @@ fn std_structure_with_hall(structure: Structure, group: &SpaceGroup) -> Result<S
     }
     builder.build()
 }
+
+/// Changes the setting of a structure to a specific Hall number.
+///
+/// The structure is standardized in the requested setting; the physical
+/// geometry is preserved while the origin, axes and cell choice change.
+///
+/// # Errors
+///
+/// Returns [`Error::Symmetry`] for an unknown Hall number or the errors of
+/// [`standardize`].
+pub fn change_setting(
+    structure: &Structure,
+    hall_number: u32,
+) -> Result<StandardizedStructure, Error> {
+    if !(1..=530).contains(&hall_number) {
+        return Err(Error::Symmetry(format!(
+            "Hall number must be in 1..=530, got {hall_number}"
+        )));
+    }
+    standardize(
+        structure,
+        SymmetryOptions {
+            setting: crate::SettingChoice::HallNumber(hall_number),
+            ..SymmetryOptions::default()
+        },
+    )
+}
