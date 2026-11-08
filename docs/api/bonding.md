@@ -19,8 +19,18 @@ let components = graph.components();
 keep their image. `perceive_bonds(structure, rules)` is the configurable
 entry point.
 
+## Explicit and topology bonds
+
+`ExplicitBond { i, j, image, order, remove }` is applied after perception: a
+removal deletes the matching perceived bond, and an addition inserts it (or
+updates its order) and marks it `explicit`. `TopologyBond { i, j, image }` is
+stored separately in `Structure::topology_bonds()`; it is a network edge, not
+chemistry, and never enters the chemical bond graph. Both types are
+serialized with the structure.
+
 ## Status
 
-Distance perception and the connectivity graph are complete. Explicit bonds
-with symmetry propagation (1.11.2), topology bonds (1.11.3) and the full
-corpus comparison (1.11.5) follow with the CIF reader and the command layer.
+Distance perception, explicit additions/removals, topology edges and the
+connectivity graph are complete. Bond symmetry propagation to every image
+(1.11.2) and the full corpus comparison (1.11.5) follow with the command
+layer.

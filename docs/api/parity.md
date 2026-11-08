@@ -15,6 +15,17 @@ compares this table with the symbols each surface actually exports.
 | `limits_bounds` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
 | `limits_check` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
 | `structure_info` | 1 | done | done | done | done | Structure summary (Task 1.4.5); JSON bridge until CIF lands |
+| `read_cif` | 1 | done | done | done | done | CIF reader (Task 1.15); CLI `info` and `convert` |
+| `read_structure` | 1 | done | done | done | done | Format dispatch (Task 1.16.3); empty hint auto-detects |
+| `supercell` | 1 | done | done | done | done | Supercells (Task 1.7); WASM `supercell_info` |
+| `slab` | 1 | done | done | done | done | Slabs (Task 1.8); WASM `slab_info` |
+| `bonds` | 1 | done | done | done | done | Bond graph (Task 1.11) |
+| `rings` | 1 | done | done | done | done | Primitive rings (Task 1.12) |
+| `groups` | 1 | done | done | done | done | Functional groups (Task 1.13) |
+| `neighbors` | 1 | done | done | done | done | Periodic neighbors (Task 1.10) |
+| `distance` | 1 | done | done | done | done | Measures (Task 1.14) |
+| `angle` | 1 | done | done | done | done | Measures (Task 1.14) |
+| `torsion` | 1 | done | done | done | done | Measures (Task 1.14) |
 
 ## Planned exceptions
 
