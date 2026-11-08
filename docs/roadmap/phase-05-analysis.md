@@ -115,14 +115,14 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   the RCSR terms of use and record them in `THIRD_PARTY.md` before copying
   them into `data/`. If redistribution is not allowed, download on first use
   with a checksum.
-- [ ] 5.6.2 Quotient graph
+- [x] 5.6.2 Quotient graph
   Port `analysis/topology.py` (1484 lines; split): a net is a finite quotient
   graph whose edges carry lattice translations, up to relabelling of vertices
   and change of basis in GL(d, Z). Built from a structure by contracting
   building units (metal clusters and organic linkers) into vertices, or from a
   CGD file. Only connectivity matters, so the net is unchanged by setting
   changes, supercells and relaxations.
-- [ ] 5.6.3 Invariants and canonical key
+- [x] 5.6.3 Invariants and canonical key
   Coordination sequences, vertex symbols, point symbols, periodicity
   dimension, and a canonical key (canonical labelling of the quotient graph
   with a normalized translation basis) so equal nets give equal keys.
