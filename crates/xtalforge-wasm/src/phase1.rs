@@ -379,3 +379,43 @@ pub fn pxrd_info(
     set(&object, "points", points.into());
     Ok(object.into())
 }
+
+/// Builds a graphene sheet and returns its summary.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid repeats or spacing.
+#[wasm_bindgen]
+pub fn build_graphene_info(
+    nx: u32,
+    ny: u32,
+    layers: u32,
+    interlayer: f64,
+    vacuum: f64,
+) -> Result<JsValue, JsValue> {
+    let structure =
+        xtalforge::build::graphene(nx, ny, layers, interlayer, vacuum).map_err(to_js_error)?;
+    summary_object(&structure)
+}
+
+/// Builds a nanotube and returns its summary.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for a bad chiral vector or length.
+#[wasm_bindgen]
+pub fn build_nanotube_info(n: i32, m: i32, length: u32, vacuum: f64) -> Result<JsValue, JsValue> {
+    let structure = xtalforge::build::nanotube(n, m, length, vacuum).map_err(to_js_error)?;
+    summary_object(&structure)
+}
+
+/// Builds C60 and returns its summary.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` when the embedded data is invalid.
+#[wasm_bindgen]
+pub fn build_c60_info() -> Result<JsValue, JsValue> {
+    let structure = xtalforge::build::fullerene(60).map_err(to_js_error)?;
+    summary_object(&structure)
+}

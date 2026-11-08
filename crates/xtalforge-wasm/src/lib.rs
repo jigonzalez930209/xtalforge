@@ -22,8 +22,9 @@ use common::{array3, array6, set, to_js_error};
 
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
-    bonds, convert_structure, groups, mesh_stl, neighbors, pxrd_info, read_cif, read_structure,
-    rings, scene_summary, slab_info, slab_text, supercell_info, supercell_text,
+    bonds, build_c60_info, build_graphene_info, build_nanotube_info, convert_structure, groups,
+    mesh_stl, neighbors, pxrd_info, read_cif, read_structure, rings, scene_summary, slab_info,
+    slab_text, supercell_info, supercell_text,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{
