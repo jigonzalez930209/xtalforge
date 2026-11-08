@@ -25,6 +25,7 @@ Pages are added with the feature that introduces them:
 - [CIF parsing](./cif) (Task 1.15)
 - [POSCAR and XYZ](./formats) (Task 1.16)
 - [Symmetry detection](./symmetry) (Task 2.1)
+- [Machine-learning backend](./ml-backend) (Task 4.11)
 - [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
 - [Validation and tolerances](./validation) (Task 0.9.4)
 - [Golden data](./golden-data) (Task 0.9.3)
