@@ -83,6 +83,8 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.6: `SymOp` parsing/printing/composition/inversion and
   `P1Cell`/`P1Atom` expansion with site/operation/lattice provenance and
   special-position deduplication.
+- Phase 1 Task 1.7: diagonal and general supercells as P1, origin shifts,
+  metadata/site-property preservation and the supercell limit check.
 
 ### Changed
 

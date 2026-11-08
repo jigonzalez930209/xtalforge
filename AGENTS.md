@@ -247,7 +247,8 @@ Independent version numbers that do NOT follow the crate version:
   implemented locally; its remaining external work is tracked in
   `docs/roadmap/phase-00-status.md`. Tasks 1.1 (elements), 1.2 (lattice) and
   1.3 (limits), 1.4 (sites and structures), 1.5 (serialization schema) and
-  1.6 (P1 expansion) are complete; Task 1.7 (supercells) is next.
+  1.6 (P1 expansion) and 1.7 (supercells) are complete; Task 1.8 (slabs)
+  is next.
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
   instruction. Task 0.6.5 (name reservation) waits for explicit approval; the
