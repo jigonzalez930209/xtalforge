@@ -139,3 +139,19 @@ fn script_applies_commands_with_undo_semantics() {
     assert_eq!(value["structure"]["sites"][0]["element"], "Ge");
     std::fs::remove_dir_all(&directory).unwrap();
 }
+
+#[test]
+fn analysis_porosity_and_nets() {
+    let output = run(&[
+        "--json",
+        "analysis",
+        "porosity",
+        &corpus("simple/Si.cif"),
+        "--spacing",
+        "0.5",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(value["cell_volume"].as_f64().expect("volume") > 0.0);
+    assert!(value["surface_area"].as_f64().expect("area") >= 0.0);
+}
