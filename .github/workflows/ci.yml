@@ -147,6 +147,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ci-docs
+          cache-on-failure: true
       - uses: jetli/wasm-pack-action@v0.4.0
       - name: Build the WASM demo package
         working-directory: crates/xtalforge-wasm
@@ -162,5 +166,13 @@ jobs:
       - name: Build the site
         working-directory: docs
         run: npm run docs:build
+      - name: Prepare the link-check root
+        run: |
+          mkdir -p .linkroot
+          ln -sfn "$PWD/docs/.vitepress/dist" .linkroot/xtalforge
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --offline --no-progress --accept 200,204,206 --root-dir .linkroot --fallback-extensions html ./docs/.vitepress/dist
       - name: Parity matrix
         run: scripts/check-parity.sh
