@@ -1,8 +1,9 @@
 //! Command dispatch for the CLI.
 
 use crate::{
-    Cli, CliError, Command, SymmetryAction, analyze, basic, build, build_structures, convert,
-    measure, mesh, pxrd, spacegroup, symmetry, symmetry_analysis,
+    Cli, CliError, analyze, args, args::Command, basic, build, build_structures, commands_extra,
+    convert, measure, mesh, pxrd, spacegroup, symmetry, symmetry::SymmetryAction,
+    symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -12,6 +13,22 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         return Err(CliError::input("--threads must be a positive number"));
     }
     match &cli.command {
+        Command::Formats => commands_extra::formats(cli),
+        Command::Params { name } => commands_extra::params(cli, name.as_deref()),
+        Command::Project { action } => match action {
+            args::ProjectAction::Pack { path, out } => commands_extra::project_pack(cli, path, out),
+            args::ProjectAction::Info { path } => commands_extra::project_info(cli, path),
+            args::ProjectAction::Extract { path, dir } => {
+                commands_extra::project_extract(cli, path, dir)
+            }
+        },
+        Command::Trajectory {
+            path,
+            frame,
+            out,
+            format,
+        } => commands_extra::trajectory(cli, path, *frame, out.as_deref(), *format),
+        Command::Script { path } => commands_extra::script(cli, path),
         Command::Version => {
             let version = xtalforge::core::version();
             if cli.json {

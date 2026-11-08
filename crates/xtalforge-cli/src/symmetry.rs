@@ -4,6 +4,8 @@ use xtalforge::symmetry::{
     SetMode, SettingChoice, SpaceGroup, SymmetryOptions, detect_symmetry, set_space_group, to_p1,
 };
 
+use clap::Subcommand;
+
 use crate::format::StructureFormat;
 use crate::{Cli, CliError, input, output};
 
@@ -190,4 +192,196 @@ pub(crate) fn lower(
     let lowered = xtalforge::symmetry::lower_to_subgroup(&structure, subgroup, tolerance)
         .map_err(CliError::core)?;
     output::emit_structure(cli, &lowered, out, format)
+}
+
+#[derive(Debug, Subcommand)]
+pub(crate) enum SymmetryAction {
+    /// Detect the symmetry of a structure.
+    Detect {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, value_name = "A", default_value_t = 1e-3)]
+        symprec: f64,
+        /// Angle tolerance in degrees.
+        #[arg(long, value_name = "DEG")]
+        angle_tolerance: Option<f64>,
+        /// Preferred Hall number (1 to 530).
+        #[arg(long, value_name = "N")]
+        hall_number: Option<u32>,
+    },
+    /// Expand a structure to P1.
+    P1 {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Reduce a structure to its detected asymmetric unit.
+    Asymmetrize {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, value_name = "A", default_value_t = 1e-3)]
+        symprec: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// List the translationengleiche subgroups of a Hall setting.
+    Subgroups {
+        /// Hall number (1 to 530).
+        hall_number: u32,
+        /// Comparison tolerance.
+        #[arg(long, default_value_t = 1e-5)]
+        epsilon: f64,
+    },
+    /// Lower a structure to a subgroup number.
+    Lower {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Target space-group number.
+        subgroup: u32,
+        /// Matching tolerance in Angstrom.
+        #[arg(long, default_value_t = 0.5)]
+        tolerance: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build the conventional standardized cell.
+    Standardize {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, default_value_t = 1e-3)]
+        symprec: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build the standardized primitive cell.
+    Primitive {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, default_value_t = 1e-3)]
+        symprec: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Reduce the lattice with Niggli, Delaunay or Minkowski reduction.
+    Reduce {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Reduction algorithm.
+        #[arg(long, default_value = "niggli")]
+        algorithm: String,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Print Wyckoff assignments.
+    Wyckoff {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, default_value_t = 1e-3)]
+        symprec: f64,
+    },
+    /// Detect the molecular point group (finite molecules).
+    Pointgroup {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, default_value_t = 1e-3)]
+        tolerance: f64,
+    },
+    /// Print the band path of a structure.
+    Kpath {
+        /// Input path, or `-` for standard input.
+        path: String,
+    },
+    /// Change the setting of a structure to a Hall number.
+    Setting {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Hall number (1 to 530).
+        hall_number: u32,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Detect the collinear magnetic space group (experimental).
+    Magnetic {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, default_value_t = 1e-3)]
+        symprec: f64,
+    },
+    /// Detect the layer group of a slab.
+    Layer {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, default_value_t = 1e-3)]
+        symprec: f64,
+    },
+    /// Print the reciprocal-space Brillouin zone.
+    Brillouin {
+        /// Input path, or `-` for standard input.
+        path: String,
+    },
+    /// Detect across a tolerance ladder.
+    Scan {
+        /// Input path, or `-` for standard input.
+        path: String,
+    },
+    /// Report per-atom deviations from a space group.
+    Diagnose {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// H-M symbol, Hall symbol or number.
+        symbol: String,
+    },
+    /// Apply a space group to a structure.
+    Set {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// H-M symbol, Hall symbol or number.
+        symbol: String,
+        /// `reinterpret` or `impose`.
+        #[arg(long, default_value = "reinterpret")]
+        mode: String,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
 }

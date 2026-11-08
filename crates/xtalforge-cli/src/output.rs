@@ -74,3 +74,15 @@ pub(crate) fn emit_structure(
 pub(crate) fn write_destination(path: &str, text: &str) -> Result<(), CliError> {
     xtalforge::io::atomic::write_text(std::path::Path::new(path), text).map_err(CliError::core)
 }
+
+/// Writes bytes to a path atomically; `-` writes to standard output.
+pub(crate) fn write_bytes(path: &str, bytes: &[u8]) -> Result<(), CliError> {
+    if path == "-" {
+        use std::io::Write;
+        std::io::stdout().write_all(bytes).map_err(|error| {
+            CliError::new("io_error", format!("could not write stdout: {error}"))
+        })?;
+        return Ok(());
+    }
+    xtalforge::io::atomic::write_bytes(std::path::Path::new(path), bytes).map_err(CliError::core)
+}
