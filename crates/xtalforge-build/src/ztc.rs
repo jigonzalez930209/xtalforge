@@ -4,7 +4,7 @@
 //! periodic minimal surfaces. [`ztc_surface_mesh`] samples the gyroid, the
 //! surface used for zeolite-templated carbon models, and
 //! [`schwarzite_surface_mesh`] samples Schwarz P. The samples are handed to
-//! [`xtalforge_analysis::isosurface`], so the mesh is periodic and
+//! the `xtalforge_analysis::isosurface` extractor, so the mesh is periodic and
 //! deterministic for a given grid.
 
 use std::f64::consts::TAU;
