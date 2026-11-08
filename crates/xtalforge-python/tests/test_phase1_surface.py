@@ -448,3 +448,13 @@ def test_prepare_surface() -> None:
     assert report["energy"] is not None
     assert abs(report["total_charge"]) < 1e-6
     assert report["steps"][0]["name"]
+
+
+def test_mof_surface() -> None:
+    topologies = xtalforge.mof_topologies()
+    assert any(item["name"] == "pcu" for item in topologies)
+    blocks = xtalforge.mof_blocks()
+    assert any(item["name"] == "Zn4O" for item in blocks)
+    built = xtalforge.build_mof("pcu", "Zn4O", "benzene")
+    assert built["n_sites"] > 0
+    assert isinstance(built["warnings"], list)
