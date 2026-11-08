@@ -3,7 +3,10 @@
 One page per domain, each showing the same operation in the four surfaces
 (Rust, CLI, Python, WebAssembly). Pages are added as features land.
 
+- [Binding architecture](./bindings)
+- [Core API](./core)
 - [Surface parity matrix](./parity)
+- [Hello-world API](./hello-world)
 
 Planned layout (generated or mirrored from source docs, see Task 0.7.2):
 

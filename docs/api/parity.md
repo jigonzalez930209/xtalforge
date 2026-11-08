@@ -7,8 +7,8 @@ compares this table with the symbols each surface actually exports.
 
 | Capability | Phase | Rust | CLI | Python | WASM | Notes |
 |---|---|---|---|---|---|---|
-| `version` | 0 | todo | todo | todo | todo | Hello-world slice (Task 0.5.7) |
-| `cell_volume` | 0 | todo | todo | todo | todo | Hello-world slice (Task 0.5.7) |
+| `version` | 0 | done | done | done | done | Hello-world slice (Task 0.5.7) |
+| `cell_volume` | 0 | done | done | done | done | Hello-world slice (Task 0.5.7) |
 
 ## Planned exceptions
 
