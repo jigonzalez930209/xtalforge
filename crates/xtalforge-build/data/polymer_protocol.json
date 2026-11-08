@@ -1,0 +1,24 @@
+{
+  "steps": [
+    {
+      "name": "Minimise",
+      "details": "Relax overlaps and bad contacts with an energy minimiser before any dynamics; keep the cell fixed at the packed density."
+    },
+    {
+      "name": "Anneal",
+      "details": "Heat and cool the model in several cycles so chains can escape local packing traps without changing the composition."
+    },
+    {
+      "name": "NVT",
+      "details": "Hold the volume and equilibrate the temperature with a thermostat until the potential energy plateaus."
+    },
+    {
+      "name": "NPT",
+      "details": "Couple a barostat and thermostat so the cell relaxes toward the target density at the production temperature and pressure."
+    },
+    {
+      "name": "Production",
+      "details": "Run the equilibrated model at the target conditions and sample the trajectory for the reported property averages."
+    }
+  ]
+}
