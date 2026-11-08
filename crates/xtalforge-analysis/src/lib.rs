@@ -8,10 +8,12 @@
 pub mod grid;
 pub mod isosurface;
 pub mod nets;
+pub mod peaks;
 pub mod pxrd;
 
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
 pub use isosurface::{TriangleMesh, isosurface};
 pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, quotient_graph};
+pub use peaks::{Peak, PeakOptions, find_peaks};
 pub use pxrd::{Pattern, PatternPoint, PxrdOptions, Radiation, Reflection, calculate_pxrd};
 pub use xtalforge_core::Error;
