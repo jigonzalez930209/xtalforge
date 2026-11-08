@@ -9,6 +9,9 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 4 Task 4.3-4.5: QEq/EQeq charges, per-site charges, Ewald energy and
+  forces, FIRE/L-BFGS optimization (P1/asymmetric, optional cell), equations of
+  state and relaxed scans.
 - Phase 4 Task 4.1/4.2: Calculator API, registry, run records and the native
   UFF/UFF4MOF engine with analytic gradients.
 - Phase 5 Task 5.1-5.3: calculated PXRD with radiation, reflections,
