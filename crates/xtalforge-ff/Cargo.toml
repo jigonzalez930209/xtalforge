@@ -18,5 +18,12 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 
+[features]
+default = []
+# Marker for the optional in-process sci-form backend (Task 4.10).  The
+# dependency is not vendored in this workspace; enabling the feature keeps the
+# adapter API but reports that the backend is not linked in this build.
+sci-form = []
+
 [lints]
 workspace = true
