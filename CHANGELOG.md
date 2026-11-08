@@ -89,6 +89,8 @@ essential release, then `0.x.y`).
   construction with layers, vacuum and P1 output, and plane angles.
 - Phase 1 Task 1.9: finite-cell images, Cartesian point transforms, plane
   fitting/alignment and displacement ellipsoids.
+- Phase 1 Task 1.10: periodic neighbor search with images, distances and
+  deterministic ordering; `neighbors` and `neighbors_of`.
 
 ### Changed
 
