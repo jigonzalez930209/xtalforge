@@ -5,12 +5,14 @@
 //! it (Tasks 5.2 and 5.3). Every public operation returns a typed [`Error`]
 //! and never panics on user input.
 
+pub mod fit;
 pub mod grid;
 pub mod isosurface;
 pub mod nets;
 pub mod peaks;
 pub mod pxrd;
 
+pub use fit::{FitOptions, FitResult, least_squares};
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
 pub use isosurface::{TriangleMesh, isosurface};
 pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, quotient_graph};
