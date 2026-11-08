@@ -65,6 +65,11 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.1: periodic table, deuterium and dummy species, Pyykko radii,
   symbol parsing, `element_info` in Rust, CLI, Python and WASM, the generated
   API table and the shared element vectors.
+- Phase 1 Task 1.2: `Lattice` with matrix rows, standard orientation,
+  parameters, volume, metric tensor, reciprocal cells, d-spacing and plane
+  normals, coordinate conversions, wrapping, exact minimum-image search,
+  transforms, strain, volume scaling and validation; `cell --params` in the
+  CLI and `lattice_info`/`lattice_minimum_image` in Python and WASM.
 
 ### Changed
 
