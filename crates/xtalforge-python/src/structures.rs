@@ -271,3 +271,40 @@ fn p1_payload<'py>(py: Python<'py>, p1: &P1Cell) -> PyResult<Bound<'py, PyDict>>
     )?;
     Ok(dict)
 }
+
+/// Builds a graphene sheet or stack.
+#[pyfunction]
+#[pyo3(signature = (nx, ny, layers = 1, interlayer = 3.35, vacuum = 15.0))]
+pub(crate) fn build_graphene<'py>(
+    py: Python<'py>,
+    nx: u32,
+    ny: u32,
+    layers: u32,
+    interlayer: f64,
+    vacuum: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure =
+        xtalforge::build::graphene(nx, ny, layers, interlayer, vacuum).map_err(crate::map_error)?;
+    structure_payload(py, &structure)
+}
+
+/// Builds a chiral nanotube.
+#[pyfunction]
+#[pyo3(signature = (n, m, length = 1, vacuum = 10.0))]
+pub(crate) fn build_nanotube<'py>(
+    py: Python<'py>,
+    n: i32,
+    m: i32,
+    length: u32,
+    vacuum: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure = xtalforge::build::nanotube(n, m, length, vacuum).map_err(crate::map_error)?;
+    structure_payload(py, &structure)
+}
+
+/// Builds C60.
+#[pyfunction]
+pub(crate) fn build_c60<'py>(py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
+    let structure = xtalforge::build::fullerene(60).map_err(crate::map_error)?;
+    structure_payload(py, &structure)
+}

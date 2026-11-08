@@ -19,7 +19,9 @@ mod view;
 
 use analysis::{angle, bonds, distance, groups, neighbors, pxrd, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
-use structures::{read_cif, read_structure, slab, supercell};
+use structures::{
+    build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
+};
 use symmetry::{
     asymmetrize, detect_symmetry, lower_to_subgroup, set_space_group, subgroups, to_p1,
 };
@@ -210,6 +212,9 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(limits_bounds, module)?)?;
     module.add_function(wrap_pyfunction!(limits_check, module)?)?;
     module.add_function(wrap_pyfunction!(structure_info, module)?)?;
+    module.add_function(wrap_pyfunction!(build_graphene, module)?)?;
+    module.add_function(wrap_pyfunction!(build_nanotube, module)?)?;
+    module.add_function(wrap_pyfunction!(build_c60, module)?)?;
     module.add_function(wrap_pyfunction!(angle, module)?)?;
     module.add_function(wrap_pyfunction!(bonds, module)?)?;
     module.add_function(wrap_pyfunction!(distance, module)?)?;
