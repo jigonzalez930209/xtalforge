@@ -9,6 +9,7 @@ compares this table with the symbols each surface actually exports.
 |---|---|---|---|---|---|---|
 | `version` | 0 | done | done | done | done | Hello-world slice (Task 0.5.7) |
 | `cell_volume` | 0 | done | done | done | done | Hello-world slice (Task 0.5.7) |
+| `element_info` | 1 | done | done | done | done | Element data (Task 1.1.4) |
 
 ## Planned exceptions
 
