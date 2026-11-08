@@ -255,3 +255,63 @@ def test_symmetry_workflow_surface() -> None:
     report = xtalforge.set_space_group(asymmetric["json"], "227", "reinterpret")
     assert report["set_report"]["n_output"] == 1
     assert report["hall"] == "F 4d 2 3 -1d"
+
+
+def test_subgroups_surface() -> None:
+    groups = xtalforge.subgroups(525)
+    assert groups
+    assert any(group["subgroup_number"] == 216 for group in groups)
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    lowered = xtalforge.lower_to_subgroup(text, 216, 0.5)
+    assert lowered["hall"] == "F -4 2 3"
+
+
+def test_standardize_reduce_wyckoff_and_zone() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    standard = xtalforge.standardize(text, symprec=0.001)
+    assert standard["n_sites"] == 1
+    primitive = xtalforge.primitive_cell(text)
+    assert primitive["p1"]["n_atoms"] == 2
+    reduced = xtalforge.reduce_structure(text)
+    assert reduced["determinant"] in (-1.0, 1.0)
+    assignments = xtalforge.wyckoff_assignments(text, symprec=0.001)
+    assert assignments
+    assert assignments[0]["letter"] == "b"
+    zone = xtalforge.brillouin_zone(text)
+    assert len(zone["vertices"]) == 8
+    ladder = xtalforge.tolerance_ladder(text)
+    assert ladder
+    diagnostics = xtalforge.diagnose(text, "227")
+    assert diagnostics["max_displacement"] < 1e-6
+    path = xtalforge.band_path(text)
+    assert path["bravais"] == "cF"
+    assert "L" in path["special_points"]
+    changed = xtalforge.change_setting(text, 526)
+    assert changed["hall"] == "-F 4vw 2vw 3"
+    assert changed["p1"]["n_atoms"] == 8
+
+
+def test_layer_group_surface() -> None:
+    text = """data_layer
+_cell_length_a 4
+_cell_length_b 4
+_cell_length_c 20
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 90
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+C1 C 0 0 0
+C2 C 0.5 0.5 0
+"""
+    dataset = xtalforge.detect_layer_symmetry(text, 0.001)
+    assert 1 <= dataset["number"] <= 80
+    assert dataset["operations"]
