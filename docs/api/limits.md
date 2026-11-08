@@ -1,0 +1,73 @@
+# Limits
+
+Size checks are arithmetic, made before anything is allocated. Two levels:
+over the **soft** limit the caller is warned; over the **hard** limit the
+operation is refused and the message says what would fit.
+
+| Profile | Soft | Hard |
+|---|---|---|
+| `standard` | table value | table value |
+| `generous` | 2x | 2x |
+| `warn_only` | table value | never refuses |
+
+The table (Standard) is: drawn 100,000 / 400,000; supercell 50,000 / 200,000;
+grid 1,500,000 / 4,000,000; carbon 10,000 / 30,000; nanotube and graphene
+50,000 / 200,000; phonons 2,000 / 8,000; analytic Hessian 100 / 300.
+
+## API
+
+::: code-group
+
+```rust
+use xtalforge::core::{Limits, Profile, limits_bounds, limits_check};
+
+let limits = Limits::new(Profile::Standard);
+let verdict = xtalforge::core::limits::check_supercell(
+    &limits, 10_000, [[2.0, 0.0, 0.0], [0.0, 2.0, 0.0], [0.0, 0.0, 2.0]],
+)?;
+let (soft, hard) = limits_bounds("standard", "supercell")?;
+let report = limits_check("standard", "supercell", 80_000)?;
+```
+
+```bash
+xtalforge --limits standard cell --params 3 4 5 60 70 80
+```
+
+```python
+soft, hard = xtalforge.limits_bounds("standard", "supercell")
+report = xtalforge.limits_check("standard", "supercell", 80_000)
+```
+
+```js
+import { limits_bounds, limits_check } from "xtalforge-wasm";
+const bounds = limits_bounds("standard", "supercell");
+const report = limits_check("standard", "supercell", 80000);
+```
+
+:::
+
+## Estimates
+
+- `count(value)` — formats a count as `52,000` or `1.4 M`.
+- `drawn_atoms(n_atoms, ranges)` — cell atoms times the range volume.
+- `multiplier(p)` and `supercell_atoms(n_atoms, p)` — `|det P|`.
+- `grid_shape(lattice, spacing)` and `grid_points(lattice, spacing)` — from
+  the cell lengths, minimum 8 points per axis.
+- `check_drawn`, `check_supercell`, `check_grid`, `check_phonons` and
+  `check_hessian` return a `Verdict { level, estimate, sentence }`.
+- `Limits::bounds(budget)` returns `(soft, hard)`; `hard` is `None` under
+  `WarnOnly`.
+- `Verdict::refused` and `Verdict::warned` are the predicates; a refused
+  operation returns `Error::LimitExceeded(verdict)` with code
+  `limit_exceeded`.
+- `Budget` names the estimate; `LimitLevel` is `Ok`, `Warn` or `Refuse`.
+  `UNDO_ATOMS`, `UNDO_KEEP` and `HESSIAN_MIB_PER_ATOM` are the model constants.
+
+The builder-specific carbon, nanotube and graphene estimates arrive with the
+builders in Phase 6; their budgets are already present in the table.
+
+## Surfaces
+
+The CLI has the global `--limits {standard,generous,warn-only}` flag. Python
+takes `limits_check(profile, budget, estimate)`; WASM takes the same and
+returns an object. WASM defaults to `standard` because browser memory is small.

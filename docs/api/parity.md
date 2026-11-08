@@ -12,6 +12,8 @@ compares this table with the symbols each surface actually exports.
 | `element_info` | 1 | done | done | done | done | Element data (Task 1.1.4) |
 | `lattice_info` | 1 | done | done | done | done | Lattice (Task 1.2.5) |
 | `lattice_minimum_image` | 1 | done | n/a | done | done | Rust, Python and WASM; the CLI reports geometry through `cell` |
+| `limits_bounds` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
+| `limits_check` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
 
 ## Planned exceptions
 

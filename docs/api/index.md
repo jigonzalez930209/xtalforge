@@ -7,6 +7,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Core API](./core)
 - [Elements](./elements)
 - [Lattice](./lattice)
+- [Limits](./limits)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
