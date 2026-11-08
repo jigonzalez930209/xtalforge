@@ -1,0 +1,382 @@
+# Phase 1 — Core
+
+**Goal:** the headless crystal data model and its basic operations, with CIF,
+POSCAR and XYZ input/output, available from Rust, CLI, Python and WASM.
+
+**Reference:** `Crystal-Builder/xtal/core/` (lattice, site, structure, p1,
+supercell, slab, cellcut, transforms, neighbors, bonding, rings, groups,
+measure, properties, scalars, describe, molecule, elements, pyykko, limits),
+`xtal/io/{text,cif_reader,cif_writer,poscar,xyz}.py`; sci-form
+`src/materials/{cell,cif}.rs`, `src/periodic.rs`, `src/rings/`.
+
+**Data model decision (from Crystal-Builder `core/structure.py`):** a
+`Structure` is **an asymmetric unit plus a space group**, not a list of atoms
+in a box. The P1 cell is derived data carrying provenance for every atom
+(parent site, operation index, lattice shift). A P1 structure is the special
+case where the asymmetric unit is the whole cell. The **Hall symbol is the
+identity** of a space group, because a number alone does not fix the setting
+(227 has two origin choices, 146 has hexagonal and rhombohedral axes).
+
+**Dependency on Phase 2:** turning a Hall symbol into operations needs moyo
+(Task 2.1.2). Task 2.1 may therefore be implemented in parallel with Task 1.6;
+until then, structures carry an explicit operation list (as read from a CIF
+`_symmetry_equiv_pos_as_xyz` loop).
+
+**Exit criteria:** every subtask ticked; golden-data tests pass for the corpus;
+together with Task 2.1 this tags **v0.0.1**.
+
+Crates: `xtalforge-core`, `xtalforge-io`, `xtalforge-symmetry` (thin, for 2.1).
+
+---
+
+## Task 1.1 — Element data
+
+- [ ] 1.1.1 Periodic table
+  Port `core/elements.py` and sci-form `periodic.rs`: atomic number, symbol,
+  name, standard atomic mass, covalent radius (Cordero 2008, which
+  Crystal-Builder takes from gemmi), van der Waals radius (Bondi where defined,
+  same source), default color (Jmol/CPK palette), typical valences (used by
+  the UFF typer), electronegativity. Elements 1 to 118, with a dummy element
+  `X` for connection points and markers (Crystal-Builder uses dummy atoms for
+  MOF connection points). Data in `data/elements.json`, loaded once.
+  Acceptance: every value equals the Crystal-Builder value for Z = 1..103.
+- [ ] 1.1.2 Symbol parsing
+  Port the parser that turns whatever a file calls an atom into an element:
+  `Fe`, `FE`, `Fe2+`, `Fe1`, `O_1`, `C1A`, `Ow`, `D` (deuterium as H). Returns
+  the element and the leftover label/charge. Ambiguities (`Co` versus `CO`,
+  `Ca` versus `C a`) follow the Crystal-Builder rules; document them.
+  Property test: parsing the symbol of every element returns that element.
+- [ ] 1.1.3 Pyykko covalent radii and isotopes
+  Port `core/pyykko.py` (single, double and aromatic covalent radii of Pyykko
+  and Atsumi 2009, cited in the data file) and the isotope masses from
+  `ff/isotopes.py` as data files with typed accessors.
+- [ ] 1.1.4 Surfaces and docs
+  `element_info(symbol_or_z)` in Rust, CLI (`xtalforge element Fe`), Python,
+  WASM; a docs page with the full table generated from the data file at build
+  time.
+
+## Task 1.2 — Lattice
+
+- [ ] 1.2.1 `Lattice` type and conventions
+  Port `core/lattice.py` (465 lines). Conventions fixed once and documented:
+  the matrix ROWS are the vectors a, b, c in Angstrom; fractional to Cartesian
+  is `frac · M` (row-vector convention); the standard orientation puts a along
+  +x and b in the xy plane. Constructors from a matrix or from
+  `a, b, c, alpha, beta, gamma`. Derived quantities: parameters, volume,
+  metric tensor, reciprocal lattice (with and without 2π), interplanar
+  spacing d(hkl), angle between planes.
+- [ ] 1.2.2 Coordinate conversions and periodic geometry
+  Fractional/Cartesian conversion for one point and for slices of points;
+  wrapping into the cell with a tolerance that maps 0.9999999 to 0;
+  minimum-image vector and distance, correct for strongly skewed triclinic
+  cells (search the 27 neighbouring images or more when the cell is not
+  reduced; document the guarantee).
+- [ ] 1.2.3 Lattice transforms
+  `transform(P)` with the same convention as Crystal-Builder's
+  `Lattice.transform` (integer or rational 3x3 matrix, determinant sign
+  checks), scaling to a target volume, applying a strain tensor (needed by the
+  cell optimizers of Phase 4). Lattice reduction lives in Task 2.6.
+- [ ] 1.2.4 Validation
+  Reject zero or negative volume, non-finite values, angles outside (0, 180),
+  impossible angle combinations; error messages state the offending values.
+- [ ] 1.2.5 Surfaces and docs
+  Rust, CLI (`xtalforge cell --params 5 5 5 90 90 90`), Python, WASM; an
+  algorithm page on the conventions with a worked triclinic example.
+
+## Task 1.3 — Limits
+
+- [ ] 1.3.1 Limits model
+  Port `core/limits.py`: every size estimate is arithmetic made **before**
+  anything is built (supercell atoms = cell atoms × |det P|; grid points =
+  product of the grid shape; drawn atoms = atoms × range volume). Two levels:
+  over the **soft** limit the caller is warned (or asked, in interactive
+  front ends); over the **hard** limit the operation is refused and the error
+  says what would fit. Profiles: `Standard` (8 GB class machine), `Generous`
+  (every limit doubled), `WarnOnly` (never refuses). The numbers come from the
+  Crystal-Builder table.
+- [ ] 1.3.2 Verdict type
+  `Verdict { fits, level, estimate, limit, suggestion }` returned by every
+  `estimate_*` function; operations take a `&Limits` and return
+  `Error::LimitExceeded(Verdict)` when refused.
+- [ ] 1.3.3 Surfaces
+  Global `--limits` flag in the CLI; `limits=` keyword in Python; an options
+  field in WASM; documented defaults per surface (WASM defaults to `Standard`
+  because browser memory is small).
+
+## Task 1.4 — Sites, Structure and properties
+
+- [ ] 1.4.1 `Site`
+  Port `core/site.py`: label, element (or species list with occupancies for
+  mixed sites), fractional coordinates, occupancy, isotropic or anisotropic
+  displacement parameters (Uiso, Uij), formal charge, disorder assembly and
+  group, and `props`, an open map of typed extension values (UFF type,
+  refinement flags, computed charge, Zeo++ label) so later phases never have
+  to change the struct. Validation on construction.
+- [ ] 1.4.2 `Structure`
+  Port `core/structure.py` (939 lines; split into model, construction,
+  validation, queries): name, lattice, space group (Hall symbol plus explicit
+  operations), asymmetric-unit sites, explicit bonds (stored against the
+  asymmetric unit, see Task 1.11), metadata. Every mutation method is
+  crate-private; the public mutation path is the command layer of Phase 3, as
+  in Crystal-Builder, so undo is always possible. Until Phase 3 exists, a
+  `StructureBuilder` creates structures and pure functions return new ones.
+- [ ] 1.4.3 Molecule in a box
+  Port `core/molecule.py`: a non-periodic molecule stored as a structure in a
+  padded P1 box, made whole across boundaries, with conversion both ways. Its
+  point-group analysis is Task 2.8.3.
+- [ ] 1.4.4 Structure properties
+  Port `core/properties.py`: formula (sum and per formula unit), Z, molar
+  mass, density, cell contents, total charge and charge balance, counted on
+  the P1 cell with occupancies.
+- [ ] 1.4.5 Surfaces and docs
+  `Structure` handle in Python and WASM with accessors (lattice, sites,
+  P1 positions as arrays, properties), CLI `info` printing the same summary as
+  Crystal-Builder `xtal info` (cell, formula, density).
+
+## Task 1.5 — Serialization schema
+
+- [ ] 1.5.1 Versioned JSON schema
+  `serde` on every public data type with `schema_version` at the top level
+  (integer, independent of the crate version, see `AGENTS.md` 5.2). Unknown
+  fields are rejected on input except under an explicit `props` map.
+  Document the schema in `docs/api/schema.md` and publish a JSON Schema file
+  generated with `schemars` so other tools can validate.
+- [ ] 1.5.2 Round-trip and compatibility tests
+  Every type round-trips; a fixture of each schema version is kept in
+  `tests/schema/` and must keep loading after future changes (migration code
+  when the version changes).
+
+## Task 1.6 — P1 expansion
+
+- [ ] 1.6.1 `P1Cell` with provenance
+  Port `core/p1.py` (443 lines). For each P1 atom keep `site_idx`, `op_idx`
+  and the lattice shift `tau` such that
+  `frac[k] = ops[op_idx[k]].apply(sites[site_idx[k]].frac) + tau[k]`.
+  This provenance is what lets later code map a drawn atom back to its
+  asymmetric site and propagate an edit to the whole orbit.
+- [ ] 1.6.2 Deduplication and special positions
+  Merge images that coincide within a tolerance (periodic distance); the
+  number of distinct images equals the Wyckoff multiplicity. Warn when a
+  file's own symmetry repeats its atoms (Crystal-Builder
+  `_warn_if_coincident` in `io/registry.py`): this signals a file listing
+  the whole cell under a non-P1 group.
+- [ ] 1.6.3 Symmetry operations type
+  `SymOp` with exact rational rotation (integers) and translation (rationals
+  with denominator 1, 2, 3, 4, 6, 12), parsing and printing of `-x+1/2,y,z`
+  forms, composition, inverse, application to fractional points and to Uij
+  tensors.
+- [ ] 1.6.4 Tests
+  Golden comparison on the corpus: P1 atom counts, positions up to lattice
+  translation and permutation, provenance consistency (re-applying the
+  recorded operation reproduces the position).
+
+## Task 1.7 — Supercells and cell transformations
+
+- [ ] 1.7.1 Diagonal and general supercells
+  Port `core/supercell.py` (366 lines): `na × nb × nc` replication and general
+  integer matrices P (non-diagonal), enumerating lattice points inside the
+  new cell via the Smith/Hermite normal form or an equivalent exact method,
+  with no duplicates on the boundaries. Results are **P1** structures: a
+  supercell does not keep the old group in the same setting, and carrying it
+  forward silently would be wrong. Symmetry can be re-detected afterwards.
+- [ ] 1.7.2 Origin shift
+  Shift the origin by a fractional vector, rewrapping atoms; part of the same
+  module in Crystal-Builder.
+- [ ] 1.7.3 Limits
+  Every supercell is checked with Task 1.3 before allocation.
+
+## Task 1.8 — Slabs
+
+- [ ] 1.8.1 Surface basis
+  Port `core/slab.py` (260 lines): `surface_basis(hkl)` finds two integer
+  vectors spanning the (hkl) plane and a third that climbs one interplanar
+  spacing, forming a unimodular basis of the crystal lattice, so one layer is
+  one d(hkl) and holds exactly the atoms of one cell.
+- [ ] 1.8.2 Slab construction
+  Stack `layers` layers, turn c to the plane normal (which moves no atom,
+  only which in-plane copy is in the cell), add vacuum above, optional
+  termination shift. Result is P1 with the in-plane lattice preserved.
+- [ ] 1.8.3 Tests and demo
+  fcc (111) and (100), rocksalt (100), wurtzite (0001), a low-symmetry case;
+  atom counts per layer equal the bulk cell; browser demo with a slab builder.
+
+## Task 1.9 — Finite cell and Cartesian transforms
+
+- [ ] 1.9.1 Unit cell as a finite object
+  Port `core/cellcut.py`: every atom in one unit cell plus its bonds, as a
+  finite object with atoms on faces, edges and corners included as needed
+  (what a picture of one cell or an STL export needs, Task 3.15).
+- [ ] 1.9.2 Point-set transforms
+  Port `core/transforms.py`: free functions over Cartesian points (translate,
+  rotate about an axis through a point, mirror, invert, align a vector, fit
+  and align planes), with no notion of sites or undo; the commands of Phase 3
+  wrap them.
+- [ ] 1.9.3 Displacement ellipsoids
+  Also from `core/transforms.py`: Uij tensor to ellipsoid axes and lengths at
+  a probability level, used by viewers and by CIF output.
+
+## Task 1.10 — Neighbor search
+
+- [ ] 1.10.1 Periodic neighbor search
+  Port `core/neighbors.py`: all pairs within r Angstrom, with the lattice
+  translation through which they meet, returning `(i, j, image, distance)`.
+  Replace scipy `cKDTree` with a cell list (linked cells) built in fractional
+  space and sized from the perpendicular widths of the cell, so triclinic
+  cells are handled exactly; non-periodic structures use the same code with a
+  bounding box.
+- [ ] 1.10.2 Determinism and performance
+  Output sorted deterministically; optional rayon parallelism with an
+  identical result; criterion benchmarks on 10^3, 10^4 and 10^5 atoms
+  compared with the Python implementation timings.
+
+## Task 1.11 — Bonding
+
+- [ ] 1.11.1 Distance-based perception
+  Port the perception part of `core/bonding.py` (1779 lines; plan a split
+  into criteria, perception, explicit bonds, graph, topology bonds, queries).
+  Perception happens on the P1 cell: covalent radius sums with tolerance,
+  per-element-pair overrides, metal-specific rules, minimum distances,
+  occupancy and disorder group awareness, periodic bonds with image shifts.
+- [ ] 1.11.2 Explicit bonds and symmetry propagation
+  User bonds are stored against the asymmetric unit and propagated to every
+  symmetry image of the atoms they join (as in VESTA: draw one Fe-O bond and
+  the whole orbit gets it). Explicit removals override perception.
+- [ ] 1.11.3 Topology bonds
+  A third kind of bond that is not chemistry: net edges between node centres,
+  used by topology analysis and the net builder. Stored in its own set so it
+  never collides with chemical bonds joining the same pair.
+- [ ] 1.11.4 Connectivity graph and fragments
+  The combined graph; connected components under periodic bonding; making
+  molecules whole across boundaries; coordination numbers and environments;
+  the data behind Crystal-Builder `xtal bonds` (bonds, coordination,
+  fragments).
+- [ ] 1.11.5 Validation
+  Golden comparison of bond lists and coordination numbers for the full
+  corpus; every intentional deviation documented.
+
+## Task 1.12 — Rings
+
+- [ ] 1.12.1 Primitive rings
+  Port `core/rings.py`: Franzblau primitive (shortest-path) rings, not every
+  simple cycle (on graphene the naive search returns 1728 ten-cycles for 576
+  hexagons). Periodic-aware: rings may cross cell boundaries. Size limit
+  parameter. Compare with sci-form `rings/sssr.rs` (SSSR, molecular) and keep
+  both: SSSR for molecules, primitive rings for frameworks.
+- [ ] 1.12.2 Ring statistics
+  Counts per size, per-atom ring membership, aromaticity flag for molecules
+  (sci-form `rings/aromaticity.rs`).
+
+## Task 1.13 — Functional groups
+
+- [ ] 1.13.1 Catalogue and matcher
+  Port `core/groups.py` (324 lines): a closed catalogue of patterns (hydroxyl,
+  carboxylic acid, amine, C-F on a sheet edge, …) matched on the stored bond
+  graph, returning every instance so it can be selected or edited together.
+  Patterns stored as data.
+- [ ] 1.13.2 Tests
+  Each pattern tested on a small molecule and on a framework from the corpus.
+
+## Task 1.14 — Measurements, per-atom scalars, descriptions
+
+- [ ] 1.14.1 Measures
+  Port `core/measure.py` (376 lines): distances, angles and torsions computed
+  on minimum-image vectors between atoms of the cell, plus centroids, plane
+  fits and inter-plane angles.
+- [ ] 1.14.2 Per-bond and per-atom scalars
+  Port `core/scalars.py`: a number per bond or atom for colouring and
+  analysis (bond length, deviation from the covalent sum, coordination
+  number, charge, …), as a registry of named scalars.
+- [ ] 1.14.3 Atom description
+  Port `core/describe.py`: the short text describing one atom (element,
+  label, site, Wyckoff letter when known, coordination, bonds), used by
+  tooltips, the CLI and the agent layer.
+
+## Task 1.15 — Text input and CIF
+
+- [ ] 1.15.1 Robust text decoding
+  Port `io/text.py`: read UTF-8 with or without a byte-order mark (Notepad,
+  Excel, PowerShell and some Java tools write one), fall back to Latin-1 with
+  a warning, normalize line endings. Every text reader uses it, so a BOM never
+  becomes "expected block header" on line 1.
+- [ ] 1.15.2 CIF tokenizer and parser
+  Start from sci-form `parse_cif` and extend it to the behaviour of
+  `io/cif_reader.py` (583 lines): data blocks, loops, quoted and
+  semicolon-delimited strings, comments, numbers with standard uncertainties
+  `1.234(5)`, `?` and `.` values, multiple blocks with block selection. Pure
+  Rust (Crystal-Builder uses gemmi). Split into tokenizer, table builder, item
+  resolver.
+- [ ] 1.15.3 Symmetry statement priority
+  Port the reader's rule for files that carry several symmetry statements:
+  (1) a Hall symbol always wins; (2) else a symmetry-operation loop
+  (`_space_group_symop_operation_xyz` or `_symmetry_equiv_pos_as_xyz`), which
+  fixes the setting; (3) else an H-M symbol and/or international number, with
+  the ambiguity reported. Inconsistent statements produce warnings.
+- [ ] 1.15.4 Structure extraction
+  Cell, atom sites (label, type symbol, fractional coordinates, occupancy,
+  Uiso/Biso, `_atom_site_aniso_*`), formal charges
+  (`_atom_type_oxidation_number`, `_atom_site_charge`), disorder assembly and
+  group, explicit bonds (`_geom_bond`), and properties CIF has no tag for
+  (kept in `props`).
+- [ ] 1.15.5 Robustness
+  Never panic: malformed numbers, missing loops, truncated files, duplicate
+  labels all return typed errors or warnings with line numbers. Fuzz target
+  (`cargo-fuzz`, nightly, optional in CI) over the tokenizer and parser.
+- [ ] 1.15.6 CIF writer
+  Port `io/cif_writer.py`: cell, Hall and H-M symbols, operations,
+  asymmetric unit or P1, ADPs, charges, bonds, stable ordering and number
+  formatting. Round-trip test: reading the written file gives back an equal
+  structure.
+
+## Task 1.16 — POSCAR and XYZ
+
+- [ ] 1.16.1 POSCAR/CONTCAR
+  Port `io/poscar.py`: comment line, scale (including negative scale meaning
+  volume), lattice rows, species line and counts, `Selective dynamics`,
+  Direct or Cartesian. A file without a species line is refused with a clear
+  message, as Crystal-Builder does (VASP 4 files carry species only in
+  POTCAR).
+- [ ] 1.16.2 Extended XYZ
+  Port `io/xyz.py`: extended XYZ with `Lattice="…"` and `Properties=` (what
+  ASE, OVITO and VMD write) round-trips the cell; plain XYZ without a cell is
+  read into a P1 box padded around the atoms. This is also the clipboard text
+  format (Task 3.10.6). Multi-frame reading is Task 3.6.
+- [ ] 1.16.3 Minimal dispatch
+  `read_structure(text, format_hint)` and `write_structure(structure,
+  format)` dispatching by name or extension; replaced by the registry of
+  Task 3.1 without changing these signatures.
+
+## Task 1.17 — CLI, Python and WASM for Phase 1
+
+- [ ] 1.17.1 CLI commands
+  `info`, `convert`, `supercell`, `slab`, `bonds`, `rings`, `groups`,
+  `measure`, `neighbors`, `element`, each reading a path or stdin and writing
+  a path or stdout, with `--json`.
+- [ ] 1.17.2 Python surface
+  Classes `Lattice`, `Site`, `Structure`, `P1Cell`; functions mirroring the
+  Rust API; NumPy arrays for coordinates; docstrings derived from rustdoc;
+  `pytest` suite running the shared test vectors.
+- [ ] 1.17.3 WASM surface
+  Same operations over JS objects and typed arrays, string input (no
+  filesystem); node and browser tests running the shared vectors.
+- [ ] 1.17.4 Parity
+  `docs/api/parity.md` updated; `scripts/check-parity.sh` passes.
+
+## Task 1.18 — Documentation and release readiness
+
+- [ ] 1.18.1 Guide pages
+  Quick start for each surface; concepts (asymmetric unit versus P1, Hall
+  symbols, fractional and Cartesian coordinates, limits); file formats.
+- [ ] 1.18.2 Algorithm pages
+  Lattice conventions, P1 expansion with provenance, supercell lattice-point
+  enumeration, surface basis for slabs, cell-list neighbor search, bond
+  perception, Franzblau primitive rings, CIF symmetry priority.
+- [ ] 1.18.3 Demo
+  Browser CIF inspector: paste or drop a CIF, see cell parameters, formula,
+  density, bond list, ring statistics, and build a supercell or slab and
+  download it.
+- [ ] 1.18.4 Checks and benchmarks
+  `check-rules.sh` clean; benchmarks published in
+  `docs/algorithms/benchmarks.md`.
+- [ ] 1.18.5 Release prerequisites for v0.0.1
+  Release dry run (Task 0.6.3) succeeds; changelog prepared; `AGENTS.md`
+  section 6 ready to update. Tag `v0.0.1` once Task 2.1 is also done.

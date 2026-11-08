@@ -1,0 +1,102 @@
+# Roadmap
+
+`xtalforge` reproduces everything the headless core of Crystal-Builder does
+(the `xtal/` package; the `xtalapp/` GUI is out of scope) as a pure Rust
+library, with four surfaces developed at the same pace: **Rust API, CLI, Python,
+WebAssembly**.
+
+Each phase has its own file. Inside a phase, work is split into numbered
+**tasks** (`N.M`) and each task into **subtasks** (`N.M.K`) with a checkbox.
+A subtask is ticked only when implementation, tests, all four surfaces (when
+user-visible) and documentation are done. The rules that govern all of this
+are in `AGENTS.md` at the repository root.
+
+## Phases
+
+| Phase | File | Goal | Release gate |
+|---|---|---|---|
+| 0 | [Foundations](./phase-00-foundations.md) | Workspace, rules, CI, docs site, moyo audit, sci-form reuse plan, dependency replacement map, binding architecture, golden-data oracle | none |
+| 1 | [Core](./phase-01-core.md) | Elements, lattice, structure, P1, supercell, slab, neighbors, bonding, rings, groups, measures, limits, CIF/POSCAR/XYZ | with Task 2.1: **v0.0.1** |
+| 2 | [Symmetry](./phase-02-symmetry.md) | moyo integration, space groups, Wyckoff, standard cells, reduction, subgroups, point groups, Brillouin zone and k-path | v0.0.x |
+| 3 | [Formats, commands, view data](./phase-03-formats-commands.md) | All file formats, project files, undo/redo commands, selection, tracking, workspace, view settings and scene data, STL | v0.0.x |
+| 4 | [Force fields](./phase-04-force-fields.md) | Calculator API, UFF/UFF4MOF, QEq/EQeq, Ewald, optimizers, scans, vibrations, phonons, thermodynamics, Prepare for simulation, external engines | **v0.1.0** |
+| 5 | [Analysis](./phase-05-analysis.md) | PXRD, grids, porosity and accessibility, topology and RCSR, merged nets, interpenetration, overlays, module registry and reports | v0.y |
+| 6 | [Builders](./phase-06-builders.md) | Molecules, substituents, fill, carbon, graphene, nanotubes, fullerenes, polymers, MOF builder | v0.y |
+| 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
+| 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
+
+## Release milestones
+
+Version rules are defined in `AGENTS.md` section 5. In short:
+
+- **v0.0.1** — Phase 1 complete plus Task 2.1 (moyo integration). The
+  "essential core": read a CIF, expand it to P1, detect its space group, build
+  supercells and slabs, perceive bonds and rings, write CIF/POSCAR/XYZ, all
+  through Rust, CLI, Python and WASM, with docs and demos.
+- **v0.0.x** — one PATCH release per completed task group of Phases 2 and 3,
+  and of Phase 4 until it is complete.
+- **v0.1.0** — Phase 4 complete: force fields and optimizers usable.
+- **v0.y.z** — Phases 5 to 7; MINOR bump at each completed phase.
+- **v1.0.0** — Phase 8 complete: API frozen, parity matrix closed,
+  documentation complete.
+
+## Cross-cutting requirements (apply to every phase)
+
+1. Every code file is at most 500 lines (Markdown exempt); data goes to
+   `data/`.
+2. Language is unrestricted; the former English-only rule is retired
+   (2026-11-08).
+3. Every user-visible subtask ships four surfaces and docs: Rust, CLI, Python,
+   WASM, plus a VitePress API page, and an algorithm page or demo where it
+   makes sense.
+4. Every ported algorithm is validated against Crystal-Builder or sci-form
+   golden data (Task 0.9) with documented tolerances.
+5. `CHANGELOG.md`, `docs/api/parity.md` and `AGENTS.md` section 6 are updated
+   as part of the work, not afterwards.
+6. Each phase ends with a "surfaces and docs" task; it is not optional.
+7. Warnings are errors; dead-code, unused and warning-suppression attributes
+   are forbidden (AGENTS.md rule 10).
+8. Commits are directory-scoped: one directory per commit,
+   `feat(<scope>):`/`ref(<scope>):` subject, and the completed tasks listed
+   from hardest to easiest in the body (AGENTS.md section 2.1).
+
+## Parity map: Crystal-Builder module to phase
+
+| Crystal-Builder module (`xtal/…`) | Phase |
+|---|---|
+| `core/` elements, pyykko, lattice, site, structure, molecule, p1, supercell, slab, cellcut, transforms, neighbors, bonding, rings, groups (functional groups), measure, properties, scalars, describe, limits; `io/text.py`, `io/cif_*`, `io/poscar.py`, `io/xyz.py` | 1 |
+| `core/` spacegroup, symmetry, subgroups; point-group part of `core/molecule.py`; `analysis/kpath.py` | 2 |
+| `io/` all other formats, `io/registry.py`, `io/export.py`, `io/atomic.py`, `io/project.py`, `io/trajectory.py`, `io/pmg.py`; `commands/`; `core/selection.py`, `core/tracking.py`, `core/atom_groups.py`; `workspace.py`, `params.py`, `plugins.py` (registries); `view/`; STL part of `modules/blender.py` | 3 |
+| `ff/` (all), `core/prepare.py`, `commands/ff.py`, `commands/prepare.py`, `modules/{forcefield,scan,thermo,qha,dftb,orca,probe,process}.py`, `orca/` | 4 |
+| `analysis/` (except kpath), `modules/{pxrd,zeopp,poregrid,report,registry,job,record,stub,net}.py`, `references.py` | 5 |
+| `build/`, `carbon/`, `graphene/`, `nanotube/`, `fullerene/`, `polymer/`, `mof/`, `modules/{build,carbon,graphene,nanotube,fullerene,polymer,mof}.py`, `commands/connections.py` | 6 |
+| `powder/`, `modules/powder.py` | 7 |
+| `agent/`, `cli.py` (completed), ML calculators (`ff/mace`, `ff/orb`, `ff/mattersim`, `ff/ase_engine.py`) | 8 |
+| `install.py`, `runtime.py`, Blender rendering in `modules/blender.py`, `xtalapp/` | out of scope (application packaging and GUI) |
+
+## Known risks
+
+- **moyo private APIs.** Niggli, Delaunay and Minkowski reductions exist in
+  moyo 0.22 but are crate-private. Plan: propose an upstream PR to export them
+  and, until it is released, port the algorithms (MIT OR Apache-2.0 allows it,
+  with attribution). Tasks 0.3 and 2.6.
+- **Python-only dependencies with no Rust equivalent.** Crystal-Builder uses
+  gemmi (CIF, space groups), spglib, scipy (k-d trees, Voronoi, L-BFGS,
+  sparse), ASE (band paths, trajectory reading, ML calculators), phonopy
+  (phonons, thermodynamics), RDKit (SMILES, sketcher), rietx (indexing,
+  Pawley, Rietveld). Each needs a Rust replacement or an explicit decision
+  (Task 0.10).
+- **Powder refinement.** The numerical core lives in rietx, an external
+  Python project with its own kernels (`rietx-kernels`). Phase 7 starts by
+  studying it; its license must be verified before porting.
+- **Data licensing.** PORMAKE is MIT (verified). The RCSR database snapshots
+  (`analysis/data/RCSR*`) and the Zeo++ radii need license checks before
+  redistribution (Tasks 5.6.1, 5.2.2 and 6.11.1).
+- **500-line limit versus ported code.** Many reference files exceed it
+  (Python: `core/prepare.py` 1833, `modules/powder.py` 1893, `mof/build.py`
+  1784; sci-form: `space_group_table.rs` 6750, `stereo.rs` 1121, `cell.rs`
+  1048). Every port starts with a written split plan.
+- **WASM limits.** No threads by default, no filesystem, no subprocesses. The
+  parity matrix records each justified exception.
+- **Scope size.** Phases 6 and 7 are larger than all the others combined.
+  They are staged so each task group ships on its own.

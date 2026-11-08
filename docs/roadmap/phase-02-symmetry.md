@@ -1,0 +1,246 @@
+# Phase 2 — Symmetry
+
+**Goal:** complete crystal symmetry support on top of `moyo`, isolated behind
+our own types, plus everything moyo does not expose: cell reduction, the
+symmetry workflow of the editor (detect, set, impose, asymmetrize, reduce to
+P1), subgroup naming, molecular point groups, the Brillouin zone and k-paths.
+
+**Reference:** `Crystal-Builder/xtal/core/spacegroup.py` (390 lines, gemmi
+tables), `core/symmetry.py` (1139, spglib), `core/subgroups.py` (1356),
+`core/supercell.py` (lattice reduction part), point groups in
+`core/molecule.py`, `analysis/kpath.py` (ASE `Cell.bandpath` and a scipy
+Voronoi zone); moyo 0.22 sources and docs (https://docs.rs/moyo).
+
+Crate: `xtalforge-symmetry`. Decision gate: the Task 0.3 report must conclude
+"adopt" or "adopt with gaps" before Task 2.1 starts.
+
+**Task 2.1 belongs to the v0.0.1 gate** and may run in parallel with Phase 1
+(see the note in Phase 1). The rest ships in v0.0.x releases.
+
+---
+
+## Task 2.1 — moyo integration (v0.0.1 gate)
+
+- [ ] 2.1.1 Conversion layer
+  `Structure`/`P1Cell` to `moyo::base::Cell` and back: lattice (moyo uses
+  column or row conventions; verify and test against our row convention),
+  fractional positions, integer atom types. Atom type policy, documented:
+  sites are typed by element plus occupancy signature (species set and
+  occupancies rounded to a tolerance), so a mixed Fe/Ni site never becomes
+  equivalent to a pure Fe site; dummy atoms get their own type.
+- [ ] 2.1.2 Operations from a space group
+  From a Hall number, Hall symbol, H-M symbol with setting, or number with
+  default setting, produce `Vec<SymOp>` (exact rationals, Task 1.6.3) through
+  moyo's `data` module. This is what lets a `Structure` built from a Hall
+  symbol expand to P1.
+- [ ] 2.1.3 Detection entry point
+  `detect_symmetry(structure, SymmetryOptions { symprec, angle_tolerance,
+  setting })` returning our `SymmetryDataset`: number, Hall number, H-M
+  symbol, Pearson symbol, operations, orbits (equivalent atoms), Wyckoff
+  letters, site-symmetry symbols. moyo errors map to `Error::Symmetry` with a
+  code and the tolerance used.
+- [ ] 2.1.4 Surfaces and docs
+  CLI `symmetry detect` (output compatible in content with Crystal-Builder
+  `xtal symmetry`), Python and WASM functions, API page, algorithm page on the
+  backend isolation and the meaning of the tolerances.
+- [ ] 2.1.5 Smoke validation
+  On the whole corpus the detected space group number equals the golden
+  spglib result at the default tolerance; any exception is listed with a
+  reason.
+
+## Task 2.2 — Space group value object and catalogue
+
+- [ ] 2.2.1 `SpaceGroup` type
+  Port `core/spacegroup.py`: an immutable value whose identity is the Hall
+  symbol (Hall number internally). Accessors: number, H-M short and full
+  symbol, Schoenflies symbol, crystal system, lattice system, Bravais type,
+  centering, point group, Laue class, operations, whether it is centrosymmetric
+  or chiral, setting description (origin choice, unique axis, cell choice,
+  hexagonal or rhombohedral axes).
+- [ ] 2.2.2 Symbol parsing and lookup
+  Accept user input such as `Fm-3m`, `F m -3 m`, `225`, `P2_1/c`,
+  `P 1 21/c 1`, `P21/n`, `R-3:H`, `R-3:R`, `Fd-3m:1`, `Fd-3m:2`, Hall
+  symbols (`-P 2ybc`), tolerant to spacing, case of the lattice letter and
+  underscores. When the input is ambiguous about the setting, return the
+  default setting and say which choices exist.
+- [ ] 2.2.3 Catalogue
+  List all 230 types and all Hall settings (530); filtering by crystal
+  system, centering, point group. Used by the docs table and by the CLI
+  (`xtalforge spacegroup list`, `xtalforge spacegroup show 227`).
+
+## Task 2.3 — The symmetry workflow
+
+- [ ] 2.3.1 Detect
+  Port `symmetry.detect`: detect at a tolerance and return the dataset plus a
+  ready-to-use symmetric `Structure` (asymmetric unit, space group in the
+  detected setting) without changing the input.
+- [ ] 2.3.2 Set a space group
+  Port `set_space_group` and its two modes: **reinterpret** (the current
+  sites become the asymmetric unit of the new group) and **impose** (the
+  current full cell is averaged onto the group: atoms are mapped to orbits,
+  positions symmetrized, duplicates merged, with a report of the largest
+  displacement). Both validate that the result is consistent.
+- [ ] 2.3.3 Asymmetrize
+  Port `asymmetrize`: keep the detected symmetry and reduce the structure to
+  its asymmetric unit, choosing representative sites deterministically
+  (lowest label, then position) and keeping labels and `props`.
+- [ ] 2.3.4 Reduce to P1
+  Throw the symmetry away: the asymmetric unit becomes the whole P1 cell, with
+  labels made unique.
+- [ ] 2.3.5 Change of setting
+  Transform a structure between settings of the same type (origin choice 1/2,
+  unique axis b/c, hexagonal/rhombohedral), keeping Cartesian positions.
+
+## Task 2.4 — Wyckoff positions and site symmetry
+
+- [ ] 2.4.1 Wyckoff tables
+  For any Hall number: letter, multiplicity, site-symmetry symbol, coordinate
+  triplets, from `moyo::data::iter_wyckoff_positions_from_hall_number`.
+- [ ] 2.4.2 Assignment
+  For a structure in a known group, assign each site its Wyckoff letter and
+  site symmetry; optionally snap coordinates exactly onto the special position
+  within a tolerance and report the snap distance.
+- [ ] 2.4.3 Free parameters
+  Express each assigned site as a coordinate template with free parameters
+  (`x, x, z`, `1/4, y, 1/4`) and their current values. This is what
+  symmetry-preserving editing (Phase 3) and Rietveld refinement of positions
+  (Task 7.8.1) use.
+
+## Task 2.5 — Standardized, primitive and idealized cells
+
+- [ ] 2.5.1 Standardization
+  Conventional standardized cell with the transformation matrix, origin shift
+  and rotation from `MoyoDataset`; applied to a full `Structure` so labels,
+  occupancies, charges, `props` and ADP tensors (rotated) are preserved.
+- [ ] 2.5.2 Primitive cell
+  Standardized primitive cell (`prim_std_cell`) and the mapping back to input
+  atoms (`mapping_std_prim`); also a "find primitive" that keeps the input
+  orientation.
+- [ ] 2.5.3 Idealization
+  Determine from Task 0.3.2 whether moyo's standardized positions are
+  symmetrized. If yes, expose them; if not, implement idealization by
+  averaging each orbit over the group operations and projecting the lattice
+  onto the metric allowed by the crystal system.
+
+## Task 2.6 — Lattice reduction (gap-fill)
+
+moyo 0.22 implements Niggli, Delaunay and Minkowski reduction but keeps them
+crate-private.
+
+- [ ] 2.6.1 Upstream request
+  Open an issue or pull request on https://github.com/spglib/moyo proposing to
+  export `niggli_reduce`, `delaunay_reduce` and `minkowski_reduce` (they are
+  already `pub fn` inside private modules). Track the outcome here.
+- [ ] 2.6.2 Port until exported
+  Port the three algorithms from moyo (MIT OR Apache-2.0, attribution in
+  `THIRD_PARTY.md`), each in its own file under 500 lines, returning the
+  reduced basis and the integer transformation. Replace with the upstream API
+  once released.
+- [ ] 2.6.3 Structure-level reduction
+  Port the lattice-reduction operation of `core/supercell.py`: apply a
+  reduction to a whole structure (P1 result, atoms rewrapped), as a command in
+  Phase 3.
+- [ ] 2.6.4 Cell comparison
+  Decide whether two lattices are equivalent (reduced forms compared with a
+  tolerance), used by structure deduplication and powder indexing.
+- [ ] 2.6.5 Property tests
+  Reduction preserves volume and the lattice; reduction is idempotent; the
+  transformation is unimodular.
+
+## Task 2.7 — Subgroups
+
+- [ ] 2.7.1 Maximal subgroup enumeration
+  Port `core/subgroups.py` (1356 lines; split into enumeration, naming,
+  application, reports). Enumeration uses moyo
+  `subgroup::enumerate_translationengleiche_subgroups` and
+  `enumerate_klassengleiche_subgroups(_by_index)`.
+- [ ] 2.7.2 Naming subgroups
+  The expensive part according to Crystal-Builder: identify each subgroup's
+  type, its setting and the transformation to its standard setting (with moyo
+  `identify`), and present a readable name (`I4/mmm → Fmmm, index 2, t2`).
+- [ ] 2.7.3 Symmetry lowering
+  Apply a chosen subgroup to a structure: split each Wyckoff orbit into the
+  independent orbits of the subgroup, giving a new asymmetric unit with the
+  new free parameters (first step of distortion, ordering and phase
+  transition models).
+- [ ] 2.7.4 Surfaces
+  CLI `symmetry subgroups` and `symmetry lower`; Python and WASM.
+
+## Task 2.8 — Layer, magnetic and point groups
+
+- [ ] 2.8.1 Layer groups
+  Expose `MoyoLayerDataset` for slabs (80 layer groups) with our types.
+- [ ] 2.8.2 Magnetic space groups
+  Expose collinear and non-collinear magnetic datasets (1651 groups) behind
+  an `experimental` marker; requires magnetic moments in `Site.props`.
+- [ ] 2.8.3 Molecular point groups
+  Port the point-group part of `core/molecule.py`: Schoenflies symbol and
+  symmetry elements of a finite molecule (needed for ORCA inputs and
+  molecular builders). Implement it ourselves if moyo has no non-periodic
+  point-group detection (to be confirmed in Task 0.3.2).
+
+## Task 2.9 — Tolerance handling and diagnostics
+
+- [ ] 2.9.1 Tolerance ladder
+  Detect across a ladder of tolerances (1e-5 to 0.5 Angstrom) and return the
+  ranges in which each group is found, so a caller can see how robust the
+  answer is.
+- [ ] 2.9.2 Diagnostics
+  When detection fails or gives a low group, report which atoms break the
+  expected symmetry and by how much (largest orbit deviations), in the
+  structured diagnostic format used by the agent layer (Task 8.1.3).
+
+## Task 2.10 — Brillouin zone and k-path
+
+Crystal-Builder takes the band path from ASE `Cell.bandpath` and builds the
+zone with scipy's Voronoi. Both must be implemented here.
+
+- [ ] 2.10.1 Brillouin zone
+  Wigner-Seitz cell of the reciprocal lattice: the region nearer the origin
+  than any other reciprocal lattice point, computed as an intersection of
+  half-spaces over the neighbouring lattice points. Output: vertices, faces,
+  edges. Test: the fcc zone is a truncated octahedron with 14 faces and 24
+  vertices.
+- [ ] 2.10.2 Bravais classification and special points
+  Determine the Bravais lattice and its variant (the Setyawan-Curtarolo 2010
+  classification used by ASE), and the special points (Gamma, X, M, L, …)
+  defined for the standard setting.
+- [ ] 2.10.3 Path in the user's cell
+  Express the special points in the reciprocal basis of the cell the user
+  actually has (a primitive fcc cell, not the textbook one), because DFTB+ and
+  other codes must be given them in that basis. Positions along the path are
+  Cartesian reciprocal distances in 1/Angstrom including 2π, so a band
+  structure's x axis is to scale.
+- [ ] 2.10.4 Validation
+  Compare special points and paths with ASE output recorded in the golden data
+  for each of the 14 Bravais lattices.
+
+## Task 2.11 — Validation
+
+- [ ] 2.11.1 spglib parity on the corpus
+  Space group, Hall number, Wyckoff letters, standardized and primitive cells
+  compared with golden spglib data; differences analysed and documented.
+- [ ] 2.11.2 Property tests
+  Random structures built by applying the operations of random groups to
+  random sites: detection recovers the group (or a supergroup when sites land
+  on special positions); standardization is idempotent; P1 expansion count
+  equals the sum of multiplicities; asymmetrize followed by P1 expansion
+  reproduces the input.
+- [ ] 2.11.3 Performance
+  Benchmarks of detection on the corpus compared with spglib timings recorded
+  from Crystal-Builder.
+
+## Task 2.12 — Surfaces and docs for Phase 2
+
+- [ ] 2.12.1 CLI
+  `symmetry {detect,set,asymmetrize,p1,standardize,primitive,wyckoff,reduce,subgroups,lower,kpath}`
+  and `spacegroup {list,show,search}`.
+- [ ] 2.12.2 Python and WASM
+  Matching functions and the `SpaceGroup`/`SymmetryDataset` types.
+- [ ] 2.12.3 Docs and demos
+  Algorithm pages (backend isolation, set versus impose, Wyckoff free
+  parameters, Niggli reduction, subgroup naming, Brillouin zone, k-path); a
+  browsable space group table; a demo that shows the space group, Wyckoff
+  labels and Brillouin zone of a pasted CIF.
+- [ ] 2.12.4 Parity and release
+  Parity matrix; changelog; PATCH release.
