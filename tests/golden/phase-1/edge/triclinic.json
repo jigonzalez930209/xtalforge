@@ -1,0 +1,290 @@
+{
+  "bonds": [],
+  "cell": {
+    "matrix": [
+      [
+        3.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.6945927106677217,
+        3.939231012048832,
+        0.0
+      ],
+      [
+        1.7101007166283442,
+        2.2370296336439046,
+        4.1317374017701365
+      ]
+    ],
+    "parameters": [
+      3.0,
+      3.9999999999999996,
+      4.999999999999999,
+      59.999999999999986,
+      69.99999999999999,
+      80.0
+    ],
+    "volume": 48.82760432008498
+  },
+  "features": [
+    "cell",
+    "sites",
+    "p1",
+    "supercell",
+    "slab",
+    "bonds",
+    "rings",
+    "groups",
+    "measures"
+  ],
+  "formula": {
+    "C": 1.0
+  },
+  "groups": {
+    "alcohol": {
+      "atoms": [],
+      "count": 0
+    },
+    "aldehyde": {
+      "atoms": [],
+      "count": 0
+    },
+    "amide": {
+      "atoms": [],
+      "count": 0
+    },
+    "amine": {
+      "atoms": [],
+      "count": 0
+    },
+    "anhydride": {
+      "atoms": [],
+      "count": 0
+    },
+    "carboxylate": {
+      "atoms": [],
+      "count": 0
+    },
+    "carboxylic_acid": {
+      "atoms": [],
+      "count": 0
+    },
+    "epoxide": {
+      "atoms": [],
+      "count": 0
+    },
+    "ester": {
+      "atoms": [],
+      "count": 0
+    },
+    "ether": {
+      "atoms": [],
+      "count": 0
+    },
+    "fluoride": {
+      "atoms": [],
+      "count": 0
+    },
+    "ketone": {
+      "atoms": [],
+      "count": 0
+    },
+    "lactone": {
+      "atoms": [],
+      "count": 0
+    },
+    "phenol": {
+      "atoms": [],
+      "count": 0
+    },
+    "ring_ether": {
+      "atoms": [],
+      "count": 0
+    }
+  },
+  "measures": {
+    "angles": [],
+    "distances": []
+  },
+  "n_sites": 1,
+  "options": {
+    "max_atoms": 600,
+    "slab_max_atoms": 200,
+    "symprec": 0.001
+  },
+  "p1": {
+    "elements": [
+      "C"
+    ],
+    "frac": [
+      [
+        0.1,
+        0.2,
+        0.3
+      ]
+    ],
+    "labels": [
+      "C1"
+    ],
+    "lattice": {
+      "matrix": [
+        [
+          3.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.6945927106677217,
+          3.939231012048832,
+          0.0
+        ],
+        [
+          1.7101007166283442,
+          2.2370296336439046,
+          4.1317374017701365
+        ]
+      ],
+      "parameters": [
+        3.0,
+        3.9999999999999996,
+        4.999999999999999,
+        59.999999999999986,
+        69.99999999999999,
+        80.0
+      ],
+      "volume": 48.82760432008498
+    },
+    "multiplicities": [
+      1
+    ],
+    "n_atoms": 1,
+    "occupancy": [
+      1.0
+    ],
+    "site_idx": [
+      0
+    ]
+  },
+  "rings": {
+    "count": 0,
+    "paths": [],
+    "truncated": false
+  },
+  "sha256": "bb19be0d31e8f5debcc3f415e1630e18d02f05dae1b270cee500ef9e161c312e",
+  "sites": [
+    {
+      "charge": null,
+      "element": "C",
+      "frac": [
+        0.1,
+        0.2,
+        0.3
+      ],
+      "label": "C1",
+      "occupancy": 1.0,
+      "wyckoff": null
+    }
+  ],
+  "skipped_features": [
+    "space-group-dataset",
+    "wyckoff-letters",
+    "k-path",
+    "pxrd",
+    "uff",
+    "charges",
+    "porosity",
+    "topology"
+  ],
+  "slab": {
+    "hkl": [
+      1,
+      0,
+      0
+    ],
+    "lattice": {
+      "matrix": [
+        [
+          0.6945927106677217,
+          3.939231012048832,
+          0.0
+        ],
+        [
+          1.0155080059606225,
+          -1.7022013784049275,
+          4.1317374017701365
+        ],
+        [
+          12.045915658960507,
+          -2.1240199380133262,
+          -3.8357310535410325
+        ]
+      ],
+      "parameters": [
+        3.9999999999999996,
+        4.582575694955839,
+        12.819063049808557,
+        90.0,
+        90.0,
+        109.1066053508691
+      ],
+      "volume": 222.03268507697257
+    },
+    "layers": 1,
+    "n_sites": 1,
+    "thickness": 2.819063049808559,
+    "vacuum": 10.0
+  },
+  "source": "edge/triclinic.cif",
+  "space_group": {
+    "hall": "P 1",
+    "hm": "P 1",
+    "number": 1
+  },
+  "supercell": {
+    "lattice": {
+      "matrix": [
+        [
+          6.0,
+          0.0,
+          0.0
+        ],
+        [
+          1.3891854213354433,
+          7.878462024097664,
+          0.0
+        ],
+        [
+          3.4202014332566884,
+          4.474059267287809,
+          8.263474803540273
+        ]
+      ],
+      "parameters": [
+        6.0,
+        7.999999999999999,
+        9.999999999999998,
+        59.999999999999986,
+        69.99999999999999,
+        80.0
+      ],
+      "volume": 390.6208345606799
+    },
+    "n_sites": 8,
+    "repeat": [
+      2,
+      2,
+      2
+    ]
+  },
+  "versions": {
+    "crystal_builder": "1.1.1.dev6+g78d5476fd",
+    "crystal_builder_commit": "78d5476fd9e851fda00cde57b7ab8da3195dcf54",
+    "gemmi": "0.7.5",
+    "numpy": "2.5.4",
+    "python": "3.14.4",
+    "scipy": "1.18.1",
+    "spglib": "2.8.0"
+  }
+}
