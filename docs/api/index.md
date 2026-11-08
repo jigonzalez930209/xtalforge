@@ -22,6 +22,11 @@ One page per domain, each showing the same operation in the four surfaces
 - [Functional groups](./groups)
 - [Rings](./rings)
 - [Symmetry](./symmetry)
+- [Typed parameters](./params)
+- [View data](./view)
+- [Selection and tracking](./selection)
+- [Modules and workspace](./modules)
+- [Commands and document](./commands)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
