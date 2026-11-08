@@ -1,0 +1,21 @@
+[package]
+name = "xtalforge-io-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[workspace]
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+xtalforge-io = { path = ".." }
+
+[[bin]]
+name = "cif"
+path = "fuzz_targets/cif.rs"
+test = false
+doc = false
+bench = false
