@@ -67,6 +67,7 @@ export default defineConfig({
             { text: 'CIF', link: '/api/cif' },
             { text: 'POSCAR and XYZ', link: '/api/formats' },
             { text: 'Measures and scalars', link: '/api/measure' },
+            { text: 'Functional groups', link: '/api/groups' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
