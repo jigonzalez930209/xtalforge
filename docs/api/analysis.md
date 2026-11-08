@@ -24,6 +24,12 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 `Pattern { points, reflections }` carries the sampled curve and the peak list;
 `Reflection { hkl, d, two_theta, multiplicity, intensity }`.
 
+## Measured patterns and peaks
+
+`xtalforge_io::read_xy` reads a measured pattern; `find_peaks(&points,
+&PeakOptions)` finds local maxima with optional smoothing, a height threshold
+and a minimum separation, returning `Peak { two_theta, intensity, fwhm }`.
+
 ## Nets
 
 `quotient_graph(&CgdEntry, tolerance)` reduces a CGD net to nodes, edges and
