@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=xtalforge
+GenericName=Crystal structure toolkit
+Comment=Build, manipulate, analyse and export crystal structures
+Exec=xtalforge
+Icon=xtalforge
+Terminal=true
+Categories=Science;Chemistry;
+Keywords=crystal;chemistry;symmetry;materials;
