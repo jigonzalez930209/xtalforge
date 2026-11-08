@@ -30,5 +30,14 @@ implemented yet.
 others) with name, SMILES, category and description; `find_fragment` looks one
 up by name.
 
+`clearance(structure, point)` returns the minimum periodic distance to an atom
+centre; `substitute(structure, site, element)` changes one asymmetric site.
+
+`place_guest(host, guest, offset, clearance)` inserts a guest molecule when
+every atom keeps the requested periodic clearance from the host.
+
+The same builders are `build_graphene`/`build_nanotube`/`build_c60` in Python
+and `build_graphene_info`/`build_nanotube_info`/`build_c60_info` in WASM.
+
 The remaining builders (SMILES molecules, fragments, fullerenes, amorphous
 carbon, polymers) are later Phase 6 tasks.

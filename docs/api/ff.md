@@ -43,3 +43,21 @@ Birch-Murnaghan or Murnaghan equation of state from energy-volume points.
 
 `ScanCoordinate` and `Constraint` describe a distance/angle/torsion scan; the
 driver steps the coordinate and relaxes the rest.
+
+## Vibrations and thermodynamics
+
+`hessian(structure, calculator, &HessianOptions)` builds the Gamma-point
+Hessian by central differences of the analytic forces.
+`vibrational_modes(&hessian, masses, options)` mass-weights it and returns
+`VibrationalModes { frequencies, modes, zero_modes, imaginary }` in cm^-1.
+
+`ir_spectrum(&modes, structure, &IrOptions)` uses QEq charges and a
+finite-difference dipole derivative (documented approximation) and broadens
+the sticks into `IrSpectrum { points, peaks }`.
+
+`phonons(...)` returns the Gamma-point dynamical matrix and frequencies;
+the q-mesh and DOS are pending. `thermochemistry(&modes, &ThermoOptions)` and
+`ideal_gas_thermochemistry` give ZPE, thermal U/H/S/G and Cv; imaginary modes
+are excluded and reported. `quasi_harmonic_free_energy(&points, options)`
+minimizes `F(V, T) = E(V) + F_vib(V, T)` by a parabola through the best sampled
+volume.

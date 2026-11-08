@@ -23,5 +23,7 @@ let set = ParamSet::new().add(ParamSpec {
 `check_required` reports missing required parameters and `schema` returns a
 JSON-schema-like object with the defaults and help text.
 
+`ParamSet::to_json`/`from_json` persist and revalidate a parameter set.
+
 The CLI, Python and WASM flag generation from the same description is Task
 3.8.2; the schema is already the input for that generation.

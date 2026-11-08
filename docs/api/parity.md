@@ -47,6 +47,9 @@ compares this table with the symbols each surface actually exports.
 | `scene_summary` | 3 | done | done | done | done | View data (Task 3.14.4); CLI `mesh` |
 | `mesh_stl` | 3 | done | done | done | done | ASCII STL (Task 3.15.1); CLI `mesh` |
 | `pxrd` | 5 | done | done | done | done | Calculated PXRD (Task 5.1); Rust `calculate_pxrd`, WASM `pxrd_info` |
+| `build_graphene` | 6 | done | done | done | done | Carbon builders (Task 6.5); Rust `graphene`, WASM `build_graphene_info` |
+| `build_nanotube` | 6 | done | done | done | done | Carbon builders (Task 6.6); Rust `nanotube`, WASM `build_nanotube_info` |
+| `build_c60` | 6 | done | n/a | done | done | C60 (Task 6.7); no CLI command yet |
 
 ## Planned exceptions
 

@@ -29,6 +29,13 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 `pareto_front(points)` returns the indices of the non-dominated `(energy,
 residual)` points, minimising both objectives.
 
+## Rietveld phase model
+
+`fit_phase(structure, observed, &RietveldOptions)` simulates the phase from the
+structure and PXRD engine, then fits its scale and background, returning
+`RietveldPhase { scale, background, rwp, pattern }`. Atomic positions and ADPs
+are the caller's model; a full refinement loop is later Task 7.8.
+
 ## Le Bail
 
 `le_bail(structure, observed, &LebailOptions)` partitions the observed
