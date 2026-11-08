@@ -9,6 +9,15 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 7 Task 7.1-7.11: the rietx inventory and acceptance metrics, the
+  instrument model, whole-range and structural least-squares refinement,
+  free cell parameters and extinction symbols, the combined objective, the
+  automatic powder run, and the CLI/Python/WASM surfaces.
+- Phase 6 Task 6.11-6.16: the `xtalforge-mof` crate with six topologies,
+  eight blocks, framework assembly, rods, layers, merged nets, decoration,
+  invented linkers and pore-space partition.
+- Phase 6 Task 6.17: `mof` CLI commands, Python/WASM catalogues and builder,
+  and the MOF API page.
 - Phase 4 Task 4.3.3: native EEQ-style charges.
 - Phase 4 Task 4.6: hydrogen placement.
 - Phase 4 Task 4.7: the preparation pipeline and report.

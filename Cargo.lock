@@ -1064,6 +1064,7 @@ dependencies = [
  "xtalforge-ff",
  "xtalforge-io",
  "xtalforge-modules",
+ "xtalforge-mof",
  "xtalforge-symmetry",
  "xtalforge-view",
 ]
@@ -1157,6 +1158,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "xtalforge-analysis",
  "xtalforge-core",
  "xtalforge-io",
 ]
