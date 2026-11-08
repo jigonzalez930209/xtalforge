@@ -85,6 +85,19 @@ def test_lattice_shared_vectors() -> None:
         assert abs(result["distance"] - case["minimum_image"]["distance"]) <= 1e-9
 
 
+def test_limits_surface() -> None:
+    soft, hard = xtalforge.limits_bounds("standard", "supercell")
+    assert soft == 50_000
+    assert hard == 200_000
+    warn = xtalforge.limits_check("standard", "supercell", 80_000)
+    assert warn["level"] == "warn"
+    refuse = xtalforge.limits_check("standard", "supercell", 300_000)
+    assert refuse["level"] == "refuse"
+    assert refuse["refused"] is True
+    never = xtalforge.limits_check("warn_only", "supercell", 1_000_000)
+    assert never["level"] == "warn"
+
+
 def test_invalid_element_raises_input_error() -> None:
     with pytest.raises(xtalforge.InputError) as caught:
         xtalforge.element_info("Zz")
