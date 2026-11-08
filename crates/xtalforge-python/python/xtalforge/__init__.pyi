@@ -310,3 +310,69 @@ def workspace_runs(path: str) -> list[str]: ...
 def workspace_read_run(path: str, id: str) -> str: ...
 def workspace_archive(records_json: str) -> bytes: ...
 def workspace_read_archive(bytes: bytes) -> list[str]: ...
+
+
+def ff_energy(text: str, format_hint: str | None = None) -> float: ...
+def ff_optimize(
+    text: str,
+    minimizer: str = "fire",
+    max_steps: int = 500,
+    force_tolerance: float = 0.05,
+    cell: bool = False,
+    format_hint: str | None = None,
+) -> StructureDict: ...
+def ff_charges(
+    text: str,
+    method: str = "qeq",
+    total_charge: float = 0.0,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def ff_vibrations(
+    text: str,
+    step: float = 0.005,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def ff_ir(
+    text: str,
+    fwhm: float = 10.0,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def ff_thermo(
+    text: str,
+    temperature: float = 298.15,
+    pressure: float = 1.0,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def ff_types(text: str, format_hint: str | None = None) -> list[dict[str, object]]: ...
+
+
+def porosity(
+    text: str,
+    spacing: float = 0.35,
+    probe: float = 1.2,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def zeo_parse(text: str) -> dict[str, object]: ...
+def zeo_run(
+    text: str,
+    probe: float = 1.2,
+    samples: int = 1000,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def net_invariants(text: str, tolerance: float = 0.01) -> list[dict[str, object]]: ...
+def net_overlay(text: str, tolerance: float = 0.01) -> dict[str, object]: ...
+def rcsr_names() -> list[str]: ...
+def add_hydrogens(
+    text: str,
+    distance: float = 1.09,
+    format_hint: str | None = None,
+) -> StructureDict: ...
+
+def ff_prepare(
+    text: str,
+    minimize: bool = True,
+    charges: bool = True,
+    ewald: bool = False,
+    vibrations: bool = False,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
