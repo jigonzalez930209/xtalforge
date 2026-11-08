@@ -32,9 +32,11 @@
 //! assert_eq!(error.code(), "invalid_input");
 //! ```
 
+pub use xtalforge_commands as commands;
 pub use xtalforge_core as core;
 pub use xtalforge_io as io;
 pub use xtalforge_symmetry as symmetry;
+pub use xtalforge_view as view;
 
 /// Common imports for typical xtalforge programs.
 pub mod prelude {
