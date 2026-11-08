@@ -6,6 +6,7 @@ must record the reason in the algorithm page.
 
 | Feature | Comparison | Tolerance | Phase |
 |---|---|---|---|
+| Element reference data | exact | 0 (copied from Crystal-Builder) | 1 |
 | Cell parameters | absolute | 1e-6 Angstrom / 1e-6 degree | 1 |
 | Cell volume | relative | 1e-9 | 1 |
 | Fractional coordinates | absolute | 1e-6 | 1 |
