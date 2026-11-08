@@ -124,6 +124,48 @@ fn array6(values: [f64; 6]) -> js_sys::Array {
     array
 }
 
+/// Soft and hard bounds for a profile and budget.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for an unknown budget.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn limits_bounds(profile: &str, budget: &str) -> Result<js_sys::Array, JsValue> {
+    let (soft, hard) = xtalforge::core::limits_bounds(profile, budget).map_err(to_js_error)?;
+    let array = js_sys::Array::new();
+    array.push(&JsValue::from_f64(soft as f64));
+    array.push(&hard.map_or(JsValue::NULL, |value| JsValue::from_f64(value as f64)));
+    Ok(array)
+}
+
+/// Generic limit check for a profile, budget and estimate.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for an unknown budget.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn limits_check(profile: &str, budget: &str, estimate: f64) -> Result<JsValue, JsValue> {
+    let estimate = if estimate.is_finite() && estimate > 0.0 {
+        estimate.round() as u64
+    } else {
+        0
+    };
+    let verdict = xtalforge::core::limits_check(profile, budget, estimate).map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(&object, "level", JsValue::from_str(verdict.level.name()));
+    set(
+        &object,
+        "estimate",
+        JsValue::from_f64(verdict.estimate as f64),
+    );
+    set(&object, "sentence", JsValue::from_str(&verdict.sentence));
+    set(&object, "refused", JsValue::from_bool(verdict.refused()));
+    set(&object, "warned", JsValue::from_bool(verdict.warned()));
+    Ok(object.into())
+}
+
 /// Reference data for an element by symbol or atomic number.
 ///
 /// # Errors
