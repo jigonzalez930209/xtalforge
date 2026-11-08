@@ -2,7 +2,7 @@
 
 use crate::{
     Cli, CliError, Command, SpacegroupAction, SymmetryAction, analyze, basic, build, convert,
-    measure, spacegroup, symmetry, symmetry_analysis,
+    measure, mesh, spacegroup, symmetry, symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -71,6 +71,12 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             gamma,
         } => basic::cell_volume(cli, *a, *b, *c, *alpha, *beta, *gamma),
         Command::Convert { path, format, out } => convert::run(cli, path, *format, out.as_deref()),
+        Command::Mesh {
+            path,
+            style,
+            scale,
+            out,
+        } => mesh::run(cli, path, style, *scale, out.as_deref()),
         Command::Supercell {
             path,
             na,

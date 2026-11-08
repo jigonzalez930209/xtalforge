@@ -1,5 +1,6 @@
 //! The `convert` command.
 
+use xtalforge::io::registry::{find, losses};
 use xtalforge::io::write_structure;
 
 use crate::format::StructureFormat;
@@ -18,6 +19,30 @@ pub(crate) fn run(
     out: Option<&str>,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
+    let source = std::path::Path::new(path)
+        .extension()
+        .and_then(std::ffi::OsStr::to_str)
+        .and_then(find);
+    let target = find(format.name());
+    if let (Some(source), Some(target)) = (source, target) {
+        let warnings = losses(source.capabilities, target.capabilities);
+        if !warnings.is_empty() {
+            if cli.strict {
+                return Err(CliError::input(format!(
+                    "conversion to {} loses {}",
+                    target.name,
+                    warnings.join(", ")
+                )));
+            }
+            if !cli.quiet {
+                eprintln!(
+                    "warning: conversion to {} loses {}",
+                    target.name,
+                    warnings.join(", ")
+                );
+            }
+        }
+    }
     let text = write_structure(&structure, format.name()).map_err(CliError::core)?;
     let destination = out.filter(|value| *value != "-");
     if let Some(destination) = destination {

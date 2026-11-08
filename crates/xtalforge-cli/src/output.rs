@@ -72,6 +72,5 @@ pub(crate) fn emit_structure(
 ///
 /// Returns [`CliError`] with code `io_error` when the file cannot be written.
 pub(crate) fn write_destination(path: &str, text: &str) -> Result<(), CliError> {
-    std::fs::write(path, text)
-        .map_err(|error| CliError::new("io_error", format!("could not write {path}: {error}")))
+    xtalforge::io::atomic::write_text(std::path::Path::new(path), text).map_err(CliError::core)
 }

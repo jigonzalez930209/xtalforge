@@ -13,6 +13,7 @@ mod dispatch;
 mod format;
 mod input;
 mod measure;
+mod mesh;
 mod output;
 mod spacegroup;
 mod symmetry;
@@ -40,6 +41,9 @@ struct Cli {
     /// Suppress headers and non-essential output.
     #[arg(long, global = true)]
     quiet: bool,
+    /// Turn loss warnings into errors.
+    #[arg(long, global = true)]
+    strict: bool,
     /// Worker threads (reserved for the parallel algorithms).
     #[arg(long, global = true, value_name = "N")]
     threads: Option<usize>,
@@ -93,6 +97,20 @@ enum Command {
         #[arg(long, value_enum)]
         format: StructureFormat,
         /// Output path, or `-` for standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+    },
+    /// Build a printable STL mesh.
+    Mesh {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Draw style: ball-stick, space-fill, wireframe or sticks.
+        #[arg(long, default_value = "ball-stick")]
+        style: String,
+        /// Atom radius multiplier.
+        #[arg(long, default_value_t = 1.0)]
+        scale: f64,
+        /// Output path; defaults to standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
     },

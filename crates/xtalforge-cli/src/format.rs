@@ -11,6 +11,18 @@ pub(crate) enum StructureFormat {
     Poscar,
     /// Plain or extended XYZ.
     Xyz,
+    /// pymatgen Structure JSON.
+    PmgJson,
+    /// CSSR, as read by Zeo++.
+    Cssr,
+    /// DFTB+ GEN geometry.
+    Gen,
+    /// LAMMPS data file.
+    Lammps,
+    /// SHELX .res/.ins.
+    Shelx,
+    /// PDB, write-only.
+    Pdb,
 }
 
 impl StructureFormat {
@@ -20,6 +32,12 @@ impl StructureFormat {
             Self::Cif => "cif",
             Self::Poscar => "poscar",
             Self::Xyz => "xyz",
+            Self::PmgJson => "pmg-json",
+            Self::Cssr => "cssr",
+            Self::Gen => "gen",
+            Self::Lammps => "lammps-data",
+            Self::Shelx => "shelx",
+            Self::Pdb => "pdb",
         }
     }
 
@@ -32,7 +50,13 @@ impl StructureFormat {
         match extension.as_str() {
             "cif" => Some(Self::Cif),
             "poscar" | "contcar" | "vasp" => Some(Self::Poscar),
-            "xyz" => Some(Self::Xyz),
+            "xyz" | "extxyz" => Some(Self::Xyz),
+            "json" => Some(Self::PmgJson),
+            "cssr" => Some(Self::Cssr),
+            "gen" => Some(Self::Gen),
+            "data" | "lmp" => Some(Self::Lammps),
+            "res" | "ins" => Some(Self::Shelx),
+            "pdb" => Some(Self::Pdb),
             _ => None,
         }
     }
