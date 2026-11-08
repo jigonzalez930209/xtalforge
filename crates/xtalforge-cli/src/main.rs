@@ -175,10 +175,16 @@ fn run(cli: &Cli) -> Result<(), CliError> {
                 )?;
                 buffer
             } else {
-                std::fs::read_to_string(path)
-                    .map_err(|error| CliError::input(format!("could not read {path}: {error}")))?
+                let bytes = std::fs::read(path)
+                    .map_err(|error| CliError::input(format!("could not read {path}: {error}")))?;
+                xtalforge::io::decode_text(&bytes)
             };
-            let summary = xtalforge::core::structure_info(&text).map_err(|error| CliError {
+            let summary = if text.trim_start().starts_with('{') {
+                xtalforge::core::structure_info(&text)
+            } else {
+                xtalforge::io::read_cif(&text).and_then(|structure| structure.summary())
+            }
+            .map_err(|error| CliError {
                 code: error.code(),
                 message: error.message(),
                 exit_code: 3,
