@@ -51,6 +51,10 @@ pub struct HessianOptions {
     /// Central-difference displacement in Angstrom.
     pub step: f64,
     /// Rigid motions the mode analysis removes.
+    ///
+    /// The finite-difference Hessian itself does not depend on this choice;
+    /// it is carried here so one option value documents the whole vibration
+    /// run.
     pub displacement: DisplacementMode,
 }
 

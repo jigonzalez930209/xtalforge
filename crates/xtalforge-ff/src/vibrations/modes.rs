@@ -127,6 +127,7 @@ pub fn vibrational_modes(
     structure: &Structure,
     options: &HessianOptions,
 ) -> Result<VibrationalModes, Error> {
+    options.validate()?;
     if !structure.is_p1() {
         return Err(Error::InvalidInput(
             "normal modes need a P1 structure; expand the asymmetric unit first".to_owned(),
