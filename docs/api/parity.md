@@ -58,6 +58,9 @@ compares this table with the symbols each surface actually exports.
 | `build_graphene` | 6 | done | done | done | done | Carbon builders (Task 6.5); Rust `graphene`, WASM `build_graphene_info` |
 | `build_nanotube` | 6 | done | done | done | done | Carbon builders (Task 6.6); Rust `nanotube`, WASM `build_nanotube_info` |
 | `build_c60` | 6 | done | n/a | done | done | C60 (Task 6.7); no CLI command yet |
+| `build_mof` | 6 | done | done | done | done | MOF assembly (Task 6.12-6.16); WASM `build_mof_info` |
+| `run_automatic` | 7 | done | done | done | done | Automatic powder run (Task 7.10); Python `powder_automatic` |
+| `refine_phase` | 7 | done | done | done | done | Structural refinement (Task 7.8); Python `powder_refine` |
 
 ## Planned exceptions
 

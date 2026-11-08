@@ -1,0 +1,44 @@
+# MOF builder
+
+`xtalforge-mof` follows the PORMAKE idea (MIT; see `THIRD_PARTY.md`): a net
+supplies the topology, a node block sits on every vertex and a linker spans
+every edge. The catalogue here is a curated subset, not the full PORMAKE data.
+
+## Catalogues
+
+`topologies()` reads six nets from `data/topologies.json`: `pcu` (6-connected),
+`dia` (4), `srs` (3), `sql` (4), `hcb` (3) and `bcu` (8). Each entry carries
+fractional vertices and edge pairs.
+
+`blocks()` reads four nodes (`Zn4O`, `Cu2` paddlewheel, `Cr3O` trimer,
+`benzene_tri`) and four linkers (`benzene`, `biphenyl`, `stilbene`,
+`triphenylene`) from `data/blocks.json`. A block carries its own cell, atoms,
+connection points and elements. Coordinates are illustrative geometries, not
+optimised structures.
+
+## Build
+
+```rust
+use xtalforge::mof::{MofRequest, build_mof};
+
+let built = build_mof(&MofRequest::new("pcu", "Zn4O", "benzene"))?;
+println!("{} atoms, {} warnings", built.structure.sites().len(), built.warnings.len());
+```
+
+The builder places the node at every vertex, orients it so its connection
+points follow the incident edges, scales the linker along each edge so the node
+and linker connection points meet at the midpoint, and returns a P1 structure.
+A vertex degree that does not match the node's connection count is a warning,
+not a silent error. Unknown names are typed errors.
+
+`build_request_json` accepts the same request as JSON; `xtalforge mof build`
+exposes it in the CLI, `build_mof` in Python and `build_mof_info` in WASM.
+
+## Deliberate limits
+
+- Six topologies and eight blocks, not the full PORMAKE catalogue.
+- No RMSD locator, rods, layers, merged nets or supertetrahedral decoration
+  beyond the curated data.
+- Blocks are not relaxed; the builder is geometric.
+- The full MOF and RCSR bundles are external data (`data-YYYY.MM.DD`), not
+  part of this crate.
