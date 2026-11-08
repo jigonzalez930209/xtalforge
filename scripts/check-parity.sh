@@ -48,6 +48,9 @@ cli_help=$(cargo run --quiet -p xtalforge-cli -- --help 2>/dev/null) || {
 
 check_cli() {
   local command=${1//_/-}
+  case "$1" in
+    element_info) command=element ;;
+  esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
 
