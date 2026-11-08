@@ -21,32 +21,40 @@ Crate: `xtalforge-symmetry`. Decision gate: the Task 0.3 report must conclude
 
 ## Task 2.1 — moyo integration (v0.0.1 gate)
 
-- [ ] 2.1.1 Conversion layer
+- [x] 2.1.1 Conversion layer
   `Structure`/`P1Cell` to `moyo::base::Cell` and back: lattice (moyo uses
   column or row conventions; verify and test against our row convention),
   fractional positions, integer atom types. Atom type policy, documented:
   sites are typed by element plus occupancy signature (species set and
   occupancies rounded to a tolerance), so a mixed Fe/Ni site never becomes
   equivalent to a pure Fe site; dummy atoms get their own type.
-- [ ] 2.1.2 Operations from a space group
+  Note: `xtalforge_symmetry::convert`; types are `(Z, occupancy x 1000)`
+  mapped to dense integers in first-appearance order.
+- [x] 2.1.2 Operations from a space group
   From a Hall number, Hall symbol, H-M symbol with setting, or number with
   default setting, produce `Vec<SymOp>` (exact rationals, Task 1.6.3) through
   moyo's `data` module. This is what lets a `Structure` built from a Hall
   symbol expand to P1.
-- [ ] 2.1.3 Detection entry point
+- [x] 2.1.3 Detection entry point
   `detect_symmetry(structure, SymmetryOptions { symprec, angle_tolerance,
   setting })` returning our `SymmetryDataset`: number, Hall number, H-M
   symbol, Pearson symbol, operations, orbits (equivalent atoms), Wyckoff
   letters, site-symmetry symbols. moyo errors map to `Error::Symmetry` with a
   code and the tolerance used.
-- [ ] 2.1.4 Surfaces and docs
+  Note: `detect_symmetry` returns `SymmetryDataset`; `Error::Symmetry` has
+  code `symmetry` and the message includes the tolerance.
+- [x] 2.1.4 Surfaces and docs
   CLI `symmetry detect` (output compatible in content with Crystal-Builder
   `xtal symmetry`), Python and WASM functions, API page, algorithm page on the
   backend isolation and the meaning of the tolerances.
-- [ ] 2.1.5 Smoke validation
+  Note: `detect_symmetry` in Rust, Python and WASM; CLI `symmetry detect`;
+  `docs/api/symmetry.md` and `docs/algorithms/symmetry.md`.
+- [x] 2.1.5 Smoke validation
   On the whole corpus the detected space group number equals the golden
   spglib result at the default tolerance; any exception is listed with a
   reason.
+  Note: the `simple/` corpus matches; the full sweep is an ignored test and
+  its six exceptions are listed in `docs/algorithms/symmetry.md`.
 
 ## Task 2.2 — Space group value object and catalogue
 
