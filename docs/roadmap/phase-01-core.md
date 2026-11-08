@@ -347,15 +347,19 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.14 — Measurements, per-atom scalars, descriptions
 
-- [ ] 1.14.1 Measures
+- [x] 1.14.1 Measures
   Port `core/measure.py` (376 lines): distances, angles and torsions computed
   on minimum-image vectors between atoms of the cell, plus centroids, plane
   fits and inter-plane angles.
-- [ ] 1.14.2 Per-bond and per-atom scalars
+  Note: `xtalforge-core::measure::{distance,angle,torsion,centroid,
+  interplanar_angle}` with minimum images.
+- [x] 1.14.2 Per-bond and per-atom scalars
   Port `core/scalars.py`: a number per bond or atom for colouring and
   analysis (bond length, deviation from the covalent sum, coordination
   number, charge, …), as a registry of named scalars.
-- [ ] 1.14.3 Atom description
+  Note: `scalars::{bond_lengths,coordination_numbers,atom_charges,atom_masses}`
+  driven by the bond graph.
+- [x] 1.14.3 Atom description
   Port `core/describe.py`: the short text describing one atom (element,
   label, site, Wyckoff letter when known, coordination, bonds), used by
   tooltips, the CLI and the agent layer.
