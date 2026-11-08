@@ -129,11 +129,11 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   Port `fullerene/spiral.py`: a cage as its Fowler-Manolopoulos face spiral
   (the twelve positions of the pentagons; C60-Ih is `1 7 9 11 13 15 18 20 22 24
   26 32`), wound up into the dual graph and then the cage graph.
-- [ ] 6.7.2 Catalogue and geometry
+- [x] 6.7.2 Catalogue and geometry
   Port `fullerene/catalogue.py` and its data (isomer tables from C20 to C100),
   and `fullerene/geometry.py` (3D embedding of the cage graph and
   relaxation).
-- [ ] 6.7.3 Builder
+- [x] 6.7.3 Builder
   Port `fullerene/build.py` and `modules/fullerene.py`: a cage from the table
   (size and isomer number) or from a typed spiral, of one element, alone in a
   box, bonds stated.
