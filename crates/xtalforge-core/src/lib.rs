@@ -7,9 +7,11 @@
 pub mod cell;
 pub mod data;
 pub mod elements;
+pub mod lattice;
 
 pub use cell::cell_volume;
 pub use elements::{Element, Isotope, element_info};
+pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
 
 /// Version of the workspace, from the package metadata.
 ///
