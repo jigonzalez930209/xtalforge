@@ -63,7 +63,7 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.2 — Fragment library
 
-- [ ] 6.2.1 Library data
+- [x] 6.2.1 Library data
   Port `build/library.py` and `build/data/fragments.json`: named molecules
   worth not typing twice (DMF `CN(C)C=O`, the phenylene strut
   `[*:1]c1ccc([*:2])cc1`, solvents, linkers), embedded as a data file.
