@@ -23,9 +23,11 @@ let xyz = xtalforge::io::write_structure(&structure, "xyz")?;
 ## Registry and capabilities
 
 `xtalforge_io::registry` is the single format list used by conversion and the
-bindings. `find("cif")`, `find(".vasp")` and `read_with`/`write_with` resolve
-names and extensions; `sniff(text)` detects CIF, pymatgen JSON and XYZ from
-content. `Capabilities` declares what a format preserves (cell, symmetry,
+bindings: `FORMATS` is the `&[FormatSpec]` table and `FormatSpec` carries the
+name, extensions, reader/writer and `Capabilities`. `find("cif")`,
+`find(".vasp")` and `read_with`/`write_with` resolve names and extensions;
+`sniff(text)` detects CIF, pymatgen JSON and XYZ from content.
+`ExportPolicy` controls how a conversion handles lossy output. `Capabilities` declares what a format preserves (cell, symmetry,
 occupancy, ADPs, charges, bonds, labels, frames), and `losses(from, to)` names
 the data a conversion drops.
 

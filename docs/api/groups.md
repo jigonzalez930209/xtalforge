@@ -13,6 +13,6 @@ for group in find_groups(&structure)? {
 ```
 
 The matcher is periodic-aware because it runs on the P1 graph. The catalogue
-is a fixed enum now; it becomes data-driven when the remaining patterns from
-Crystal-Builder `core/groups.py` are ported. Each pattern is tested on a small
-molecule; framework tests follow with the corpus.
+is a fixed enum with these four patterns; the remaining patterns from
+Crystal-Builder `core/groups.py` and the framework corpus tests are not
+implemented. Each current pattern is tested on a small molecule.

@@ -63,8 +63,11 @@ const report = limits_check("standard", "supercell", 80000);
 - `Budget` names the estimate; `LimitLevel` is `Ok`, `Warn` or `Refuse`.
   `UNDO_ATOMS`, `UNDO_KEEP` and `HESSIAN_MIB_PER_ATOM` are the model constants.
 
-The builder-specific carbon, nanotube and graphene estimates arrive with the
-builders in Phase 6; their budgets are already present in the table.
+The carbon, nanotube, graphene, phonon and Hessian budgets are part of the
+table. The builders allocate through the generic supercell/grid paths; a
+dedicated per-builder check is not exposed, so callers use
+`check_supercell`, `check_grid`, `check_phonons` or `check_hessian` with the
+matching budget.
 
 ## Surfaces
 

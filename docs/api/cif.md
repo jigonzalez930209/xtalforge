@@ -11,6 +11,10 @@ let p1 = structure.p1()?;
 let output = xtalforge::io::write_cif(&structure)?;
 ```
 
+`CifDocument::parse` exposes the raw parse as `CifDocument { blocks }`, with
+`CifBlock` for a data block and `CifLoop` for its loops; the `read_cif*`
+functions are the typed shortcut.
+
 The parser handles data blocks, tags, loops, single and double quoted values,
 semicolon-delimited text, comments, standard uncertainties (`1.234(5)`), `?`
 and `.` values, atom sites, occupancy, Uiso/Uij, charge, and symmetry
@@ -24,6 +28,9 @@ byte by byte. `read_text(path)` is the file wrapper.
 
 ## Status
 
-The reader covers the corpus CIFs and the malformed edge case returns a typed
-error. The exact Crystal-Builder symmetry-priority warnings (1.15.3), fuzzing
-(1.15.5) and the full round-trip of explicit bonds/ADP loops are pending.
+The reader covers the corpus CIFs and malformed input returns a typed error.
+The writer emits cell, Hall symbol, operation loop, occupancy, Uiso and charge;
+it does not write Uij loops or explicit bond loops yet, so those parts are not
+round-tripped. The fuzz target lives in `crates/xtalforge-io/fuzz`; the exact
+Crystal-Builder inconsistency warnings beyond the missing-operation warning are
+not implemented.

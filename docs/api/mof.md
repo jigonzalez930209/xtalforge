@@ -31,14 +31,35 @@ and linker connection points meet at the midpoint, and returns a P1 structure.
 A vertex degree that does not match the node's connection count is a warning,
 not a silent error. Unknown names are typed errors.
 
-`build_request_json` accepts the same request as JSON; `xtalforge mof build`
-exposes it in the CLI, `build_mof` in Python and `build_mof_info` in WASM.
+`MofRequest`, `BuiltMof { structure, topology, node, linker, warnings }`,
+`BlockKind` (`Node`/`Linker`) and the `find_topology`/`find_block` lookups are
+the public types. `build_request_json` accepts the same request as JSON;
+`xtalforge mof build` exposes it in the CLI, `build_mof` in Python and
+`build_mof_info` in WASM.
+
+## Advanced builders
+
+The crate also exposes documented geometric helpers:
+
+- `linkers_by_span(min, max)` lists linker blocks by connection-point distance
+  and `invent_linker(span, aromatic)` builds a linear carbon chain.
+- `build_rod_framework(repeats)` places a metal chain with carbon linkers and
+  `build_layered_framework(layers)` stacks honeycomb sheets.
+- `merge_frameworks(first, second, shift)` merges two structures at a
+  fractional shift; `decorate_super_tetrahedron(structure, node)` adds a
+  tetrahedral O shell.
+- `partition_pore_space(frameworks, spacing, probe)` reports each framework's
+  accessible volume.
+- `node_oriented(block, target_direction)` is the deterministic orientation
+  helper used by the builder.
 
 ## Deliberate limits
 
 - Six topologies and eight blocks, not the full PORMAKE catalogue.
-- No RMSD locator, rods, layers, merged nets or supertetrahedral decoration
-  beyond the curated data.
+- No RMSD locator and no automatic SBU recognition; the linker/node choice is
+  explicit in the request.
+- Rods, layers, merged nets and decoration are the simplified helpers above,
+  not full PORMAKE net manipulations.
 - Blocks are not relaxed; the builder is geometric.
 - The full MOF and RCSR bundles are external data (`data-YYYY.MM.DD`), not
   part of this crate.

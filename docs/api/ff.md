@@ -16,28 +16,34 @@ Units at the boundary are eV, eV/Angstrom and GPa; UFF keeps kcal/mol and
 Angstrom internally. The calculator builds the P1 topology once per call;
 `UffModel` exposes the prepared topology for optimizers that move positions.
 
-`CalculatorRegistry` lists engines and availability. `RunRecord { calculator,
-energy, n_atoms, converged, steps, notes }` is the serializable run record.
+`CalculatorRegistry` lists engines and availability through `CalculatorInfo`
+(name, label, description, capabilities); `RunRecord { calculator, energy,
+n_atoms, converged, steps, notes }` is the serializable run record.
 Dummy `X` atoms are excluded from the energy and return a zero force.
 
 The UFF table covers the 218 Rappe/UFF4MOF types; the typer uses element and
 bond geometry, with UFF4MOF metal types for framework nodes. Charges, Ewald,
-optimizers and thermochemistry are later Phase 4 tasks.
+optimizers, vibrations and thermochemistry build on the same `Calculator`
+contract and are documented below.
 
 ## Charges
 
-`qeq_charges(structure, &ChargeOptions)` and `eqeq_charges` solve charge
-equilibration and return `Charges { per_atom, total }`; `apply_charges` writes
-them into the sites. `EwaldOptions` and the Ewald energy/forces provide the
+`qeq_charges(structure, &ChargeOptions)`, `eqeq_charges` and `eeq_charges`
+solve charge equilibration and return `Charges { per_atom, total }`;
+`apply_charges` writes them into the sites. `EwaldOptions` and
+`ewald_energy`/`ewald_energy_forces` return an `EwaldResult` and provide the
 periodic electrostatic term.
+EEQ reuses the local charge table (the sci-form fitted table is not vendored);
+the module documents the approximation.
 
 ## Optimizers
 
-`minimize(structure, calculator, &OptimizeOptions)` runs FIRE or L-BFGS over
-the P1 coordinates (asymmetric mode keeps the asymmetric unit) and returns
-`OptimizationResult { structure, energy, max_force, steps, converged }`.
-`apply_optimized_geometry` writes the result back. `fit_eos` fits a
-Birch-Murnaghan or Murnaghan equation of state from energy-volume points.
+`minimize(calculator, structure, &OptimizeOptions, Minimizer::Fire)` runs FIRE
+or L-BFGS over the P1 coordinates (asymmetric mode keeps the asymmetric unit)
+and returns `OptimizationResult { structure, energy, max_force, steps,
+converged }`. `apply_optimized_geometry` writes the result back. `fit_eos`
+fits a Birch-Murnaghan or Murnaghan equation of state from energy-volume
+points and returns an `EosFit { v0, e0, b0, b0_prime, rms }`.
 
 ## Scans
 
@@ -46,12 +52,13 @@ driver steps the coordinate and relaxes the rest.
 
 ## Vibrations and thermodynamics
 
-`hessian(structure, calculator, &HessianOptions)` builds the Gamma-point
+`hessian(calculator, structure, &HessianOptions)` builds the Gamma-point
 Hessian by central differences of the analytic forces.
-`vibrational_modes(&hessian, masses, options)` mass-weights it and returns
-`VibrationalModes { frequencies, modes, zero_modes, imaginary }` in cm^-1.
+`vibrational_modes(&hessian, structure, &HessianOptions)` mass-weights it and
+returns `VibrationalModes { frequencies, modes, zero_modes, imaginary }` in
+cm^-1.
 
-`ir_spectrum(&modes, structure, &IrOptions)` uses QEq charges and a
+`ir_spectrum(structure, &modes, &IrOptions)` uses QEq charges and a
 finite-difference dipole derivative (documented approximation) and broadens
 the sticks into `IrSpectrum { points, peaks }`.
 
@@ -73,8 +80,8 @@ charge, Ewald energy and frequencies.
 
 `probe(EngineKind)` checks a binary by running `--version`; on WASM it reports
 `Missing`. `write_dftb_hsd`, `write_xtb_input` and `write_orca_input` prepare
-inputs; `parse_dftb_output` and `parse_xtb_output` read energies, forces and
-stress. ORCA is input-only and `orca_catalogue` lists the bundled methods.
+inputs; `parse_dftb_output` and `parse_xtb_output` return an `EngineResult` with the
+energy, forces and optional stress. ORCA is input-only and `orca_catalogue` lists the bundled methods.
 
 ## Quantum adapter
 

@@ -109,12 +109,16 @@ moyo 0.22 exposes all three reductions publicly, so no local port is needed.
 
 `wyckoff_assignments(structure, options)` returns, per atom, the letter,
 multiplicity, site-symmetry symbol, coordinate template and free parameters
-(`free_parameters` extracts the current x/y/z values).
+(`WyckoffAssignment`, `free_parameters` extracts the current x/y/z values).
+`SpaceGroupFilter` narrows `catalogue` by number, symbol or crystal system.
 
 `tolerance_ladder(structure, &DEFAULT_LADDER)` groups consecutive tolerances
-that give the same Hall setting into ranges. `diagnose(structure, &SpaceGroup)`
-returns the per-atom deviation from the nearest orbit image, sorted by
-decreasing displacement, with `max_displacement` and `mean_displacement`.
+that give the same Hall setting into ranges (`ToleranceSample`,
+`ToleranceRange`, `tolerance_samples`). `diagnose(structure, &SpaceGroup)`
+returns the per-atom deviation from the nearest orbit image
+(`SymmetryDiagnostics`, `AtomDeviation`), sorted by decreasing displacement,
+with `max_displacement` and `mean_displacement`. `classify_bravais`,
+`laue_class` and `reduce_lattice` are the Bravais/lattice helpers.
 
 ## Subgroups
 
@@ -123,8 +127,11 @@ decreasing displacement, with `max_displacement` and `mean_displacement`.
 `klassengleiche_subgroups(hall_number, transformation, epsilon)` return the
 conjugacy-class representatives with index, depth, operations and conjugate
 count. `lower_to_subgroup(structure, number, tolerance)` keeps the first atom
-of every subgroup orbit and returns the lowered structure. `identify_space_group(operations)` names a primitive operation list.
-Subgroup naming and symmetry lowering are not implemented yet.
+of every subgroup orbit and returns the lowered structure.
+`identify_space_group(operations)` returns the space-group and Hall numbers of
+a primitive operation list; each `Subgroup` also carries its identified number
+and Hall number. Free-parameter splitting across the subgroup orbits is not
+part of the current lowering.
 
 ## Layer groups
 
@@ -132,8 +139,8 @@ Subgroup naming and symmetry lowering are not implemented yet.
 the lattice must have `c` perpendicular to `a` and `b`, and the result carries
 the layer-group number (1 to 80), Hall number, operations, orbits, Wyckoff
 letters and Pearson symbol. `detect_magnetic_symmetry(structure, symprec)`
-reads the `magmom` site property and returns the UNI number, operations and
-orbits; it is marked experimental. Molecular point groups are still pending.
+reads the `magmom` site property and returns a `MagneticDataset` with the UNI
+number, `MagneticOperation`s and orbits; it is marked experimental.
 
 ## Band paths and molecular point groups
 
@@ -154,5 +161,6 @@ improper counts, inversion and mirror count.
 `brillouin_zone(lattice)` returns the Wigner-Seitz cell of the reciprocal
 lattice as `BrillouinZone { vertices, faces, edges }`. Reciprocal vectors
 include `2 pi`, so coordinates are in `1/Angstrom`. The fcc primitive cell
-gives a truncated octahedron with 14 faces, 24 vertices and 36 edges. The
-special points and k-path of Task 2.10.2-2.10.4 are pending.
+gives a truncated octahedron with 14 faces, 24 vertices and 36 edges.
+`band_path`/`band_path_for_structure` supply the Bravais special points and
+the k-path in the user's reciprocal basis.

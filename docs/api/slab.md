@@ -19,6 +19,7 @@ planes.
 
 ## Status
 
-The atom cut and the surface basis are complete. Bond carrying through the cut
-needs the bond graph from Task 1.11; until then `cut` is zero and the caller
-must perceive the slab's bonds. The browser slab demo arrives with Task 1.18.
+The atom cut and the surface basis are complete. `cut` is currently zero: the
+slab builder does not carry the bonds severed by the cut, so the caller
+perceives the slab's bonds from the returned structure. The CIF inspector demo
+downloads the same slabs through the WASM bindings.

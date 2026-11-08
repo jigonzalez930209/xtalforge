@@ -20,5 +20,6 @@ are sorted by `(i, j, image)`, which makes them deterministic. Self-images
 ## Status
 
 The direct periodic search is complete and exact. The linked-cell
-acceleration and criterion benchmarks from Task 1.10.2 are pending; they must
-preserve this output exactly. A rayon build will use a fixed reduction order.
+acceleration and the criterion benchmarks from Task 1.10.2 are not implemented
+yet; a future implementation must preserve this output exactly. A rayon build
+would use a fixed reduction order.

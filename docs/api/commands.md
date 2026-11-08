@@ -9,7 +9,12 @@ the atom groups and the origin of each edit.
 use xtalforge::commands::{CommandStack, Origin, atoms::MoveSites};
 
 let mut stack = CommandStack::new();
-let edited = stack.push(Box::new(MoveSites::new(vec![0], [0.1, 0.0, 0.0])), &structure, Origin::User)?;
+let mut edited = structure.clone();
+stack.push(
+    &mut edited,
+    Box::new(MoveSites::new(vec![(0, [0.1, 0.0, 0.0])])),
+    Origin::User,
+)?;
 ```
 
 ## Stack
@@ -37,6 +42,12 @@ methods are the public state. `Origin` is `User`, `Script` or `Agent`.
 - `groups`: `AtomGroup`, `AddAtomGroup`, `RemoveAtomGroup`, `SetGroupColor`,
   `SetGroupHidden`.
 - `clipboard`: `Fragment`, `copy_selection`, `PasteFragment`.
+- `later`: `SetCharges`, `Interpenetrate`, `MarkConnectionPoints` (Phase 4-6
+  wrappers, undoable like every other command).
+
+`CommandRecord` is one logged edit, `PositionPolicy` selects
+`KeepFractional`/`KeepCartesian` when the lattice changes, and `GroupStore`
+owns the atom groups for `Document`.
 
 Every command is tested for apply and undo; invalid indices and values return
 `Error::InvalidInput`.

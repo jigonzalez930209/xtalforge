@@ -9,8 +9,11 @@ Task 7.1 is a study, not a port. `rietx_inventory()` returns a `RietxBridge`
 with the documented capabilities (pattern IO, background, profile, Le Bail,
 Pawley, Rietveld, indexing), the MIT license and the source note. The acceptance
 metrics are `AcceptanceMetrics { max_rwp, max_position_error }` and
-`check_acceptance` rejects values outside them. The exact rietx sources are not
-vendored; `xtalforge-powder` will port what is needed when that crate starts.
+`check_acceptance` rejects values outside them. `RIETX_LICENSE_NOTE`,
+`ACCEPTANCE_MAX_RWP` and `ACCEPTANCE_MAX_POSITION_ERROR` are the public
+constants. The exact rietx sources are not vendored; the native implementation
+is a simplified model documented in the module comments and the roadmap's
+known-gaps section.
 
 ## Instrument
 
@@ -34,16 +37,18 @@ Task 7.9.1.
 
 `free_cell_parameters(number)` returns the free cell parameters for the
 crystal system of a space-group number (triclinic 6, monoclinic 4, orthorhombic
-3, tetragonal/hexagonal 2, cubic 1; trigonal has both settings).
-`extinction_symbol(number)` returns the Bravais extinction letter for the 14
-Bravais types.
+3, tetragonal/hexagonal 2, cubic 1); `TrigonalSetting` and
+`free_cell_parameters_with_setting` choose the trigonal setting, and
+`CELL_PARAMETER_NAMES` holds the names. `extinction_symbol(number)` returns
+the Bravais extinction letter for the 14 Bravais types.
 
 ## Automatic run
 
 `run_automatic(structure, observed, &AutomaticOptions)` finds the peaks, indexes
 a cubic cell, extracts Le Bail intensities and fits the phase, recording every
-step in order. It refuses fewer than three points or peaks and reports the
-cubic-only limitation in the module documentation.
+step in order in `AutomaticResult { peaks, index, lebail, phase, steps }`. It
+refuses fewer than three points or peaks and reports the cubic-only limitation
+in the module documentation. `IndexedPeak` is one indexed reflection.
 
 ## Surfaces
 

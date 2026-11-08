@@ -33,8 +33,11 @@ residual)` points, minimising both objectives.
 
 `fit_phase(structure, observed, &RietveldOptions)` simulates the phase from the
 structure and PXRD engine, then fits its scale and background, returning
-`RietveldPhase { scale, background, rwp, pattern }`. Atomic positions and ADPs
-are the caller's model; a full refinement loop is later Task 7.8.
+`RietveldPhase { scale, background, rwp, pattern }`. The structural
+least-squares loop is `refine_phase(structure, observed, &RietveldOptions,
+&RefineOptions)` in the [powder refinement](./powder) page; it refines
+fractional coordinates, a global isotropic ADP multiplier and occupancies and
+returns `RefinedPhase { structure, rwp, parameters, converged, iterations }`.
 
 ## Le Bail
 
@@ -46,8 +49,9 @@ intensity among overlapping reflections and iterates the profile sum, returning
 
 `index_cubic(peaks, wavelength, max_index, tolerance)` searches cubic `a`,
 indexes each peak and returns `CubicIndex { a, peaks, completeness,
-mean_error }`. It is the first indexing engine; non-cubic cells and figures of
-merit are later Task 7.5 work.
+mean_error }`. This is the implemented indexing engine; non-cubic cells, the
+TREOR/ITO-style searches and the M20/F_N figures of merit of Task 7.5 are not
+implemented and are listed as remaining work in the roadmap.
 
 ## Profiles and background
 
@@ -73,8 +77,9 @@ and a minimum separation, returning `Peak { two_theta, intensity, fwhm }`.
 lattice shifts; `NetInvariants` reports node/edge counts, cycle rank and
 coordination, and `shift_map` groups shifts by node pair. `NetIndex` indexes a CGD file and searches by invariants; `components` finds
 connected components (interpenetration candidates) and `interpenetrate` duplicates
-a net at a shift. RCSR identification and
-canonical keys are later Task 5.6 work.
+a net at a shift. `RcsrIndex::from_subset()` identifies the curated 17-net
+subset by counts, cycle rank and coordination; the full RCSR catalogue and its
+canonical keys are not bundled.
 
 ## Isosurfaces
 
@@ -89,7 +94,9 @@ cases). It rejects grids with fewer than two samples along an axis.
 surface (negative inside an atom), using minimum images. `contact_surface`,
 `accessible_volume(probe)`, `pore_volume`, `surface_area`,
 `largest_included_diameter` and `pore_diameter(bin_width)` are the porosity
-numbers. `default_radii` uses the element van der Waals radii.
+numbers; `PoreSizeBin` is one histogram bin. `default_radii` uses the element
+van der Waals radii. `PatternPoint` is the shared measured-pattern point type,
+and `ProfileKind` selects Gaussian, Lorentzian or pseudo-Voigt.
 
 All operations return typed errors for non-positive spacing, missing radii or
 invalid probe values.
@@ -103,8 +110,10 @@ arguments.
 
 `RcsrIndex::from_subset()` holds a curated 17-net subset (the full RCSR
 database is an external bundle); `identify` matches by node/edge counts, cycle
-rank and coordination and `validate` checks the subset. `merge_nets` joins two
-quotient graphs and `overlay_net` turns one into an `Overlay`.
+rank and coordination and `validate` checks the subset. `QuotientGraph`,
+`NetEdge`, `NetInvariants` and `RcsrEntry` are the net types. `merge_nets`
+joins two quotient graphs and `overlay_net` turns one into an `Overlay` with an
+`OverlayStyle`; `OverlaySet` collects overlays for a viewer.
 
 `xtalforge analysis {porosity,nets,zeo,overlay}`, Python `porosity`,
 `net_invariants`, `zeo_parse` and the WASM equivalents expose the same

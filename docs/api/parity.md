@@ -14,7 +14,7 @@ compares this table with the symbols each surface actually exports.
 | `lattice_minimum_image` | 1 | done | n/a | done | done | Rust, Python and WASM; the CLI reports geometry through `cell` |
 | `limits_bounds` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
 | `limits_check` | 1 | done | n/a | done | done | Limits (Task 1.3.3); the CLI has the global `--limits` flag |
-| `structure_info` | 1 | done | done | done | done | Structure summary (Task 1.4.5); JSON bridge until CIF lands |
+| `structure_info` | 1 | done | done | done | done | Structure summary (Task 1.4.5); reads any registered format |
 | `read_cif` | 1 | done | done | done | done | CIF reader (Task 1.15); CLI `info` and `convert` |
 | `read_structure` | 1 | done | done | done | done | Format dispatch (Task 1.16.3); empty hint auto-detects |
 | `supercell` | 1 | done | done | done | done | Supercells (Task 1.7); WASM `supercell_info` |
@@ -57,12 +57,18 @@ compares this table with the symbols each surface actually exports.
 | `zeo_parse` | 5 | done | done | done | done | Zeo++ output parser (Task 5.5); Rust `parse_zeo_channels` |
 | `build_graphene` | 6 | done | done | done | done | Carbon builders (Task 6.5); Rust `graphene`, WASM `build_graphene_info` |
 | `build_nanotube` | 6 | done | done | done | done | Carbon builders (Task 6.6); Rust `nanotube`, WASM `build_nanotube_info` |
-| `build_c60` | 6 | done | n/a | done | done | C60 (Task 6.7); no CLI command yet |
+| `build_c60` | 6 | done | done | done | done | C60 (Task 6.7); CLI `build c60`, WASM `build_c60_info` |
+| `build_c20` | 6 | done | done | done | done | C20 (Task 6.7); Rust `face_spiral(20)`, CLI `build c20` |
 | `build_mof` | 6 | done | done | done | done | MOF assembly (Task 6.12-6.16); WASM `build_mof_info` |
+| `twist` | 6 | done | done | done | done | Commensurate twist (Task 6.5.3); CLI `build twist` |
+| `ribbon` | 6 | done | done | done | done | Nanoribbon (Task 6.8.3); CLI `build ribbon` |
+| `build_ztc` | 6 | done | done | done | done | Gyroid carbon model (Task 6.8); CLI `build ztc` |
+| `build_schwarzite` | 6 | done | done | done | done | Schwarz P carbon model (Task 6.8); CLI `build schwarzite` |
+| `build_polymer` | 6 | done | done | done | done | Polymer chain (Task 6.9); CLI `build polymer` |
 | `run_automatic` | 7 | done | done | done | done | Automatic powder run (Task 7.10); Python `powder_automatic` |
 | `refine_phase` | 7 | done | done | done | done | Structural refinement (Task 7.8); Python `powder_refine` |
 
-## Planned exceptions
+## Recorded exceptions
 
 | Capability | Surface | Reason | Alternative offered |
 |---|---|---|---|
@@ -71,4 +77,6 @@ compares this table with the symbols each surface actually exports.
 | External engines (DFTB+, xtb, Zeo++) and process probes | WASM | No subprocesses in the browser | Native engines (UFF, QEq, EQeq, grid porosity) |
 | Multi-threading | WASM | Threads need cross-origin isolation | Optional threaded build |
 | MCP server over stdio | Python, WASM | It is a process, served by the CLI | `xtalforge mcp` |
-| Embedded MOF and RCSR bundles | WASM | Package size | Bundles fetched on demand |
+| Embedded MOF and RCSR bundles | WASM | Package size | The curated MOF/RCSR subsets are embedded; the full bundles are fetched on demand |
+| lattice_minimum_image, limits_bounds, limits_check | CLI | The CLI exposes geometry through `cell` and the global `--limits` flag | Use `cell` and `--limits` |
+| workspace_archive | CLI | The CLI reads and writes `runs/<id>/run.json` directly | Use `project` or the on-disk workspace |

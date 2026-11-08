@@ -27,10 +27,10 @@ background, colormap, hide_hydrogens }` with `sanitize`. `DrawStyle` is
 list and radii for the CLI, Python and WASM. `mesh_stl` returns the full ASCII
 STL string.
 
-`SceneData { atoms, bonds, cell_edges, settings }`: atoms carry element,
-Cartesian position, display radius, colour, index and a hidden flag; bonds
-carry endpoints, radius, colour and order; cell edges are 12 Cartesian
-segments.
+`SceneData { atoms, bonds, cell_edges, settings }`: `SceneAtom` carries
+element, Cartesian position, display radius, colour, index and a hidden flag;
+`SceneBond` carries endpoints, radius, colour and order; cell edges are 12
+Cartesian segments.
 
 ## STL
 

@@ -1,10 +1,10 @@
 # Structures and sites
 
 A `Structure` is a lattice, a space-group identity (the Hall symbol) and the
-asymmetric-unit sites. The current Phase 1 model stores the cell contents in
-the asymmetric unit and reports P1; P1 expansion with provenance arrives in
-Task 1.6, after which the same type carries the asymmetric unit and its derived
-cell.
+asymmetric-unit sites. `Structure::p1()` derives the full cell with provenance:
+every `P1Atom` carries its parent site, the operation that generated it and the
+lattice shift. A structure with no operations is already P1 and reports
+`is_p1() == true`.
 
 ## API
 
@@ -59,14 +59,14 @@ Reads are `name`, `lattice`, `hall`, `sites`, `operations`, `metadata`, `is_p1`,
 in a padded P1 box.
 
 `StructureSummary` carries `name`, `formula`, `hall`, `n_sites`, `volume`,
-`density`, `total_charge` and `is_p1` to the four surfaces. The Phase 1 JSON
-bridge is `structure_info(text)`; CIF input replaces it in Task 1.15 and keeps
-the same summary.
+`density`, `total_charge` and `is_p1` to the four surfaces. `structure_info`
+accepts CIF, POSCAR, XYZ and pymatgen JSON through the format registry and
+returns the same summary.
 
 ## Conventions
 
 - Formula counts include occupancy and follow first appearance in the sites.
 - Density uses the cell contents: `mass * 1.66053906660 / volume` g/cm3.
-- `z` is 1 while the asymmetric unit is the cell contents; the P1 expansion
-  refines it.
+- `z` is the number of formula units in the cell contents; a structure with
+  operations derives it from the P1 expansion.
 - `total_charge` is the occupancy-weighted sum of formal charges.
