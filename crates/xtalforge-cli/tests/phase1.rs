@@ -402,3 +402,29 @@ fn help_lists_the_phase_one_commands() {
         assert!(text.contains(command), "help is missing {command}");
     }
 }
+
+#[test]
+fn strict_conversion_rejects_lossy_formats() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let output = run(&[
+        "--strict",
+        "convert",
+        &path.to_string_lossy(),
+        "--format",
+        "xyz",
+    ]);
+    assert_eq!(output.status.code(), Some(3));
+    let text = String::from_utf8(output.stderr).expect("stderr is UTF-8");
+    assert!(text.contains("loses"));
+}
+
+#[test]
+fn mesh_writes_ascii_stl() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let output = run(&["mesh", &path.to_string_lossy(), "--style", "space-fill"]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    assert!(text.starts_with("solid"));
+    assert!(text.contains("facet normal"));
+    assert!(text.contains("endsolid"));
+}
