@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "note": "Molecules worth not typing twice.  Edit this file to add one; nothing else has to change.",
+  "fragments": [
+    {
+      "name": "Water",
+      "smiles": "O",
+      "category": "Solvent",
+      "description": "The guest that is in every pore somebody forgot to evacuate"
+    },
+    {
+      "name": "Methanol",
+      "smiles": "CO",
+      "category": "Solvent",
+      "description": "Wash solvent, and the commonest thing left in a pore"
+    },
+    {
+      "name": "Acetonitrile",
+      "smiles": "CC#N",
+      "category": "Solvent",
+      "description": "Linear, weakly coordinating"
+    },
+    {
+      "name": "DMF",
+      "smiles": "CN(C)C=O",
+      "category": "Solvent",
+      "description": "N,N-dimethylformamide: the synthesis solvent, and what activation is trying to remove"
+    },
+    {
+      "name": "DEF",
+      "smiles": "CCN(CC)C=O",
+      "category": "Solvent",
+      "description": "N,N-diethylformamide, the larger sibling of DMF"
+    },
+    {
+      "name": "Ethanol",
+      "smiles": "CCO",
+      "category": "Solvent",
+      "description": "Exchange solvent before a supercritical dry"
+    },
+    {
+      "name": "Benzene",
+      "smiles": "c1ccccc1",
+      "category": "Ring",
+      "description": "The aromatic ring, flat and 1.39 A round"
+    },
+    {
+      "name": "Pyridine",
+      "smiles": "c1ccncc1",
+      "category": "Ring",
+      "description": "One nitrogen donor, pointing out of the ring"
+    },
+    {
+      "name": "Imidazole",
+      "smiles": "c1c[nH]cn1",
+      "category": "Ring",
+      "description": "The ZIF linker before it is deprotonated"
+    },
+    {
+      "name": "Naphthalene",
+      "smiles": "c1ccc2ccccc2c1",
+      "category": "Ring",
+      "description": "Two fused rings, for a longer strut"
+    },
+    {
+      "name": "Cyclohexane",
+      "smiles": "C1CCCCC1",
+      "category": "Ring",
+      "description": "The saturated ring, which comes out as a chair"
+    },
+    {
+      "name": "Benzoate",
+      "smiles": "c1ccccc1C(=O)[O-]",
+      "category": "Ligand",
+      "description": "A monodentate carboxylate, for capping a node"
+    },
+    {
+      "name": "Acetate",
+      "smiles": "CC(=O)[O-]",
+      "category": "Ligand",
+      "description": "The modulator that ends up on a defect site"
+    },
+    {
+      "name": "Formate",
+      "smiles": "[O-]C=O",
+      "category": "Ligand",
+      "description": "The smallest carboxylate there is"
+    },
+    {
+      "name": "4,4'-bipyridine",
+      "smiles": "c1cc(ccn1)-c2ccncc2",
+      "category": "Ligand",
+      "description": "The pillar in a pillared-layer framework"
+    },
+    {
+      "name": "Terephthalic acid",
+      "smiles": "OC(=O)c1ccc(cc1)C(=O)O",
+      "category": "Ligand",
+      "description": "H2BDC, the linker of MOF-5 before it loses its protons"
+    },
+    {
+      "name": "Trimesic acid",
+      "smiles": "OC(=O)c1cc(cc(c1)C(=O)O)C(=O)O",
+      "category": "Ligand",
+      "description": "H3BTC, the three-connected linker of HKUST-1"
+    },
+    {
+      "name": "Phenylene",
+      "smiles": "[*:1]c1ccc([*:2])cc1",
+      "category": "Linker",
+      "description": "A two-connected benzene strut, connection points where it joins its nodes"
+    },
+    {
+      "name": "Biphenylene",
+      "smiles": "[*:1]c1ccc(cc1)-c2ccc([*:2])cc2",
+      "category": "Linker",
+      "description": "Two rings: the same net, a larger pore"
+    },
+    {
+      "name": "Terphenylene",
+      "smiles": "[*:1]c1ccc(cc1)-c2ccc(cc2)-c3ccc([*:2])cc3",
+      "category": "Linker",
+      "description": "Three rings, where interpenetration usually starts"
+    },
+    {
+      "name": "Acetylene-extended phenylene",
+      "smiles": "[*:1]c1ccc(cc1)C#C[*:2]",
+      "category": "Linker",
+      "description": "A rigid strut that lengthens without another ring"
+    },
+    {
+      "name": "Naphthalene linker",
+      "smiles": "[*:1]c1ccc2cc([*:2])ccc2c1",
+      "category": "Linker",
+      "description": "Two-connected and fused, so it cannot twist"
+    },
+    {
+      "name": "Benzene tritopic",
+      "smiles": "[*:1]c1cc([*:2])cc([*:3])c1",
+      "category": "Linker",
+      "description": "Three connection points at 120 degrees, for a tbo or pto net"
+    },
+    {
+      "name": "Tetraphenylmethane",
+      "smiles": "[*:1]c1ccc(cc1)C(c2ccc([*:2])cc2)(c3ccc([*:3])cc3)c4ccc([*:4])cc4",
+      "category": "Linker",
+      "description": "Four connection points, tetrahedral: the dia and pts node"
+    },
+    {
+      "name": "Methyl",
+      "smiles": "[*:1]C",
+      "category": "Group",
+      "description": "CH3, on a ring or anywhere a hydrogen was"
+    },
+    {
+      "name": "Amino",
+      "smiles": "[*:1]N",
+      "category": "Group",
+      "description": "NH2 -- IRMOF-3 is MOF-5 with one on every ring"
+    },
+    {
+      "name": "Hydroxy",
+      "smiles": "[*:1]O",
+      "category": "Group",
+      "description": "OH"
+    },
+    {
+      "name": "Methoxy",
+      "smiles": "[*:1]OC",
+      "category": "Group",
+      "description": "OCH3, turned where it has room"
+    },
+    {
+      "name": "Nitro",
+      "smiles": "[*:1][N+](=O)[O-]",
+      "category": "Group",
+      "description": "NO2, written as the zwitterion so every atom has its valence"
+    },
+    {
+      "name": "Fluoro",
+      "smiles": "[*:1]F",
+      "category": "Group",
+      "description": "F"
+    },
+    {
+      "name": "Chloro",
+      "smiles": "[*:1]Cl",
+      "category": "Group",
+      "description": "Cl"
+    },
+    {
+      "name": "Bromo",
+      "smiles": "[*:1]Br",
+      "category": "Group",
+      "description": "Br"
+    },
+    {
+      "name": "Phenyl",
+      "smiles": "[*:1]c1ccccc1",
+      "category": "Group",
+      "description": "C6H5 -- bulky enough to need the room it is turned for"
+    },
+    {
+      "name": "Acetyl",
+      "smiles": "[*:1]C(C)=O",
+      "category": "Group",
+      "description": "COCH3 -- on a hydroxyl's oxygen, in place of its H, an acetate ester"
+    },
+    {
+      "name": "Formyl",
+      "smiles": "[*:1]C=O",
+      "category": "Group",
+      "description": "CHO -- an aldehyde on a carbon, a formate on an oxygen"
+    },
+    {
+      "name": "Benzoyl",
+      "smiles": "[*:1]C(=O)c1ccccc1",
+      "category": "Group",
+      "description": "COC6H5 -- a benzoate ester on a hydroxyl's oxygen"
+    },
+    {
+      "name": "Trifluoroacetyl",
+      "smiles": "[*:1]C(=O)C(F)(F)F",
+      "category": "Group",
+      "description": "COCF3 -- a trifluoroacetate ester on a hydroxyl's oxygen"
+    },
+    {
+      "name": "Amino-phenylene",
+      "smiles": "[*:1]c1ccc([*:2])cc1N",
+      "category": "Linker",
+      "description": "A functionalised strut: the same geometry, a different pore wall"
+    },
+    {
+      "name": "Polyethylene",
+      "smiles": "[*:1]CC[*:2]",
+      "category": "Monomer",
+      "description": "PE, -CH2CH2-: the planar zigzag every other chain is compared with"
+    },
+    {
+      "name": "Polypropylene",
+      "smiles": "[*:1]CC([*:2])C",
+      "category": "Monomer",
+      "description": "PP, head to tail, the methyl on the tail carbon: its hand is the tacticity"
+    },
+    {
+      "name": "Polystyrene",
+      "smiles": "[*:1]CC([*:2])c1ccccc1",
+      "category": "Monomer",
+      "description": "PS: a phenyl on every other backbone carbon, glassy at room temperature"
+    },
+    {
+      "name": "PMMA",
+      "smiles": "[*:1]CC([*:2])(C)C(=O)OC",
+      "category": "Monomer",
+      "description": "Poly(methyl methacrylate): a quaternary carbon with a methyl and a methyl ester"
+    },
+    {
+      "name": "PVC",
+      "smiles": "[*:1]CC([*:2])Cl",
+      "category": "Monomer",
+      "description": "Poly(vinyl chloride): a chlorine where polypropylene has its methyl"
+    },
+    {
+      "name": "PEO",
+      "smiles": "[*:1]CCO[*:2]",
+      "category": "Monomer",
+      "description": "Poly(ethylene oxide), -CH2CH2O-: the electrolyte host"
+    },
+    {
+      "name": "PTFE",
+      "smiles": "[*:1]C(F)(F)C(F)(F)[*:2]",
+      "category": "Monomer",
+      "description": "Polytetrafluoroethylene: fluorines too large for a zigzag, so it is a helix"
+    },
+    {
+      "name": "PET",
+      "smiles": "[*:1]OCCOC(=O)c1ccc(cc1)C(=O)[*:2]",
+      "category": "Monomer",
+      "description": "Poly(ethylene terephthalate): the bottle polyester"
+    },
+    {
+      "name": "Nylon-6",
+      "smiles": "[*:1]NCCCCCC(=O)[*:2]",
+      "category": "Monomer",
+      "description": "Polycaprolactam: five methylenes and an amide, hydrogen-bonded sheets"
+    },
+    {
+      "name": "PIM-1",
+      "smiles": "[*:1]1Oc2cc3c(cc2O1)C(C)(C)CC32CC(C)(C)c3cc4Oc5c(C#N)c6c(c(C#N)c5Oc4cc32)[*:2]6",
+      "category": "Monomer",
+      "description": "Spirobisindane dibenzodioxin ladder: each end is two atoms, and the spiro centre is the kink that leaves room"
+    },
+    {
+      "name": "PIM-EA-TB",
+      "smiles": "CC12CCC(C)(c3cc4c(cc31)N1CN(C4)[*:2]C1)c1cc3c(cc21)[*:1]3",
+      "category": "Monomer",
+      "description": "Ethanoanthracene joined by Troger's base: a ladder whose ends are a nitrogen and a methylene"
+    }
+  ]
+}
