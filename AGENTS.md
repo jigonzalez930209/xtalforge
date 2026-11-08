@@ -224,6 +224,9 @@ Independent version numbers that do NOT follow the crate version:
 ## 6. Current state (update at every release)
 
 - Version: `0.0.0` (bootstrap, nothing published).
+- Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
+  Actions are disabled at repository level until the maintainer enables them
+  explicitly (2026-11-08).
 - Current phase: Phase 0 — Foundations (`docs/roadmap/phase-00-foundations.md`);
   Tasks 0.1 (workspace, toolchain, license, facade, contributor guide) and 0.2
   (rule tooling, hooks, data loader, CI rules job) are done. Task 0.3 (moyo
