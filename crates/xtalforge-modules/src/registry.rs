@@ -22,6 +22,27 @@ pub struct ModuleInfo {
 pub trait Module: std::fmt::Debug + Send + Sync {
     /// Description.
     fn info(&self) -> ModuleInfo;
+
+    /// Whether the module can run in this build and environment.
+    ///
+    /// The default is `true`; modules that need an external program or an
+    /// optional feature override it with a real probe.
+    fn available(&self) -> bool {
+        true
+    }
+
+    /// Runs the module with JSON parameters and returns a JSON result.
+    ///
+    /// # Errors
+    ///
+    /// The default implementation returns [`Error::InvalidInput`]; modules
+    /// that can run override it.
+    fn run(&self, _parameters: &serde_json::Value) -> Result<serde_json::Value, Error> {
+        Err(Error::InvalidInput(format!(
+            "module {} has no run implementation",
+            self.info().name
+        )))
+    }
 }
 
 /// Registry of modules by name.

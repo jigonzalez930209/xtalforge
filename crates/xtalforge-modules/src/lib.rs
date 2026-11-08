@@ -3,8 +3,12 @@
 
 pub mod jobs;
 pub mod registry;
+pub mod report;
+pub mod stub;
 pub mod workspace;
 
 pub use jobs::{Job, JobQueue, JobStatus};
 pub use registry::{Module, ModuleInfo, ModuleRegistry};
+pub use report::{Report, ReportSection};
+pub use stub::{TestModule, test_module};
 pub use workspace::{RunRecord, RunStatus, Workspace, archive_records, read_archived_records};
