@@ -160,3 +160,79 @@ fn pad(point: &[f64]) -> [f64; 3] {
         point.get(2).copied().unwrap_or(0.0),
     ]
 }
+
+/// Builds a searchable index of quotient graphs from a CGD file.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct NetIndex {
+    /// One invariant set per successfully read net.
+    pub entries: Vec<(String, NetInvariants)>,
+}
+
+impl NetIndex {
+    /// Indexes every entry that has a valid quotient graph.
+    #[must_use]
+    pub fn from_file(file: &xtalforge_io::cgd::CgdFile, tolerance: f64) -> Self {
+        let mut entries = Vec::new();
+        for entry in &file.entries {
+            if let Ok(graph) = quotient_graph(entry, tolerance) {
+                entries.push((entry.name.clone(), graph.invariants()));
+            }
+        }
+        Self { entries }
+    }
+
+    /// Nets with the same node/edge counts, cycle rank and coordination.
+    #[must_use]
+    pub fn search(&self, invariants: &NetInvariants) -> Vec<&str> {
+        self.entries
+            .iter()
+            .filter(|(_, candidate)| {
+                candidate.nodes == invariants.nodes
+                    && candidate.edges == invariants.edges
+                    && candidate.cycle_rank == invariants.cycle_rank
+                    && candidate.coordination == invariants.coordination
+            })
+            .map(|(name, _)| name.as_str())
+            .collect()
+    }
+}
+
+impl QuotientGraph {
+    /// Connected components of the quotient graph, ignoring lattice shifts.
+    #[must_use]
+    pub fn components(&self) -> Vec<Vec<usize>> {
+        let mut adjacency = vec![Vec::new(); self.nodes.len()];
+        for edge in &self.edges {
+            if let Some(list) = adjacency.get_mut(edge.a) {
+                list.push(edge.b);
+            }
+            if let Some(list) = adjacency.get_mut(edge.b) {
+                list.push(edge.a);
+            }
+        }
+        let mut seen = vec![false; self.nodes.len()];
+        let mut components = Vec::new();
+        for start in 0..self.nodes.len() {
+            if seen.get(start).copied().unwrap_or(true) {
+                continue;
+            }
+            let mut stack = vec![start];
+            let mut component = Vec::new();
+            while let Some(node) = stack.pop() {
+                if seen.get(node).copied().unwrap_or(true) {
+                    continue;
+                }
+                if let Some(slot) = seen.get_mut(node) {
+                    *slot = true;
+                }
+                component.push(node);
+                if let Some(neighbours) = adjacency.get(node) {
+                    stack.extend(neighbours.iter().copied());
+                }
+            }
+            component.sort_unstable();
+            components.push(component);
+        }
+        components
+    }
+}
