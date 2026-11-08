@@ -4,6 +4,7 @@
 //! P1, supercell and slab operations developed in Phase 1. The foundation is
 //! kept small so every domain can share a single error type per crate.
 
+pub mod bonding;
 pub mod cell;
 pub mod data;
 pub mod elements;
@@ -18,6 +19,7 @@ pub mod supercell;
 pub mod symop;
 pub mod transforms;
 
+pub use bonding::{Bond, BondGraph, BondRules, perceive_bonds};
 pub use cell::cell_volume;
 pub use elements::{Element, Isotope, element_info};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
