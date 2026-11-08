@@ -82,3 +82,26 @@ fn duplicate_and_invalid_defaults_are_rejected() {
     });
     assert!(invalid.is_err());
 }
+
+#[test]
+fn parameter_sets_round_trip_and_validate() {
+    let set = ParamSet::new()
+        .with_param(ParamSpec {
+            name: "cutoff".to_owned(),
+            kind: ParamType::Float {
+                min: Some(0.0),
+                max: None,
+                unit: Some("Angstrom".to_owned()),
+            },
+            default: json!(12.0),
+            help: String::new(),
+            required: false,
+            group: None,
+        })
+        .unwrap();
+    let text = set.to_json().unwrap();
+    let back = ParamSet::from_json(&text).unwrap();
+    assert_eq!(back.get("cutoff"), Some(&json!(12.0)));
+    let bad = text.replace("12.0", "\"twelve\"");
+    assert!(ParamSet::from_json(&bad).is_err());
+}
