@@ -3,7 +3,7 @@
 ## Rust
 
 ```rust
-use xtalforge::core::{Structure, read_cif};
+use xtalforge::io::read_cif;
 
 let text = std::fs::read_to_string("structure.cif")?;
 let structure = xtalforge::io::read_cif(&text)?;

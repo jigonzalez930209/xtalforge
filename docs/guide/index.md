@@ -1,21 +1,20 @@
 # Introduction
 
-`xtalforge` is a pure Rust library for crystal structures. This guide is filled
-in as each roadmap phase lands; see the [roadmap](/roadmap/) for the schedule.
+`xtalforge` is a pure Rust library for crystal structures, exposed through the
+Rust API, a command-line binary, Python bindings and WebAssembly bindings.
+Phases 0-7 are complete locally and Phase 8 (agent and distribution) is the
+remaining roadmap work; see the [roadmap](/roadmap/) for the current status.
 
-Start with the quick start and the concepts:
+Start here:
 
-- [Quick start](./quickstart)
-- [Concepts](./concepts)
-- [File formats](./formats)
-- [Contributing](./contributing)
-- [Cargo features](./features)
-- [Data bundles](./data)
+- [Quick start](./quickstart) for Rust, the CLI, Python and WebAssembly
+- [Concepts](./concepts): lattices, sites, fractional and Cartesian
+  coordinates, symmetry and bonding
+- [File formats](./formats) and the format registry
+- [Cargo features](./features) and the WASM budget
+- [Data bundles](./data) and the embedded-versus-external policy
+- [Contributing](./contributing) and the local check list
 
-Planned contents:
-
-- Quick start for Rust, CLI, Python and WebAssembly (Task 1.15.1)
-- Concepts: lattice, sites, fractional and Cartesian coordinates
-- File formats and conversions
-- Symmetry workflows
-- Building and analysing frameworks
+The [API reference](/api/) documents each capability on all four surfaces, the
+[algorithm pages](/algorithms/) record the formulations and validation, and
+the [demos](/demos/) run the WebAssembly package in the browser.

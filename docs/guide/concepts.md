@@ -11,8 +11,9 @@ atom therefore maps back to the site that owns the orbit.
 
 The Hall symbol is the identity of a space group. A number alone does not fix
 the setting: 227 has two origin choices, 146 has hexagonal and rhombohedral
-axes. Until moyo supplies the operations, a structure carries the explicit
-operation list read from the file or supplied by a builder.
+axes. A structure carries the explicit operation list read from the file or
+supplied by a builder; `detect_symmetry` supplies the operations from moyo,
+and `set_space_group` replaces them with the chosen setting.
 
 ## Coordinates
 
@@ -25,8 +26,9 @@ operation list read from the file or supplied by a builder.
 
 ## Units
 
-Angstrom and degrees at every API boundary; radians internally. Energies in
-eV, forces in eV/Angstrom and stress in GPa in Phase 4.
+Angstrom and degrees at every API boundary; radians internally. Force-field
+energies are in eV, forces in eV/Angstrom and stress in GPa; UFF keeps
+kcal/mol and Angstrom internally.
 
 ## Limits
 

@@ -7,11 +7,11 @@ downstream crate can be built directly with or without them.
 
 | Feature | Default | Domains | Effect |
 |---|---|---|---|
-| `parallel` | yes | all | Enables optional Rayon support. No Phase 0/1 algorithm uses it yet; it exists so builds can already opt out with `--no-default-features`. |
-| `sci-form` | no | force fields | Reserved for quantum-chemistry methods through the `sci-form` crate (Task 4.10). Currently a no-op. |
-| `ml` | no | force fields | Reserved for machine-learned potentials (Task 8.4). Currently a no-op. |
-| `external` | no | force fields | Reserved for subprocess engines such as DFTB+, xtb and ORCA (Task 4.9). Currently a no-op. |
-| `mof-data` | no | MOF builder | Reserved for the embedded MOF data bundle (Task 6.11.3). Currently a no-op. |
+| `parallel` | yes | core, io, symmetry | Reserves Rayon for the parallel algorithms. The current algorithms are single-threaded and deterministic; the feature exists so builds can already opt out with `--no-default-features`. |
+| `sci-form` | no | force fields | Adapter contract for the in-process GFN0/GFN1/GFN2 backend (Task 4.10). The dependency is not vendored, so the adapter returns a typed error naming the feature. |
+| `ml` | no | force fields | Reserved for machine-learned potentials (Task 8.4). The decision is recorded in `docs/algorithms/ml-backend.md`; currently a no-op. |
+| `external` | no | force fields | Reserved; the runtime engine probes and input writers for DFTB+, xTB and ORCA are always compiled and need no feature (Task 4.9). |
+| `mof-data` | no | MOF builder | Reserved for a future full MOF bundle; the curated six-topology/eight-block subset is always embedded (Tasks 6.11-6.16). |
 
 ## Building with and without defaults
 
@@ -35,8 +35,8 @@ cargo build -p xtalforge --all-features
 4. Features stay additive. Two features enabled together must behave like the
    union of their capabilities, never like a different code path that changes
    numeric output.
-5. The default WASM package has a 3 MiB budget, checked by
+5. The default WASM package has a 3.5 MiB budget, checked by
    `scripts/check-wasm-size.sh`. The hello-world build was about 41 KiB; the
-   Phase 1 readers, builders and analysis brought it to about 438 KiB; the
-   symmetry search and its space-group tables brought it to about 813 KiB,
-   still inside the 1 MiB budget.
+   Phase 1 readers and builders brought it to about 438 KiB, symmetry to about
+   813 KiB, and the Phase 3-7 surfaces (including the polymer/embedding code)
+   took the release package to about 2905 KiB, inside the 3.5 MiB budget.
