@@ -26,6 +26,16 @@ roadmap subtask into a reviewed change.
     silence them with `#[allow(dead_code)]`, `#[allow(unused_*)]`,
     `#[allow(warnings)]` or similar attributes. The rule checker rejects them.
 
+## Test layout
+
+Every Rust library crate keeps its tests in `crates/<crate>/tests/`, one file
+per functionality or module, and the tests use only the public API. Do not put
+`#[cfg(test)]` unit-test modules in `src/`: the test list of a library is
+independent of its source files. Fixtures live in
+`crates/<crate>/tests/fixtures/`. Every public operation has at least one test,
+including its error paths. CLI, Python and WASM tests live in the `tests/`
+directory of their own crate.
+
 ## Roadmap workflow
 
 - Work on one subtask at a time. Read its full description and the reference
@@ -41,11 +51,22 @@ roadmap subtask into a reviewed change.
 ```bash
 scripts/check-rules.sh                 # 500-line limit and no warning suppressions
 scripts/tests/run-rules-selftest.sh    # the rule checker itself
+scripts/sync-version.sh --check
+scripts/tests/run-version-selftest.sh
+scripts/check-agent-version.sh
 cargo fmt --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo test --workspace --all-features
+RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 cargo check -p xtalforge-wasm --target wasm32-unknown-unknown
 cargo deny check
+maturin build --release --manifest-path crates/xtalforge-python/Cargo.toml
+python -m pytest -q crates/xtalforge-python/tests
+python -m mypy --strict crates/xtalforge-python/python/xtalforge
+(cd crates/xtalforge-wasm && wasm-pack test --node)
+scripts/check-wasm-size.sh
+scripts/check-parity.sh
+scripts/check-api-docs.sh
 cd docs && npm install && npm run docs:build
 ```
 

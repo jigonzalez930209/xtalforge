@@ -35,3 +35,5 @@ cargo build -p xtalforge --all-features
 4. Features stay additive. Two features enabled together must behave like the
    union of their capabilities, never like a different code path that changes
    numeric output.
+5. The default WASM package has a 200 KiB budget, checked by
+   `scripts/check-wasm-size.sh`. The Phase 0 hello-world build is about 41 KiB.
