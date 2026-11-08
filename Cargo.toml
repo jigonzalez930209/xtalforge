@@ -1,0 +1,51 @@
+[workspace]
+resolver = "3"
+members = [
+  "crates/xtalforge",
+  "crates/xtalforge-cli",
+  "crates/xtalforge-core",
+  "crates/xtalforge-io",
+  "crates/xtalforge-python",
+  "crates/xtalforge-symmetry",
+  "crates/xtalforge-wasm",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.89"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/jigonzalez930209/xtalforge"
+homepage = "https://jigonzalez930209.github.io/xtalforge/"
+documentation = "https://docs.rs/xtalforge"
+authors = ["Jose Ivan Gonzalez <jigonzalez930209@gmail.com>"]
+keywords = ["crystal", "chemistry", "symmetry", "materials", "science"]
+categories = ["science", "science::chemistry", "simulation"]
+
+[workspace.dependencies]
+# Internal crates. `scripts/sync-version.sh` rewrites the pinned versions.
+xtalforge = { version = "=0.0.0", path = "crates/xtalforge" }
+xtalforge-core = { version = "=0.0.0", path = "crates/xtalforge-core" }
+xtalforge-io = { version = "=0.0.0", path = "crates/xtalforge-io" }
+xtalforge-symmetry = { version = "=0.0.0", path = "crates/xtalforge-symmetry" }
+
+# External crates shared by more than one crate.
+nalgebra = { version = "0.35", default-features = false, features = ["std"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+rayon = "1"
+moyo = "0.22"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+sha2 = "0.10"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "deny"
+warnings = "deny"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+expect_used = "warn"
+panic = "warn"
+indexing_slicing = "warn"

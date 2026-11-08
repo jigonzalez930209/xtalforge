@@ -1,0 +1,53 @@
+# cargo-deny configuration (Task 0.1.3).
+#
+# Check locally with:
+#   cargo deny check
+#
+# The default graph models a normal build: it must stay pure Rust (AGENTS.md
+# rule 3). C-backed dependencies may only appear behind an optional feature and
+# require a documented decision before they are added; a release audit also
+# runs `cargo deny --all-features check`.
+
+[graph]
+targets = []
+all-features = false
+no-default-features = false
+
+[output]
+feature-depth = 1
+
+[advisories]
+ignore = []
+
+[licenses]
+allow = [
+  "MIT",
+  "Apache-2.0",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "Unicode-3.0",
+  "Zlib",
+]
+confidence-threshold = 0.93
+
+[bans]
+# One version per crate keeps the dependency tree small and auditable. Add a
+# `skip` entry with a reason only when two versions are genuinely required.
+multiple-versions = "deny"
+wildcards = "deny"
+highlight = "all"
+workspace-default-features = "allow"
+external-default-features = "allow"
+deny = [
+  { crate = "cc", reason = "C toolchains must never enter the default build (AGENTS.md rule 3)" },
+  { crate = "cmake", reason = "native builds must stay behind optional features (AGENTS.md rule 3)" },
+]
+skip = []
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
