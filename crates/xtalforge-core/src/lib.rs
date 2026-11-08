@@ -8,10 +8,12 @@ pub mod cell;
 pub mod data;
 pub mod elements;
 pub mod lattice;
+pub mod limits;
 
 pub use cell::cell_volume;
 pub use elements::{Element, Isotope, element_info};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
+pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
 
 /// Version of the workspace, from the package metadata.
 ///
@@ -56,6 +58,9 @@ pub enum Error {
         /// Message from the JSON decoder.
         reason: String,
     },
+    /// A size limit would be exceeded; the verdict explains what would fit.
+    #[error("{0}")]
+    LimitExceeded(crate::limits::Verdict),
 }
 
 impl Error {
@@ -70,6 +75,7 @@ impl Error {
             Self::DataChecksum { .. } => "data_checksum",
             Self::DataDigest { .. } => "data_digest",
             Self::DataJson { .. } => "data_json",
+            Self::LimitExceeded(_) => "limit_exceeded",
         }
     }
 
