@@ -49,6 +49,8 @@ impl AtomType {
 /// A P1 cell ready for a moyo search.
 pub(crate) struct MoyoCell {
     pub(crate) cell: Cell,
+    /// Atom type for each dense species number, in number order.
+    pub(crate) type_of_number: Vec<AtomType>,
 }
 
 /// Converts a P1 cell to a moyo cell with dense atom types.
@@ -67,6 +69,7 @@ pub(crate) fn to_moyo(cell: &P1Cell) -> Result<MoyoCell, Error> {
     let mut mapping: BTreeMap<AtomType, i32> = BTreeMap::new();
     let mut numbers = Vec::with_capacity(cell.atoms.len());
     let mut positions = Vec::with_capacity(cell.atoms.len());
+    let mut type_of_number = Vec::new();
     for atom in &cell.atoms {
         if !atom.frac.iter().all(|value| value.is_finite()) {
             return Err(Error::InvalidInput(
@@ -75,12 +78,16 @@ pub(crate) fn to_moyo(cell: &P1Cell) -> Result<MoyoCell, Error> {
         }
         let atom_type = AtomType::new(&atom.element, atom.occupancy)?;
         let next = mapping.len() as i32 + 1;
+        if !mapping.contains_key(&atom_type) {
+            type_of_number.push(atom_type.clone());
+        }
         let number = *mapping.entry(atom_type.clone()).or_insert(next);
         numbers.push(number);
         positions.push(Position::new(atom.frac[0], atom.frac[1], atom.frac[2]));
     }
     Ok(MoyoCell {
         cell: Cell::new(lattice, positions, numbers),
+        type_of_number,
     })
 }
 

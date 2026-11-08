@@ -1,6 +1,9 @@
 //! Space-group lookup and operations (Task 2.1.2 and 2.2).
 
-use moyo::data::{HallNumber, Setting, hall_symbol_entry, iter_wyckoff_positions_from_hall_number};
+use moyo::data::{
+    HallNumber, Setting, arithmetic_crystal_class_entry, hall_symbol_entry,
+    iter_wyckoff_positions_from_hall_number,
+};
 use xtalforge_core::{Error, SymOp};
 
 /// One Hall setting of a space group.
@@ -24,6 +27,14 @@ pub struct SpaceGroup {
     pub crystal_system: &'static str,
     /// Lattice system.
     pub lattice_system: &'static str,
+    /// Geometric crystal class (point group), for example `m-3m`.
+    pub point_group: String,
+    /// Schoenflies symbol, for example `Oh`.
+    pub schoenflies: String,
+    /// Bravais class, for example `cF`.
+    pub bravais: String,
+    /// Laue class, for example `m-3m`.
+    pub laue_class: String,
     /// Operations of the conventional cell.
     pub operations: Vec<SymOp>,
 }
@@ -39,6 +50,11 @@ impl SpaceGroup {
         let entry = hall_entry(hall_number)?;
         let symbol = moyo::data::HallSymbol::from_hall_number(hall_number as HallNumber)
             .ok_or_else(|| Error::Symmetry(format!("unknown Hall symbol for {hall_number}")))?;
+        let arithmetic =
+            arithmetic_crystal_class_entry(entry.arithmetic_number).ok_or_else(|| {
+                Error::Symmetry(format!("unknown arithmetic class for {hall_number}"))
+            })?;
+        let point_group = arithmetic.geometric_crystal_class.to_string();
         let base = symbol.traverse();
         let mut expanded = base.clone();
         for operation in &base {
@@ -63,6 +79,10 @@ impl SpaceGroup {
                 .unwrap_or('P'),
             crystal_system: crystal_system(entry.number as u32),
             lattice_system: lattice_system(entry.number as u32),
+            point_group: point_group.clone(),
+            schoenflies: format!("{:?}", arithmetic.geometric_crystal_class),
+            bravais: arithmetic.bravais_class.to_string(),
+            laue_class: laue_class(&point_group).to_owned(),
             operations,
         })
     }
@@ -184,13 +204,68 @@ impl WyckoffPosition {
     }
 }
 
+/// Laue class of a point-group symbol.
+#[must_use]
+pub fn laue_class(point_group: &str) -> &'static str {
+    match point_group {
+        "1" | "-1" => "-1",
+        "2" | "m" | "2/m" => "2/m",
+        "222" | "mm2" | "mmm" => "mmm",
+        "4" | "-4" | "4/m" => "4/m",
+        "422" | "4mm" | "-42m" | "4/mmm" => "4/mmm",
+        "3" | "-3" => "-3",
+        "32" | "3m" | "-3m" => "-3m",
+        "6" | "-6" | "6/m" => "6/m",
+        "622" | "6mm" | "-6m2" | "6/mmm" => "6/mmm",
+        "23" | "m-3" => "m-3",
+        _ => "m-3m",
+    }
+}
+
+/// Filters for the space-group catalogue.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct SpaceGroupFilter<'a> {
+    /// Crystal system name, for example `cubic`.
+    pub crystal_system: Option<&'a str>,
+    /// Centering letter, for example `F`.
+    pub centering: Option<char>,
+    /// Point-group symbol, for example `m-3m`.
+    pub point_group: Option<&'a str>,
+}
+
+/// Catalogue entries matching a filter.
+///
+/// # Errors
+///
+/// Returns the first Hall lookup error, which cannot happen in range.
+pub fn catalogue(filter: SpaceGroupFilter<'_>) -> Result<Vec<SpaceGroup>, Error> {
+    let mut groups = Vec::new();
+    for hall in 1..=530u32 {
+        let group = SpaceGroup::from_hall_number(hall)?;
+        if filter
+            .crystal_system
+            .is_some_and(|value| group.crystal_system != value)
+            || filter
+                .centering
+                .is_some_and(|value| group.centering != value)
+            || filter
+                .point_group
+                .is_some_and(|value| group.point_group != value)
+        {
+            continue;
+        }
+        groups.push(group);
+    }
+    Ok(groups)
+}
+
 /// All 530 Hall settings, ordered by Hall number.
 ///
 /// # Errors
 ///
 /// Returns the first lookup error, which cannot happen for numbers in range.
 pub fn all_settings() -> Result<Vec<SpaceGroup>, Error> {
-    (1..=530).map(SpaceGroup::from_hall_number).collect()
+    catalogue(SpaceGroupFilter::default())
 }
 
 /// Crystal system from the ITA number.
