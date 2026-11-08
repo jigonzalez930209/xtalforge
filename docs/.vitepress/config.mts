@@ -18,6 +18,11 @@ export default defineConfig({
   description: 'Pure Rust library for building, analysing and exporting crystal structures',
   cleanUrls: true,
   lastUpdated: true,
+  markdown: { math: true },
+  editLink: {
+    pattern: 'https://github.com/jigonzalez930209/xtalforge/edit/main/docs/:path',
+    text: 'Edit this page on GitHub',
+  },
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide/' },
@@ -44,15 +49,40 @@ export default defineConfig({
           text: 'API',
           items: [
             { text: 'Overview', link: '/api/' },
+            { text: 'Binding architecture', link: '/api/bindings' },
+            { text: 'Core API', link: '/api/core' },
+            { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
         },
       ],
-      '/algorithms/': [{ text: 'Algorithms', items: [{ text: 'Overview', link: '/algorithms/' }] }],
-      '/demos/': [{ text: 'Demos', items: [{ text: 'Overview', link: '/demos/' }] }],
+      '/algorithms/': [
+        {
+          text: 'Algorithms',
+          items: [
+            { text: 'Overview', link: '/algorithms/' },
+            { text: 'Validation and tolerances', link: '/algorithms/validation' },
+            { text: 'Golden data', link: '/algorithms/golden-data' },
+            { text: 'Symmetry backend: moyo', link: '/algorithms/symmetry-backend' },
+            { text: 'sci-form reuse', link: '/algorithms/sci-form-reuse' },
+            { text: 'Dependency replacement map', link: '/algorithms/dependency-map' },
+          ],
+        },
+      ],
+      '/demos/': [
+        {
+          text: 'Demos',
+          items: [
+            { text: 'Overview', link: '/demos/' },
+            { text: 'Cell volume', link: '/demos/cell-volume' },
+          ],
+        },
+      ],
       '/roadmap/': [{ text: 'Roadmap', items: roadmapItems }],
     },
     search: { provider: 'local' },
-    socialLinks: [],
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/jigonzalez930209/xtalforge' },
+    ],
   },
 })
