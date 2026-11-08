@@ -4,7 +4,7 @@
 use xtalforge_core::Error;
 
 /// One row of a two-theta/intensity pattern.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PatternPoint {
     /// Two-theta in degrees.
     pub two_theta: f64,
