@@ -15,6 +15,7 @@ pub mod slab;
 pub mod structure;
 pub mod supercell;
 pub mod symop;
+pub mod transforms;
 
 pub use cell::cell_volume;
 pub use elements::{Element, Isotope, element_info};
@@ -28,6 +29,7 @@ pub use structure::{
     structure_info,
 };
 pub use symop::SymOp;
+pub use transforms::{Ellipsoid, Plane, displacement_ellipsoid};
 
 /// Version of the workspace, from the package metadata.
 ///
