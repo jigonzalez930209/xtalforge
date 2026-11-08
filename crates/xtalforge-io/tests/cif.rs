@@ -125,3 +125,15 @@ fn writer_round_trips_a_p1_structure() {
     assert_eq!(back.sites()[0].occupancy(), 0.5);
     assert_eq!(back.sites()[0].charge(), Some(-1.0));
 }
+
+#[test]
+fn out_of_range_occupancy_is_clamped_and_reported() {
+    let text = "data_clamp\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                _atom_site_occupancy\nC1 C 0 0 0 1.8\n";
+    let structure = read_cif(text).unwrap();
+    assert_eq!(structure.sites()[0].occupancy(), 1.0);
+    assert_eq!(structure.metadata()["occupancy_clamped"].as_u64(), Some(1));
+}
