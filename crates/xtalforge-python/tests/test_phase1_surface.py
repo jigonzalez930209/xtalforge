@@ -458,3 +458,19 @@ def test_mof_surface() -> None:
     built = xtalforge.build_mof("pcu", "Zn4O", "benzene")
     assert built["n_sites"] > 0
     assert isinstance(built["warnings"], list)
+
+
+def test_extra_builders_surface() -> None:
+    c20 = xtalforge.build_c20()
+    assert c20["n_sites"] == 20
+    twist = xtalforge.twist(2, 2, 0.0, 2)
+    assert twist["n_sites"] == 16
+    ribbon = xtalforge.ribbon(2, 3, 12.0)
+    assert ribbon["n_sites"] > 0
+    ztc = xtalforge.build_ztc(samples=8, cell=12.0)
+    assert ztc["n_sites"] > 0
+    schwarz = xtalforge.build_schwarzite(samples=8, cell=12.0)
+    assert schwarz["n_sites"] > 0
+    polymer = xtalforge.build_polymer("C=C", 3)
+    assert polymer["n_sites"] > 0
+    assert polymer["steps"]
