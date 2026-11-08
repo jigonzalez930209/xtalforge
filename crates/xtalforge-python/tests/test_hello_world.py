@@ -98,6 +98,18 @@ def test_limits_surface() -> None:
     assert never["level"] == "warn"
 
 
+def test_structure_info_vector() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "vectors" / "structure.json").read_text(
+        encoding="utf-8"
+    )
+    info = xtalforge.structure_info(text)
+    assert info["name"] == "NaCl"
+    assert info["formula"] == "Na Cl"
+    assert info["n_sites"] == 2
+    assert abs(info["density"] - 0.540_931_879_932_264_1) < 1e-9
+    assert info["is_p1"] is True
+
+
 def test_invalid_element_raises_input_error() -> None:
     with pytest.raises(xtalforge.InputError) as caught:
         xtalforge.element_info("Zz")
