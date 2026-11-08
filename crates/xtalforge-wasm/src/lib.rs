@@ -9,7 +9,11 @@
 use wasm_bindgen::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
+mod analysis_export;
+#[cfg(target_arch = "wasm32")]
 mod common;
+#[cfg(target_arch = "wasm32")]
+mod forcefield;
 #[cfg(target_arch = "wasm32")]
 mod phase1;
 #[cfg(target_arch = "wasm32")]
@@ -22,6 +26,13 @@ mod symmetry_analysis;
 #[cfg(target_arch = "wasm32")]
 use common::{array3, array6, set, to_js_error};
 
+#[cfg(target_arch = "wasm32")]
+pub use analysis_export::{hydrogens_info, net_invariants_info, porosity_info, zeo_parse_info};
+#[cfg(target_arch = "wasm32")]
+pub use forcefield::{
+    ff_charges_info, ff_energy, ff_ir_info, ff_optimize_info, ff_prepare_info, ff_thermo_info,
+    ff_types_info, ff_vibrations_info,
+};
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
     bonds, build_c60_info, build_graphene_info, build_nanotube_info, convert_structure, groups,
