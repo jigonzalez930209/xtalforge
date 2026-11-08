@@ -13,9 +13,10 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
-    angle, bonds, cell_volume, convert_structure, distance, element_info, groups, lattice_info,
-    lattice_minimum_image, limits_bounds, limits_check, neighbors, read_cif, read_structure, rings,
-    slab_info, slab_text, structure_info, supercell_info, supercell_text, torsion, version,
+    angle, bonds, cell_volume, convert_structure, detect_symmetry, distance, element_info, groups,
+    lattice_info, lattice_minimum_image, limits_bounds, limits_check, neighbors, read_cif,
+    read_structure, rings, slab_info, slab_text, structure_info, supercell_info, supercell_text,
+    torsion, version,
 };
 
 const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
@@ -397,4 +398,21 @@ fn phase_one_writers_return_text() {
     assert!(cell.starts_with("data_"));
     let slab = slab_text(NACL_CIF, 1, 0, 0, 1, 10.0).expect("slab text");
     assert!(slab.starts_with("data_"));
+}
+
+#[wasm_bindgen_test]
+fn symmetry_detection_returns_the_dataset() {
+    let value = detect_symmetry(NACL_CIF, 0.001).expect("symmetry");
+    assert_eq!(property(&value, "number").as_f64(), Some(225.0));
+    assert_eq!(
+        property(&value, "hm_symbol")
+            .as_string()
+            .as_deref()
+            .map(|text| text.replace(' ', "")),
+        Some("Fm-3m".to_owned())
+    );
+    let operations = property(&value, "operations");
+    let operations: js_sys::Array = operations.unchecked_into();
+    assert_eq!(operations.length(), 192);
+    assert!(detect_symmetry("not a structure", 0.001).is_err());
 }
