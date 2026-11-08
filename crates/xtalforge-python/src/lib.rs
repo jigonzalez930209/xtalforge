@@ -14,11 +14,19 @@ mod analysis;
 mod classes;
 mod structures;
 mod symmetry;
+mod symmetry_analysis;
 
 use analysis::{angle, bonds, distance, groups, neighbors, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
 use structures::{read_cif, read_structure, slab, supercell};
-use symmetry::{asymmetrize, detect_symmetry, set_space_group, to_p1};
+use symmetry::{
+    asymmetrize, detect_symmetry, lower_to_subgroup, set_space_group, subgroups, to_p1,
+};
+use symmetry_analysis::{
+    band_path, brillouin_zone, change_setting, detect_layer_symmetry, detect_magnetic_symmetry,
+    diagnose, molecular_point_group, primitive_cell, reduce_structure, standardize,
+    tolerance_ladder, wyckoff_assignments,
+};
 
 create_exception!(
     _xtalforge,
@@ -215,6 +223,20 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(asymmetrize, module)?)?;
     module.add_function(wrap_pyfunction!(to_p1, module)?)?;
     module.add_function(wrap_pyfunction!(set_space_group, module)?)?;
+    module.add_function(wrap_pyfunction!(subgroups, module)?)?;
+    module.add_function(wrap_pyfunction!(lower_to_subgroup, module)?)?;
+    module.add_function(wrap_pyfunction!(standardize, module)?)?;
+    module.add_function(wrap_pyfunction!(primitive_cell, module)?)?;
+    module.add_function(wrap_pyfunction!(reduce_structure, module)?)?;
+    module.add_function(wrap_pyfunction!(wyckoff_assignments, module)?)?;
+    module.add_function(wrap_pyfunction!(brillouin_zone, module)?)?;
+    module.add_function(wrap_pyfunction!(tolerance_ladder, module)?)?;
+    module.add_function(wrap_pyfunction!(diagnose, module)?)?;
+    module.add_function(wrap_pyfunction!(detect_layer_symmetry, module)?)?;
+    module.add_function(wrap_pyfunction!(detect_magnetic_symmetry, module)?)?;
+    module.add_function(wrap_pyfunction!(change_setting, module)?)?;
+    module.add_function(wrap_pyfunction!(band_path, module)?)?;
+    module.add_function(wrap_pyfunction!(molecular_point_group, module)?)?;
     module.add_class::<Lattice>()?;
     module.add_class::<Site>()?;
     module.add_class::<Structure>()?;

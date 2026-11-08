@@ -172,3 +172,51 @@ pub(crate) fn set_space_group<'py>(
     dict.set_item("set_report", report_dict)?;
     Ok(dict)
 }
+
+/// Lists the translationengleiche subgroups of a Hall setting.
+#[pyfunction]
+#[pyo3(signature = (hall_number, epsilon = 1e-5))]
+pub(crate) fn subgroups<'py>(
+    py: Python<'py>,
+    hall_number: u32,
+    epsilon: f64,
+) -> PyResult<Bound<'py, PyList>> {
+    let groups = xtalforge::symmetry::translationengleiche_subgroups(hall_number, epsilon)
+        .map_err(crate::map_error)?;
+    let items = PyList::empty(py);
+    for group in groups {
+        let dict = PyDict::new(py);
+        dict.set_item("kind", format!("{:?}", group.kind))?;
+        dict.set_item("index", group.index)?;
+        dict.set_item("depth", group.depth)?;
+        dict.set_item("conjugates", group.conjugates)?;
+        dict.set_item("subgroup_number", group.subgroup_number)?;
+        dict.set_item("subgroup_hall_number", group.subgroup_hall_number)?;
+        dict.set_item(
+            "operations",
+            group
+                .operations
+                .iter()
+                .map(|operation| operation.triplet())
+                .collect::<Vec<_>>(),
+        )?;
+        items.append(dict)?;
+    }
+    Ok(items)
+}
+
+/// Lowers a structure to a subgroup number.
+#[pyfunction]
+#[pyo3(signature = (text, subgroup, tolerance = 0.5, format_hint = None))]
+pub(crate) fn lower_to_subgroup<'py>(
+    py: Python<'py>,
+    text: &str,
+    subgroup: u32,
+    tolerance: f64,
+    format_hint: Option<&str>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure = load_structure(text, format_hint)?;
+    let lowered = xtalforge::symmetry::lower_to_subgroup(&structure, subgroup, tolerance)
+        .map_err(crate::map_error)?;
+    crate::structures::structure_payload(py, &lowered)
+}
