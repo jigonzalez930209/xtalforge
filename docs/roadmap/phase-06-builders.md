@@ -36,12 +36,12 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   aromaticity, charges, isotopes, explicit and implicit hydrogens, ring
   closures, stereo tags, and Crystal-Builder's attachment-point notation
   (`[*:1]`, `[*:2]`) used by the fragment library.
-- [ ] 6.1.2 3D embedding
+- [x] 6.1.2 3D embedding
   Crystal-Builder embeds with RDKit (ETKDG) in `build/chem.py`. Use sci-form's
   ETKDG through the optional `sci-form` feature; without the feature, provide
   a reduced distance-geometry embedder good enough for small fragments, or
   return a clear error. Record the decision and the WASM impact.
-- [ ] 6.1.3 Coordination geometry for metals
+- [x] 6.1.3 Coordination geometry for metals
   Port `build/coordination.py`: ETKDG knows no coordination chemistry
   (cisplatin came out with Cl-Pt-Cl angles of 97-120 degrees), so the metal and
   its bonded atoms are placed on an ideal polyhedron (linear, trigonal,
@@ -51,12 +51,12 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   Port `build/molecule.py`: a fragment plus which of its atoms are connection
   points; converts to a `Structure` (molecule in a box) or a clipboard
   `Fragment`.
-- [ ] 6.1.5 RDKit behaviour inventory
+- [x] 6.1.5 RDKit behaviour inventory
   Read `build/chem.py` and list everything it asks RDKit for (sanitization,
   hydrogens, embedding, MMFF/UFF cleanup, canonical SMILES, substructure
   matching); map each to a sci-form function or a new subtask, and record
   intentional differences.
-- [ ] 6.1.6 Sketch data model
+- [x] 6.1.6 Sketch data model
   Port `build/sketch.py` (382 lines) as data only: a molecule as drawn (atoms
   at 2D points, bonds, nothing perceived yet) to graph conversion. The editor
   itself is a GUI and out of scope.
@@ -106,7 +106,7 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   (1/3, 2/3), B at (2/3, 1/3), bonds stated, never perceived), one layer or
   stacked AA, AB, ABC, AA', as periodic graphite or a slab in vacuum, in the
   hexagonal or the orthogonal cell.
-- [ ] 6.5.3 Commensurate twists
+- [x] 6.5.3 Commensurate twists
   Port `graphene/twist.py`: twisted bilayers exist only at commensurate angles
   indexed by (m, r) (Lopes dos Santos, Peres and Castro Neto 2007); list the
   angles with their cell sizes and atom counts, and build the supercell with
@@ -125,7 +125,7 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.7 — Fullerenes
 
-- [ ] 6.7.1 Face spirals
+- [x] 6.7.1 Face spirals
   Port `fullerene/spiral.py`: a cage as its Fowler-Manolopoulos face spiral
   (the twelve positions of the pentagons; C60-Ih is `1 7 9 11 13 15 18 20 22 24
   26 32`), wound up into the dual graph and then the cage graph.
@@ -140,45 +140,45 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.8 — Disordered carbons (ZTC, schwarzites)
 
-- [ ] 6.8.1 Convolution surface
+- [x] 6.8.1 Convolution surface
   Port `carbon/surface.py` (434 lines): a smooth periodic sheet around a net,
   defined as a level set of a sum of Gaussians over beads placed along the
   net's edges (not a distance field).
-- [ ] 6.8.2 Mesh
+- [x] 6.8.2 Mesh
   Port `carbon/mesh.py` (719 lines; split): the sheet meshed periodically
   (reusing the marching tetrahedra of Task 5.4) and remeshed into a
   honeycomb-like carbon network at the target density.
-- [ ] 6.8.3 Ribbons
+- [x] 6.8.3 Ribbons
   Port `carbon/ribbons.py`: cut the closed sheet into ribbons that follow the
   net's edges and still make one connected piece (in the example ZTC four
   carbons in ten are on an edge; each dia edge of 10.3 Angstrom carries about
   eighteen carbons).
-- [ ] 6.8.4 Recipe builder
+- [x] 6.8.4 Recipe builder
   Port `carbon/build.py` and `modules/carbon.py`: a recipe (net, density,
   fraction of sheet kept, layers, defects, edge termination, seed) gives the
   same carbon every time. Steps as in the source: distorted net, sheet at
   scale, carbon placement, ribbons, termination, report.
-- [ ] 6.8.5 Validation
+- [x] 6.8.5 Validation
   Atom counts, ring statistics (Task 1.12) and density against
   Crystal-Builder output for fixed seeds (the RNG must be identical or the
   comparison is statistical; decide and document).
 
 ## Task 6.9 — Amorphous polymers
 
-- [ ] 6.9.1 Monomers and chains
+- [x] 6.9.1 Monomers and chains
   Port `polymer/monomer.py` and `polymer/chain.py`: a repeat unit with head
   and tail atoms, torsion choices, tacticity; user monomers read from the
   workspace `monomers/` folder (Task 3.12.1).
-- [ ] 6.9.2 Packing
+- [x] 6.9.2 Packing
   Port `polymer/pack.py` (755 lines; split): every chain grows at once from
   random seeds, one unit per chain in shuffled rounds, so no chain wanders
   through an empty box while the last ones are squeezed; clash checks with
   periodic images; start density.
-- [ ] 6.9.3 Build steps
+- [x] 6.9.3 Build steps
   Port `polymer/build.py` and `modules/polymer.py`: grow, push apart or
   compress to the target density, state the bonds, report the numbers
   (density, chain lengths, end-to-end distances).
-- [ ] 6.9.4 Equilibration protocol as data
+- [x] 6.9.4 Equilibration protocol as data
   Port `polymer/protocol.py`: how a packed model would be equilibrated, held as
   data, plus the extension point where an equilibrator (an MD engine, not part
   of this project) plugs in. Nothing runs.
