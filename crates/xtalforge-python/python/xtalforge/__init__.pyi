@@ -14,6 +14,23 @@ __version__: Final[str]
 
 def version() -> str: ...
 def element_info(input: str | int) -> dict[str, object]: ...
+def lattice_info(
+    a: float,
+    b: float,
+    c: float,
+    alpha: float,
+    beta: float,
+    gamma: float,
+) -> dict[str, object]: ...
+def lattice_minimum_image(
+    a: float,
+    b: float,
+    c: float,
+    alpha: float,
+    beta: float,
+    gamma: float,
+    delta: list[float],
+) -> dict[str, object]: ...
 def cell_volume(
     a: float,
     b: float,
