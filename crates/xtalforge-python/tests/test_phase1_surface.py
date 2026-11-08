@@ -238,3 +238,20 @@ def test_detect_symmetry_surface() -> None:
     assert dataset["wyckoffs"] == ["b"] * 8
     assert dataset["orbits"] == [0] * 8
     assert len(dataset["std_lattice"]) == 3
+
+
+def test_symmetry_workflow_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    expanded = xtalforge.to_p1(text)
+    assert expanded["is_p1"] is True
+    assert expanded["n_sites"] == 8
+
+    asymmetric = xtalforge.asymmetrize(text, symprec=0.001)
+    assert asymmetric["n_sites"] == 1
+    assert asymmetric["hall"] == "F 4d 2 3 -1d"
+
+    report = xtalforge.set_space_group(asymmetric["json"], "227", "reinterpret")
+    assert report["set_report"]["n_output"] == 1
+    assert report["hall"] == "F 4d 2 3 -1d"
