@@ -1,0 +1,20 @@
+[package]
+name = "xtalforge-view"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "View settings, draw styles, colormaps and scene data for xtalforge."
+
+[dependencies]
+xtalforge-core = { workspace = true }
+serde = { workspace = true }
+
+[lints]
+workspace = true
