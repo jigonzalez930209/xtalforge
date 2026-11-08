@@ -41,6 +41,89 @@ pub fn cell_volume(
     xtalforge::core::cell_volume(a, b, c, alpha, beta, gamma).map_err(to_js_error)
 }
 
+/// Unit-cell information from the six parameters.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` with a stable `code` property for an invalid
+/// cell.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn lattice_info(
+    a: f64,
+    b: f64,
+    c: f64,
+    alpha: f64,
+    beta: f64,
+    gamma: f64,
+) -> Result<JsValue, JsValue> {
+    let lattice =
+        xtalforge::core::lattice_info(a, b, c, alpha, beta, gamma).map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(&object, "parameters", array6(lattice.parameters()).into());
+    set(&object, "volume", JsValue::from_f64(lattice.volume()));
+    let matrix = js_sys::Array::new();
+    for row in lattice.matrix() {
+        matrix.push(&array3(row).into());
+    }
+    set(&object, "matrix", matrix.into());
+    set(
+        &object,
+        "right_handed",
+        JsValue::from_bool(lattice.is_right_handed()),
+    );
+    Ok(object.into())
+}
+
+/// Minimum-image fractional vector and distance.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` with a stable `code` property for an invalid
+/// cell or a delta that is not three numbers.
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub fn lattice_minimum_image(
+    a: f64,
+    b: f64,
+    c: f64,
+    alpha: f64,
+    beta: f64,
+    gamma: f64,
+    delta: Vec<f64>,
+) -> Result<JsValue, JsValue> {
+    let [dx, dy, dz] = delta.as_slice() else {
+        return Err(JsValue::from_str(
+            "invalid_input: delta must contain three fractional coordinates",
+        ));
+    };
+    let (vector, distance) =
+        xtalforge::core::lattice_minimum_image(a, b, c, alpha, beta, gamma, [*dx, *dy, *dz])
+            .map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(&object, "delta", array3(vector).into());
+    set(&object, "distance", JsValue::from_f64(distance));
+    Ok(object.into())
+}
+
+#[cfg(target_arch = "wasm32")]
+fn array3(values: [f64; 3]) -> js_sys::Array {
+    let array = js_sys::Array::new();
+    for value in values {
+        array.push(&JsValue::from_f64(value));
+    }
+    array
+}
+
+#[cfg(target_arch = "wasm32")]
+fn array6(values: [f64; 6]) -> js_sys::Array {
+    let array = js_sys::Array::new();
+    for value in values {
+        array.push(&JsValue::from_f64(value));
+    }
+    array
+}
+
 /// Reference data for an element by symbol or atomic number.
 ///
 /// # Errors
