@@ -11,6 +11,7 @@ pub mod lattice;
 pub mod limits;
 pub mod p1;
 pub mod site;
+pub mod slab;
 pub mod structure;
 pub mod supercell;
 pub mod symop;
@@ -21,6 +22,7 @@ pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
 pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
 pub use p1::{P1Atom, P1Cell};
 pub use site::Site;
+pub use slab::{Slab, make_slab, plane_angle, surface_basis};
 pub use structure::{
     SCHEMA_VERSION, Structure, StructureBuilder, StructureDocument, StructureSummary,
     structure_info,
