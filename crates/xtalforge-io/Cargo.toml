@@ -14,6 +14,8 @@ description = "File-format readers and writers for xtalforge."
 
 [dependencies]
 rayon = { workspace = true, optional = true }
+serde_json = { workspace = true }
+xtalforge-core = { workspace = true }
 
 [features]
 parallel = ["dep:rayon"]
