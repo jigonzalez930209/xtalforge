@@ -1,8 +1,8 @@
 //! Command dispatch for the CLI.
 
 use crate::{
-    Cli, CliError, Command, SpacegroupAction, SymmetryAction, analyze, basic, build, convert,
-    measure, mesh, spacegroup, symmetry, symmetry_analysis,
+    Cli, CliError, Command, SymmetryAction, analyze, basic, build, build_structures, convert,
+    measure, mesh, pxrd, spacegroup, symmetry, symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -71,6 +71,43 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             gamma,
         } => basic::cell_volume(cli, *a, *b, *c, *alpha, *beta, *gamma),
         Command::Convert { path, format, out } => convert::run(cli, path, *format, out.as_deref()),
+        Command::Pxrd {
+            path,
+            radiation,
+            max_two_theta,
+            step,
+            out,
+        } => pxrd::run(cli, path, radiation, *max_two_theta, *step, out.as_deref()),
+        Command::Build { action } => match action {
+            build_structures::BuildAction::Graphene {
+                nx,
+                ny,
+                layers,
+                interlayer,
+                vacuum,
+                out,
+                format,
+            } => build_structures::graphene(
+                cli,
+                build_structures::GrapheneOptions {
+                    nx: *nx,
+                    ny: *ny,
+                    layers: *layers,
+                    interlayer: *interlayer,
+                    vacuum: *vacuum,
+                    out: out.as_deref(),
+                    format: *format,
+                },
+            ),
+            build_structures::BuildAction::Nanotube {
+                n,
+                m,
+                length,
+                vacuum,
+                out,
+                format,
+            } => build_structures::nanotube(cli, *n, *m, *length, *vacuum, out.as_deref(), *format),
+        },
         Command::Mesh {
             path,
             style,
@@ -110,13 +147,13 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Distance { path, i, j } => measure::distance(cli, path, *i, *j),
         Command::Angle { path, i, j, k } => measure::angle(cli, path, *i, *j, *k),
         Command::Spacegroup { action } => match action {
-            SpacegroupAction::Show { symbol } => spacegroup::show(cli, symbol),
-            SpacegroupAction::List {
+            spacegroup::SpacegroupAction::Show { symbol } => spacegroup::show(cli, symbol),
+            spacegroup::SpacegroupAction::List {
                 system,
                 centering,
                 point_group,
             } => spacegroup::list(cli, system.as_deref(), *centering, point_group.as_deref()),
-            SpacegroupAction::Search { text } => spacegroup::search(cli, text),
+            spacegroup::SpacegroupAction::Search { text } => spacegroup::search(cli, text),
         },
         Command::Symmetry { action } => match action {
             SymmetryAction::Detect {

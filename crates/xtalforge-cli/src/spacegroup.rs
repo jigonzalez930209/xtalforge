@@ -1,5 +1,7 @@
 //! The `spacegroup` command family.
 
+use clap::Subcommand;
+
 use xtalforge::symmetry::{SpaceGroup, SpaceGroupFilter, catalogue};
 
 use crate::{Cli, CliError};
@@ -151,4 +153,30 @@ fn normalize(text: &str) -> String {
         .filter(|character| !character.is_whitespace() && *character != '_')
         .flat_map(char::to_lowercase)
         .collect()
+}
+
+#[derive(Debug, Subcommand)]
+pub(crate) enum SpacegroupAction {
+    /// Show one space group by symbol, Hall symbol or number.
+    Show {
+        /// H-M symbol, Hall symbol or number.
+        symbol: String,
+    },
+    /// List catalogue entries.
+    List {
+        /// Filter by crystal system.
+        #[arg(long)]
+        system: Option<String>,
+        /// Filter by centering letter.
+        #[arg(long)]
+        centering: Option<char>,
+        /// Filter by point-group symbol.
+        #[arg(long)]
+        point_group: Option<String>,
+    },
+    /// Search by symbol or number substring.
+    Search {
+        /// Text to search for.
+        text: String,
+    },
 }

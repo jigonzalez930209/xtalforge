@@ -8,21 +8,25 @@
 mod analyze;
 mod basic;
 mod build;
+mod build_structures;
 mod convert;
 mod dispatch;
 mod format;
 mod input;
+mod limits;
 mod measure;
 mod mesh;
 mod output;
+mod pxrd;
 mod spacegroup;
 mod symmetry;
 mod symmetry_analysis;
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
 use std::process::ExitCode;
 
 use format::StructureFormat;
+use limits::Limits;
 
 /// Exit code used for every runtime failure.
 const ERROR_EXIT_CODE: u8 = 3;
@@ -99,6 +103,28 @@ enum Command {
         /// Output path, or `-` for standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
+    },
+    /// Calculate a PXRD pattern.
+    Pxrd {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Radiation: cu-ka, cu-ka1, mo-ka, co-ka, fe-ka, cr-ka or ag-ka.
+        #[arg(long, default_value = "cu-ka")]
+        radiation: String,
+        /// Highest 2-theta in degrees.
+        #[arg(long, default_value_t = 80.0)]
+        max_two_theta: f64,
+        /// Step in degrees.
+        #[arg(long, default_value_t = 0.02)]
+        step: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+    },
+    /// Build graphene or a nanotube.
+    Build {
+        #[command(subcommand)]
+        action: build_structures::BuildAction,
     },
     /// Build a printable STL mesh.
     Mesh {
@@ -203,7 +229,7 @@ enum Command {
     /// Browse the space-group catalogue.
     Spacegroup {
         #[command(subcommand)]
-        action: SpacegroupAction,
+        action: spacegroup::SpacegroupAction,
     },
     /// Detect the space group and Wyckoff positions.
     Symmetry {
@@ -222,32 +248,6 @@ enum Command {
         k: usize,
         /// Fourth atom index.
         l: usize,
-    },
-}
-
-#[derive(Debug, Subcommand)]
-enum SpacegroupAction {
-    /// Show one space group by symbol, Hall symbol or number.
-    Show {
-        /// H-M symbol, Hall symbol or number.
-        symbol: String,
-    },
-    /// List catalogue entries.
-    List {
-        /// Filter by crystal system.
-        #[arg(long)]
-        system: Option<String>,
-        /// Filter by centering letter.
-        #[arg(long)]
-        centering: Option<char>,
-        /// Filter by point-group symbol.
-        #[arg(long)]
-        point_group: Option<String>,
-    },
-    /// Search by symbol or number substring.
-    Search {
-        /// Text to search for.
-        text: String,
     },
 }
 
@@ -441,23 +441,6 @@ enum SymmetryAction {
         #[arg(long, value_enum)]
         format: Option<StructureFormat>,
     },
-}
-
-#[derive(Clone, Copy, Debug, ValueEnum)]
-enum Limits {
-    Standard,
-    Generous,
-    WarnOnly,
-}
-
-impl Limits {
-    fn profile(self) -> xtalforge::core::Profile {
-        match self {
-            Self::Standard => xtalforge::core::Profile::Standard,
-            Self::Generous => xtalforge::core::Profile::Generous,
-            Self::WarnOnly => xtalforge::core::Profile::WarnOnly,
-        }
-    }
 }
 
 #[derive(Debug)]
