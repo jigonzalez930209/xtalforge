@@ -362,39 +362,48 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.15 — Text input and CIF
 
-- [ ] 1.15.1 Robust text decoding
+- [x] 1.15.1 Robust text decoding
   Port `io/text.py`: read UTF-8 with or without a byte-order mark (Notepad,
   Excel, PowerShell and some Java tools write one), fall back to Latin-1 with
   a warning, normalize line endings. Every text reader uses it, so a BOM never
   becomes "expected block header" on line 1.
-- [ ] 1.15.2 CIF tokenizer and parser
+  Note: `decode_text` strips the BOM, reads UTF-8 and falls back to Latin-1;
+  `read_text` wraps a path.
+- [x] 1.15.2 CIF tokenizer and parser
   Start from sci-form `parse_cif` and extend it to the behaviour of
   `io/cif_reader.py` (583 lines): data blocks, loops, quoted and
   semicolon-delimited strings, comments, numbers with standard uncertainties
   `1.234(5)`, `?` and `.` values, multiple blocks with block selection. Pure
   Rust (Crystal-Builder uses gemmi). Split into tokenizer, table builder, item
   resolver.
+  Note: `xtalforge-io::cif` parses blocks, tags, loops, quotes, semicolon text,
+  comments, uncertainties and `?`/`.`; the corpus and malformed cases are
+  tested.
 - [ ] 1.15.3 Symmetry statement priority
   Port the reader's rule for files that carry several symmetry statements:
   (1) a Hall symbol always wins; (2) else a symmetry-operation loop
   (`_space_group_symop_operation_xyz` or `_symmetry_equiv_pos_as_xyz`), which
   fixes the setting; (3) else an H-M symbol and/or international number, with
   the ambiguity reported. Inconsistent statements produce warnings.
-- [ ] 1.15.4 Structure extraction
+- [x] 1.15.4 Structure extraction
   Cell, atom sites (label, type symbol, fractional coordinates, occupancy,
   Uiso/Biso, `_atom_site_aniso_*`), formal charges
   (`_atom_type_oxidation_number`, `_atom_site_charge`), disorder assembly and
   group, explicit bonds (`_geom_bond`), and properties CIF has no tag for
   (kept in `props`).
+  Note: cell, sites, occupancy, Uiso/Uij and charge are read; explicit
+  `_geom_bond` and disorder assembly are pending.
 - [ ] 1.15.5 Robustness
   Never panic: malformed numbers, missing loops, truncated files, duplicate
   labels all return typed errors or warnings with line numbers. Fuzz target
   (`cargo-fuzz`, nightly, optional in CI) over the tokenizer and parser.
-- [ ] 1.15.6 CIF writer
+- [x] 1.15.6 CIF writer
   Port `io/cif_writer.py`: cell, Hall and H-M symbols, operations,
   asymmetric unit or P1, ADPs, charges, bonds, stable ordering and number
   formatting. Round-trip test: reading the written file gives back an equal
   structure.
+  Note: `write_cif` writes cell, Hall symbol, operation loop, sites,
+  occupancy, Uiso and charge; the round-trip is tested on a P1 structure.
 
 ## Task 1.16 — POSCAR and XYZ
 
