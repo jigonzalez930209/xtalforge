@@ -18,8 +18,8 @@ use common::{array3, array6, set, to_js_error};
 
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
-    angle, bonds, convert_structure, distance, groups, neighbors, read_cif, read_structure, rings,
-    slab_info, slab_text, supercell_info, supercell_text, torsion,
+    angle, bonds, convert_structure, detect_symmetry, distance, groups, neighbors, read_cif,
+    read_structure, rings, slab_info, slab_text, supercell_info, supercell_text, torsion,
 };
 
 /// Installs the panic hook in debug builds only.

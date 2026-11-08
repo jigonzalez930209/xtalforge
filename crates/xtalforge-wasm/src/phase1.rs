@@ -248,6 +248,96 @@ pub fn slab_text(
     xtalforge::io::write_structure(&slab.structure, "cif").map_err(to_js_error)
 }
 
+/// Detects the space group and returns the dataset as a JS object.
+///
+/// The object carries `number`, `hall_number`, `hm_symbol`, `pearson_symbol`,
+/// `operations` (rotation, translation, triplet), `orbits`, `wyckoffs`,
+/// `site_symmetry_symbols`, `std_lattice`, `std_positions`,
+/// `std_origin_shift` and `std_rotation_matrix`.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text, a bad tolerance or a failed
+/// symmetry search.
+#[wasm_bindgen]
+pub fn detect_symmetry(text: &str, symprec: f64) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let dataset = xtalforge::symmetry::detect_symmetry(
+        &structure,
+        xtalforge::symmetry::SymmetryOptions {
+            symprec,
+            ..Default::default()
+        },
+    )
+    .map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(
+        &object,
+        "number",
+        JsValue::from_f64(f64::from(dataset.number)),
+    );
+    set(
+        &object,
+        "hall_number",
+        JsValue::from_f64(f64::from(dataset.hall_number)),
+    );
+    set(&object, "hm_symbol", JsValue::from_str(&dataset.hm_symbol));
+    set(
+        &object,
+        "pearson_symbol",
+        JsValue::from_str(&dataset.pearson_symbol),
+    );
+    let operations = js_sys::Array::new();
+    for operation in &dataset.operations {
+        let item = js_sys::Object::new();
+        let rotation = js_sys::Array::new();
+        for row in operation.rotation() {
+            rotation.push(&array_i32(row).into());
+        }
+        set(&item, "rotation", rotation.into());
+        set(&item, "translation", array3(operation.translation()).into());
+        set(&item, "triplet", JsValue::from_str(&operation.triplet()));
+        operations.push(&item.into());
+    }
+    set(&object, "operations", operations.into());
+    let orbits = js_sys::Array::new();
+    for orbit in &dataset.orbits {
+        orbits.push(&JsValue::from_f64(*orbit as f64));
+    }
+    set(&object, "orbits", orbits.into());
+    let wyckoffs = js_sys::Array::new();
+    for wyckoff in &dataset.wyckoffs {
+        wyckoffs.push(&JsValue::from_str(&wyckoff.to_string()));
+    }
+    set(&object, "wyckoffs", wyckoffs.into());
+    let symbols = js_sys::Array::new();
+    for symbol in &dataset.site_symmetry_symbols {
+        symbols.push(&JsValue::from_str(symbol));
+    }
+    set(&object, "site_symmetry_symbols", symbols.into());
+    let lattice = js_sys::Array::new();
+    for row in dataset.std_lattice {
+        lattice.push(&array3(row).into());
+    }
+    set(&object, "std_lattice", lattice.into());
+    let positions = js_sys::Array::new();
+    for point in &dataset.std_positions {
+        positions.push(&array3(*point).into());
+    }
+    set(&object, "std_positions", positions.into());
+    set(
+        &object,
+        "std_origin_shift",
+        array3(dataset.std_origin_shift).into(),
+    );
+    let rotation = js_sys::Array::new();
+    for row in dataset.std_rotation_matrix {
+        rotation.push(&array3(row).into());
+    }
+    set(&object, "std_rotation_matrix", rotation.into());
+    Ok(object.into())
+}
+
 /// Minimum-image distance between two P1 atoms, in Angstrom.
 ///
 /// # Errors
