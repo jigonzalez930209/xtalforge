@@ -70,10 +70,11 @@ scripts/check-api-docs.sh
 cd docs && npm install && npm run docs:build
 ```
 
-The `Rules` workflow runs the rule check and its self-test, `cargo fmt
---check` and clippy with warnings denied on every push and pull request; enable
-both jobs as required status checks in the repository branch protection
-settings. CI (Task 0.8) adds the full Rust, Python and WASM matrix.
+There is no CI workflow: the maintainer removed the push/pull-request jobs to
+avoid the runner cost. Run the checks above locally before committing. The only
+workflow is `.github/workflows/release.yml`, which runs on a version tag and
+builds the CLI packages, publishes the registries and deploys the docs. It does
+not run tests.
 
 ## Local Git hooks
 
