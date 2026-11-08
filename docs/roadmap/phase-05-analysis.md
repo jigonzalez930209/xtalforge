@@ -141,7 +141,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.7 — Net search and merged nets
 
-- [ ] 5.7.1 Net search
+- [x] 5.7.1 Net search
   Port `analysis/netsearch.py`: find nets by what a chemist knows:
   coordination ("a 3,6 net"), space group number, transitivity (vertex, edge,
   face, tile counts, from the RCSR data, unknown where the RCSR has none) and
@@ -154,7 +154,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.8 — Interpenetration
 
-- [ ] 5.8.1 Detection
+- [x] 5.8.1 Detection
   Count independent subnets of a framework, their translation and symmetry
   relations, and classify by Blatov's scheme: Class Ia (copies related by a
   translation; one net's lattice is an index-n sublattice of the array's),
