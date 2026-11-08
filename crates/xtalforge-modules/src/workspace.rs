@@ -185,7 +185,8 @@ pub fn read_archived_records(bytes: &[u8]) -> Result<Vec<RunRecord>, Error> {
     let mut records: Vec<RunRecord> = Vec::new();
     for index in 0..archive.len() {
         let mut file = archive.by_index(index).map_err(archive_error)?;
-        if !file.name().ends_with("/run.json") {
+        let name = file.name().map_err(archive_error)?;
+        if !name.ends_with("/run.json") {
             continue;
         }
         let mut text = String::new();
