@@ -7,4 +7,4 @@ pub mod workspace;
 
 pub use jobs::{Job, JobQueue, JobStatus};
 pub use registry::{Module, ModuleInfo, ModuleRegistry};
-pub use workspace::{RunRecord, RunStatus, Workspace};
+pub use workspace::{RunRecord, RunStatus, Workspace, archive_records, read_archived_records};

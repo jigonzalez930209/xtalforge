@@ -144,3 +144,61 @@ impl Workspace {
         Ok(ids)
     }
 }
+
+/// Serializes run records into an in-memory ZIP (the WASM workspace).
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] when a record cannot be serialized or the
+/// archive cannot be written.
+pub fn archive_records(records: &[RunRecord]) -> Result<Vec<u8>, Error> {
+    use std::io::Write;
+    let mut buffer = std::io::Cursor::new(Vec::new());
+    {
+        let mut archive = zip::ZipWriter::new(&mut buffer);
+        let options = zip::write::SimpleFileOptions::default()
+            .compression_method(zip::CompressionMethod::Deflated)
+            .unix_permissions(0o644);
+        for record in records {
+            let text = serde_json::to_vec_pretty(record).map_err(|error| {
+                Error::InvalidInput(format!("could not serialize run {}: {error}", record.id))
+            })?;
+            archive
+                .start_file(format!("runs/{}/run.json", record.id), options)
+                .map_err(archive_error)?;
+            archive.write_all(&text).map_err(archive_error)?;
+        }
+        archive.finish().map_err(archive_error)?;
+    }
+    Ok(buffer.into_inner())
+}
+
+/// Reads run records from an in-memory ZIP.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for a corrupt archive or an invalid record.
+pub fn read_archived_records(bytes: &[u8]) -> Result<Vec<RunRecord>, Error> {
+    use std::io::Read;
+    let cursor = std::io::Cursor::new(bytes);
+    let mut archive = zip::ZipArchive::new(cursor).map_err(archive_error)?;
+    let mut records: Vec<RunRecord> = Vec::new();
+    for index in 0..archive.len() {
+        let mut file = archive.by_index(index).map_err(archive_error)?;
+        if !file.name().ends_with("/run.json") {
+            continue;
+        }
+        let mut text = String::new();
+        file.read_to_string(&mut text).map_err(archive_error)?;
+        records.push(
+            serde_json::from_str(&text)
+                .map_err(|error| Error::InvalidInput(format!("invalid run record: {error}")))?,
+        );
+    }
+    records.sort_by(|first, second| first.id.cmp(&second.id));
+    Ok(records)
+}
+
+fn archive_error(error: impl std::fmt::Display) -> Error {
+    Error::InvalidInput(format!("workspace archive: {error}"))
+}
