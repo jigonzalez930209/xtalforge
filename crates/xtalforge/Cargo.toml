@@ -21,6 +21,7 @@ xtalforge-analysis = { workspace = true }
 xtalforge-build = { workspace = true }
 xtalforge-commands = { workspace = true }
 xtalforge-ff = { workspace = true }
+xtalforge-mof = { workspace = true }
 xtalforge-modules = { workspace = true }
 
 [features]
