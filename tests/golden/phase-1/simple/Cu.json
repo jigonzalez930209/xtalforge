@@ -1,0 +1,367 @@
+{
+  "bonds": [],
+  "cell": {
+    "matrix": [
+      [
+        3.615,
+        0.0,
+        0.0
+      ],
+      [
+        2.2135490894588411e-16,
+        3.615,
+        0.0
+      ],
+      [
+        2.2135490894588411e-16,
+        2.2135490894588411e-16,
+        3.615
+      ]
+    ],
+    "parameters": [
+      3.615,
+      3.615,
+      3.615,
+      90.0,
+      90.0,
+      90.0
+    ],
+    "volume": 47.241633375
+  },
+  "features": [
+    "cell",
+    "sites",
+    "p1",
+    "supercell",
+    "slab",
+    "bonds",
+    "rings",
+    "groups",
+    "measures"
+  ],
+  "formula": {
+    "Cu": 1.0
+  },
+  "groups": {
+    "alcohol": {
+      "atoms": [],
+      "count": 0
+    },
+    "aldehyde": {
+      "atoms": [],
+      "count": 0
+    },
+    "amide": {
+      "atoms": [],
+      "count": 0
+    },
+    "amine": {
+      "atoms": [],
+      "count": 0
+    },
+    "anhydride": {
+      "atoms": [],
+      "count": 0
+    },
+    "carboxylate": {
+      "atoms": [],
+      "count": 0
+    },
+    "carboxylic_acid": {
+      "atoms": [],
+      "count": 0
+    },
+    "epoxide": {
+      "atoms": [],
+      "count": 0
+    },
+    "ester": {
+      "atoms": [],
+      "count": 0
+    },
+    "ether": {
+      "atoms": [],
+      "count": 0
+    },
+    "fluoride": {
+      "atoms": [],
+      "count": 0
+    },
+    "ketone": {
+      "atoms": [],
+      "count": 0
+    },
+    "lactone": {
+      "atoms": [],
+      "count": 0
+    },
+    "phenol": {
+      "atoms": [],
+      "count": 0
+    },
+    "ring_ether": {
+      "atoms": [],
+      "count": 0
+    }
+  },
+  "measures": {
+    "angles": [
+      {
+        "angle": 120.00000000000001,
+        "i": 0,
+        "j": 1,
+        "k": 2
+      },
+      {
+        "angle": 120.00000000000001,
+        "i": 1,
+        "j": 0,
+        "k": 2
+      },
+      {
+        "angle": 120.00000000000001,
+        "i": 2,
+        "j": 0,
+        "k": 1
+      }
+    ],
+    "distances": [
+      {
+        "distance": 2.5561910139893693,
+        "i": 0,
+        "j": 1
+      },
+      {
+        "distance": 2.5561910139893693,
+        "i": 0,
+        "j": 2
+      },
+      {
+        "distance": 2.5561910139893693,
+        "i": 0,
+        "j": 3
+      },
+      {
+        "distance": 2.5561910139893693,
+        "i": 1,
+        "j": 2
+      },
+      {
+        "distance": 2.5561910139893693,
+        "i": 1,
+        "j": 3
+      },
+      {
+        "distance": 2.5561910139893693,
+        "i": 2,
+        "j": 3
+      }
+    ]
+  },
+  "n_sites": 1,
+  "options": {
+    "max_atoms": 600,
+    "slab_max_atoms": 200,
+    "symprec": 0.001
+  },
+  "p1": {
+    "elements": [
+      "Cu",
+      "Cu",
+      "Cu",
+      "Cu"
+    ],
+    "frac": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.5,
+        0.5
+      ],
+      [
+        0.5,
+        0.0,
+        0.5
+      ],
+      [
+        0.5,
+        0.5,
+        0.0
+      ]
+    ],
+    "labels": [
+      "Cu",
+      "Cu",
+      "Cu",
+      "Cu"
+    ],
+    "lattice": {
+      "matrix": [
+        [
+          3.615,
+          0.0,
+          0.0
+        ],
+        [
+          2.2135490894588411e-16,
+          3.615,
+          0.0
+        ],
+        [
+          2.2135490894588411e-16,
+          2.2135490894588411e-16,
+          3.615
+        ]
+      ],
+      "parameters": [
+        3.615,
+        3.615,
+        3.615,
+        90.0,
+        90.0,
+        90.0
+      ],
+      "volume": 47.241633375
+    },
+    "multiplicities": [
+      4
+    ],
+    "n_atoms": 4,
+    "occupancy": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "site_idx": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "rings": {
+    "count": 0,
+    "paths": [],
+    "truncated": false
+  },
+  "sha256": "65447378bdb758281b86778ccc7af29d1eae8a72890df9ed25f854b304c23aaf",
+  "sites": [
+    {
+      "charge": null,
+      "element": "Cu",
+      "frac": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "label": "Cu",
+      "occupancy": 1.0,
+      "wyckoff": null
+    }
+  ],
+  "skipped_features": [
+    "space-group-dataset",
+    "wyckoff-letters",
+    "k-path",
+    "pxrd",
+    "uff",
+    "charges",
+    "porosity",
+    "topology"
+  ],
+  "slab": {
+    "hkl": [
+      1,
+      0,
+      0
+    ],
+    "lattice": {
+      "matrix": [
+        [
+          2.2135490894588411e-16,
+          3.615,
+          0.0
+        ],
+        [
+          2.2135490894588411e-16,
+          2.2135490894588411e-16,
+          3.615
+        ],
+        [
+          13.615,
+          -8.336783085195607e-16,
+          -8.336783085195607e-16
+        ]
+      ],
+      "parameters": [
+        3.615,
+        3.615,
+        13.615,
+        90.0,
+        90.0,
+        90.0
+      ],
+      "volume": 177.92388337500003
+    },
+    "layers": 1,
+    "n_sites": 4,
+    "thickness": 3.615,
+    "vacuum": 10.0
+  },
+  "source": "simple/Cu.cif",
+  "space_group": {
+    "hall": "-F 4 2 3",
+    "hm": "F m -3 m",
+    "number": 225
+  },
+  "supercell": {
+    "lattice": {
+      "matrix": [
+        [
+          7.23,
+          0.0,
+          0.0
+        ],
+        [
+          4.4270981789176823e-16,
+          7.23,
+          0.0
+        ],
+        [
+          4.4270981789176823e-16,
+          4.4270981789176823e-16,
+          7.23
+        ]
+      ],
+      "parameters": [
+        7.23,
+        7.23,
+        7.23,
+        90.0,
+        90.0,
+        90.0
+      ],
+      "volume": 377.93306699999994
+    },
+    "n_sites": 32,
+    "repeat": [
+      2,
+      2,
+      2
+    ]
+  },
+  "versions": {
+    "crystal_builder": "1.1.1.dev6+g78d5476fd",
+    "crystal_builder_commit": "78d5476fd9e851fda00cde57b7ab8da3195dcf54",
+    "gemmi": "0.7.5",
+    "numpy": "2.5.4",
+    "python": "3.14.4",
+    "scipy": "1.18.1",
+    "spglib": "2.8.0"
+  }
+}
