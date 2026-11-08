@@ -74,6 +74,10 @@ essential release, then `0.x.y`).
   profiles, soft and hard verdicts, drawn/supercell/grid/phonon/Hessian
   estimates, `Error::LimitExceeded`, and `limits_bounds`/`limits_check` in
   Rust, Python and WASM.
+- Phase 1 Task 1.4: `Site` (label, canonical element, occupancy, Uiso/Uij,
+  charge, disorder group, props), `Structure`/`StructureBuilder`, molecule in
+  a padded box, formula/mass/density/charge properties, the `info` CLI bridge
+  and `structure_info` in Python and WASM.
 
 ### Changed
 
