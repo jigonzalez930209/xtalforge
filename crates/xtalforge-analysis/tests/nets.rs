@@ -72,3 +72,17 @@ fn bad_inputs_are_rejected() {
     assert!(quotient_graph(&entry, 1e-6).is_err());
     assert!(quotient_graph(&square_net(), 0.0).is_err());
 }
+
+#[test]
+fn net_index_and_components() {
+    let file = xtalforge_io::cgd::CgdFile {
+        entries: vec![square_net()],
+        problems: Vec::new(),
+    };
+    let index = xtalforge_analysis::NetIndex::from_file(&file, 1e-6);
+    assert_eq!(index.entries.len(), 1);
+    let graph = quotient_graph(&square_net(), 1e-6).unwrap();
+    let matches = index.search(&graph.invariants());
+    assert_eq!(matches, vec!["square"]);
+    assert_eq!(graph.components(), vec![vec![0, 1, 2, 3]]);
+}
