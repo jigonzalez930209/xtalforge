@@ -39,6 +39,7 @@ pub use xtalforge_core as core;
 pub use xtalforge_ff as ff;
 pub use xtalforge_io as io;
 pub use xtalforge_modules as modules;
+pub use xtalforge_mof as mof;
 pub use xtalforge_symmetry as symmetry;
 pub use xtalforge_view as view;
 
