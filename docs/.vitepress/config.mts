@@ -54,6 +54,7 @@ export default defineConfig({
             { text: 'Binding architecture', link: '/api/bindings' },
             { text: 'Core API', link: '/api/core' },
             { text: 'Elements', link: '/api/elements' },
+            { text: 'Lattice', link: '/api/lattice' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
@@ -64,6 +65,7 @@ export default defineConfig({
           text: 'Algorithms',
           items: [
             { text: 'Overview', link: '/algorithms/' },
+            { text: 'Lattice conventions', link: '/algorithms/lattice' },
             { text: 'Validation and tolerances', link: '/algorithms/validation' },
             { text: 'Golden data', link: '/algorithms/golden-data' },
             { text: 'Symmetry backend: moyo', link: '/algorithms/symmetry-backend' },
