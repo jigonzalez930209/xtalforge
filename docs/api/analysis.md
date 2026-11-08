@@ -24,6 +24,13 @@ atoms, Lorentz-polarization and multiplicity, and samples a Gaussian profile.
 `Pattern { points, reflections }` carries the sampled curve and the peak list;
 `Reflection { hkl, d, two_theta, multiplicity, intensity }`.
 
+## Nets
+
+`quotient_graph(&CgdEntry, tolerance)` reduces a CGD net to nodes, edges and
+lattice shifts; `NetInvariants` reports node/edge counts, cycle rank and
+coordination, and `shift_map` groups shifts by node pair. RCSR identification
+and canonical keys are later Task 5.6 work.
+
 ## Isosurfaces
 
 `isosurface(&Grid3, value)` extracts a `TriangleMesh { vertices, triangles }`
