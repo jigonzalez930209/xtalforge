@@ -118,6 +118,53 @@ fn shared_cell_volume_vectors() {
 }
 
 #[test]
+fn element_human_output() {
+    let output = run(&["element", "Fe"]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    assert!(text.contains("Fe"));
+    assert!(text.contains("Iron"));
+    assert!(text.contains("Z=26"));
+}
+
+#[test]
+fn element_json_output() {
+    let output = run(&["--json", "element", "26"]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    assert_eq!(value["symbol"], "Fe");
+    assert_eq!(value["z"], 26);
+    assert_eq!(value["color"], serde_json::json!([224, 102, 51]));
+}
+
+#[test]
+fn invalid_element_exits_with_code_three() {
+    let output = run(&["element", "Zz"]);
+    assert_eq!(output.status.code(), Some(3));
+    let text = String::from_utf8(output.stderr).expect("stderr is UTF-8");
+    assert!(text.contains("unknown element symbol"));
+}
+
+#[test]
+fn shared_element_vectors() {
+    let vectors: serde_json::Value =
+        serde_json::from_str(include_str!("../../../tests/vectors/elements.json"))
+            .expect("element vectors must be valid JSON");
+    for case in vectors["elements"].as_array().expect("elements array") {
+        let input = case["input"].as_str().expect("input");
+        let output = Command::new(env!("CARGO_BIN_EXE_xtalforge"))
+            .args(["--json", "element", input])
+            .output()
+            .expect("the CLI binary must run");
+        assert!(output.status.success());
+        let value: serde_json::Value =
+            serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+        assert_eq!(value["symbol"], case["symbol"]);
+    }
+}
+
+#[test]
 fn help_lists_the_hello_world_commands_and_flags() {
     let output = run(&["--help"]);
     assert!(output.status.success());
