@@ -45,3 +45,24 @@ or 2). The CLI exposes it as `xtalforge hydrogens`.
 
 The remaining builders (SMILES molecules, fragments, fullerenes, amorphous
 carbon, polymers) are later Phase 6 tasks.
+
+## SMILES, embedding and sketches
+
+`parse_smiles` builds the graph; `embed_smiles` gives deterministic 3D
+coordinates; `coordination_geometry`/`apply_coordination` place metal
+neighbours on the requested shape. `Sketch` edits a 2D graph and writes SMILES;
+`RDKIT_BEHAVIOUR_INVENTORY` records the reference behaviours.
+
+## Twists, ribbons, spirals and ZTC
+
+`commensurate_twist` builds two graphene layers with a relative twist (0 and
+60 degrees exact, nearest-angle approximation recorded in metadata);
+`nanoribbon` adds vacuum to a honeycomb strip; `face_spiral` covers C20 and
+C60; `build_ztc`/`build_schwarzite` sample gyroid and Schwarz P surfaces and
+`ztc_surface_mesh`/`schwarzite_surface_mesh` return their periodic meshes.
+
+## Polymers
+
+`build_polymer(smiles, monomers, &PolymerOptions)` parses, embeds, replicates
+and packs a chain and records every step. `pack_chains` fills a cubic cell at
+a target density; `polymer_protocol` loads the documented equilibration steps.
