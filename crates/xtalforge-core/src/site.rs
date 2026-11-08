@@ -134,6 +134,21 @@ impl Site {
         Ok(self)
     }
 
+    /// Copy with different fractional coordinates.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for non-finite coordinates.
+    pub fn with_frac(mut self, frac: [f64; 3]) -> Result<Self, Error> {
+        if !frac.iter().all(|value| value.is_finite()) {
+            return Err(Error::InvalidInput(
+                "site coordinates must be finite".to_owned(),
+            ));
+        }
+        self.frac = frac;
+        Ok(self)
+    }
+
     /// Copy with an isotropic displacement parameter.
     ///
     /// # Errors

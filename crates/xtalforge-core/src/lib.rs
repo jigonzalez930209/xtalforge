@@ -12,6 +12,7 @@ pub mod limits;
 pub mod p1;
 pub mod site;
 pub mod structure;
+pub mod supercell;
 pub mod symop;
 
 pub use cell::cell_volume;
