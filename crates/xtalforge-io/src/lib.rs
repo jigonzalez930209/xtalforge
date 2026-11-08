@@ -6,7 +6,13 @@
 //! input.
 
 pub mod cif;
+pub mod dispatch;
+pub mod poscar;
 pub mod text;
+pub mod xyz;
 
 pub use cif::{CifBlock, CifDocument, CifLoop, read_cif, read_cif_all, read_cif_block, write_cif};
+pub use dispatch::{read_structure, write_structure};
+pub use poscar::{read_poscar, write_poscar};
 pub use text::{decode_text, read_text};
+pub use xyz::{read_xyz, write_xyz};
