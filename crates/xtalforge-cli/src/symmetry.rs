@@ -1,8 +1,7 @@
 //! The `symmetry` command family.
 
 use xtalforge::symmetry::{
-    SetMode, SettingChoice, SpaceGroup, SymmetryOptions, asymmetrize as reduce, detect_symmetry,
-    set_space_group, to_p1,
+    SetMode, SettingChoice, SpaceGroup, SymmetryOptions, detect_symmetry, set_space_group, to_p1,
 };
 
 use crate::format::StructureFormat;
@@ -87,7 +86,7 @@ pub(crate) fn asymmetrize(
     format: Option<StructureFormat>,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
-    let reduced = reduce(
+    let reduced = xtalforge::symmetry::asymmetrize(
         &structure,
         SymmetryOptions {
             symprec,
@@ -136,4 +135,59 @@ pub(crate) fn set(
         return Ok(());
     }
     output::emit_structure(cli, &report.structure, out, format)
+}
+
+/// Lists the translationengleiche subgroups of a Hall setting.
+///
+/// # Errors
+///
+/// Returns [`CliError`] when enumeration fails.
+pub(crate) fn subgroups(cli: &Cli, hall_number: u32, epsilon: f64) -> Result<(), CliError> {
+    let groups = xtalforge::symmetry::translationengleiche_subgroups(hall_number, epsilon)
+        .map_err(CliError::core)?;
+    if cli.json {
+        println!(
+            "{}",
+            serde_json::to_string(&groups).map_err(|error| {
+                CliError::new(
+                    "json_error",
+                    format!("could not serialize subgroups: {error}"),
+                )
+            })?
+        );
+    } else {
+        for group in groups {
+            println!(
+                "index {:>3} depth {} {:?} operations {}{}",
+                group.index,
+                group.depth,
+                group.kind,
+                group.operations.len(),
+                group
+                    .subgroup_number
+                    .map(|number| format!(" -> No. {number}"))
+                    .unwrap_or_default()
+            );
+        }
+    }
+    Ok(())
+}
+
+/// Lowers a structure to a subgroup number.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a read or lowering failure.
+pub(crate) fn lower(
+    cli: &Cli,
+    path: &str,
+    subgroup: u32,
+    tolerance: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure = input::read_structure_path(path).map_err(CliError::core)?;
+    let lowered = xtalforge::symmetry::lower_to_subgroup(&structure, subgroup, tolerance)
+        .map_err(CliError::core)?;
+    output::emit_structure(cli, &lowered, out, format)
 }
