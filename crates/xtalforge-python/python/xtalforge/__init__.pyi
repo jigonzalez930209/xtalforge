@@ -13,6 +13,7 @@ class InputError(XtalforgeError):
 __version__: Final[str]
 
 def version() -> str: ...
+def element_info(input: str | int) -> dict[str, object]: ...
 def cell_volume(
     a: float,
     b: float,
