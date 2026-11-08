@@ -1,0 +1,35 @@
+name: Rules
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    name: Repository rules
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Check repository rules
+        run: scripts/check-rules.sh
+      - name: Run the rules self-test
+        run: scripts/tests/run-rules-selftest.sh
+
+  format-and-lints:
+    name: Format and lints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+      - name: Install Rust components
+        run: rustup component add rustfmt clippy
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Run clippy with warnings denied
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Build rustdoc with warnings denied
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
