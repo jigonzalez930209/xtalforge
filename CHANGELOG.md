@@ -9,6 +9,14 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 3: format registry with capabilities/loss warnings, atomic writes,
+  pymatgen JSON/CSSR/GEN/LAMMPS/SHELX/PDB, CGD nets, Grid3/cube/XY,
+  trajectories, typed parameters, commands/document with undo, selection and
+  tracking, workspace/modules, view data, colormaps and ASCII STL.
+- Phase 3 Task 3.1-3.3: the format registry with capabilities and loss
+  warnings, atomic writes, and pymatgen JSON, CSSR and DFTB+ GEN readers and
+  writers.
+
 - Phase 2 Task 2.8: layer-group detection for slabs, experimental collinear
   magnetic groups and molecular point groups.
 - Phase 2 Task 2.10.2-2.10.4: Bravais classification, ASE-derived special

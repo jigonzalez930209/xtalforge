@@ -3,10 +3,13 @@ resolver = "3"
 members = [
   "crates/xtalforge",
   "crates/xtalforge-cli",
+  "crates/xtalforge-commands",
   "crates/xtalforge-core",
   "crates/xtalforge-io",
+  "crates/xtalforge-modules",
   "crates/xtalforge-python",
   "crates/xtalforge-symmetry",
+  "crates/xtalforge-view",
   "crates/xtalforge-testkit",
   "crates/xtalforge-wasm",
 ]
@@ -28,7 +31,10 @@ categories = ["science", "science::chemistry", "simulation"]
 xtalforge = { version = "=0.0.0", path = "crates/xtalforge" }
 xtalforge-core = { version = "=0.0.0", path = "crates/xtalforge-core" }
 xtalforge-io = { version = "=0.0.0", path = "crates/xtalforge-io" }
+xtalforge-modules = { version = "=0.0.0", path = "crates/xtalforge-modules" }
+xtalforge-commands = { version = "=0.0.0", path = "crates/xtalforge-commands" }
 xtalforge-symmetry = { version = "=0.0.0", path = "crates/xtalforge-symmetry" }
+xtalforge-view = { version = "=0.0.0", path = "crates/xtalforge-view" }
 
 # External crates shared by more than one crate.
 nalgebra = { version = "0.35", default-features = false, features = ["std"] }

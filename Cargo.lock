@@ -1015,9 +1015,11 @@ dependencies = [
 name = "xtalforge"
 version = "0.0.0"
 dependencies = [
+ "xtalforge-commands",
  "xtalforge-core",
  "xtalforge-io",
  "xtalforge-symmetry",
+ "xtalforge-view",
 ]
 
 [[package]]
@@ -1027,6 +1029,16 @@ dependencies = [
  "clap",
  "serde_json",
  "xtalforge",
+]
+
+[[package]]
+name = "xtalforge-commands"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "xtalforge-core",
+ "xtalforge-symmetry",
 ]
 
 [[package]]
@@ -1046,6 +1058,16 @@ name = "xtalforge-io"
 version = "0.0.0"
 dependencies = [
  "rayon",
+ "serde",
+ "serde_json",
+ "xtalforge-core",
+]
+
+[[package]]
+name = "xtalforge-modules"
+version = "0.0.0"
+dependencies = [
+ "serde",
  "serde_json",
  "xtalforge-core",
 ]
@@ -1075,6 +1097,14 @@ dependencies = [
 [[package]]
 name = "xtalforge-testkit"
 version = "0.0.0"
+
+[[package]]
+name = "xtalforge-view"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "xtalforge-core",
+]
 
 [[package]]
 name = "xtalforge-wasm"
