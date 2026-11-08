@@ -1,11 +1,26 @@
 //! Command-line interface for `xtalforge`.
 //!
-//! The command tree grows with each phase. Phase 0 provides the global flags
-//! and the hello-world commands `version` and `cell-volume`; the rest of the
-//! surface is added as the domain crates land.
+//! Phase 1 provides structure input and conversion, supercells, slabs,
+//! connectivity reports and geometry queries. Every command accepts the global
+//! flags, emits one JSON value in `--json` mode and reports runtime failures
+//! with exit code 3.
+
+mod analyze;
+mod basic;
+mod build;
+mod convert;
+mod format;
+mod input;
+mod measure;
+mod output;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use std::process::ExitCode;
+
+use format::StructureFormat;
+
+/// Exit code used for every runtime failure.
+const ERROR_EXIT_CODE: u8 = 3;
 
 #[derive(Debug, Parser)]
 #[command(
@@ -24,7 +39,7 @@ struct Cli {
     /// Worker threads (reserved for the parallel algorithms).
     #[arg(long, global = true, value_name = "N")]
     threads: Option<usize>,
-    /// Limit policy (reserved for the limits feature).
+    /// Limit policy used by the size checks.
     #[arg(long, global = true, value_enum, default_value_t = Limits::Standard)]
     limits: Limits,
     #[command(subcommand)]
@@ -40,7 +55,7 @@ enum Command {
         /// Element symbol or atomic number.
         input: String,
     },
-    /// Print a summary of a structure JSON document.
+    /// Print a summary of a structure or structure JSON document.
     Info {
         /// Input path, or `-` for standard input.
         path: String,
@@ -66,6 +81,116 @@ enum Command {
         /// Angle gamma in degrees.
         gamma: f64,
     },
+    /// Convert a structure between CIF, POSCAR and XYZ.
+    Convert {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: StructureFormat,
+        /// Output path, or `-` for standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+    },
+    /// Build an na x nb x nc supercell.
+    Supercell {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Repeats along a.
+        na: u32,
+        /// Repeats along b.
+        nb: u32,
+        /// Repeats along c.
+        nc: u32,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Cut a slab along the (h k l) plane.
+    Slab {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// First Miller index.
+        h: i32,
+        /// Second Miller index.
+        k: i32,
+        /// Third Miller index.
+        l: i32,
+        /// Number of layers.
+        #[arg(long, value_name = "N")]
+        layers: u32,
+        /// Vacuum above the slab in Angstrom.
+        #[arg(long, value_name = "A")]
+        vacuum: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// List the perceived bonds of the P1 cell.
+    Bonds {
+        /// Input path, or `-` for standard input.
+        path: String,
+    },
+    /// List the chordless rings of the P1 cell.
+    Rings {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Largest ring size in atoms.
+        #[arg(long, value_name = "N", default_value_t = 6)]
+        max_size: usize,
+    },
+    /// List the matched functional groups.
+    Groups {
+        /// Input path, or `-` for standard input.
+        path: String,
+    },
+    /// List the periodic neighbors within a cutoff.
+    Neighbors {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Cutoff radius in Angstrom.
+        #[arg(long, value_name = "A")]
+        cutoff: f64,
+    },
+    /// Minimum-image distance between two P1 atoms.
+    Distance {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// First atom index.
+        i: usize,
+        /// Second atom index.
+        j: usize,
+    },
+    /// Angle i-j-k in degrees.
+    Angle {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// First atom index.
+        i: usize,
+        /// Pivot atom index.
+        j: usize,
+        /// Third atom index.
+        k: usize,
+    },
+    /// Torsion i-j-k-l in degrees.
+    Torsion {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// First atom index.
+        i: usize,
+        /// Second atom index.
+        j: usize,
+        /// Third atom index.
+        k: usize,
+        /// Fourth atom index.
+        l: usize,
+    },
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -75,20 +200,36 @@ enum Limits {
     WarnOnly,
 }
 
+impl Limits {
+    fn profile(self) -> xtalforge::core::Profile {
+        match self {
+            Self::Standard => xtalforge::core::Profile::Standard,
+            Self::Generous => xtalforge::core::Profile::Generous,
+            Self::WarnOnly => xtalforge::core::Profile::WarnOnly,
+        }
+    }
+}
+
 #[derive(Debug)]
-struct CliError {
-    code: &'static str,
-    message: String,
-    exit_code: u8,
+pub(crate) struct CliError {
+    pub(crate) code: &'static str,
+    pub(crate) message: String,
 }
 
 impl CliError {
-    fn input(message: impl Into<String>) -> Self {
+    pub(crate) fn new(code: &'static str, message: impl Into<String>) -> Self {
         Self {
-            code: "invalid_input",
+            code,
             message: message.into(),
-            exit_code: 3,
         }
+    }
+
+    pub(crate) fn input(message: impl Into<String>) -> Self {
+        Self::new("invalid_input", message)
+    }
+
+    pub(crate) fn core(error: xtalforge::core::Error) -> Self {
+        Self::new(error.code(), error.message())
     }
 }
 
@@ -98,7 +239,7 @@ fn main() -> ExitCode {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             report_error(&cli, &error);
-            ExitCode::from(error.exit_code)
+            ExitCode::from(ERROR_EXIT_CODE)
         }
     }
 }
@@ -109,11 +250,6 @@ fn run(cli: &Cli) -> Result<(), CliError> {
     {
         return Err(CliError::input("--threads must be a positive number"));
     }
-    // Both flags are part of the stable CLI contract and are consumed by the
-    // parallel and limits work in later phases; reading them here keeps the
-    // skeleton warning-free.
-    let _ = cli.limits;
-
     match &cli.command {
         Command::Version => {
             let version = xtalforge::core::version();
@@ -127,11 +263,7 @@ fn run(cli: &Cli) -> Result<(), CliError> {
             Ok(())
         }
         Command::Element { input } => {
-            let element = xtalforge::core::element_info(input).map_err(|error| CliError {
-                code: error.code(),
-                message: error.message(),
-                exit_code: 3,
-            })?;
+            let element = xtalforge::core::element_info(input).map_err(CliError::core)?;
             if cli.json {
                 println!(
                     "{}",
@@ -167,90 +299,8 @@ fn run(cli: &Cli) -> Result<(), CliError> {
             }
             Ok(())
         }
-        Command::Info { path } => {
-            let text = if path == "-" {
-                let mut buffer = String::new();
-                std::io::Read::read_to_string(&mut std::io::stdin(), &mut buffer).map_err(
-                    |error| CliError::input(format!("could not read standard input: {error}")),
-                )?;
-                buffer
-            } else {
-                let bytes = std::fs::read(path)
-                    .map_err(|error| CliError::input(format!("could not read {path}: {error}")))?;
-                xtalforge::io::decode_text(&bytes)
-            };
-            let summary = if text.trim_start().starts_with('{') {
-                xtalforge::core::structure_info(&text)
-            } else {
-                xtalforge::io::read_cif(&text).and_then(|structure| structure.summary())
-            }
-            .map_err(|error| CliError {
-                code: error.code(),
-                message: error.message(),
-                exit_code: 3,
-            })?;
-            if cli.json {
-                let payload = serde_json::to_string(&summary).map_err(|error| CliError {
-                    code: "json_error",
-                    message: error.to_string(),
-                    exit_code: 4,
-                })?;
-                println!("{payload}");
-            } else {
-                println!(
-                    "{}: {} [{}] sites={} volume={:.3} A^3 density={:.4} g/cm^3 charge={:.3} p1={}",
-                    summary.name,
-                    summary.formula,
-                    summary.hall,
-                    summary.n_sites,
-                    summary.volume,
-                    summary.density,
-                    summary.total_charge,
-                    summary.is_p1
-                );
-            }
-            Ok(())
-        }
-        Command::Cell { params } => {
-            let [a, b, c, alpha, beta, gamma] = match params.as_slice() {
-                [a, b, c, alpha, beta, gamma] => [*a, *b, *c, *alpha, *beta, *gamma],
-                _ => {
-                    return Err(CliError::input(
-                        "cell needs six parameters: a b c alpha beta gamma",
-                    ));
-                }
-            };
-            let lattice =
-                xtalforge::core::lattice_info(a, b, c, alpha, beta, gamma).map_err(|error| {
-                    CliError {
-                        code: error.code(),
-                        message: error.message(),
-                        exit_code: 3,
-                    }
-                })?;
-            if cli.json {
-                println!(
-                    "{}",
-                    serde_json::json!({
-                        "parameters": lattice.parameters(),
-                        "volume": lattice.volume(),
-                        "matrix": lattice.matrix(),
-                        "right_handed": lattice.is_right_handed(),
-                    })
-                );
-            } else {
-                let [a, b, c, alpha, beta, gamma] = lattice.parameters();
-                println!(
-                    "a={a:.6} b={b:.6} c={c:.6} alpha={alpha:.6} beta={beta:.6} gamma={gamma:.6} volume={:.6}",
-                    lattice.volume()
-                );
-                for row in lattice.matrix() {
-                    let [x, y, z] = row;
-                    println!("{x:12.6} {y:12.6} {z:12.6}");
-                }
-            }
-            Ok(())
-        }
+        Command::Info { path } => basic::info(cli, path),
+        Command::Cell { params } => basic::cell(cli, params),
         Command::CellVolume {
             a,
             b,
@@ -258,21 +308,41 @@ fn run(cli: &Cli) -> Result<(), CliError> {
             alpha,
             beta,
             gamma,
-        } => {
-            let volume = xtalforge::core::cell_volume(*a, *b, *c, *alpha, *beta, *gamma).map_err(
-                |error| CliError {
-                    code: error.code(),
-                    message: error.message(),
-                    exit_code: 3,
-                },
-            )?;
-            if cli.json {
-                println!("{}", serde_json::json!({ "volume": volume }));
-            } else {
-                println!("{volume}");
-            }
-            Ok(())
-        }
+        } => basic::cell_volume(cli, *a, *b, *c, *alpha, *beta, *gamma),
+        Command::Convert { path, format, out } => convert::run(cli, path, *format, out.as_deref()),
+        Command::Supercell {
+            path,
+            na,
+            nb,
+            nc,
+            out,
+            format,
+        } => build::supercell(cli, path, [*na, *nb, *nc], out.as_deref(), *format),
+        Command::Slab {
+            path,
+            h,
+            k,
+            l,
+            layers,
+            vacuum,
+            out,
+            format,
+        } => build::slab(
+            cli,
+            path,
+            [*h, *k, *l],
+            *layers,
+            *vacuum,
+            out.as_deref(),
+            *format,
+        ),
+        Command::Bonds { path } => analyze::bonds(cli, path),
+        Command::Rings { path, max_size } => analyze::rings(cli, path, *max_size),
+        Command::Groups { path } => analyze::groups(cli, path),
+        Command::Neighbors { path, cutoff } => analyze::neighbors(cli, path, *cutoff),
+        Command::Distance { path, i, j } => measure::distance(cli, path, *i, *j),
+        Command::Angle { path, i, j, k } => measure::angle(cli, path, *i, *j, *k),
+        Command::Torsion { path, i, j, k, l } => measure::torsion(cli, path, *i, *j, *k, *l),
     }
 }
 
