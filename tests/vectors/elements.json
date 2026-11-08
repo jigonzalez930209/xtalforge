@@ -1,0 +1,58 @@
+{
+  "elements": [
+    {
+      "input": "H",
+      "symbol": "H",
+      "z": 1,
+      "mass": 1.00794,
+      "covalent_radius": 0.3100000023841858,
+      "vdw_radius": 1.2000000476837158,
+      "tolerance": 1e-9
+    },
+    {
+      "input": "C",
+      "symbol": "C",
+      "z": 6,
+      "mass": 12.0107,
+      "covalent_radius": 0.7300000190734863,
+      "vdw_radius": 1.7000000476837158,
+      "tolerance": 1e-9
+    },
+    {
+      "input": "Fe",
+      "symbol": "Fe",
+      "z": 26,
+      "mass": 55.845,
+      "covalent_radius": 1.3200000524520874,
+      "vdw_radius": 2.44,
+      "tolerance": 1e-9
+    },
+    {
+      "input": "26",
+      "symbol": "Fe",
+      "z": 26,
+      "mass": 55.845,
+      "covalent_radius": 1.3200000524520874,
+      "vdw_radius": 2.44,
+      "tolerance": 1e-9
+    },
+    {
+      "input": "D",
+      "symbol": "D",
+      "z": 1,
+      "mass": 2.0141,
+      "covalent_radius": 0.3100000023841858,
+      "vdw_radius": 1.2000000476837158,
+      "tolerance": 1e-9
+    },
+    {
+      "input": "X",
+      "symbol": "X",
+      "z": 0,
+      "mass": 1.0,
+      "covalent_radius": 0.5,
+      "vdw_radius": 1.0,
+      "tolerance": 1e-9
+    }
+  ]
+}
