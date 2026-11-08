@@ -1015,11 +1015,31 @@ dependencies = [
 name = "xtalforge"
 version = "0.0.0"
 dependencies = [
+ "xtalforge-analysis",
+ "xtalforge-build",
  "xtalforge-commands",
  "xtalforge-core",
  "xtalforge-io",
  "xtalforge-symmetry",
  "xtalforge-view",
+]
+
+[[package]]
+name = "xtalforge-analysis"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "xtalforge-core",
+ "xtalforge-io",
+]
+
+[[package]]
+name = "xtalforge-build"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "xtalforge-core",
 ]
 
 [[package]]
@@ -1051,6 +1071,16 @@ dependencies = [
  "serde_json",
  "sha2",
  "thiserror",
+]
+
+[[package]]
+name = "xtalforge-ff"
+version = "0.0.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "thiserror",
+ "xtalforge-core",
 ]
 
 [[package]]

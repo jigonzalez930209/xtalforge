@@ -9,6 +9,11 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 4 Task 4.1/4.2: Calculator API, registry, run records and the native
+  UFF/UFF4MOF engine with analytic gradients.
+- Phase 5 Task 5.1-5.3: calculated PXRD with radiation, reflections,
+  structure factors, LP and profiles; periodic distance grids and porosity.
+- Phase 6 Task 6.5/6.6: graphene sheets/stacks and nanotube roll-up builders.
 - Phase 3: format registry with capabilities/loss warnings, atomic writes,
   pymatgen JSON/CSSR/GEN/LAMMPS/SHELX/PDB, CGD nets, Grid3/cube/XY,
   trajectories, typed parameters, commands/document with undo, selection and
