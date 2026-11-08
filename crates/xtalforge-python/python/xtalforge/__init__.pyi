@@ -182,3 +182,68 @@ def set_space_group(
     mode: str = "reinterpret",
     format_hint: str | None = None,
 ) -> StructureDict: ...
+
+def subgroups(hall_number: int, epsilon: float = 1e-5) -> list[dict[str, object]]: ...
+def lower_to_subgroup(
+    text: str,
+    subgroup: int,
+    tolerance: float = 0.5,
+    format_hint: str | None = None,
+) -> StructureDict: ...
+
+def standardize(
+    text: str,
+    symprec: float = 1e-3,
+    format_hint: str | None = None,
+) -> StructureDict: ...
+def primitive_cell(
+    text: str,
+    symprec: float = 1e-3,
+    format_hint: str | None = None,
+) -> StructureDict: ...
+def reduce_structure(
+    text: str,
+    algorithm: str = "niggli",
+    format_hint: str | None = None,
+) -> StructureDict: ...
+def wyckoff_assignments(
+    text: str,
+    symprec: float = 1e-3,
+    format_hint: str | None = None,
+) -> list[dict[str, object]]: ...
+def brillouin_zone(text: str, format_hint: str | None = None) -> dict[str, object]: ...
+def tolerance_ladder(
+    text: str,
+    format_hint: str | None = None,
+) -> list[dict[str, object]]: ...
+def diagnose(
+    text: str,
+    symbol: str,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+
+def detect_layer_symmetry(
+    text: str,
+    symprec: float = 1e-3,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+
+def detect_magnetic_symmetry(
+    text: str,
+    symprec: float = 1e-3,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+
+def change_setting(
+    text: str,
+    hall_number: int,
+    format_hint: str | None = None,
+) -> StructureDict: ...
+
+def band_path(text: str, format_hint: str | None = None) -> dict[str, object]: ...
+
+def molecular_point_group(
+    text: str,
+    tolerance: float = 1e-3,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
