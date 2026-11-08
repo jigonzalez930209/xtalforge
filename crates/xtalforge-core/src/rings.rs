@@ -73,6 +73,44 @@ pub fn ring_counts(structure: &Structure, max_size: usize) -> Result<Vec<(usize,
     Ok(counts)
 }
 
+/// Number of rings each P1 atom belongs to.
+///
+/// # Errors
+///
+/// Returns the errors of [`rings`].
+pub fn ring_membership(structure: &Structure, max_size: usize) -> Result<Vec<usize>, Error> {
+    let p1 = structure.p1()?;
+    let mut membership = vec![0usize; p1.atoms.len()];
+    for ring in rings(structure, max_size)? {
+        for atom in ring.atoms {
+            if let Some(slot) = membership.get_mut(atom) {
+                *slot += 1;
+            }
+        }
+    }
+    Ok(membership)
+}
+
+/// Heuristic aromaticity for a ring: five- or six-membered and all C/N/O.
+///
+/// A real aromaticity check needs bond orders and planarity; this flag is a
+/// first approximation for the molecule builder and is labelled as such.
+///
+/// # Errors
+///
+/// Returns the errors of the P1 expansion.
+pub fn is_aromatic(structure: &Structure, ring: &Ring) -> Result<bool, Error> {
+    if !matches!(ring.size(), 5 | 6) {
+        return Ok(false);
+    }
+    let p1 = structure.p1()?;
+    Ok(ring.atoms.iter().all(|index| {
+        p1.atoms
+            .get(*index)
+            .is_some_and(|atom| matches!(atom.element.as_str(), "C" | "N" | "O"))
+    }))
+}
+
 fn search(
     graph: &crate::BondGraph,
     start: usize,

@@ -22,6 +22,32 @@ pub struct Bond {
     pub explicit: bool,
 }
 
+/// An explicit bond stored by the user.
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct ExplicitBond {
+    /// First atom index in the asymmetric unit or P1 cell.
+    pub i: usize,
+    /// Second atom index.
+    pub j: usize,
+    /// Lattice image of `j`.
+    pub image: [i32; 3],
+    /// Bond order.
+    pub order: f64,
+    /// When true, remove a perceived bond instead of adding one.
+    pub remove: bool,
+}
+
+/// A topology edge between node centres; never a chemical bond.
+#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct TopologyBond {
+    /// First node.
+    pub i: usize,
+    /// Second node.
+    pub j: usize,
+    /// Lattice image of `j`.
+    pub image: [i32; 3],
+}
+
 /// Perception rules.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BondRules {
@@ -164,6 +190,29 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
                 distance,
                 order: 1.0,
                 explicit: false,
+            });
+        }
+    }
+    for explicit in structure.explicit_bonds() {
+        if explicit.remove {
+            bonds.retain(|bond| {
+                !(bond.i == explicit.i && bond.j == explicit.j && bond.image == explicit.image)
+            });
+        } else if let Some(existing) = bonds.iter_mut().find(|bond| {
+            bond.i == explicit.i && bond.j == explicit.j && bond.image == explicit.image
+        }) {
+            existing.order = explicit.order;
+            existing.explicit = true;
+        } else if let (Some(first), Some(second)) =
+            (p1.atoms.get(explicit.i), p1.atoms.get(explicit.j))
+        {
+            bonds.push(Bond {
+                i: explicit.i,
+                j: explicit.j,
+                image: explicit.image,
+                distance: p1.lattice.distance(first.frac, second.frac),
+                order: explicit.order,
+                explicit: true,
             });
         }
     }

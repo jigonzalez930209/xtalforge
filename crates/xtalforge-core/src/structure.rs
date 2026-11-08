@@ -7,6 +7,7 @@ use serde_json::Value;
 
 use crate::Error;
 use crate::Lattice;
+use crate::bonding::{ExplicitBond, TopologyBond};
 use crate::elements::element_by_symbol;
 use crate::site::Site;
 use crate::symop::SymOp;
@@ -20,6 +21,10 @@ pub struct Structure {
     sites: Vec<Site>,
     #[serde(default)]
     operations: Vec<SymOp>,
+    #[serde(default)]
+    explicit_bonds: Vec<ExplicitBond>,
+    #[serde(default)]
+    topology_bonds: Vec<TopologyBond>,
     metadata: BTreeMap<String, Value>,
 }
 
@@ -52,6 +57,18 @@ impl Structure {
     #[must_use]
     pub fn operations(&self) -> &[SymOp] {
         &self.operations
+    }
+
+    /// User bonds and removals applied after perception.
+    #[must_use]
+    pub fn explicit_bonds(&self) -> &[ExplicitBond] {
+        &self.explicit_bonds
+    }
+
+    /// Topology edges, kept separate from chemical bonds.
+    #[must_use]
+    pub fn topology_bonds(&self) -> &[TopologyBond] {
+        &self.topology_bonds
     }
 
     /// Open structure metadata.
@@ -369,6 +386,8 @@ pub struct StructureBuilder {
     hall: String,
     sites: Vec<Site>,
     operations: Vec<SymOp>,
+    explicit_bonds: Vec<ExplicitBond>,
+    topology_bonds: Vec<TopologyBond>,
     metadata: BTreeMap<String, Value>,
 }
 
@@ -382,6 +401,8 @@ impl StructureBuilder {
             hall: "P 1".to_owned(),
             sites: Vec::new(),
             operations: Vec::new(),
+            explicit_bonds: Vec::new(),
+            topology_bonds: Vec::new(),
             metadata: BTreeMap::new(),
         }
     }
@@ -404,6 +425,20 @@ impl StructureBuilder {
     #[must_use]
     pub fn operation(mut self, operation: SymOp) -> Self {
         self.operations.push(operation);
+        self
+    }
+
+    /// Adds an explicit bond or removal.
+    #[must_use]
+    pub fn explicit_bond(mut self, bond: ExplicitBond) -> Self {
+        self.explicit_bonds.push(bond);
+        self
+    }
+
+    /// Adds a topology edge.
+    #[must_use]
+    pub fn topology_bond(mut self, bond: TopologyBond) -> Self {
+        self.topology_bonds.push(bond);
         self
     }
 
@@ -432,6 +467,8 @@ impl StructureBuilder {
             hall: self.hall,
             sites: self.sites,
             operations: self.operations,
+            explicit_bonds: self.explicit_bonds,
+            topology_bonds: self.topology_bonds,
             metadata: self.metadata,
         })
     }

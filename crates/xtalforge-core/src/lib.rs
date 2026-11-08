@@ -24,7 +24,7 @@ pub mod supercell;
 pub mod symop;
 pub mod transforms;
 
-pub use bonding::{Bond, BondGraph, BondRules, perceive_bonds};
+pub use bonding::{Bond, BondGraph, BondRules, ExplicitBond, TopologyBond, perceive_bonds};
 pub use cell::cell_volume;
 pub use describe::describe_atom;
 pub use elements::{Element, Isotope, element_info};
@@ -34,7 +34,7 @@ pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
 pub use measure::{angle, centroid, distance, interplanar_angle, torsion};
 pub use neighbors::{Neighbor, neighbors, neighbors_of};
 pub use p1::{P1Atom, P1Cell};
-pub use rings::{Ring, ring_counts, rings};
+pub use rings::{Ring, is_aromatic, ring_counts, ring_membership, rings};
 pub use scalars::{atom_charges, atom_masses, bond_lengths, coordination_numbers};
 pub use site::Site;
 pub use slab::{Slab, make_slab, plane_angle, surface_basis};
