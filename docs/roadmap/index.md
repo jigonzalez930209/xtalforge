@@ -15,7 +15,7 @@ are in `AGENTS.md` at the repository root.
 
 | Phase | File | Goal | Release gate |
 |---|---|---|---|
-| 0 | [Foundations](./phase-00-foundations.md) | Workspace, rules, CI, docs site, moyo audit, sci-form reuse plan, dependency replacement map, binding architecture, golden-data oracle | none |
+| 0 | [Foundations](./phase-00-foundations.md) | Workspace, rules, CI, docs site, moyo audit, sci-form reuse plan, dependency replacement map, binding architecture, golden-data oracle | none ([remaining work](./phase-00-status.md)) |
 | 1 | [Core](./phase-01-core.md) | Elements, lattice, structure, P1, supercell, slab, neighbors, bonding, rings, groups, measures, limits, CIF/POSCAR/XYZ | with Task 2.1: **v0.0.1** |
 | 2 | [Symmetry](./phase-02-symmetry.md) | moyo integration, space groups, Wyckoff, standard cells, reduction, subgroups, point groups, Brillouin zone and k-path | v0.0.x |
 | 3 | [Formats, commands, view data](./phase-03-formats-commands.md) | All file formats, project files, undo/redo commands, selection, tracking, workspace, view settings and scene data, STL | v0.0.x |

@@ -174,8 +174,8 @@ This task produces the evidence and the plan for every gap.
   adds; check that its dependency versions (`nalgebra` 0.35, `serde`, `strum`
   0.28, `itertools`) do not duplicate ours.
   Note: wasm32 and pyo3 builds pass; nalgebra 0.35 is shared; release compile
-  about 45 s; the hello-world WASM stays at 41 KiB because the unused moyo
-  code is tree-shaken.
+  about 45 s; the hello-world WASM was 41 KiB because the unused moyo code is
+  tree-shaken, and the Phase 1 element table brings it to about 190 KiB.
 - [x] 0.3.5 Decision report
   `docs/algorithms/symmetry-backend.md`: verdict (adopt / adopt with gaps /
   reject), the matrix above with final statuses, the gap plan, links to
