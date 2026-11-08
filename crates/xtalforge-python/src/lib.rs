@@ -13,6 +13,8 @@ use pyo3::prelude::*;
 mod analysis;
 mod classes;
 mod phase3;
+mod phase4;
+mod phase5;
 mod structures;
 mod symmetry;
 mod symmetry_analysis;
@@ -23,6 +25,12 @@ use classes::{Lattice, P1Cell, Site, Structure};
 use phase3::{
     Document, param_schema, project_pack, project_read, workspace_archive, workspace_open,
     workspace_read_archive, workspace_read_run, workspace_runs, workspace_write_run,
+};
+use phase4::{
+    ff_charges, ff_energy, ff_ir, ff_optimize, ff_prepare, ff_thermo, ff_types, ff_vibrations,
+};
+use phase5::{
+    add_hydrogens, net_invariants, net_overlay, porosity, rcsr_names, zeo_parse, zeo_run,
 };
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
@@ -60,6 +68,14 @@ fn map_error(error: xtalforge::core::Error) -> PyErr {
     let args = (error.code(), error.message());
     match error {
         xtalforge::core::Error::InvalidInput(_) => InputError::new_err(args),
+        _ => XtalforgeError::new_err(args),
+    }
+}
+
+fn map_ff_error(error: xtalforge::ff::Error) -> PyErr {
+    let args = (error.code(), error.message());
+    match error {
+        xtalforge::ff::Error::InvalidInput(_) => InputError::new_err(args),
         _ => XtalforgeError::new_err(args),
     }
 }
@@ -266,5 +282,20 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(workspace_read_run, module)?)?;
     module.add_function(wrap_pyfunction!(workspace_archive, module)?)?;
     module.add_function(wrap_pyfunction!(workspace_read_archive, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_energy, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_optimize, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_charges, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_vibrations, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_ir, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_thermo, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_types, module)?)?;
+    module.add_function(wrap_pyfunction!(ff_prepare, module)?)?;
+    module.add_function(wrap_pyfunction!(porosity, module)?)?;
+    module.add_function(wrap_pyfunction!(zeo_parse, module)?)?;
+    module.add_function(wrap_pyfunction!(zeo_run, module)?)?;
+    module.add_function(wrap_pyfunction!(net_invariants, module)?)?;
+    module.add_function(wrap_pyfunction!(net_overlay, module)?)?;
+    module.add_function(wrap_pyfunction!(rcsr_names, module)?)?;
+    module.add_function(wrap_pyfunction!(add_hydrogens, module)?)?;
     Ok(())
 }
