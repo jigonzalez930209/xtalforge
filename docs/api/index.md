@@ -18,6 +18,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Bonding](./bonding)
 - [CIF input and output](./cif)
 - [POSCAR and XYZ](./formats)
+- [Measures, scalars and descriptions](./measure)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
