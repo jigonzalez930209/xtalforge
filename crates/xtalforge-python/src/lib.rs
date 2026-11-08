@@ -44,6 +44,64 @@ fn cell_volume(a: f64, b: f64, c: f64, alpha: f64, beta: f64, gamma: f64) -> PyR
     xtalforge::core::cell_volume(a, b, c, alpha, beta, gamma).map_err(map_error)
 }
 
+/// Unit-cell information from the six parameters.
+#[pyfunction]
+#[pyo3(signature = (a, b, c, alpha, beta, gamma))]
+fn lattice_info<'py>(
+    py: Python<'py>,
+    a: f64,
+    b: f64,
+    c: f64,
+    alpha: f64,
+    beta: f64,
+    gamma: f64,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let lattice = xtalforge::core::lattice_info(a, b, c, alpha, beta, gamma).map_err(map_error)?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("parameters", lattice.parameters().to_vec())?;
+    dict.set_item("volume", lattice.volume())?;
+    dict.set_item(
+        "matrix",
+        lattice
+            .matrix()
+            .iter()
+            .map(|row| row.to_vec())
+            .collect::<Vec<_>>(),
+    )?;
+    dict.set_item("right_handed", lattice.is_right_handed())?;
+    Ok(dict)
+}
+
+/// Minimum-image fractional vector and distance.
+#[pyfunction]
+#[pyo3(signature = (a, b, c, alpha, beta, gamma, delta))]
+#[allow(clippy::too_many_arguments)] // one Python argument per cell parameter
+fn lattice_minimum_image<'py>(
+    py: Python<'py>,
+    a: f64,
+    b: f64,
+    c: f64,
+    alpha: f64,
+    beta: f64,
+    gamma: f64,
+    delta: Vec<f64>,
+) -> PyResult<Bound<'py, pyo3::types::PyDict>> {
+    let [dx, dy, dz] = delta.as_slice() else {
+        return Err(InputError::new_err((
+            "invalid_input",
+            "delta must contain three fractional coordinates",
+        )));
+    };
+    let delta = [*dx, *dy, *dz];
+    let (vector, distance) =
+        xtalforge::core::lattice_minimum_image(a, b, c, alpha, beta, gamma, delta)
+            .map_err(map_error)?;
+    let dict = pyo3::types::PyDict::new(py);
+    dict.set_item("delta", vector.to_vec())?;
+    dict.set_item("distance", distance)?;
+    Ok(dict)
+}
+
 /// Reference data for an element by symbol or atomic number.
 #[pyfunction]
 fn element_info<'py>(
@@ -81,5 +139,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(version, module)?)?;
     module.add_function(wrap_pyfunction!(cell_volume, module)?)?;
     module.add_function(wrap_pyfunction!(element_info, module)?)?;
+    module.add_function(wrap_pyfunction!(lattice_info, module)?)?;
+    module.add_function(wrap_pyfunction!(lattice_minimum_image, module)?)?;
     Ok(())
 }
