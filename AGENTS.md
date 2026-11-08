@@ -258,13 +258,18 @@ Independent version numbers that do NOT follow the crate version:
   view data and STL are implemented. Phase 3 is complete locally: project
   files, parameter presets on every surface, the command/document surfaces,
   the Python/WASM workspace behaviour and the editor demo are in place.
-  Phase 4 has the Calculator API, native UFF/UFF4MOF, charges/Ewald,
-  FIRE/L-BFGS, scans and vibrations/thermochemistry; Phase 5 has PXRD,
-  porosity, isosurfaces, net quotient graphs, peaks, indexing, Le Bail/Pawley
-  and Rietveld phase fitting; Phase 6 has graphene, nanotubes, C60, SMILES
-  graphs, fragments and net/structure builders. The remaining Phase 4-7 work
-  (EEQ, engines, MOF builder, full Rietveld and the remaining surfaces) is in
-  progress.
+  Phase 4 is complete locally: Calculator API, native UFF/UFF4MOF,
+  charges/Ewald, FIRE/L-BFGS, scans, vibrations/thermochemistry, EEQ, the
+  preparation pipeline, engine writers/probes and the quantum adapter contract.
+  Phase 5 is complete locally: PXRD, porosity, isosurfaces, net quotient
+  graphs, RCSR subset, merge/overlay, peaks, indexing, Le Bail/Pawley and the
+  Rietveld phase fit. Phase 6 is complete locally: graphene, nanotubes, C60,
+  SMILES parsing/embedding, sketches, fragments, net/structure builders, the
+  MOF builder subset, twists, ribbons, carbon surfaces and polymers. Phase 7
+  is complete locally: measured patterns/instrument, whole-range and
+  structural refinement, cells/extinction, the automatic run and the powder
+  surfaces. Phase 1's Task 1.18.5 remains the only open item and is external
+  (release dry run, Actions disabled).
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
   instruction. Task 0.6.5 (name reservation) waits for explicit approval; the

@@ -9,6 +9,9 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 6 Task 6.1/6.5/6.7/6.8/6.9: SMILES 3D embedding, metal coordination,
+  the sketch model and SMILES writer, commensurate twists, C20/C60 face
+  spirals, gyroid/Schwarz P carbon surfaces and polymer chain packing.
 - Phase 7 Task 7.1-7.11: the rietx inventory and acceptance metrics, the
   instrument model, whole-range and structural least-squares refinement,
   free cell parameters and extinction symbols, the combined objective, the

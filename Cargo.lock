@@ -1085,6 +1085,7 @@ version = "0.0.0"
 dependencies = [
  "serde",
  "serde_json",
+ "xtalforge-analysis",
  "xtalforge-core",
  "xtalforge-io",
 ]
