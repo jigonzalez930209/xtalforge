@@ -1,0 +1,33 @@
+[package]
+name = "xtalforge"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Pure Rust library for building, manipulating, analysing and exporting crystal structures."
+
+[dependencies]
+xtalforge-core = { workspace = true }
+xtalforge-io = { workspace = true }
+xtalforge-symmetry = { workspace = true }
+
+[features]
+default = ["parallel"]
+parallel = [
+  "xtalforge-core/parallel",
+  "xtalforge-io/parallel",
+  "xtalforge-symmetry/parallel",
+]
+sci-form = []
+ml = []
+external = []
+mof-data = []
+
+[lints]
+workspace = true
