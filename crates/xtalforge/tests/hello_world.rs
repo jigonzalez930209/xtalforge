@@ -6,7 +6,7 @@
     clippy::indexing_slicing
 )]
 
-use xtalforge::prelude::{Error, cell_volume, version};
+use xtalforge::prelude::{Error, cell_volume, element_info, version};
 
 #[test]
 fn facade_reexports_the_hello_world_api() {
@@ -14,6 +14,12 @@ fn facade_reexports_the_hello_world_api() {
     assert!((cell_volume(1.0, 1.0, 1.0, 90.0, 90.0, 90.0).unwrap() - 1.0).abs() < 1e-12);
     let error = Error::InvalidInput("bad cell".to_owned());
     assert_eq!(error.code(), "invalid_input");
+}
+
+#[test]
+fn facade_reexports_element_info() {
+    assert_eq!(element_info("Fe").unwrap().symbol, "Fe");
+    assert_eq!(element_info("26").unwrap().z, 26);
 }
 
 #[test]
