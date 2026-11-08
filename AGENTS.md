@@ -239,10 +239,10 @@ Independent version numbers that do NOT follow the crate version:
 
 ## 6. Current state (update at every release)
 
-- Version: `0.0.0` (bootstrap, nothing published).
-- Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
+- Version: `0.0.1` (first release prepared; nothing published yet).
+- Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are disabled at repository level until the maintainer enables them
-  explicitly (2026-11-08).
+  explicitly (2026-11-08); the release workflow requires them to be enabled.
 - Current phase: Phase 8 — Agent and distribution
   (`docs/roadmap/phase-08-distribution.md`); no Phase 8 subtask is implemented
   yet. Phases 1-7 are complete locally at the documented-subset level; the

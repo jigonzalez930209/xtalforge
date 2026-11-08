@@ -5,7 +5,7 @@ structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
 > Status: Phases 0-7 are complete locally at the documented-subset level
-> (`0.0.0`, nothing published yet). The core, symmetry, formats and commands,
+> (`0.0.1`, release prepared, nothing published yet). The core, symmetry, formats and commands,
 > force fields, analysis, builders and powder refinement work through the Rust
 > API, CLI, Python and WASM packages; the known reference gaps are listed in
 > [`docs/roadmap/index.md`](docs/roadmap/index.md). Phase 8 (agent and
@@ -38,9 +38,9 @@ parity with the Rust API.
 Nothing is published yet. After the first release the commands will be:
 
 ```bash
-cargo add xtalforge@0.0.0
-pip install xtalforge==0.0.0
-npm install xtalforge-wasm@0.0.0
+cargo add xtalforge@0.0.1
+pip install xtalforge==0.0.1
+npm install xtalforge-wasm@0.0.1
 ```
 
 ## Goals

@@ -7,6 +7,8 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+## [0.0.1] - 2026-11-08
+
 ### Changed
 
 - Refresh the documentation against the implemented Phase 1-7 surface: the
