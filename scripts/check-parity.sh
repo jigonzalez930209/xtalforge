@@ -29,6 +29,9 @@ check_rust() {
     build_graphene) name=graphene ;;
     build_nanotube) name=nanotube ;;
     build_c60) name=fullerene ;;
+    build_mof) name=build_mof ;;
+    run_automatic) name=run_automatic ;;
+    refine_phase) name=refine_phase ;;
     param_schema) name=preset ;;
     project_pack) name=write_project ;;
     workspace_archive) name=archive_records ;;
@@ -48,6 +51,8 @@ check_python() {
   local name=$1
   case "$name" in
     prepare) name=ff_prepare ;;
+    run_automatic) name=powder_automatic ;;
+    refine_phase) name=powder_refine ;;
   esac
   grep -q "def $name(" "$PY_STUB"
 }
@@ -77,6 +82,9 @@ check_wasm() {
     build_graphene) name=build_graphene_info ;;
     build_nanotube) name=build_nanotube_info ;;
     build_c60) name=build_c60_info ;;
+    build_mof) name=build_mof_info ;;
+    run_automatic) name=powder_automatic_info ;;
+    refine_phase) name=powder_refine_info ;;
     param_schema) name=param_schema ;;
     project_pack) name=project_pack ;;
     workspace_archive) name=workspace_archive ;;
@@ -114,6 +122,8 @@ check_cli() {
     scene_summary|mesh_stl) command=mesh ;;
     pxrd) command=pxrd ;;
     build_graphene|build_nanotube) command=build ;;
+    build_mof) command=mof ;;
+    run_automatic|refine_phase) command=powder ;;
     param_schema) command=params ;;
     project_pack) command=project ;;
     prepare) command=ff ;;
