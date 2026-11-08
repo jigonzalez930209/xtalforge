@@ -13,10 +13,12 @@ use pyo3::prelude::*;
 mod analysis;
 mod classes;
 mod structures;
+mod symmetry;
 
 use analysis::{angle, bonds, distance, groups, neighbors, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
 use structures::{read_cif, read_structure, slab, supercell};
+use symmetry::detect_symmetry;
 
 create_exception!(
     _xtalforge,
@@ -209,6 +211,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(slab, module)?)?;
     module.add_function(wrap_pyfunction!(supercell, module)?)?;
     module.add_function(wrap_pyfunction!(torsion, module)?)?;
+    module.add_function(wrap_pyfunction!(detect_symmetry, module)?)?;
     module.add_class::<Lattice>()?;
     module.add_class::<Site>()?;
     module.add_class::<Structure>()?;
