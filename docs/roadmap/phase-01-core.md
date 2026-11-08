@@ -219,18 +219,22 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.7 — Supercells and cell transformations
 
-- [ ] 1.7.1 Diagonal and general supercells
+- [x] 1.7.1 Diagonal and general supercells
   Port `core/supercell.py` (366 lines): `na × nb × nc` replication and general
   integer matrices P (non-diagonal), enumerating lattice points inside the
   new cell via the Smith/Hermite normal form or an equivalent exact method,
   with no duplicates on the boundaries. Results are **P1** structures: a
   supercell does not keep the old group in the same setting, and carrying it
   forward silently would be wrong. Symmetry can be re-detected afterwards.
-- [ ] 1.7.2 Origin shift
+  Note: `Structure::supercell`/`supercell_matrix` enumerate integer shifts and
+  return P1; the volume and atom counts are tested.
+- [x] 1.7.2 Origin shift
   Shift the origin by a fractional vector, rewrapping atoms; part of the same
   module in Crystal-Builder.
-- [ ] 1.7.3 Limits
+  Note: `Structure::origin_shift` preserves metadata and site properties.
+- [x] 1.7.3 Limits
   Every supercell is checked with Task 1.3 before allocation.
+  Note: a refused estimate returns `Error::LimitExceeded`.
 
 ## Task 1.8 — Slabs
 
