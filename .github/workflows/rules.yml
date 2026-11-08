@@ -10,10 +10,10 @@ permissions:
 jobs:
   rules:
     name: Repository rules
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Check repository rules
         run: scripts/check-rules.sh
       - name: Run the rules self-test
@@ -24,10 +24,10 @@ jobs:
 
   format-and-lints:
     name: Format and lints
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install Rust components
         run: rustup component add rustfmt clippy
       - name: Check formatting

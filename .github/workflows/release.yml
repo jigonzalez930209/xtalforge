@@ -15,22 +15,14 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
 
 jobs:
-  verify:
-    name: Verify the release
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+  version:
+    name: Check the version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-verify
-          cache-on-failure: true
+      - uses: actions/checkout@v7
       - name: Version lockstep
         run: scripts/sync-version.sh --check
       - name: Agent memory version
@@ -46,57 +38,215 @@ jobs:
       - name: Changelog has the release section
         if: startsWith(github.ref, 'refs/tags/v')
         run: grep -q "^## \[${GITHUB_REF_NAME#v}\]" CHANGELOG.md
-      - name: Repository rules
-        run: scripts/check-rules.sh
-      - name: Formatting
-        run: cargo fmt --check
-      - name: Clippy
-        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-      - name: Tests
-        run: cargo test --workspace --all-features
-      - name: Rustdoc
-        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 
-  wasm:
-    name: Build the WASM package
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+  cli-linux:
+    name: CLI Linux packages
+    needs: version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: rust-wasm
+          shared-key: rust-release-linux
           cache-on-failure: true
-      - uses: jetli/wasm-pack-action@v0.4.0
-      - name: Build the web package
-        working-directory: crates/xtalforge-wasm
-        run: wasm-pack build --release --target web
-      - name: Size budget
-        run: scripts/check-wasm-size.sh
-      - uses: actions/upload-artifact@v4
+      - uses: actions/cache@v6
         with:
-          name: wasm-web
-          path: crates/xtalforge-wasm/pkg
+          path: ~/.cargo/bin
+          key: cargo-package-tools-linux-v2
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes appstream
+          cargo install --locked cargo-deb cargo-generate-rpm
+      - name: Build the binary
+        run: cargo build --release -p xtalforge-cli --locked
+      - name: Package deb and rpm
+        run: |
+          mkdir -p artifacts
+          cargo deb -p xtalforge-cli --no-build --no-dbgsym --output artifacts
+          (cd crates/xtalforge-cli && cargo generate-rpm --output ../../artifacts --payload-compress gzip)
+      - name: Package tar.gz and AppImage
+        run: |
+          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
+          mkdir -p package artifacts
+          cp target/release/xtalforge package/
+          cp README.md LICENSE-MIT LICENSE-APACHE package/
+          tar -czf "artifacts/xtalforge-${version}-linux-x86_64.tar.gz" -C package .
+          scripts/package-appimage.sh artifacts
+      - name: Validate AppStream metadata
+        run: appstreamcli validate assets/io.github.jigonzalez930209.xtalforge.appdata.xml
+      - uses: actions/upload-artifact@v7
+        with:
+          name: cli-linux
+          path: artifacts/*
           if-no-files-found: error
-          retention-days: 1
 
-  publish-crates:
-    name: Publish crates.io
-    needs: verify
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    timeout-minutes: 180
+  cli-windows:
+    name: CLI Windows archive
+    needs: version
+    runs-on: windows-2025
+    timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-release-windows
+          cache-on-failure: true
+      - name: Build the binary
+        run: cargo build --release -p xtalforge-cli --locked
+      - name: Package zip
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"').Matches[0].Groups[1].Value
+          New-Item -ItemType Directory -Force package, artifacts | Out-Null
+          Copy-Item target\release\xtalforge.exe package\
+          Copy-Item README.md, LICENSE-MIT, LICENSE-APACHE package\
+          Compress-Archive -Path package\* -DestinationPath "artifacts\xtalforge-$version-windows-x86_64.zip"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: cli-windows
+          path: artifacts/*
+          if-no-files-found: error
+
+  cli-macos:
+    name: CLI macOS universal
+    needs: version
+    runs-on: macos-15-intel
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin, aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-release-macos-universal
+          cache-on-failure: true
+      - name: Build both architectures
+        run: |
+          cargo build --release -p xtalforge-cli --locked --target x86_64-apple-darwin
+          cargo build --release -p xtalforge-cli --locked --target aarch64-apple-darwin
+      - name: Package tar.gz and dmg
+        run: |
+          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
+          mkdir -p package artifacts dmg
+          lipo -create \
+            "target/x86_64-apple-darwin/release/xtalforge" \
+            "target/aarch64-apple-darwin/release/xtalforge" \
+            -output package/xtalforge
+          cp README.md LICENSE-MIT LICENSE-APACHE package/
+          tar -czf "artifacts/xtalforge-${version}-macos-universal.tar.gz" -C package .
+          cp package/xtalforge dmg/
+          ln -s /Applications dmg/Applications
+          hdiutil create -volname "xtalforge" -srcfolder dmg -ov -format UDZO \
+            "artifacts/xtalforge-${version}-macos-universal.dmg"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: cli-macos
+          path: artifacts/*
+          if-no-files-found: error
+
+  github-release:
+    name: Publish the GitHub release
+    needs: [cli-linux, cli-windows, cli-macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums
+        run: |
+          cd artifacts
+          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 \
+            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+      - uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          files: artifacts/*
+
+  publish-packages:
+    name: Publish PyPI, npm and crates.io
+    needs: github-release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-publish
           cache-on-failure: true
-      - name: Publish in dependency order
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Build the Python wheel
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --out dist
+          working-directory: crates/xtalforge-python
+          manylinux: auto
+      - name: Build the Python sdist
+        uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+          working-directory: crates/xtalforge-python
+      - name: Publish to PyPI
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m pip install --quiet --upgrade twine
+          python -m twine upload \
+            --username __token__ \
+            --password "${PYPI_API_TOKEN}" \
+            --skip-existing \
+            crates/xtalforge-python/dist/*
+
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Build the npm package
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack build --release --target bundler --out-dir pkg-bundler
+      - name: Publish to npm
+        working-directory: crates/xtalforge-wasm/pkg-bundler
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "xtalforge-wasm@${version}" version >/dev/null 2>&1; then
+            echo "xtalforge-wasm@${version} is already published"
+          else
+            npm publish --provenance --access public
+          fi
+      - name: Build the documentation WASM package
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack build --release --target web --out-dir pkg-web
+      - uses: actions/upload-artifact@v7
+        with:
+          name: wasm-web
+          path: crates/xtalforge-wasm/pkg-web
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Publish crates in dependency order
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         run: |
@@ -132,244 +282,17 @@ jobs:
                 echo "could not publish ${crate}" >&2
                 exit 1
               fi
-              sleep $((attempt * 30))
+              sleep $((attempt * 60))
             done
-            # Give crates.io a moment to expose the new version to the next
-            # dependency resolution. New crates can also be rate-limited.
-            sleep 45
+            sleep 60
             echo "::endgroup::"
           done
 
-  wheels:
-    name: Python wheels (${{ matrix.os }})
-    needs: verify
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-22.04
-            manylinux: auto
-          - os: macos-15-intel
-            manylinux: auto
-          - os: macos-15
-            manylinux: auto
-          - os: windows-latest
-            manylinux: auto
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-release-${{ matrix.os }}
-          cache-on-failure: true
-      - uses: PyO3/maturin-action@v1
-        with:
-          command: build
-          args: --release --out dist
-          working-directory: crates/xtalforge-python
-          manylinux: ${{ matrix.manylinux }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.os }}
-          path: crates/xtalforge-python/dist
-          if-no-files-found: error
-
-  sdist:
-    name: Python sdist
-    needs: verify
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-sdist
-          cache-on-failure: true
-      - uses: PyO3/maturin-action@v1
-        with:
-          command: sdist
-          args: --out dist
-          working-directory: crates/xtalforge-python
-      - uses: actions/upload-artifact@v4
-        with:
-          name: python-sdist
-          path: crates/xtalforge-python/dist
-          if-no-files-found: error
-
-  publish-pypi:
-    name: Publish PyPI
-    needs: [wheels, sdist]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: dist
-          pattern: wheels-*
-          merge-multiple: true
-      - uses: actions/download-artifact@v4
-        with:
-          name: python-sdist
-          path: dist
-      # Trusted Publishing needs no secret. If the project is not configured
-      # for it yet, add PYPI_API_TOKEN and pass it as `password` below.
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist
-
-  npm:
-    name: Publish npm
-    needs: verify
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      id-token: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: npm
-          cache-on-failure: true
-      - uses: jetli/wasm-pack-action@v0.4.0
-      - name: Build the WASM package
-        working-directory: crates/xtalforge-wasm
-        run: wasm-pack build --release --target bundler
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-      - name: Publish with provenance
-        working-directory: crates/xtalforge-wasm/pkg
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-  cli-linux:
-    name: CLI Linux packages
-    needs: verify
-    runs-on: ubuntu-22.04
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-release-linux
-          cache-on-failure: true
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cargo/bin
-          key: cargo-package-tools-linux-v1
-      - name: Install packaging tools
-        run: cargo install --locked cargo-deb cargo-generate-rpm
-      - name: Build the binary
-        run: cargo build --release -p xtalforge-cli --locked
-      - name: Package deb and rpm
-        run: |
-          mkdir -p artifacts
-          cargo deb -p xtalforge-cli --no-build --no-dbgsym --output artifacts
-          (cd crates/xtalforge-cli && cargo generate-rpm --output ../../artifacts --payload-compress gzip)
-      - name: Package tar.gz and AppImage
-        run: |
-          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
-          mkdir -p package artifacts
-          cp target/release/xtalforge package/
-          cp README.md LICENSE-MIT LICENSE-APACHE package/
-          tar -czf "artifacts/xtalforge-${version}-linux-x86_64.tar.gz" -C package .
-          scripts/package-appimage.sh artifacts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cli-linux
-          path: artifacts/*
-          if-no-files-found: error
-
-  cli-windows:
-    name: CLI Windows archive
-    needs: verify
-    runs-on: windows-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-release-windows
-          cache-on-failure: true
-      - name: Build the binary
-        run: cargo build --release -p xtalforge-cli --locked
-      - name: Package zip
-        shell: pwsh
-        run: |
-          $version = (Select-String -Path Cargo.toml -Pattern '^version = "([^"]+)"').Matches[0].Groups[1].Value
-          New-Item -ItemType Directory -Force package, artifacts | Out-Null
-          Copy-Item target\release\xtalforge.exe package\
-          Copy-Item README.md, LICENSE-MIT, LICENSE-APACHE package\
-          Compress-Archive -Path package\* -DestinationPath "artifacts\xtalforge-$version-windows-x86_64.zip"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cli-windows
-          path: artifacts/*
-          if-no-files-found: error
-
-  cli-macos:
-    name: CLI macOS (${{ matrix.arch }})
-    needs: verify
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-15-intel
-            arch: x86_64
-            target: x86_64-apple-darwin
-          - os: macos-15
-            arch: arm64
-            target: aarch64-apple-darwin
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-release-macos-${{ matrix.arch }}
-          cache-on-failure: true
-      - name: Build the binary
-        run: cargo build --release -p xtalforge-cli --locked --target ${{ matrix.target }}
-      - name: Package tar.gz and dmg
-        run: |
-          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
-          mkdir -p package artifacts dmg
-          cp "target/${{ matrix.target }}/release/xtalforge" package/
-          cp README.md LICENSE-MIT LICENSE-APACHE package/
-          tar -czf "artifacts/xtalforge-${version}-macos-${{ matrix.arch }}.tar.gz" -C package .
-          cp "target/${{ matrix.target }}/release/xtalforge" dmg/
-          ln -s /Applications dmg/Applications
-          hdiutil create -volname "xtalforge" -srcfolder dmg -ov -format UDZO \
-            "artifacts/xtalforge-${version}-macos-${{ matrix.arch }}.dmg"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cli-macos-${{ matrix.arch }}
-          path: artifacts/*
-          if-no-files-found: error
-
   docs:
-    name: Deploy documentation
-    needs: [verify, wasm]
+    name: Build and deploy the documentation
+    needs: publish-packages
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     permissions:
       contents: read
@@ -379,12 +302,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: wasm-web
           path: crates/xtalforge-wasm/pkg
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -402,39 +325,8 @@ jobs:
         uses: lycheeverse/lychee-action@v2
         with:
           args: --offline --no-progress --accept 200,204,206 --root-dir .linkroot --fallback-extensions html ./docs/.vitepress/dist
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs/.vitepress/dist
       - id: deployment
-        uses: actions/deploy-pages@v4
-
-  github-release:
-    name: GitHub release
-    needs:
-      - publish-crates
-      - publish-pypi
-      - npm
-      - cli-linux
-      - cli-windows
-      - cli-macos
-      - docs
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          merge-multiple: true
-      - name: Checksums
-        run: |
-          cd artifacts
-          find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -print0 \
-            | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
-      - uses: softprops/action-gh-release@v2
-        with:
-          generate_release_notes: true
-          files: artifacts/*
+        uses: actions/deploy-pages@v5

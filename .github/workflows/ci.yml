@@ -15,15 +15,15 @@ permissions:
 jobs:
   changes:
     name: Detect changed areas
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       rust: ${{ steps.filter.outputs.rust }}
       python: ${{ steps.filter.outputs.python }}
       wasm: ${{ steps.filter.outputs.wasm }}
       docs: ${{ steps.filter.outputs.docs }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: |
@@ -53,21 +53,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-14, windows-latest]
+        os: [ubuntu-24.04, macos-15-intel, windows-2025]
         rust: [stable, "1.89"]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - name: Formatting
-        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        if: matrix.os == 'ubuntu-24.04' && matrix.rust == 'stable'
         run: cargo fmt --check
       - name: Clippy
-        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        if: matrix.os == 'ubuntu-24.04' && matrix.rust == 'stable'
         run: cargo clippy --workspace --exclude xtalforge-python --all-targets --all-features -- -D warnings
       - name: Tests with default features
         run: cargo test --workspace --exclude xtalforge-python
@@ -76,41 +76,42 @@ jobs:
       - name: Tests with all features
         run: cargo test --workspace --exclude xtalforge-python --all-features
       - name: Rustdoc
-        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        if: matrix.os == 'ubuntu-24.04' && matrix.rust == 'stable'
         run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
       - name: License and advisory audit
-        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        if: matrix.os == 'ubuntu-24.04' && matrix.rust == 'stable'
         uses: EmbarkStudios/cargo-deny-action@v2
       - name: Install cargo-hack
-        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        if: matrix.os == 'ubuntu-24.04' && matrix.rust == 'stable'
         uses: taiki-e/install-action@cargo-hack
       - name: Every facade feature
-        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        if: matrix.os == 'ubuntu-24.04' && matrix.rust == 'stable'
         run: cargo hack --each-feature -p xtalforge
 
   python:
     name: Python ${{ matrix.python }}
     needs: changes
     if: needs.changes.outputs.python == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         python: ["3.9", "3.14"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
       - uses: PyO3/maturin-action@v1
         with:
           command: build
           args: --release --out dist
+          working-directory: crates/xtalforge-python
           manylinux: auto
       - name: Install the wheel and the test tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install dist/*.whl pytest mypy
+          python -m pip install crates/xtalforge-python/dist/*.whl pytest mypy
       - name: Tests
         run: python -m pytest -q crates/xtalforge-python/tests
       - name: Type stubs
@@ -120,14 +121,15 @@ jobs:
     name: WASM
     needs: changes
     if: needs.changes.outputs.wasm == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
-      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Node tests
         working-directory: crates/xtalforge-wasm
         run: wasm-pack test --node
@@ -141,9 +143,9 @@ jobs:
     name: Docs
     needs: changes
     if: needs.changes.outputs.docs == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
@@ -151,11 +153,12 @@ jobs:
         with:
           shared-key: ci-docs
           cache-on-failure: true
-      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
       - name: Build the WASM demo package
         working-directory: crates/xtalforge-wasm
         run: wasm-pack build --release --target web
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
