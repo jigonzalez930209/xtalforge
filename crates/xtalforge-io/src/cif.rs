@@ -313,9 +313,23 @@ fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
             }
         }
     }
-    let mut builder = StructureBuilder::new(block.name.clone(), lattice).hall(hall);
+    let has_operations = !operations.is_empty();
+    let mut builder = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
     for operation in operations {
         builder = builder.operation(operation);
+    }
+    if !has_operations && hall != "P 1" && hall != "P1" {
+        builder = builder.metadata(
+            "symmetry_warning",
+            serde_json::Value::String(
+                "no symmetry operation loop; P1 expansion uses the identity".to_owned(),
+            ),
+        );
+    } else if has_operations {
+        builder = builder.metadata(
+            "symmetry_source",
+            serde_json::Value::String("operation loop".to_owned()),
+        );
     }
     for site in sites {
         builder = builder.site(site);
