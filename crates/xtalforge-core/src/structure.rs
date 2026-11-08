@@ -257,6 +257,66 @@ impl Structure {
     }
 }
 
+/// Version of the serialized structure schema.
+pub const SCHEMA_VERSION: u32 = 1;
+
+/// Versioned JSON envelope for a structure.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct StructureDocument {
+    /// Schema version, independent of the crate version.
+    pub schema_version: u32,
+    /// The structure payload.
+    pub structure: Structure,
+}
+
+impl StructureDocument {
+    /// Wraps a structure in the current schema version.
+    #[must_use]
+    pub fn new(structure: Structure) -> Self {
+        Self {
+            schema_version: SCHEMA_VERSION,
+            structure,
+        }
+    }
+
+    /// Serializes the document to JSON.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] if serialization fails.
+    pub fn to_json(&self) -> Result<String, Error> {
+        serde_json::to_string(self)
+            .map_err(|error| Error::InvalidInput(format!("could not serialize structure: {error}")))
+    }
+
+    /// Parses a document and checks its schema version.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for invalid JSON, unknown fields or an
+    /// unsupported schema version.
+    pub fn from_json(text: &str) -> Result<Self, Error> {
+        let document: Self = serde_json::from_str(text)
+            .map_err(|error| Error::InvalidInput(format!("invalid structure JSON: {error}")))?;
+        if document.schema_version != SCHEMA_VERSION {
+            return Err(Error::InvalidInput(format!(
+                "unsupported structure schema_version {}, expected {SCHEMA_VERSION}",
+                document.schema_version
+            )));
+        }
+        Ok(document)
+    }
+}
+
+impl Structure {
+    /// Wraps this structure in the versioned document envelope.
+    #[must_use]
+    pub fn to_document(&self) -> StructureDocument {
+        StructureDocument::new(self.clone())
+    }
+}
+
 /// Parses a structure JSON document and returns its summary.
 ///
 /// This is the Phase 1 bridge until the CIF reader lands in Task 1.15.

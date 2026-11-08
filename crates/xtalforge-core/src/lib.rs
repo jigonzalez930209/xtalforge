@@ -17,7 +17,10 @@ pub use elements::{Element, Isotope, element_info};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
 pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
 pub use site::Site;
-pub use structure::{Structure, StructureBuilder, StructureSummary, structure_info};
+pub use structure::{
+    SCHEMA_VERSION, Structure, StructureBuilder, StructureDocument, StructureSummary,
+    structure_info,
+};
 
 /// Version of the workspace, from the package metadata.
 ///
