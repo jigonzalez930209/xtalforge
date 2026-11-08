@@ -222,6 +222,31 @@ fn shared_lattice_vectors() {
 }
 
 #[test]
+fn info_human_and_json() {
+    let path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/vectors/structure.json");
+    let output = run(&["info", &path.to_string_lossy()]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    assert!(text.contains("NaCl"));
+    assert!(text.contains("Na Cl"));
+
+    let output = run(&["--json", "info", &path.to_string_lossy()]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    assert_eq!(value["name"], "NaCl");
+    assert_eq!(value["formula"], "Na Cl");
+    assert!((value["density"].as_f64().unwrap() - 0.540_931_879_932_264_1).abs() < 1e-9);
+}
+
+#[test]
+fn info_invalid_input_exits_with_code_three() {
+    let output = run(&["info", "/definitely/not/a/file"]);
+    assert_eq!(output.status.code(), Some(3));
+}
+
+#[test]
 fn help_lists_the_hello_world_commands_and_flags() {
     let output = run(&["--help"]);
     assert!(output.status.success());
