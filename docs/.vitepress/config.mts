@@ -108,6 +108,7 @@ export default defineConfig({
             { text: 'Validation and tolerances', link: '/algorithms/validation' },
             { text: 'Golden data', link: '/algorithms/golden-data' },
             { text: 'Symmetry detection', link: '/algorithms/symmetry' },
+            { text: 'Machine-learning backend', link: '/algorithms/ml-backend' },
             { text: 'Symmetry backend: moyo', link: '/algorithms/symmetry-backend' },
             { text: 'sci-form reuse', link: '/algorithms/sci-form-reuse' },
             { text: 'Dependency replacement map', link: '/algorithms/dependency-map' },
