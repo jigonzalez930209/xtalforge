@@ -9,11 +9,15 @@ pub mod data;
 pub mod elements;
 pub mod lattice;
 pub mod limits;
+pub mod site;
+pub mod structure;
 
 pub use cell::cell_volume;
 pub use elements::{Element, Isotope, element_info};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
 pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
+pub use site::Site;
+pub use structure::{Structure, StructureBuilder, StructureSummary, structure_info};
 
 /// Version of the workspace, from the package metadata.
 ///
