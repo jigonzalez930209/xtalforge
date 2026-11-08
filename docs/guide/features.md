@@ -37,4 +37,5 @@ cargo build -p xtalforge --all-features
    numeric output.
 5. The default WASM package has a 200 KiB budget, checked by
    `scripts/check-wasm-size.sh`. The hello-world build was about 41 KiB; the
-   element table brought it to about 190 KiB, still inside the budget.
+   element and lattice code brought it to about 197 KiB, still inside the
+   budget.
