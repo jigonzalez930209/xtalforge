@@ -428,3 +428,44 @@ fn mesh_writes_ascii_stl() {
     assert!(text.contains("facet normal"));
     assert!(text.contains("endsolid"));
 }
+
+#[test]
+fn pxrd_writes_xy_points_and_reflections() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let output = run(&[
+        "--json",
+        "pxrd",
+        &path.to_string_lossy(),
+        "--max-two-theta",
+        "60",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(
+        !value["reflections"]
+            .as_array()
+            .expect("reflections")
+            .is_empty()
+    );
+    assert!(value["points"].as_array().expect("points").len() > 100);
+}
+
+#[test]
+fn build_graphene_and_nanotube() {
+    let output = run(&["--json", "build", "graphene", "2", "2", "--layers", "2"]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(
+        value["structure"]["sites"].as_array().expect("sites").len(),
+        16
+    );
+    let output = run(&["--json", "build", "nanotube", "5", "5", "--length", "2"]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(
+        !value["structure"]["sites"]
+            .as_array()
+            .expect("sites")
+            .is_empty()
+    );
+}
