@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="console-application">
+  <id>io.github.jigonzalez930209.xtalforge</id>
+  <name>xtalforge</name>
+  <summary>Crystal structure toolkit</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT OR Apache-2.0</project_license>
+  <description>
+    <p>
+      Build, manipulate, analyse and export crystal structures from the
+      command line: symmetry, formats, force fields, porosity, builders and
+      powder refinement.
+    </p>
+  </description>
+  <launchable type="desktop-id">xtalforge.desktop</launchable>
+  <provides>
+    <binary>xtalforge</binary>
+  </provides>
+  <url type="homepage">https://jigonzalez930209.github.io/xtalforge/</url>
+  <url type="bugtracker">https://github.com/jigonzalez930209/xtalforge/issues</url>
+  <developer id="io.github.jigonzalez930209">
+    <name>Jose Ivan Gonzalez</name>
+  </developer>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.0.1" date="2026-11-08"/>
+  </releases>
+</component>
