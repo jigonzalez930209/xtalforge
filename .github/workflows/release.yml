@@ -1,0 +1,171 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run every check and build without publishing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  verify:
+    name: Verify the release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - name: Version lockstep
+        run: scripts/sync-version.sh --check
+      - name: Agent memory version
+        run: scripts/check-agent-version.sh
+      - name: Changelog has the release section
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: grep -q "## \\[${GITHUB_REF_NAME#v}\\]" CHANGELOG.md
+      - name: Repository rules
+        run: scripts/check-rules.sh
+      - name: Formatting
+        run: cargo fmt --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - name: Tests
+        run: cargo test --workspace --all-features
+      - name: Rustdoc
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+
+  publish-crates:
+    name: Publish crates
+    needs: verify
+    if: github.event_name == 'push' && !inputs.dry_run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Publish in dependency order
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          for crate in xtalforge-core xtalforge-io xtalforge-symmetry xtalforge xtalforge-cli; do
+            for attempt in 1 2 3 4 5; do
+              if cargo publish -p "$crate"; then break; fi
+              sleep $((attempt * 20))
+            done
+          done
+
+  wheels:
+    name: Python wheels
+    needs: verify
+    if: github.event_name == 'push' && !inputs.dry_run
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --out dist
+          manylinux: auto
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: dist
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: wheels
+    if: github.event_name == 'push' && !inputs.dry_run
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-*
+          merge-multiple: true
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+
+  npm:
+    name: npm package
+    needs: verify
+    if: github.event_name == 'push' && !inputs.dry_run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Build the WASM package
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack build --release --target bundler
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Publish with provenance
+        working-directory: crates/xtalforge-wasm/pkg
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  docs:
+    name: Deploy documentation
+    needs: verify
+    if: github.event_name == 'push' && !inputs.dry_run
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Build the WASM demo package
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack build --release --target web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install and build
+        working-directory: docs
+        run: |
+          npm ci
+          npm run docs:build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  github-release:
+    name: GitHub release
+    needs: [publish-crates, wheels, publish-pypi, npm, docs]
+    if: github.event_name == 'push' && !inputs.dry_run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true

@@ -1,0 +1,166 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changed areas
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+      python: ${{ steps.filter.outputs.python }}
+      wasm: ${{ steps.filter.outputs.wasm }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'crates/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'tests/**'
+            python:
+              - 'crates/xtalforge-python/**'
+              - 'crates/xtalforge-core/**'
+              - 'tests/vectors/**'
+            wasm:
+              - 'crates/xtalforge-wasm/**'
+              - 'crates/xtalforge-core/**'
+              - 'tests/vectors/**'
+            docs:
+              - 'docs/**'
+              - 'README.md'
+              - 'CHANGELOG.md'
+              - 'crates/xtalforge-wasm/**'
+
+  rust:
+    name: Rust ${{ matrix.os }} / ${{ matrix.rust }}
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+        rust: [stable, "1.89"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Formatting
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        run: cargo fmt --check
+      - name: Clippy
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        run: cargo clippy --workspace --exclude xtalforge-python --all-targets --all-features -- -D warnings
+      - name: Tests with default features
+        run: cargo test --workspace --exclude xtalforge-python
+      - name: Tests without default features
+        run: cargo test --workspace --exclude xtalforge-python --no-default-features
+      - name: Tests with all features
+        run: cargo test --workspace --exclude xtalforge-python --all-features
+      - name: Rustdoc
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+      - name: License and advisory audit
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        uses: EmbarkStudios/cargo-deny-action@v2
+      - name: Install cargo-hack
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        uses: taiki-e/install-action@cargo-hack
+      - name: Every facade feature
+        if: matrix.os == 'ubuntu-latest' && matrix.rust == 'stable'
+        run: cargo hack --each-feature -p xtalforge
+
+  python:
+    name: Python ${{ matrix.python }}
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          args: --release --out dist
+          manylinux: auto
+      - name: Install the wheel and the test tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install dist/*.whl pytest mypy
+      - name: Tests
+        run: python -m pytest -q crates/xtalforge-python/tests
+      - name: Type stubs
+        run: python -m mypy --strict crates/xtalforge-python/python/xtalforge
+
+  wasm:
+    name: WASM
+    needs: changes
+    if: needs.changes.outputs.wasm == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Node tests
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack test --node
+      - name: Release build
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack build --release --target web
+      - name: Size budget
+        run: scripts/check-wasm-size.sh
+
+  docs:
+    name: Docs
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - name: Build the WASM demo package
+        working-directory: crates/xtalforge-wasm
+        run: wasm-pack build --release --target web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+      - name: Install
+        working-directory: docs
+        run: npm ci
+      - name: Build the site
+        working-directory: docs
+        run: npm run docs:build
+      - name: Parity matrix
+        run: scripts/check-parity.sh

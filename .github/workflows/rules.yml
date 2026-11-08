@@ -18,6 +18,9 @@ jobs:
         run: scripts/check-rules.sh
       - name: Run the rules self-test
         run: scripts/tests/run-rules-selftest.sh
+      - name: Check AGENTS.md version on tags
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: scripts/check-agent-version.sh
 
   format-and-lints:
     name: Format and lints
