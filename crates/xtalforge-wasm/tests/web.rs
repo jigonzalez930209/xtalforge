@@ -11,7 +11,10 @@
 use serde::Deserialize;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
-use xtalforge_wasm::{cell_volume, element_info, lattice_info, lattice_minimum_image, version};
+use xtalforge_wasm::{
+    cell_volume, element_info, lattice_info, lattice_minimum_image, limits_bounds, limits_check,
+    version,
+};
 
 #[derive(Debug, Deserialize)]
 struct Vectors {
@@ -140,4 +143,22 @@ fn lattice_shared_vectors() {
 #[wasm_bindgen_test]
 fn invalid_lattice_returns_an_error() {
     assert!(lattice_info(0.0, 1.0, 1.0, 90.0, 90.0, 90.0).is_err());
+}
+
+#[wasm_bindgen_test]
+fn limits_surface() {
+    let bounds = limits_bounds("standard", "supercell").expect("bounds");
+    assert_eq!(bounds.get(0).as_f64(), Some(50_000.0));
+    assert_eq!(bounds.get(1).as_f64(), Some(200_000.0));
+    let warn = limits_check("standard", "supercell", 80_000.0).expect("warn");
+    assert_eq!(
+        property(&warn, "level").as_string().as_deref(),
+        Some("warn")
+    );
+    let refuse = limits_check("standard", "supercell", 300_000.0).expect("refuse");
+    assert_eq!(
+        property(&refuse, "level").as_string().as_deref(),
+        Some("refuse")
+    );
+    assert!(property(&refuse, "refused").as_bool().unwrap_or(false));
 }
