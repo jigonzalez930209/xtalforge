@@ -16,6 +16,7 @@ const roadmapItems = [
 ]
 
 export default defineConfig({
+  base: '/xtalforge/',
   title: 'xtalforge',
   description: 'Pure Rust library for building, analysing and exporting crystal structures',
   cleanUrls: true,
@@ -46,6 +47,7 @@ export default defineConfig({
             { text: 'Contributing', link: '/guide/contributing' },
             { text: 'Cargo features', link: '/guide/features' },
             { text: 'Data bundles', link: '/guide/data' },
+            { text: 'Release and deployment', link: '/guide/release' },
           ],
         },
       ],
