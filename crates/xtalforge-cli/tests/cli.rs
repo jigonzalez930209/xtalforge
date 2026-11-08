@@ -241,6 +241,18 @@ fn info_human_and_json() {
 }
 
 #[test]
+fn info_reads_a_cif_file() {
+    let path =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let output = run(&["--json", "info", &path.to_string_lossy()]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    assert_eq!(value["formula"], "Si");
+    assert_eq!(value["n_sites"], 1);
+}
+
+#[test]
 fn info_invalid_input_exits_with_code_three() {
     let output = run(&["info", "/definitely/not/a/file"]);
     assert_eq!(output.status.code(), Some(3));
