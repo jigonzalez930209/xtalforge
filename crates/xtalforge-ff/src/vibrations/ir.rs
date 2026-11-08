@@ -242,6 +242,13 @@ pub fn ir_spectrum(
         });
     }
 
+    peaks.sort_by(|first, second| {
+        first
+            .frequency
+            .partial_cmp(&second.frequency)
+            .unwrap_or(std::cmp::Ordering::Equal)
+            .then(first.mode.cmp(&second.mode))
+    });
     let points = broadened(&peaks, options)?;
     Ok(IrSpectrum { points, peaks })
 }
