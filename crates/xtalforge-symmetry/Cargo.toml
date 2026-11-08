@@ -16,6 +16,7 @@ description = "Symmetry types, space-group operations and reductions for xtalfor
 moyo = { workspace = true }
 xtalforge-core = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 nalgebra = { workspace = true }
 rayon = { workspace = true, optional = true }
 
