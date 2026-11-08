@@ -7,6 +7,24 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+### Changed
+
+- Refresh the documentation against the implemented Phase 1-7 surface: the
+  README status, guide, API pages, algorithm pages, validation table, benchmark
+  notes, third-party attribution and roadmap current-status/gap list.
+- Record the remaining documented subsets (neighbour acceleration, phonon
+  q-mesh, preparation steps, general indexing and figures of merit, powder
+  profile simplifications) in `docs/roadmap/index.md`.
+
+### Fixed
+
+- Upgrade `zip` to 9.4.2, clearing RUSTSEC-2026-0367, RUSTSEC-2026-0368,
+  RUSTSEC-2026-0369 and RUSTSEC-2026-0429.
+- Fix the rustdoc intra-doc links that failed `cargo doc -D warnings`.
+- Expose C20, twists, ribbons, ZTC/Schwarz P surfaces and polymers in the CLI,
+  Python and WASM, closing the Phase 6 surface-parity gaps; add regression
+  tests for each surface.
+
 ### Added
 
 - Phase 6 Task 6.1/6.5/6.7/6.8/6.9: SMILES 3D embedding, metal coordination,

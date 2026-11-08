@@ -4,12 +4,34 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: Phase 0 complete locally (`0.0.0`, nothing published). The workspace,
-> rule tooling, hello-world in the four surfaces, corpus and golden data, docs
-> site and dependency map are in place. GitHub Actions remain disabled until
-> the maintainer enables them. The plan is in
-> [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
-> [`AGENTS.md`](AGENTS.md).
+> Status: Phases 0-7 are complete locally at the documented-subset level
+> (`0.0.0`, nothing published yet). The core, symmetry, formats and commands,
+> force fields, analysis, builders and powder refinement work through the Rust
+> API, CLI, Python and WASM packages; the known reference gaps are listed in
+> [`docs/roadmap/index.md`](docs/roadmap/index.md). Phase 8 (agent and
+> distribution) is next. GitHub Actions remain disabled until the maintainer
+> enables them, so the release dry run and the name reservation are still
+> pending. The plan is in [`docs/roadmap`](docs/roadmap/index.md); the project
+> rules are in [`AGENTS.md`](AGENTS.md).
+
+## What works today
+
+- Crystal structures: elements, lattices, sites, P1 expansion, supercells,
+  slabs, transforms, periodic neighbours, bond graphs, rings and measures.
+- Symmetry: space-group detection, Wyckoff positions, standard and primitive
+  cells, lattice reduction, subgroups, layer and magnetic groups, molecular
+  point groups, Brillouin zones and band paths.
+- Formats and editing: CIF, POSCAR, XYZ, pymatgen JSON, CSSR, GEN, LAMMPS,
+  SHELX and PDB; atomic writes, project archives, undo/redo documents,
+  selections, workspace runs and scene data.
+- Force fields and thermodynamics: native UFF/UFF4MOF, QEq/EQeq/EEQ charges,
+  Ewald, FIRE/L-BFGS, scans, Gamma-point vibrations, IR, thermochemistry and
+  quasi-harmonic free energies.
+- Analysis and builders: PXRD, porosity, isosurfaces, nets, RCSR matching,
+  graphene, nanotubes, fullerenes, SMILES embedding, polymers, MOF assembly
+  and powder refinement.
+- Four surfaces at parity, with documented exceptions for the filesystem,
+  subprocesses and threads in WASM. See `docs/api/parity.md`.
 
 ## Install
 
@@ -37,7 +59,7 @@ npm install xtalforge-wasm@0.0.0
 ## Working on the project
 
 ```bash
-scripts/check-rules.sh                 # 500-line limit and English-only checks
+scripts/check-rules.sh                 # 500-line limit and warning-suppression checks
 cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cd docs && npm install && npm run docs:dev

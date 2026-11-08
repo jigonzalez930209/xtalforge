@@ -243,33 +243,33 @@ Independent version numbers that do NOT follow the crate version:
 - Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
   Actions are disabled at repository level until the maintainer enables them
   explicitly (2026-11-08).
-- Current phase: Phase 2 — Symmetry (`docs/roadmap/phase-02-symmetry.md`).
-  Phase 1 is complete locally; Task 1.18.5 waits on the Phase 0 release dry
-  run, which needs GitHub Actions enabled by the maintainer. Task 2.1 (moyo
-  integration and `detect_symmetry` on all surfaces), the space-group
-  catalogue, the detect/asymmetrize/P1/set workflow, Wyckoff assignments,
-  standardized/primitive cells, lattice reduction, subgroup enumeration,
-  tolerance diagnostics, the Brillouin zone, subgroup naming/lowering,
-  layer/magnetic/molecular point groups, band paths, change of setting and the
-  Phase 2 surfaces are complete. Phase 2 is complete locally; the PATCH tag
-  waits for the v0.0.1 gate and the external release dry run. Phase 3 is in
-  progress: the format registry, atomic writes, the extra formats, grids,
-  trajectories, commands/document, selection/tracking, workspace/modules,
-  view data and STL are implemented. Phase 3 is complete locally: project
-  files, parameter presets on every surface, the command/document surfaces,
-  the Python/WASM workspace behaviour and the editor demo are in place.
-  Phase 4 is complete locally: Calculator API, native UFF/UFF4MOF,
-  charges/Ewald, FIRE/L-BFGS, scans, vibrations/thermochemistry, EEQ, the
-  preparation pipeline, engine writers/probes and the quantum adapter contract.
-  Phase 5 is complete locally: PXRD, porosity, isosurfaces, net quotient
-  graphs, RCSR subset, merge/overlay, peaks, indexing, Le Bail/Pawley and the
-  Rietveld phase fit. Phase 6 is complete locally: graphene, nanotubes, C60,
-  SMILES parsing/embedding, sketches, fragments, net/structure builders, the
-  MOF builder subset, twists, ribbons, carbon surfaces and polymers. Phase 7
-  is complete locally: measured patterns/instrument, whole-range and
+- Current phase: Phase 8 — Agent and distribution
+  (`docs/roadmap/phase-08-distribution.md`); no Phase 8 subtask is implemented
+  yet. Phases 1-7 are complete locally at the documented-subset level; the
+  remaining reference gaps (neighbour acceleration, phonon q-mesh, preparation
+  steps, general indexing, profile simplifications and others) are listed in
+  `docs/roadmap/index.md` under "Known subsets". Phase 1's Task 1.18.5 is the
+  only unchecked item in Phases 1-7 and is external (release dry run, Actions
+  disabled).
+  Phase 2 covers moyo integration, the space-group catalogue, the
+  detect/asymmetrize/P1/set workflow, Wyckoff assignments, standardized and
+  primitive cells, lattice reduction, subgroup enumeration and lowering,
+  tolerance diagnostics, the Brillouin zone, layer/magnetic/molecular point
+  groups, band paths and change of setting. Phase 3 covers the format
+  registry, atomic writes, the extra formats, grids, trajectories,
+  commands/document, selection/tracking, workspace/modules, view data, STL,
+  project files, parameter presets and the editor demo. Phase 4 covers the
+  Calculator API, native UFF/UFF4MOF, charges/Ewald, FIRE/L-BFGS, scans,
+  vibrations/thermochemistry, EEQ, the preparation pipeline, engine
+  writers/probes and the quantum adapter contract. Phase 5 covers PXRD,
+  porosity, isosurfaces, net quotient graphs, the RCSR subset, merge/overlay,
+  peaks, indexing, Le Bail/Pawley and the Rietveld phase fit. Phase 6 covers
+  graphene, nanotubes, C60/C20, SMILES parsing/embedding, sketches, fragments,
+  the net/structure and MOF builders, twists, ribbons, carbon surfaces and
+  polymers. Phase 7 covers measured patterns/instrument, whole-range and
   structural refinement, cells/extinction, the automatic run and the powder
-  surfaces. Phase 1's Task 1.18.5 remains the only open item and is external
-  (release dry run, Actions disabled).
+  surfaces. Phase 2-7 releases wait for the v0.0.1 gate and the external
+  release dry run.
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
   instruction. Task 0.6.5 (name reservation) waits for explicit approval; the
@@ -282,9 +282,12 @@ Independent version numbers that do NOT follow the crate version:
   (`crates/<crate>/data/`) so `cargo package` carries them; the workspace
   `data/` holds canonical files, external bundles and repository-only assets.
   Loader: `xtalforge_core::data` (Task 0.2.3).
-- Workspace members (Task 0.1.1): `xtalforge-core`, `xtalforge-symmetry`,
-  `xtalforge-io`, the facade `xtalforge`, `xtalforge-cli`, `xtalforge-python`
-  and `xtalforge-wasm`. Rust edition 2024, MSRV 1.89, license
+- Workspace members (Task 0.1.1, extended by later phases): `xtalforge-core`,
+  `xtalforge-symmetry`, `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`,
+  `xtalforge-ff`, `xtalforge-analysis`, `xtalforge-build`, `xtalforge-mof`,
+  `xtalforge-modules`, the facade `xtalforge`, `xtalforge-cli`,
+  `xtalforge-python`, `xtalforge-wasm` and the test crate
+  `xtalforge-testkit`. Rust edition 2024, MSRV 1.89, license
   `MIT OR Apache-2.0` (`LICENSE-MIT`, `LICENSE-APACHE`).
 - Decisions taken (2026-11-08): name `xtalforge`; symmetry through `moyo`
   (0.22, MIT OR Apache-2.0) behind our own types, subject to the audit in
