@@ -11,16 +11,36 @@ impl Structure {
     /// Returns [`Error::InvalidInput`] for zero repeats, or
     /// [`Error::LimitExceeded`] when the estimate exceeds the hard limit.
     pub fn supercell(&self, na: u32, nb: u32, nc: u32) -> Result<Self, Error> {
+        self.supercell_with_limits(na, nb, nc, &Limits::default())
+    }
+
+    /// Builds an `na x nb x nc` supercell with an explicit limits profile.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for zero repeats, or
+    /// [`Error::LimitExceeded`] when the estimate exceeds the profile's hard
+    /// limit.
+    pub fn supercell_with_limits(
+        &self,
+        na: u32,
+        nb: u32,
+        nc: u32,
+        limits: &Limits,
+    ) -> Result<Self, Error> {
         if na == 0 || nb == 0 || nc == 0 {
             return Err(Error::InvalidInput(
                 "supercell repeats must be positive".to_owned(),
             ));
         }
-        self.supercell_matrix([
-            [f64::from(na), 0.0, 0.0],
-            [0.0, f64::from(nb), 0.0],
-            [0.0, 0.0, f64::from(nc)],
-        ])
+        self.supercell_matrix_with_limits(
+            [
+                [f64::from(na), 0.0, 0.0],
+                [0.0, f64::from(nb), 0.0],
+                [0.0, 0.0, f64::from(nc)],
+            ],
+            limits,
+        )
     }
 
     /// Builds a supercell from a positive integer transformation matrix.
@@ -32,6 +52,20 @@ impl Structure {
     /// Returns [`Error::InvalidInput`] for non-integer, singular or negative
     /// determinant matrices, or [`Error::LimitExceeded`] for a refused size.
     pub fn supercell_matrix(&self, p: [[f64; 3]; 3]) -> Result<Self, Error> {
+        self.supercell_matrix_with_limits(p, &Limits::default())
+    }
+
+    /// Builds a supercell with an explicit limits profile.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for non-integer, singular or negative
+    /// determinant matrices, or [`Error::LimitExceeded`] for a refused size.
+    pub fn supercell_matrix_with_limits(
+        &self,
+        p: [[f64; 3]; 3],
+        limits: &Limits,
+    ) -> Result<Self, Error> {
         for value in p.iter().flatten() {
             if !value.is_finite() || (value - value.round()).abs() > 1e-9 {
                 return Err(Error::InvalidInput(
@@ -39,8 +73,7 @@ impl Structure {
                 ));
             }
         }
-        let limits = Limits::default();
-        let verdict = check_supercell(&limits, self.sites().len() as u64, p)?;
+        let verdict = check_supercell(limits, self.sites().len() as u64, p)?;
         if verdict.refused() {
             return Err(Error::LimitExceeded(verdict));
         }

@@ -73,7 +73,7 @@ pub fn ring_counts(structure: &Structure, max_size: usize) -> Result<Vec<(usize,
     Ok(counts)
 }
 
-/// Number of rings each P1 atom belongs to.
+/// Number of rings each P1 atom belongs to (`ring_membership`).
 ///
 /// # Errors
 ///
