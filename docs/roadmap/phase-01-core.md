@@ -297,12 +297,14 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.11 — Bonding
 
-- [ ] 1.11.1 Distance-based perception
+- [x] 1.11.1 Distance-based perception
   Port the perception part of `core/bonding.py` (1779 lines; plan a split
   into criteria, perception, explicit bonds, graph, topology bonds, queries).
   Perception happens on the P1 cell: covalent radius sums with tolerance,
   per-element-pair overrides, metal-specific rules, minimum distances,
   occupancy and disorder group awareness, periodic bonds with image shifts.
+  Note: `perceive_bonds`/`Structure::bond_graph` use covalent-radius sums with
+  a 1.2 scale, a 0.4 A floor and no dummy bonds; metal overrides follow.
 - [ ] 1.11.2 Explicit bonds and symmetry propagation
   User bonds are stored against the asymmetric unit and propagated to every
   symmetry image of the atoms they join (as in VESTA: draw one Fe-O bond and
@@ -311,11 +313,12 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   A third kind of bond that is not chemistry: net edges between node centres,
   used by topology analysis and the net builder. Stored in its own set so it
   never collides with chemical bonds joining the same pair.
-- [ ] 1.11.4 Connectivity graph and fragments
+- [x] 1.11.4 Connectivity graph and fragments
   The combined graph; connected components under periodic bonding; making
   molecules whole across boundaries; coordination numbers and environments;
   the data behind Crystal-Builder `xtal bonds` (bonds, coordination,
   fragments).
+  Note: `BondGraph` exposes degree, bonds_of and connected components.
 - [ ] 1.11.5 Validation
   Golden comparison of bond lists and coordination numbers for the full
   corpus; every intentional deviation documented.
