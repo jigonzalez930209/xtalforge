@@ -100,6 +100,16 @@ pub(crate) fn slab<'py>(
 
 pub(crate) fn load_structure(text: &str, format_hint: Option<&str>) -> PyResult<Structure> {
     let text = strip_bom(text);
+    if text.trim_start().starts_with('{') {
+        let structure = if text.contains("\"schema_version\"") {
+            xtalforge::core::StructureDocument::from_json(text).map(|document| document.structure)
+        } else {
+            serde_json::from_str(text).map_err(|error| {
+                xtalforge::core::Error::InvalidInput(format!("invalid structure JSON: {error}"))
+            })
+        };
+        return structure.map_err(crate::map_error);
+    }
     let hint = format_hint.unwrap_or_else(|| detect_format(text));
     xtalforge::io::read_structure(text, hint).map_err(crate::map_error)
 }
@@ -110,6 +120,9 @@ fn strip_bom(text: &str) -> &str {
 
 /// Detects the format from the text: CIF tags, an XYZ atom count or POSCAR.
 pub(crate) fn detect_format(text: &str) -> &'static str {
+    if text.trim_start().starts_with('{') {
+        return "json";
+    }
     if text.trim_start().starts_with("data_")
         || text.contains("_cell_length_a")
         || text.contains("_atom_site_")
@@ -154,7 +167,10 @@ pub(crate) fn as_p1_structure(structure: &Structure) -> PyResult<Structure> {
     builder.build().map_err(crate::map_error)
 }
 
-fn structure_payload<'py>(py: Python<'py>, structure: &Structure) -> PyResult<Bound<'py, PyDict>> {
+pub(crate) fn structure_payload<'py>(
+    py: Python<'py>,
+    structure: &Structure,
+) -> PyResult<Bound<'py, PyDict>> {
     let summary = structure.summary().map_err(crate::map_error)?;
     let p1 = structure.p1().map_err(crate::map_error)?;
     let dict = PyDict::new(py);

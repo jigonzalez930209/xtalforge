@@ -18,7 +18,7 @@ mod symmetry;
 use analysis::{angle, bonds, distance, groups, neighbors, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
 use structures::{read_cif, read_structure, slab, supercell};
-use symmetry::detect_symmetry;
+use symmetry::{asymmetrize, detect_symmetry, set_space_group, to_p1};
 
 create_exception!(
     _xtalforge,
@@ -212,6 +212,9 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(supercell, module)?)?;
     module.add_function(wrap_pyfunction!(torsion, module)?)?;
     module.add_function(wrap_pyfunction!(detect_symmetry, module)?)?;
+    module.add_function(wrap_pyfunction!(asymmetrize, module)?)?;
+    module.add_function(wrap_pyfunction!(to_p1, module)?)?;
+    module.add_function(wrap_pyfunction!(set_space_group, module)?)?;
     module.add_class::<Lattice>()?;
     module.add_class::<Site>()?;
     module.add_class::<Structure>()?;

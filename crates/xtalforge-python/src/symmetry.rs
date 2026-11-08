@@ -96,3 +96,79 @@ pub(crate) fn detect_symmetry<'py>(
     )?;
     Ok(dict)
 }
+
+/// Reduces a structure to its detected asymmetric unit.
+///
+/// The returned dictionary has the same shape as :func:`read_structure`.
+#[pyfunction]
+#[pyo3(signature = (text, format_hint = None, symprec = 1e-3))]
+pub(crate) fn asymmetrize<'py>(
+    py: Python<'py>,
+    text: &str,
+    format_hint: Option<&str>,
+    symprec: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure = load_structure(text, format_hint)?;
+    let reduced = xtalforge::symmetry::asymmetrize(
+        &structure,
+        SymmetryOptions {
+            symprec,
+            ..SymmetryOptions::default()
+        },
+    )
+    .map_err(crate::map_error)?;
+    crate::structures::structure_payload(py, &reduced)
+}
+
+/// Expands a structure to P1.
+///
+/// The returned dictionary has the same shape as :func:`read_structure`.
+#[pyfunction]
+#[pyo3(signature = (text, format_hint = None))]
+pub(crate) fn to_p1<'py>(
+    py: Python<'py>,
+    text: &str,
+    format_hint: Option<&str>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure = load_structure(text, format_hint)?;
+    let expanded = xtalforge::symmetry::to_p1(&structure).map_err(crate::map_error)?;
+    crate::structures::structure_payload(py, &expanded)
+}
+
+/// Applies a space group in ``reinterpret`` or ``impose`` mode.
+///
+/// The dictionary also carries a ``set_report`` entry with the input/output
+/// site counts and the largest imposed displacement.
+#[pyfunction]
+#[pyo3(signature = (text, symbol, mode = "reinterpret".to_string(), format_hint = None))]
+pub(crate) fn set_space_group<'py>(
+    py: Python<'py>,
+    text: &str,
+    symbol: &str,
+    mode: String,
+    format_hint: Option<&str>,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure = load_structure(text, format_hint)?;
+    let group = xtalforge::symmetry::SpaceGroup::parse(symbol).map_err(crate::map_error)?;
+    let mode = match mode.as_str() {
+        "reinterpret" => xtalforge::symmetry::SetMode::Reinterpret,
+        "impose" => xtalforge::symmetry::SetMode::Impose,
+        other => {
+            return Err(crate::invalid_input(format!(
+                "unknown set mode {other:?}; use reinterpret or impose"
+            )));
+        }
+    };
+    let report =
+        xtalforge::symmetry::set_space_group(&structure, &group, mode).map_err(crate::map_error)?;
+    let dict = crate::structures::structure_payload(py, &report.structure)?;
+    let summary = report.summary(&group);
+    let report_dict = PyDict::new(py);
+    report_dict.set_item("n_input", summary.n_input)?;
+    report_dict.set_item("n_output", summary.n_output)?;
+    report_dict.set_item("max_displacement", summary.max_displacement)?;
+    report_dict.set_item("hall", summary.hall)?;
+    report_dict.set_item("number", summary.number)?;
+    dict.set_item("set_report", report_dict)?;
+    Ok(dict)
+}
