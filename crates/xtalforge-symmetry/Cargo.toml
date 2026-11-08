@@ -13,7 +13,13 @@ categories.workspace = true
 description = "Symmetry types, space-group operations and reductions for xtalforge."
 
 [dependencies]
+moyo = { workspace = true }
+nalgebra = { workspace = true }
 rayon = { workspace = true, optional = true }
+
+[dev-dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 [features]
 parallel = ["dep:rayon"]
