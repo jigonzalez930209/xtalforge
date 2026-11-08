@@ -64,6 +64,7 @@ export default defineConfig({
             { text: 'Finite cells and transforms', link: '/api/transforms' },
             { text: 'Neighbors', link: '/api/neighbors' },
             { text: 'Bonding', link: '/api/bonding' },
+            { text: 'CIF', link: '/api/cif' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
