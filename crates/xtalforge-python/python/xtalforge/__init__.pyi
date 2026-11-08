@@ -247,3 +247,24 @@ def molecular_point_group(
     tolerance: float = 1e-3,
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
+
+def scene_summary(
+    text: str,
+    style: str = "ball-stick",
+    scale: float = 1.0,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
+def mesh_stl(
+    text: str,
+    style: str = "ball-stick",
+    scale: float = 1.0,
+    format_hint: str | None = None,
+) -> str: ...
+
+def pxrd(
+    text: str,
+    radiation: str = "cu-ka",
+    max_two_theta: float = 80.0,
+    step: float = 0.02,
+    format_hint: str | None = None,
+) -> dict[str, object]: ...
