@@ -14,6 +14,8 @@ Start here:
 - [Cargo features](./features) and the WASM budget
 - [Data bundles](./data) and the embedded-versus-external policy
 - [Contributing](./contributing) and the local check list
+- [Release and deployment](./release): tokens, tag flow, CLI packages and
+  caches
 
 The [API reference](/api/) documents each capability on all four surfaces, the
 [algorithm pages](/algorithms/) record the formulations and validation, and
