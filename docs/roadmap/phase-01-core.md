@@ -259,18 +259,23 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.9 — Finite cell and Cartesian transforms
 
-- [ ] 1.9.1 Unit cell as a finite object
+- [x] 1.9.1 Unit cell as a finite object
   Port `core/cellcut.py`: every atom in one unit cell plus its bonds, as a
   finite object with atoms on faces, edges and corners included as needed
   (what a picture of one cell or an STL export needs, Task 3.15).
-- [ ] 1.9.2 Point-set transforms
+  Note: `Structure::finite_cell` includes face, edge and corner images.
+- [x] 1.9.2 Point-set transforms
   Port `core/transforms.py`: free functions over Cartesian points (translate,
   rotate about an axis through a point, mirror, invert, align a vector, fit
   and align planes), with no notion of sites or undo; the commands of Phase 3
   wrap them.
-- [ ] 1.9.3 Displacement ellipsoids
+  Note: `xtalforge-core::transforms::{translate,rotate,mirror,invert,
+  align_vector,align_planes,fit_plane}`.
+- [x] 1.9.3 Displacement ellipsoids
   Also from `core/transforms.py`: Uij tensor to ellipsoid axes and lengths at
   a probability level, used by viewers and by CIF output.
+  Note: `displacement_ellipsoid` uses Jacobi eigenvalues and the chi-square
+  scale table.
 
 ## Task 1.10 — Neighbor search
 
