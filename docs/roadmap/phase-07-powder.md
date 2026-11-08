@@ -23,7 +23,7 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.1 — Study rietx and fix the scope
 
-- [ ] 7.1.1 Inventory the bridge
+- [x] 7.1.1 Inventory the bridge
   Read `powder/bridge.py` and list every rietx entry point used, with inputs,
   outputs and meaning. Known from a first scan: `rietx.io.read_pattern`,
   `rietx.indexing.pick` / `pick_peaks_with_state` / `fit_peaks`,
@@ -33,17 +33,17 @@ Crate: `xtalforge-powder`.
   `rietx.determine_extinction_symbol`, `rietx.schemas.structure.lebail_scaffold`,
   and the Pawley/Rietveld fits (`mode="pawley"`, `mode="rietveld"`, refinement
   plans).
-- [ ] 7.1.2 Study the rietx sources
+- [x] 7.1.2 Study the rietx sources
   Clone rietx and rietx-kernels into a scratch directory (never into this
   repository), read the mathematics of each entry point (profile functions,
   background, instrument presets, indexing engines, figures of merit, the
   least-squares engine, esd computation) and write
   `docs/algorithms/powder-scope.md`: per function, port, reimplement from the
   literature, or drop, with reasons.
-- [ ] 7.1.3 License and attribution
+- [x] 7.1.3 License and attribution
   Record the rietx and rietx-kernels licenses in `THIRD_PARTY.md`; if porting
   is not allowed, reimplement from published methods only.
-- [ ] 7.1.4 Test data and acceptance metrics
+- [x] 7.1.4 Test data and acceptance metrics
   Collect the measured patterns used by Crystal-Builder's powder tests and
   define acceptance: peak positions within a fraction of the step, indexing
   recovers the published cell, Pawley/Rietveld Rwp within a stated margin of
@@ -56,10 +56,13 @@ Crate: `xtalforge-powder`.
   Port `powder/data.py`: three arrays (2θ, intensity, esd or √I), read from
   `.xy` (Task 3.5.3) and the other formats rietx reads that Crystal-Builder
   tests use; range selection, excluded regions.
-- [ ] 7.2.2 Radiation and instrument
+- [x] 7.2.2 Radiation and instrument
   `Radiation`: wavelength(s) with Kα2 ratio, polarization, geometry
   (Bragg-Brentano, Debye-Scherrer), zero shift, sample displacement;
   instrument presets equivalent to rietx's.
+  Note: `Instrument { geometry, zero_shift, displacement, ka2_ratio,
+  polarization, sample_radius }`, `correct` and `doublet`; presets are the
+  documented defaults.
 
 ## Task 7.3 — Peaks
 
@@ -67,7 +70,7 @@ Crate: `xtalforge-powder`.
   Equivalent of `rietx.indexing.pick_peaks_with_state`: a background envelope,
   candidate detection, each line fitted in its own window; fitting at named
   positions (`fit_peaks`).
-- [ ] 7.3.2 Whole-range refinement
+- [x] 7.3.2 Whole-range refinement
   Port `refine_peaks` from `powder/peaks.py` (604 lines; split): one
   least-squares fit of the whole range with a Chebyshev background of the
   requested order, every kept line's position, area, width and Lorentzian
@@ -100,11 +103,11 @@ Crate: `xtalforge-powder`.
 - [x] 7.5.2 Figures of merit and ranking
   Predicted lines per candidate cell, M20 and F_N figures of merit, ranking
   table (TOPAS `b_indy` and its `.ndx` table).
-- [ ] 7.5.3 Free cell parameters per space group
+- [x] 7.5.3 Free cell parameters per space group
   Port `powder/cell.py`: which of the six cell numbers a space group leaves
   free (cubic one length; monoclinic three lengths and the unique-axis angle),
   so a refinement never offers a = 4.59, b = 4.60 for a tetragonal cell.
-- [ ] 7.5.4 Extinction symbol
+- [x] 7.5.4 Extinction symbol
   Equivalent of `rietx.determine_extinction_symbol`: candidate extinction
   symbols and space groups from the indexed reflections, using Phase 2 data.
 
@@ -148,13 +151,13 @@ Crate: `xtalforge-powder`.
   Port the phase-building logic of `bridge.py`: a phase is built from the
   sites (not by writing and reading a CIF), and the refined phase comes back
   onto the same sites with esds.
-- [ ] 7.8.3 Validation
+- [x] 7.8.3 Validation
   Rietveld refinements of benchmark patterns match the rietx golden results
   within the acceptance metrics of Task 7.1.4.
 
 ## Task 7.9 — Rietveld with energies and the Pareto sweep
 
-- [ ] 7.9.1 Combined objective
+- [x] 7.9.1 Combined objective
   Port `powder/energy.py` (572 lines; split): the objective
   `f = (1 - w) χ²/χ²₀ + w (E - E₀)/ΔE`, where χ²₀ and E₀ are the values at
   the start and ΔE is how far the energy falls when the atoms answer to the
@@ -168,11 +171,11 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.10 — Automatic run and module steps
 
-- [ ] 7.10.1 Automatic run
+- [x] 7.10.1 Automatic run
   Port `powder/auto.py`: peaks, indexing, then a Pawley fit of every leading
   cell in every leading space group, and a table ranked by fit quality (TOPAS
   `b_indy` into `c_paw` without a person copying the cell).
-- [ ] 7.10.2 Module steps
+- [x] 7.10.2 Module steps
   Port `modules/powder.py` (1893 lines; split by step): each step (peaks,
   index, pawley, rietveld, energy, pareto, auto) as a module action reading the
   previous step's output from the run folder, runnable headless
@@ -181,16 +184,16 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.11 — Surfaces and docs
 
-- [ ] 7.11.1 CLI
+- [x] 7.11.1 CLI
   `powder {peaks,index,pawley,rietveld,energy,pareto,auto}` with JSON results
   and run folders.
-- [ ] 7.11.2 Python and WASM
+- [x] 7.11.2 Python and WASM
   Cancellable refinements with progress; WASM supports small problems
   single-threaded and documents its limits.
-- [ ] 7.11.3 Docs and demos
+- [x] 7.11.3 Docs and demos
   Algorithm pages: profile functions, Levenberg-Marquardt with constraints,
   indexing engines and figures of merit, Pawley, Rietveld refinement order,
   energy-weighted objective, Pareto knee. Demo: load a pattern, fit peaks and
   index it in the browser.
-- [ ] 7.11.4 Parity and release
+- [x] 7.11.4 Parity and release
   Parity matrix; changelog; MINOR release.

@@ -192,143 +192,143 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
 
 ## Task 6.11 — MOF data and licensing
 
-- [ ] 6.11.1 License record
+- [x] 6.11.1 License record
   PORMAKE 0.2.3 is MIT ("Copyright (c) 2022 Sangwon"), vendored in
   Crystal-Builder with every modification listed in its `PROVENANCE.md`. Copy
   the notice into `THIRD_PARTY.md`. Verify separately the license of the
   PORMAKE database (2403 topologies, about 867 building blocks; the database
   may come from RCSR and CoRE MOF sources), of `mof/data/` and of
   `mof/library/`.
-- [ ] 6.11.2 Compact bundle
+- [x] 6.11.2 Compact bundle
   A reproducible script converts the topology `.cgd` files and the building
   block `.xyz` files into one versioned compressed bundle (`data-YYYY.MM.DD`),
   with an index for lazy access. Crystal-Builder measured 2.85 MB for nets and
   blocks; the bundle should not be larger.
-- [ ] 6.11.3 Distribution strategy
+- [x] 6.11.3 Distribution strategy
   Feature `mof-data` embeds the bundle; without it, the bundle is fetched on
   first use and cached with a checksum (the default for WASM, where size
   matters, and an option for Python wheels).
 
 ## Task 6.12 — MOF builder: PORMAKE port
 
-- [ ] 6.12.1 Topologies and building blocks
+- [x] 6.12.1 Topologies and building blocks
   Port `pormake/topology.py`, `building_block.py`, `local_structure.py`,
   `neighbor_list.py`, `utils.py`: nets with node and edge slots, building
   blocks with connection points (dummy `X` atoms, Task 1.1.1). Replace the
   vendored ASE usage with our own types.
-- [ ] 6.12.2 Locating and scaling
+- [x] 6.12.2 Locating and scaling
   Port `pormake/locator.py` (fit a block onto a slot by RMSD of connection
   directions) and `pormake/scaler.py` (scale the net so every edge length
   matches the blocks), replacing the removed gradient and function call
   described in `PROVENANCE.md` with Rust equivalents.
-- [ ] 6.12.3 Builder and framework
+- [x] 6.12.3 Builder and framework
   Port `pormake/builder.py` and `framework.py`: place nodes and edges, join
   connection points, remove dummies, produce the framework and its RMSD
   report.
-- [ ] 6.12.4 Edge midpoints
+- [x] 6.12.4 Edge midpoints
   Port `mof/midpoints.py`: PORMAKE's reading of a net (nodes plus edge
   centres) with Crystal-Builder's third method of finding edges.
-- [ ] 6.12.5 Compare with sci-form assembly
+- [x] 6.12.5 Compare with sci-form assembly
   sci-form `materials/assembly.rs` (829 lines) also assembles frameworks;
   compare on simple nets (pcu, dia, sql) and reuse what is better tested.
 
 ## Task 6.13 — MOF builder: orientation, catalogue, build request
 
-- [ ] 6.13.1 Orientation
+- [x] 6.13.1 Orientation
   Port `mof/orient.py` (1354 lines; split): a node block is placed by fitting
   its connection directions onto the slot's, and a symmetric node has many
   equally good fits (24 for an octahedral node, RMSD spread 6e-08) that are
   not cosmetic for the rest of the block; choose deterministically and
   explore when asked. `align_edges` turns linkers about their axis using
   clearance (Task 6.3.1).
-- [ ] 6.13.2 Catalogue
+- [x] 6.13.2 Catalogue
   Port `mof/catalog.py` (1306 lines; split): what there is to build with, read
   from the bundle files rather than through PORMAKE (import time was 10 to 30
   s in Python); search by topology, connectivity, elements, size; user blocks
   from the workspace `blocks/` folder; the stamp/refresh logic for the
   catalogue cache.
-- [ ] 6.13.3 Build request and result
+- [x] 6.13.3 Build request and result
   Port `mof/build.py` (1784 lines; split into resolve, run, read back, net
   overlay): a request is three strings (topology, node assignment, edge
   assignment) so it survives the CLI and saved parameters; the framework is
   read back with its net drawn on it as topology bonds.
-- [ ] 6.13.4 Block writing and connection points
+- [x] 6.13.4 Block writing and connection points
   Port `mof/block.py` (connection point placement at `CONNECTION_DISTANCE`,
   block file format) and `commands/connections.py` (`MarkConnectionPoints`,
   `MarkOneConnectionPoint`; one way only, as documented in the source).
-- [ ] 6.13.5 Attachment semantics
+- [x] 6.13.5 Attachment semantics
   Port `mof/attach.py`: what one connection point stands for (one atom, or a
   set of atoms as in MFU-4l's Zn5Cl4 kernel) and which bonds it carries into
   the framework.
 
 ## Task 6.14 — MOF builder: rods and layers
 
-- [ ] 6.14.1 Rod SBUs
+- [x] 6.14.1 Rod SBUs
   Port `mof/rod.py` (1075 lines; split): a rod is one 1-periodic block (MOF-74,
   MIL-53, MOF-303, Ni2Cl2BTDD, Co(BDP)), not a chain of finite nodes (cut into
   nodes, MOF-74's net msf would put carboxylate carbons, not zinc, on the
   vertices).
-- [ ] 6.14.2 Rod nets
+- [x] 6.14.2 Rod nets
   Port `mof/rodnet.py` (1178 lines; split): parallel rod axes in one of the
   four plane patterns sql, hxl, hcb, kgm, rod handedness and placement.
-- [ ] 6.14.3 Rod builder and donors
+- [x] 6.14.3 Rod builder and donors
   Port `mof/rodbuild.py` (1056 lines; split) and `mof/donors.py`: linkers
   meeting a rod as a core with `X` where each donor joined, recovering which
   `X` was which donor from a whole drawn linker (dobpdc versus pc-dobpdc).
   Validate with the rod test files in `Crystal-Builder/tests/data/rod_*.xyz`.
-- [ ] 6.14.4 Layered frameworks
+- [x] 6.14.4 Layered frameworks
   Port `mof/layers.py`: 2-periodic nets (Ni3(HITP)2, Cu-HHTP, 2D COFs)
   shipped as `.cgd` in a 3D cell and stacked along the free direction.
 
 ## Task 6.15 — MOF builder: merged nets, decoration, partition, trimers
 
-- [ ] 6.15.1 Merged nets
+- [x] 6.15.1 Merged nets
   Port `mof/merged.py` (839 lines) and `mof/merged_nets.py` with
   `mof/data/merged_nets.{cgd.gz,json}`: nets with several kinds of edges
   (`sph` is spn plus hxg) need a set of linkers whose reaches put every edge at
   its drawn length at one scale.
-- [ ] 6.15.2 Supertetrahedral decoration
+- [x] 6.15.2 Supertetrahedral decoration
   Port `mof/decorate.py` (1708 lines; split): any 4-connected net as an ST-MOF
   net (MIL-100, sod-ZMOFs): four M3O trimers at the corners of a tetrahedron,
   a tritopic linker on each face, every trimer shared by two supertetrahedra.
-- [ ] 6.15.3 Trimers
+- [x] 6.15.3 Trimers
   Port `mof/trimer.py`: an M3O(RCO2)6 trimer with its open metal sites as
   connection points.
-- [ ] 6.15.4 Pore-space partition
+- [x] 6.15.4 Pore-space partition
   Port `mof/partition.py` (624 lines): which partitioner fits which `acs`
   framework (MIL-88, MOF-235; Bu and Feng's pacs frameworks put a C3 pyridyl
   ligand on the channel axis, its nitrogens on the trimers' open sites).
 
 ## Task 6.16 — MOF builder: inverse linker design
 
-- [ ] 6.16.1 Linkers by span
+- [x] 6.16.1 Linkers by span
   Port `mof/linkers.py` (447 lines) with `mof/data/linker_series.json` and
   `linker_set_nets.json`: a `Requirement` (distance between connection
   points, topicity, geometry) and `suggest` returning molecules that satisfy
   it; used by partition, merged nets and ST-MOF windows.
-- [ ] 6.16.2 Invented linkers
+- [x] 6.16.2 Invented linkers
   Port `mof/invent.py`: put together new linkers wider than the stored
   isoreticular series on request.
-- [ ] 6.16.3 Validation
+- [x] 6.16.3 Validation
   Rebuild known MOFs from the corpus (HKUST-1, MOF-5, UiO-66, ZIF-8,
   MIL-100, MOF-74, Ni3(HITP)2) and compare cell, atom count, net, and RMSD
   with Crystal-Builder output and with the corpus CIFs.
 
 ## Task 6.17 — Surfaces and docs
 
-- [ ] 6.17.1 CLI
+- [x] 6.17.1 CLI
   `build molecule` (SMILES or library name), `build substitute`, `build fill`,
   `build graphene`, `build nanotube`, `build fullerene`, `build carbon`,
   `build polymer`, `build net`, `mof {list,search,build,rod,layer,decorate,partition,linkers}`.
-- [ ] 6.17.2 Python and WASM
+- [x] 6.17.2 Python and WASM
   Builders return `Structure` plus a report; long builds are cancellable and
   report progress; WASM loads the MOF bundle on demand (Task 6.11.3).
-- [ ] 6.17.3 Docs and demos
+- [x] 6.17.3 Docs and demos
   Algorithm pages: coordination polyhedra, clearance search, commensurate
   twist angles, nanotube roll-up, face spirals, convolution surfaces, chain
   growth packing, PORMAKE locate and scale, node orientation ambiguity, rods,
   merged nets, supertetrahedral decoration, pore-space partition. Demos:
   nanotube and graphene builders, building a MOF in the browser.
-- [ ] 6.17.4 Parity and release
+- [x] 6.17.4 Parity and release
   Parity matrix; changelog; MINOR release at phase completion (task groups
   may ship earlier as PATCH releases).
