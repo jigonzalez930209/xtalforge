@@ -17,6 +17,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Neighbors](./neighbors)
 - [Bonding](./bonding)
 - [CIF input and output](./cif)
+- [POSCAR and XYZ](./formats)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 
