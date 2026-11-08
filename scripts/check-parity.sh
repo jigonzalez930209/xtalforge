@@ -50,6 +50,8 @@ check_cli() {
   local command=${1//_/-}
   case "$1" in
     element_info) command=element ;;
+    lattice_info) command=cell ;;
+    lattice_minimum_image) command=cell ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
