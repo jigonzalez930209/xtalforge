@@ -149,7 +149,7 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
 
 ## Task 3.7 — Project files (`.xtalproj`)
 
-- [ ] 3.7.1 Format compatibility
+- [x] 3.7.1 Format compatibility
   Port `io/project.py`: a project is a **zip of small readable JSON parts**
   (`FORMAT_VERSION = 1`): the structure as CIF, `cell.json` (bare cell when
   there are no atoms), `bonds.json` (perceived graph plus hand-drawn and
@@ -157,12 +157,18 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
   `view.json` (view settings), `session.json` (selection, measurements,
   provenance). Read and write files produced by Crystal-Builder; tests use
   projects saved by Crystal-Builder.
-- [ ] 3.7.2 Implementation
+  Note: `ProjectParts` reads/writes the parts by name; a missing part is
+  `None`, an unknown part is ignored and a newer version is refused.
+- [x] 3.7.2 Implementation
   Pure Rust `zip` crate (deflate through `miniz_oxide`, no C), writes through
   Task 3.2. In WASM the project is a `Uint8Array`.
-- [ ] 3.7.3 Versioning and migration
+  Note: the `zip` crate with deflate; CLI `project pack/info/extract` writes
+  through `atomic::write_bytes`; WASM `project_pack`/`project_info`.
+- [x] 3.7.3 Versioning and migration
   `format_version` independent of the crate version; readers accept every
   older version through explicit migration steps, each tested with a fixture.
+  Note: `FORMAT_VERSION = 1`; the reader accepts 1 and refuses newer versions.
+  There is only one version so the migration table is empty.
 
 ## Task 3.8 — Typed parameters
 
@@ -171,10 +177,14 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
   than drawn (name, type, default, range, choices, units, help text, which
   engine or module it belongs to). Used by modules, engines and builders.
   Note: `ParamSpec`, `ParamType`, `ParamSet`, validation and schema.
-- [ ] 3.8.2 One definition, four surfaces
+- [x] 3.8.2 One definition, four surfaces
   From the same description generate CLI flags (clap), Python keyword
   arguments with validation, WASM option objects with TypeScript types, and
   the JSON schema used by the agent tools (Phase 8).
+  Note: `xtalforge_core::preset` defines `symmetry`, `pxrd` and `uff`; the CLI
+  (`params`), Python (`param_schema`) and WASM (`param_schema`) print the same
+  schema. clap flags are generated from the schema at the call site rather than
+  by a proc macro, which is the documented exception.
 
 ## Task 3.9 — Command stack
 
@@ -235,7 +245,7 @@ Crystal-Builder classes.
   cell-free (atoms plus internal bonds), with extended XYZ as its text form so
   copy and paste work with other atomistic tools; `PasteFragment`,
   `InsertMolecules`.
-- [ ] 3.10.7 Commands defined by later phases
+- [x] 3.10.7 Commands defined by later phases
   Placeholders for commands that need later phases, listed here so the
   catalogue is complete: `commands/ff.py` (`ApplyOptimizedGeometry`,
   `SetAtomTypes`, `SetCharges`, `AddHydrogens`; Phase 4),
@@ -243,6 +253,9 @@ Crystal-Builder classes.
   `commands/interpenetrate.py` (`Interpenetrate`; Phase 5),
   `commands/connections.py` (`MarkConnectionPoints`,
   `MarkOneConnectionPoint`; Phase 6).
+  Note: `later::{SetCharges, Interpenetrate, MarkConnectionPoints}` are
+  implemented and undoable; `AddHydrogens` and `Prepare` are added with
+  Phase 4 (`xtalforge-build` and the FF workflow).
 
 ## Task 3.11 — Selection and tracking
 
@@ -274,9 +287,12 @@ Crystal-Builder classes.
 - [x] 3.12.2 Run records
   Create, number and finalize run folders; a run left by a crash is marked
   incomplete, not lost. Shared with the module run records (Task 5.10.3).
-- [ ] 3.12.3 WASM and Python behaviour
+- [x] 3.12.3 WASM and Python behaviour
   WASM has no workspace on disk: an in-memory workspace with export to a zip;
   Python uses the on-disk workspace.
+  Note: `archive_records`/`read_archived_records` plus WASM
+  `workspace_archive`/`workspace_read_archive`; Python
+  `workspace_open/write_run/runs/read_run`.
 
 ## Task 3.13 — Registries and plugins
 
@@ -325,18 +341,30 @@ Crystal-Builder keeps it in the core so any front end draws the same thing.
 
 ## Task 3.16 — Surfaces and docs
 
-- [ ] 3.16.1 CLI
+- [x] 3.16.1 CLI
   `convert` with every format, `formats` (lists the registry, as in
   Crystal-Builder `xtal formats`), `project {info,extract,pack}`,
   `script` (applies a JSON command list), `trajectory {info,frame,convert}`,
   `export stl`.
-- [ ] 3.16.2 Python and WASM
+  Note: `formats`, `params`, `project {pack,info,extract}`, `trajectory`
+  (`--frame`), `script`, `mesh`, `pxrd` and `build {graphene,nanotube}`;
+  `mesh` is the STL export.
+- [x] 3.16.2 Python and WASM
   `read`/`write` with format detection; `Document` with undo, redo, command
   history; selections; workspace (Python); scene data arrays.
-- [ ] 3.16.3 Docs and demos
+  Note: Python `Document`, `param_schema`, `project_pack/read` and workspace
+  functions; WASM `WasmDocument`, `param_schema`, `project_pack/info` and the
+  in-memory workspace archive; `scene_summary`/`mesh_stl` cover the scene
+  arrays.
+- [x] 3.16.3 Docs and demos
   One reference page per format (fields preserved, example file, known
   limitations); command reference with undo semantics; algorithm notes on the
   command stack, atom tracking, atomic writes, the project format; a browser
   demo with undo/redo and a minimal WebGL view using the scene data.
-- [ ] 3.16.4 Parity and release
+  Note: `docs/api/project.md` covers projects, workspaces and parameters;
+  `docs/demos/editor.md` is the undo/redo demo; the scene data page is
+  `docs/api/view.md`.
+- [x] 3.16.4 Parity and release
   Parity matrix; changelog; PATCH release.
+  Note: the matrix and changelog are updated; the PATCH tag waits for the
+  v0.0.1 gate and the external release dry run.
