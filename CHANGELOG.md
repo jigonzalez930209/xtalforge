@@ -78,6 +78,8 @@ essential release, then `0.x.y`).
   charge, disorder group, props), `Structure`/`StructureBuilder`, molecule in
   a padded box, formula/mass/density/charge properties, the `info` CLI bridge
   and `structure_info` in Python and WASM.
+- Phase 1 Task 1.5: `StructureDocument` with `SCHEMA_VERSION`, strict
+  top-level fields, version checks and a versioned fixture.
 
 ### Changed
 
