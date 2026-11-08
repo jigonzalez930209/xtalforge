@@ -13,7 +13,7 @@ use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
     cell_volume, element_info, lattice_info, lattice_minimum_image, limits_bounds, limits_check,
-    version,
+    structure_info, version,
 };
 
 #[derive(Debug, Deserialize)]
@@ -138,6 +138,22 @@ fn lattice_shared_vectors() {
                 <= 1e-9
         );
     }
+}
+
+#[wasm_bindgen_test]
+fn structure_info_vector() {
+    let text = include_str!("../../../tests/vectors/structure.json");
+    let value = structure_info(text).expect("valid structure JSON");
+    assert_eq!(
+        property(&value, "name").as_string().as_deref(),
+        Some("NaCl")
+    );
+    assert_eq!(
+        property(&value, "formula").as_string().as_deref(),
+        Some("Na Cl")
+    );
+    assert_eq!(property(&value, "n_sites").as_f64(), Some(2.0));
+    assert!(property(&value, "is_p1").as_bool().unwrap_or(false));
 }
 
 #[wasm_bindgen_test]
