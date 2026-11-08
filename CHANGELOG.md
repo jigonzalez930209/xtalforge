@@ -85,6 +85,8 @@ essential release, then `0.x.y`).
   special-position deduplication.
 - Phase 1 Task 1.7: diagonal and general supercells as P1, origin shifts,
   metadata/site-property preservation and the supercell limit check.
+- Phase 1 Task 1.8: surface bases for arbitrary Miller planes, slab
+  construction with layers, vacuum and P1 output, and plane angles.
 
 ### Changed
 
