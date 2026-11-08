@@ -8,12 +8,12 @@ origin. Status: `verified` (license read in the source), `to verify`,
 | Source | License | What is used | Status |
 |---|---|---|---|
 | sci-form (https://github.com/jigonzalez930209/sci-form, same maintainer) | MIT | Crystal-related modules ported (roadmap Task 0.4); optional dependency for quantum methods | verified, planned; plan in `docs/algorithms/sci-form-reuse.md` |
-| Crystal-Builder (https://github.com/JulesOpp/Crystal-Builder) | MIT, "Copyright (c) 2026 Jules Oppenheim" | Behavioural reference, algorithms ported from `xtal/`, test corpus, golden data | verified, planned; corpus copied with provenance |
+| Crystal-Builder (https://github.com/JulesOpp/Crystal-Builder) | MIT, "Copyright (c) 2026 Jules Oppenheim" | Behavioural reference, algorithms ported from `xtal/`, test corpus, golden data, fragment table | verified, redistributed; corpus copied with provenance |
 | gemmi (https://github.com/project-gemmi/gemmi) | MPL-2.0 | Golden-data generator only; no code ported | verified, not redistributed |
 | spglib (https://github.com/spglib/spglib) | BSD-3-Clause | Golden-data generator and moyo audit comparison only | verified, not redistributed |
 | NumPy (https://numpy.org) | BSD-3-Clause | Golden-data generator only | verified, not redistributed |
 | SciPy (https://scipy.org) | BSD-3-Clause | Golden-data generator only; algorithms reimplemented from papers | verified, not redistributed |
-| ASE (https://ase-lib.org) | LGPL-2.1-or-later | Reference for k-paths; no code ported | verified, no port |
+| ASE (https://ase-lib.org) | LGPL-2.1-or-later | Reference for k-paths and the C60 coordinates; the generated JSON tables are data, no code ported | verified, redistributed as derived data |
 | phonopy (https://phonopy.github.io/phonopy/) | BSD-3-Clause | Reference outputs; algorithms ported with attribution when they land | verified, planned |
 | RDKit (https://www.rdkit.org) | BSD-3-Clause | Replaced by the sci-form SMILES port | verified, not ported |
 | Matplotlib (https://matplotlib.org) | Matplotlib license (PSF-based, BSD-compatible) | Colormap samples as data | verified, planned |
@@ -26,7 +26,7 @@ origin. Status: `verified` (license read in the source), `to verify`,
 | Other Crystal-Builder samples (`simple/`, `prepared/`, `polymer/`, top level) | per-file, see its `PROVENANCE.md` | Test corpus | to verify per file |
 | Zeo++ radii (`Crystal-Builder/tests/data/zeo_radii.cc`) | to verify (Zeo++ license) | Radii set for porosity (Task 5.2.2) | to verify |
 | rietx and rietx-kernels (https://github.com/yue-here/rietx) | stated as MIT in Crystal-Builder's `pyproject.toml`; no license field on PyPI | Reference for powder refinement (Phase 7) | to verify |
-| UFF and UFF4MOF parameters (Rappé et al. 1992; Addicoat et al. 2014; Coupry et al. 2016) | published parameters, cited in the data file | Force field (Task 4.2.1) | planned |
+| UFF and UFF4MOF parameters (Rappé et al. 1992; Addicoat et al. 2014; Coupry et al. 2016) | published parameters, cited in the data file | Force field (Task 4.2.1) | verified, redistributed in `crates/xtalforge-ff/data/uff.json` |
 | Pyykkö and Atsumi covalent radii (2009) | published data, cited in the Crystal-Builder source | Element data (Task 1.1.3); stored in `crates/xtalforge-core/data/elements.json.gz` | verified, redistributed |
 | Cordero 2008 covalent radii, Bondi van der Waals radii, Jmol/CPK colours, Pauling electronegativity | published data via gemmi and Crystal-Builder | Element data (Task 1.1) | verified, redistributed |
 | Crystal-Builder element table (`core/elements.py`, `core/pyykko.py`, `ff/isotopes.py`) | MIT, "Copyright (c) 2026 Jules Oppenheim" | Source of the embedded element bundle (Task 1.1) | verified, redistributed |
