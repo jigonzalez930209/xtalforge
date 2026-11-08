@@ -11,6 +11,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Structures and sites](./structure)
 - [Structure schema](./schema)
 - [P1 expansion](./p1)
+- [Supercells and origin shifts](./supercell)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 

@@ -41,7 +41,7 @@ const summary = structure_info(jsonText);
 
 `Site::new(label, element, frac)` normalizes the element (`Fe2+` becomes
 `Fe`), validates a non-empty label and finite coordinates, and starts fully
-occupied. The chainable methods are `with_occupancy`, `with_u_iso`,
+occupied. The chainable methods are `with_occupancy`, `with_frac`, `with_u_iso`,
 `with_u_aniso`, `with_charge`, `with_disorder_group` and `with_prop`; the
 readers are `label`, `element`, `frac`, `occupancy`, `u_iso`, `u_aniso`,
 `charge`, `disorder_group`, `props` and `is_partial`.
