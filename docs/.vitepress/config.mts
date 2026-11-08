@@ -40,6 +40,9 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Introduction', link: '/guide/' },
+            { text: 'Quick start', link: '/guide/quickstart' },
+            { text: 'Concepts', link: '/guide/concepts' },
+            { text: 'File formats', link: '/guide/formats' },
             { text: 'Contributing', link: '/guide/contributing' },
             { text: 'Cargo features', link: '/guide/features' },
             { text: 'Data bundles', link: '/guide/data' },
@@ -88,6 +91,7 @@ export default defineConfig({
             { text: 'Neighbor search', link: '/algorithms/neighbors' },
             { text: 'Bond perception', link: '/algorithms/bonding' },
             { text: 'Primitive rings', link: '/algorithms/rings' },
+            { text: 'Functional groups', link: '/algorithms/groups' },
             { text: 'Measures', link: '/algorithms/measures' },
             { text: 'CIF parsing', link: '/algorithms/cif' },
             { text: 'POSCAR and XYZ', link: '/algorithms/formats' },
@@ -105,6 +109,7 @@ export default defineConfig({
           items: [
             { text: 'Overview', link: '/demos/' },
             { text: 'Cell volume', link: '/demos/cell-volume' },
+            { text: 'CIF inspector', link: '/demos/cif-inspector' },
           ],
         },
       ],
