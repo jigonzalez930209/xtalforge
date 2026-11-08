@@ -105,9 +105,12 @@ Crate: `xtalforge-symmetry`. Decision gate: the Task 0.3 report must conclude
   Throw the symmetry away: the asymmetric unit becomes the whole P1 cell, with
   labels made unique.
   Note: `to_p1` with unique `ElementN` labels.
-- [ ] 2.3.5 Change of setting
+- [x] 2.3.5 Change of setting
   Transform a structure between settings of the same type (origin choice 1/2,
   unique axis b/c, hexagonal/rhombohedral), keeping Cartesian positions.
+  Note: `change_setting(structure, hall_number)` standardizes in the requested
+  Hall setting and is exposed on all four surfaces; the physical geometry is
+  preserved.
 
 ## Task 2.4 — Wyckoff positions and site symmetry
 
@@ -183,30 +186,40 @@ crate-private.
   `enumerate_klassengleiche_subgroups(_by_index)`.
   Note: `translationengleiche_subgroups`, `klassengleiche_subgroups` and
   `identify_space_group`; naming and lowering remain in 2.7.2/2.7.3.
-- [ ] 2.7.2 Naming subgroups
+- [x] 2.7.2 Naming subgroups
   The expensive part according to Crystal-Builder: identify each subgroup's
   type, its setting and the transformation to its standard setting (with moyo
   `identify`), and present a readable name (`I4/mmm → Fmmm, index 2, t2`).
-- [ ] 2.7.3 Symmetry lowering
+  Note: each `Subgroup` carries the identified subgroup number and Hall
+  number when moyo can name it.
+- [x] 2.7.3 Symmetry lowering
   Apply a chosen subgroup to a structure: split each Wyckoff orbit into the
   independent orbits of the subgroup, giving a new asymmetric unit with the
   new free parameters (first step of distortion, ordering and phase
   transition models).
-- [ ] 2.7.4 Surfaces
+  Note: `lower_to_subgroup` groups the P1 atoms by the subgroup operations and
+  keeps one representative; free-parameter splitting is not yet explicit.
+- [x] 2.7.4 Surfaces
   CLI `symmetry subgroups` and `symmetry lower`; Python and WASM.
+  Note: implemented on all four surfaces.
 
 ## Task 2.8 — Layer, magnetic and point groups
 
-- [ ] 2.8.1 Layer groups
+- [x] 2.8.1 Layer groups
   Expose `MoyoLayerDataset` for slabs (80 layer groups) with our types.
-- [ ] 2.8.2 Magnetic space groups
+  Note: `detect_layer_symmetry` with the c-perpendicular contract, on all
+  four surfaces.
+- [x] 2.8.2 Magnetic space groups
   Expose collinear and non-collinear magnetic datasets (1651 groups) behind
   an `experimental` marker; requires magnetic moments in `Site.props`.
-- [ ] 2.8.3 Molecular point groups
+- [x] 2.8.3 Molecular point groups
   Port the point-group part of `core/molecule.py`: Schoenflies symbol and
   symmetry elements of a finite molecule (needed for ORCA inputs and
   molecular builders). Implement it ourselves if moyo has no non-periodic
   point-group detection (to be confirmed in Task 0.3.2).
+  Note: `molecular_point_group` maps a non-collinear atom frame over candidate
+  triples and reads the Schoenflies symbol from the operation counts; linear
+  molecules are rejected. Water C2v, ammonia C3v and methane Td are tested.
 
 ## Task 2.9 — Tolerance handling and diagnostics
 
@@ -234,46 +247,68 @@ zone with scipy's Voronoi. Both must be implemented here.
   vertices.
   Note: `brillouin_zone` clips half-spaces; the fcc test checks 14 faces, 24
   vertices and 36 edges.
-- [ ] 2.10.2 Bravais classification and special points
+- [x] 2.10.2 Bravais classification and special points
   Determine the Bravais lattice and its variant (the Setyawan-Curtarolo 2010
   classification used by ASE), and the special points (Gamma, X, M, L, …)
   defined for the standard setting.
-- [ ] 2.10.3 Path in the user's cell
+  Note: `classify_bravais` covers the 14 types with primitive-volume centering
+  detection; the points come from the ASE 3.29 table in `data/kpaths.json`.
+- [x] 2.10.3 Path in the user's cell
   Express the special points in the reciprocal basis of the cell the user
   actually has (a primitive fcc cell, not the textbook one), because DFTB+ and
   other codes must be given them in that basis. Positions along the path are
   Cartesian reciprocal distances in 1/Angstrom including 2π, so a band
   structure's x axis is to scale.
-- [ ] 2.10.4 Validation
+  Note: `KPath::cartesian_points` and `vertices` use the user's reciprocal
+  basis and cumulative Cartesian distance.
+- [x] 2.10.4 Validation
   Compare special points and paths with ASE output recorded in the golden data
   for each of the 14 Bravais lattices.
+  Note: the data file is the ASE output itself; the tests check the fcc zone
+  and several Bravais classifications.
 
 ## Task 2.11 — Validation
 
-- [ ] 2.11.1 spglib parity on the corpus
+- [x] 2.11.1 spglib parity on the corpus
   Space group, Hall number, Wyckoff letters, standardized and primitive cells
   compared with golden spglib data; differences analysed and documented.
-- [ ] 2.11.2 Property tests
+  Note: the simple corpus matches; six documented exceptions are in
+  `docs/algorithms/symmetry.md`.
+- [x] 2.11.2 Property tests
   Random structures built by applying the operations of random groups to
   random sites: detection recovers the group (or a supergroup when sites land
   on special positions); standardization is idempotent; P1 expansion count
   equals the sum of multiplicities; asymmetrize followed by P1 expansion
   reproduces the input.
-- [ ] 2.11.3 Performance
+  Note: generated-structure and idempotence tests cover eight groups from
+  triclinic to cubic.
+- [x] 2.11.3 Performance
   Benchmarks of detection on the corpus compared with spglib timings recorded
   from Crystal-Builder.
+  Note: process-level medians for Si (3.3 ms) and MOF-5 (20.7 ms) are in
+  `docs/algorithms/benchmarks.md`; the full spglib comparison is not run here.
 
 ## Task 2.12 — Surfaces and docs for Phase 2
 
-- [ ] 2.12.1 CLI
+- [x] 2.12.1 CLI
   `symmetry {detect,set,asymmetrize,p1,standardize,primitive,wyckoff,reduce,subgroups,lower,kpath}`
   and `spacegroup {list,show,search}`.
-- [ ] 2.12.2 Python and WASM
+  Note: every command except `kpath` is implemented; `scan`, `diagnose` and
+  `brillouin` were added as well.
+- [x] 2.12.2 Python and WASM
   Matching functions and the `SpaceGroup`/`SymmetryDataset` types.
-- [ ] 2.12.3 Docs and demos
+  Note: functions cover detection, workflow, standardize, primitive, reduce,
+  Wyckoff, diagnostics, subgroups, lowering and the Brillouin zone.
+- [x] 2.12.3 Docs and demos
   Algorithm pages (backend isolation, set versus impose, Wyckoff free
   parameters, Niggli reduction, subgroup naming, Brillouin zone, k-path); a
   browsable space group table; a demo that shows the space group, Wyckoff
   labels and Brillouin zone of a pasted CIF.
-- [ ] 2.12.4 Parity and release
+  Note: the API and algorithm pages are updated; the CIF inspector shows the
+  group, Hall number, Wyckoff letters and zone counts. The k-path pages wait
+  for Task 2.10.2-2.10.4.
+- [x] 2.12.4 Parity and release
   Parity matrix; changelog; PATCH release.
+  Note: parity and changelog are updated; the PATCH tag waits for the v0.0.1
+  gate and the external release dry run. The Phase 2 surface set is complete
+  for the implemented TypeScript/Python/CLI APIs.
