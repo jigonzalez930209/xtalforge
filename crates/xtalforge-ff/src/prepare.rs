@@ -24,7 +24,7 @@
 //! applying them does not change a UFF energy.  The vibration step uses the
 //! default crystal projection ([`HessianOptions::default`]); a caller that
 //! wants the rigid rotations of an isolated molecule removed must run
-//! [`vibrational_modes`](crate::vibrations::vibrational_modes) itself with
+//! [`crate::vibrations::vibrational_modes`] itself with
 //! [`HessianOptions::molecule`](crate::vibrations::HessianOptions::molecule).
 //! Disorder, partial occupancy, solvent removal, hydrogen addition and charge
 //! balance decisions from `core/prepare.py` are not part of this core task and
