@@ -11,6 +11,7 @@ One page per ported algorithm. Template for every page:
 
 Pages are added with the feature that introduces them:
 
+- [Lattice conventions](./lattice) (Task 1.2.5)
 - [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
 - [Validation and tolerances](./validation) (Task 0.9.4)
 - [Golden data](./golden-data) (Task 0.9.3)
