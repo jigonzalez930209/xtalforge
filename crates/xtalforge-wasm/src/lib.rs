@@ -13,6 +13,8 @@ mod common;
 #[cfg(target_arch = "wasm32")]
 mod phase1;
 #[cfg(target_arch = "wasm32")]
+mod phase3;
+#[cfg(target_arch = "wasm32")]
 mod symmetry;
 #[cfg(target_arch = "wasm32")]
 mod symmetry_analysis;
@@ -25,6 +27,11 @@ pub use phase1::{
     bonds, build_c60_info, build_graphene_info, build_nanotube_info, convert_structure, groups,
     mesh_stl, neighbors, pxrd_info, read_cif, read_structure, rings, scene_summary, slab_info,
     slab_text, supercell_info, supercell_text,
+};
+#[cfg(target_arch = "wasm32")]
+pub use phase3::{
+    WasmDocument, param_schema, project_info, project_pack, workspace_archive,
+    workspace_read_archive,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{
