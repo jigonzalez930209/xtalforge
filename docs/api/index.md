@@ -10,6 +10,7 @@ One page per domain, each showing the same operation in the four surfaces
 - [Limits](./limits)
 - [Structures and sites](./structure)
 - [Structure schema](./schema)
+- [P1 expansion](./p1)
 - [Surface parity matrix](./parity)
 - [Hello-world API](./hello-world)
 

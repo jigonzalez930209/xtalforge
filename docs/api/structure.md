@@ -48,9 +48,10 @@ readers are `label`, `element`, `frac`, `occupancy`, `u_iso`, `u_aniso`,
 
 ## Structure
 
-`StructureBuilder::new(name, lattice)` starts a P1 structure; `hall`, `site`
-and `metadata` add data, and `build` produces the immutable `Structure`.
-Reads are `name`, `lattice`, `hall`, `sites`, `metadata`, `is_p1`,
+`StructureBuilder::new(name, lattice)` starts a P1 structure; `hall`,
+`operation`, `site` and `metadata` add data, and `build` produces the
+immutable `Structure`.
+Reads are `name`, `lattice`, `hall`, `sites`, `operations`, `metadata`, `is_p1`,
 `cart_sites`, `cell_contents`, `formula`, `cell_mass`, `molar_mass`,
 `density`, `z`, `total_charge`, `charge_balance` and `summary`.
 `with_name`, `with_lattice` and `with_site` return modified copies.
