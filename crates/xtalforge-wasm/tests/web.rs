@@ -9,12 +9,35 @@
 )]
 
 use serde::Deserialize;
+use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
-    cell_volume, element_info, lattice_info, lattice_minimum_image, limits_bounds, limits_check,
-    structure_info, version,
+    angle, bonds, cell_volume, convert_structure, distance, element_info, groups, lattice_info,
+    lattice_minimum_image, limits_bounds, limits_check, neighbors, read_cif, read_structure, rings,
+    slab_info, slab_text, structure_info, supercell_info, supercell_text, torsion, version,
 };
+
+const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
+
+/// A planar regular hexagon, one C-C bond of 1.4 A per side.
+const HEXAGON_XYZ: &str = "6
+hexagon
+C 3.4 2.0 0.0
+C 2.7 3.212435565 0.0
+C 1.3 3.212435565 0.0
+C 0.6 2.0 0.0
+C 1.3 0.787564435 0.0
+C 2.7 0.787564435 0.0
+";
+
+/// Methanol, with one hydroxyl group.
+const METHANOL_XYZ: &str = "3
+methanol
+C 0.0 0.0 0.0
+O 1.43 0.0 0.0
+H 1.90 0.0 0.0
+";
 
 #[derive(Debug, Deserialize)]
 struct Vectors {
@@ -177,4 +200,201 @@ fn limits_surface() {
         Some("refuse")
     );
     assert!(property(&refuse, "refused").as_bool().unwrap_or(false));
+}
+
+fn as_array(value: &JsValue) -> js_sys::Array {
+    value
+        .clone()
+        .dyn_into::<js_sys::Array>()
+        .expect("the export must return a JavaScript array")
+}
+
+#[wasm_bindgen_test]
+fn read_structure_summary_from_cif_corpus() {
+    let reference = xtalforge::io::read_cif(NACL_CIF).expect("NaCl corpus must parse");
+    let expected = reference.summary().expect("summary");
+    let value = read_structure(NACL_CIF, "cif").expect("CIF must parse");
+    assert_eq!(
+        property(&value, "name").as_string().as_deref(),
+        Some(expected.name.as_str())
+    );
+    assert_eq!(
+        property(&value, "formula").as_string().as_deref(),
+        Some(expected.formula.as_str())
+    );
+    assert_eq!(
+        property(&value, "hall").as_string().as_deref(),
+        Some(expected.hall.as_str())
+    );
+    assert_eq!(
+        property(&value, "n_sites").as_f64(),
+        Some(expected.n_sites as f64)
+    );
+    let volume = property(&value, "volume").as_f64().expect("volume");
+    assert!((volume - expected.volume).abs() <= 1e-9);
+    assert!((volume - 177.5).abs() < 1.0);
+    assert!(!property(&value, "is_p1").as_bool().unwrap_or(true));
+}
+
+#[wasm_bindgen_test]
+fn read_structure_empty_hint_detects_the_format() {
+    let value = read_structure(HEXAGON_XYZ, "").expect("XYZ must be detected");
+    assert_eq!(property(&value, "n_sites").as_f64(), Some(6.0));
+    assert!(property(&value, "is_p1").as_bool().unwrap_or(false));
+}
+
+#[wasm_bindgen_test]
+fn supercell_info_matches_the_core_api() {
+    let reference = xtalforge::io::read_cif(NACL_CIF).expect("NaCl corpus must parse");
+    let expected = reference
+        .supercell(2, 1, 1)
+        .expect("supercell")
+        .summary()
+        .expect("summary");
+    let value = supercell_info(NACL_CIF, 2, 1, 1).expect("supercell summary");
+    assert_eq!(
+        property(&value, "n_sites").as_f64(),
+        Some(expected.n_sites as f64)
+    );
+    assert_eq!(property(&value, "n_sites").as_f64(), Some(4.0));
+    let volume = property(&value, "volume").as_f64().expect("volume");
+    assert!((volume - expected.volume).abs() <= 1e-9);
+    assert!(property(&value, "is_p1").as_bool().unwrap_or(false));
+    let repeats = as_array(&property(&value, "repeats"));
+    assert_eq!(repeats.get(0).as_f64(), Some(2.0));
+    assert_eq!(repeats.get(2).as_f64(), Some(1.0));
+}
+
+#[wasm_bindgen_test]
+fn slab_info_matches_the_core_api() {
+    let reference = xtalforge::io::read_cif(NACL_CIF).expect("NaCl corpus must parse");
+    let expected = xtalforge::core::make_slab(&reference, [1, 0, 0], 2, 10.0, 0.0).expect("slab");
+    let value = slab_info(NACL_CIF, 1, 0, 0, 2, 10.0).expect("slab summary");
+    assert_eq!(
+        property(&value, "n_sites").as_f64(),
+        Some(expected.structure.sites().len() as f64)
+    );
+    assert!(property(&value, "is_p1").as_bool().unwrap_or(false));
+    let hkl = as_array(&property(&value, "hkl"));
+    assert_eq!(hkl.get(0).as_f64(), Some(1.0));
+    assert_eq!(hkl.get(1).as_f64(), Some(0.0));
+    assert_eq!(property(&value, "layers").as_f64(), Some(2.0));
+    assert_eq!(property(&value, "vacuum").as_f64(), Some(10.0));
+    assert!(property(&value, "thickness").as_f64().unwrap_or(0.0) > 0.0);
+}
+
+#[wasm_bindgen_test]
+fn bonds_from_cif_corpus_match_the_core_api() {
+    let reference = xtalforge::io::read_cif(NACL_CIF).expect("NaCl corpus must parse");
+    let expected = reference.bond_graph().expect("bond graph");
+    let value = bonds(NACL_CIF).expect("bond list");
+    let array = as_array(&value);
+    assert_eq!(array.length() as usize, expected.bonds.len());
+    assert!(array.length() > 0);
+    let first = array.get(0);
+    assert_eq!(
+        property(&first, "i").as_f64(),
+        expected.bonds.first().map(|bond| bond.i as f64)
+    );
+    let image = as_array(&property(&first, "image"));
+    assert_eq!(image.length(), 3);
+    assert!(
+        property(&first, "distance")
+            .as_f64()
+            .is_some_and(|distance| distance > 0.0)
+    );
+    assert!(!property(&first, "explicit").as_bool().unwrap_or(true));
+}
+
+#[wasm_bindgen_test]
+fn rings_find_the_hexagon() {
+    let reference = xtalforge::io::read_xyz(HEXAGON_XYZ).expect("hexagon must parse");
+    let expected = xtalforge::core::rings(&reference, 8).expect("rings");
+    let value = rings(HEXAGON_XYZ, 8).expect("ring list");
+    let array = as_array(&value);
+    assert_eq!(array.length() as usize, expected.len());
+    assert_eq!(array.length(), 1);
+    let ring = array.get(0);
+    assert_eq!(property(&ring, "size").as_f64(), Some(6.0));
+    assert_eq!(as_array(&property(&ring, "atoms")).length(), 6);
+}
+
+#[wasm_bindgen_test]
+fn groups_find_the_hydroxyl() {
+    let reference = xtalforge::io::read_xyz(METHANOL_XYZ).expect("methanol must parse");
+    let expected = xtalforge::core::find_groups(&reference).expect("groups");
+    let value = groups(METHANOL_XYZ).expect("group list");
+    let array = as_array(&value);
+    assert_eq!(array.length() as usize, expected.len());
+    assert!(array.length() >= 1);
+    let group = array.get(0);
+    assert_eq!(
+        property(&group, "kind").as_string().as_deref(),
+        Some("hydroxyl")
+    );
+    assert_eq!(as_array(&property(&group, "atoms")).length(), 2);
+}
+
+#[wasm_bindgen_test]
+fn neighbors_from_cif_corpus_match_the_core_api() {
+    let reference = xtalforge::io::read_cif(NACL_CIF).expect("NaCl corpus must parse");
+    let expected = xtalforge::core::neighbors(&reference, 3.0).expect("neighbors");
+    let value = neighbors(NACL_CIF, 3.0).expect("neighbor list");
+    let array = as_array(&value);
+    assert_eq!(array.length() as usize, expected.len());
+    assert!(array.length() > 0);
+    for (index, expected) in expected.iter().enumerate().take(16) {
+        let item = array.get(index as u32);
+        assert_eq!(property(&item, "i").as_f64(), Some(expected.i as f64));
+        assert_eq!(property(&item, "j").as_f64(), Some(expected.j as f64));
+        assert!(
+            property(&item, "distance")
+                .as_f64()
+                .is_some_and(|distance| (distance - expected.distance).abs() <= 1e-12)
+        );
+    }
+}
+
+#[wasm_bindgen_test]
+fn measures_match_the_core_api() {
+    let reference = xtalforge::io::read_xyz(HEXAGON_XYZ).expect("hexagon must parse");
+    let d = distance(HEXAGON_XYZ, 0, 1).expect("distance");
+    let d_expected = xtalforge::core::distance(&reference, 0, 1).expect("core distance");
+    assert!((d - d_expected).abs() <= 1e-12);
+    assert!((d - 1.4).abs() <= 1e-9);
+
+    let a = angle(HEXAGON_XYZ, 0, 1, 2).expect("angle");
+    let a_expected = xtalforge::core::angle(&reference, 0, 1, 2).expect("core angle");
+    assert!((a - a_expected).abs() <= 1e-12);
+    assert!((a - 120.0).abs() <= 1e-6);
+
+    let t = torsion(HEXAGON_XYZ, 0, 1, 2, 3).expect("torsion");
+    let t_expected = xtalforge::core::torsion(&reference, 0, 1, 2, 3).expect("core torsion");
+    assert!((t - t_expected).abs() <= 1e-12);
+}
+
+#[wasm_bindgen_test]
+fn phase_one_exports_reject_invalid_input() {
+    assert!(read_structure(NACL_CIF, "unknown-format").is_err());
+    assert!(bonds("not a structure").is_err());
+    assert!(rings(HEXAGON_XYZ, 2).is_err());
+    assert!(neighbors(HEXAGON_XYZ, 0.0).is_err());
+    assert!(distance(HEXAGON_XYZ, 99, 0).is_err());
+    assert!(supercell_info(NACL_CIF, 0, 1, 1).is_err());
+    assert!(slab_info(NACL_CIF, 0, 0, 0, 1, 10.0).is_err());
+}
+
+#[wasm_bindgen_test]
+fn phase_one_writers_return_text() {
+    let summary = read_cif(NACL_CIF).expect("read_cif");
+    assert_eq!(
+        property(&summary, "formula").as_string().as_deref(),
+        Some("Na Cl")
+    );
+    let xyz = convert_structure(NACL_CIF, "cif", "xyz").expect("convert");
+    assert!(xyz.contains("Lattice="));
+    let cell = supercell_text(NACL_CIF, 2, 1, 1).expect("supercell text");
+    assert!(cell.starts_with("data_"));
+    let slab = slab_text(NACL_CIF, 1, 0, 0, 1, 10.0).expect("slab text");
+    assert!(slab.starts_with("data_"));
 }
