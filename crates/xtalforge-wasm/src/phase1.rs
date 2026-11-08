@@ -338,6 +338,89 @@ pub fn detect_symmetry(text: &str, symprec: f64) -> Result<JsValue, JsValue> {
     Ok(object.into())
 }
 
+/// Reduces a structure to its detected asymmetric unit.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a failed search.
+#[wasm_bindgen]
+pub fn asymmetrize_info(text: &str, symprec: f64) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let reduced = xtalforge::symmetry::asymmetrize(
+        &structure,
+        xtalforge::symmetry::SymmetryOptions {
+            symprec,
+            ..Default::default()
+        },
+    )
+    .map_err(to_js_error)?;
+    summary_object(&reduced)
+}
+
+/// Expands a structure to P1.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or an empty structure.
+#[wasm_bindgen]
+pub fn to_p1_info(text: &str) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let expanded = xtalforge::symmetry::to_p1(&structure).map_err(to_js_error)?;
+    summary_object(&expanded)
+}
+
+/// Applies a space group in `reinterpret` or `impose` mode.
+///
+/// The object carries the structure summary plus `set_report` with the
+/// input/output site counts and the largest imposed displacement.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text, an unknown symbol or mode.
+#[wasm_bindgen]
+pub fn set_space_group_info(text: &str, symbol: &str, mode: &str) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let group = xtalforge::symmetry::SpaceGroup::parse(symbol).map_err(to_js_error)?;
+    let mode = match mode {
+        "reinterpret" => xtalforge::symmetry::SetMode::Reinterpret,
+        "impose" => xtalforge::symmetry::SetMode::Impose,
+        other => {
+            return Err(JsValue::from_str(&format!(
+                "invalid_input: unknown set mode {other:?}; use reinterpret or impose"
+            )));
+        }
+    };
+    let report =
+        xtalforge::symmetry::set_space_group(&structure, &group, mode).map_err(to_js_error)?;
+    let object = summary_object(&report.structure)?;
+    let summary = report.summary(&group);
+    let set_report = js_sys::Object::new();
+    set(
+        &set_report,
+        "n_input",
+        JsValue::from_f64(summary.n_input as f64),
+    );
+    set(
+        &set_report,
+        "n_output",
+        JsValue::from_f64(summary.n_output as f64),
+    );
+    set(
+        &set_report,
+        "max_displacement",
+        JsValue::from_f64(summary.max_displacement),
+    );
+    set(&set_report, "hall", JsValue::from_str(&summary.hall));
+    set(
+        &set_report,
+        "number",
+        JsValue::from_f64(f64::from(summary.number)),
+    );
+    let object: js_sys::Object = object.unchecked_into();
+    set(&object, "set_report", set_report.into());
+    Ok(object.into())
+}
+
 /// Minimum-image distance between two P1 atoms, in Angstrom.
 ///
 /// # Errors
