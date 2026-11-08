@@ -13,6 +13,7 @@ categories.workspace = true
 description = "Molecule, carbon and polymer builders for xtalforge."
 
 [dependencies]
+xtalforge-analysis = { workspace = true }
 xtalforge-core = { workspace = true }
 xtalforge-io = { workspace = true }
 serde = { workspace = true }
