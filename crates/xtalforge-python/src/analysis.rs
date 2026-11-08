@@ -154,3 +154,60 @@ fn atom_index(value: i64) -> PyResult<usize> {
         ))
     })
 }
+
+/// Calculates a PXRD pattern.
+#[pyfunction]
+#[pyo3(signature = (text, radiation = "cu-ka".to_string(), max_two_theta = 80.0, step = 0.02, format_hint = None))]
+#[allow(clippy::too_many_arguments)] // one Python argument per pattern option
+pub(crate) fn pxrd<'py>(
+    py: Python<'py>,
+    text: &str,
+    radiation: String,
+    max_two_theta: f64,
+    step: f64,
+    format_hint: Option<&str>,
+) -> PyResult<Bound<'py, PyDict>> {
+    use xtalforge::analysis::{PxrdOptions, Radiation, calculate_pxrd};
+    let structure = load_structure(text, format_hint)?;
+    let radiation = match radiation.as_str() {
+        "cu-ka" | "cuka" => Radiation::CuKa,
+        "cu-ka1" | "cuka1" => Radiation::CuKa1,
+        "mo-ka" | "moka" => Radiation::MoKa,
+        "co-ka" | "coka" => Radiation::CoKa,
+        "fe-ka" | "feka" => Radiation::FeKa,
+        "cr-ka" | "crka" => Radiation::CrKa,
+        "ag-ka" | "agka" => Radiation::AgKa,
+        other => return Err(crate::invalid_input(format!("unknown radiation {other:?}"))),
+    };
+    let pattern = calculate_pxrd(
+        &structure,
+        &PxrdOptions {
+            radiation,
+            two_theta_range: [5.0, max_two_theta],
+            step,
+            ..PxrdOptions::default()
+        },
+    )
+    .map_err(crate::map_error)?;
+    let dict = PyDict::new(py);
+    let reflections = PyList::empty(py);
+    for reflection in &pattern.reflections {
+        let item = PyDict::new(py);
+        item.set_item("hkl", reflection.hkl.to_vec())?;
+        item.set_item("d", reflection.d)?;
+        item.set_item("two_theta", reflection.two_theta)?;
+        item.set_item("multiplicity", reflection.multiplicity)?;
+        item.set_item("intensity", reflection.intensity)?;
+        reflections.append(item)?;
+    }
+    dict.set_item("reflections", reflections)?;
+    dict.set_item(
+        "points",
+        pattern
+            .points
+            .iter()
+            .map(|point| (point.two_theta, point.intensity))
+            .collect::<Vec<_>>(),
+    )?;
+    Ok(dict)
+}

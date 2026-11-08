@@ -15,8 +15,9 @@ mod classes;
 mod structures;
 mod symmetry;
 mod symmetry_analysis;
+mod view;
 
-use analysis::{angle, bonds, distance, groups, neighbors, rings, torsion};
+use analysis::{angle, bonds, distance, groups, neighbors, pxrd, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
 use structures::{read_cif, read_structure, slab, supercell};
 use symmetry::{
@@ -27,6 +28,7 @@ use symmetry_analysis::{
     diagnose, molecular_point_group, primitive_cell, reduce_structure, standardize,
     tolerance_ladder, wyckoff_assignments,
 };
+use view::{mesh_stl, scene_summary};
 
 create_exception!(
     _xtalforge,
@@ -219,6 +221,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(slab, module)?)?;
     module.add_function(wrap_pyfunction!(supercell, module)?)?;
     module.add_function(wrap_pyfunction!(torsion, module)?)?;
+    module.add_function(wrap_pyfunction!(pxrd, module)?)?;
     module.add_function(wrap_pyfunction!(detect_symmetry, module)?)?;
     module.add_function(wrap_pyfunction!(asymmetrize, module)?)?;
     module.add_function(wrap_pyfunction!(to_p1, module)?)?;
@@ -236,6 +239,8 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(detect_magnetic_symmetry, module)?)?;
     module.add_function(wrap_pyfunction!(change_setting, module)?)?;
     module.add_function(wrap_pyfunction!(band_path, module)?)?;
+    module.add_function(wrap_pyfunction!(scene_summary, module)?)?;
+    module.add_function(wrap_pyfunction!(mesh_stl, module)?)?;
     module.add_function(wrap_pyfunction!(molecular_point_group, module)?)?;
     module.add_class::<Lattice>()?;
     module.add_class::<Site>()?;
