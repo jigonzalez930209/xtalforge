@@ -1,0 +1,129 @@
+//! Integration tests for the `xtalforge` CLI hello-world surface.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::indexing_slicing
+)]
+
+use std::process::{Command, Output};
+
+fn run(args: &[&str]) -> Output {
+    Command::new(env!("CARGO_BIN_EXE_xtalforge"))
+        .args(args)
+        .output()
+        .expect("the CLI binary must run")
+}
+
+#[test]
+fn version_human_output() {
+    let output = run(&["version"]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    assert_eq!(
+        text.trim(),
+        format!("xtalforge {}", env!("CARGO_PKG_VERSION"))
+    );
+}
+
+#[test]
+fn version_json_output() {
+    let output = run(&["--json", "version"]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    assert_eq!(
+        value["version"],
+        serde_json::Value::String(env!("CARGO_PKG_VERSION").to_owned())
+    );
+}
+
+#[test]
+fn cell_volume_human_output() {
+    let output = run(&["cell-volume", "1", "1", "1", "90", "90", "90"]);
+    assert!(output.status.success());
+    let volume: f64 = String::from_utf8(output.stdout)
+        .expect("stdout is UTF-8")
+        .trim()
+        .parse()
+        .expect("the volume must be a number");
+    assert!((volume - 1.0).abs() < 1e-12);
+}
+
+#[test]
+fn cell_volume_json_output() {
+    let output = run(&["--json", "cell-volume", "2", "2", "3", "90", "90", "90"]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    let volume = value["volume"].as_f64().expect("volume must be a number");
+    assert!((volume - 12.0).abs() < 1e-12);
+}
+
+#[test]
+fn invalid_cell_exits_with_code_three() {
+    let output = run(&["cell-volume", "0", "1", "1", "90", "90", "90"]);
+    assert_eq!(output.status.code(), Some(3));
+    let text = String::from_utf8(output.stderr).expect("stderr is UTF-8");
+    assert!(text.contains("invalid input"));
+}
+
+#[test]
+fn invalid_cell_json_error_has_a_code() {
+    let output = run(&["--json", "cell-volume", "0", "1", "1", "90", "90", "90"]);
+    assert_eq!(output.status.code(), Some(3));
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stderr).expect("stderr must be JSON");
+    assert_eq!(value["error"]["code"], "invalid_input");
+}
+
+#[test]
+fn missing_arguments_use_the_usage_exit_code() {
+    let output = run(&["cell-volume", "1"]);
+    assert_eq!(output.status.code(), Some(2));
+}
+
+#[test]
+fn shared_cell_volume_vectors() {
+    let vectors: serde_json::Value =
+        serde_json::from_str(include_str!("../../../tests/vectors/hello_world.json"))
+            .expect("shared hello-world vectors must be valid JSON");
+    let cases = vectors["cell_volume"]
+        .as_array()
+        .expect("cell_volume must be an array");
+    for case in cases {
+        let number = |key: &str| {
+            case[key]
+                .as_f64()
+                .unwrap_or_else(|| panic!("missing numeric field {key}"))
+        };
+        let output = Command::new(env!("CARGO_BIN_EXE_xtalforge"))
+            .arg("--json")
+            .arg("cell-volume")
+            .arg(number("a").to_string())
+            .arg(number("b").to_string())
+            .arg(number("c").to_string())
+            .arg(number("alpha").to_string())
+            .arg(number("beta").to_string())
+            .arg(number("gamma").to_string())
+            .output()
+            .expect("the CLI binary must run");
+        assert!(output.status.success());
+        let value: serde_json::Value =
+            serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+        let got = value["volume"].as_f64().expect("volume must be a number");
+        assert!((got - number("expected")).abs() <= number("tolerance"));
+    }
+}
+
+#[test]
+fn help_lists_the_hello_world_commands_and_flags() {
+    let output = run(&["--help"]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    assert!(text.contains("cell-volume"));
+    assert!(text.contains("--json"));
+    assert!(text.contains("--threads"));
+    assert!(text.contains("--limits"));
+}
