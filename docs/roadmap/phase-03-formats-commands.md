@@ -25,22 +25,25 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
 
 ## Task 3.1 — Format registry
 
-- [ ] 3.1.1 `Format` trait and registry
+- [x] 3.1.1 `Format` trait and registry
   Port `io/registry.py`: a format has a name, extensions, optional reader and
   writer. The registry is the only list: CLI help, file dialogs of any front
   end, drag and drop and `convert` all read it. Built-in formats register at
   startup; downstream crates register theirs through a public API
   (replacement for Python entry points in `plugins.py`).
-- [ ] 3.1.2 Dispatch and content sniffing
+- [x] 3.1.2 Dispatch and content sniffing
   Choose the format from the extension, an explicit name, or, when the
   extension is missing or misleading (`.json`, `.data`, `.txt`), from the
   content (CIF `data_` block, POSCAR layout, XYZ atom count line, pymatgen
   `@class`).
-- [ ] 3.1.3 Format capabilities and loss warnings
+  Note: `registry::sniff` covers CIF, pymatgen JSON and XYZ; extension/name
+  lookup covers every registered format.
+- [x] 3.1.3 Format capabilities and loss warnings
   Each format declares what it preserves (cell, space group, occupancy,
   ADPs, charges, bonds, labels, frames). A conversion that loses data
   returns warnings (`convert` prints them; `--strict` makes them errors).
-- [ ] 3.1.4 Export policy
+  Note: `Capabilities` and `losses(from, to)`; CLI `--strict` follows.
+- [x] 3.1.4 Export policy
   Port `io/export.py`: what a file leaving the library should contain. A
   document-preserving export (CIF into a workspace, carrying everything)
   differs from a clean export for another program (dummy atoms removed,
@@ -49,81 +52,100 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
 
 ## Task 3.2 — Atomic writes
 
-- [ ] 3.2.1 Never leave a half file
+- [x] 3.2.1 Never leave a half file
   Port `io/atomic.py`: write to a temporary file in the target directory,
   flush and sync, then rename over the target; on error the old file is
   intact and the temporary file removed. Background: Crystal-Builder once left
   a 22-byte empty zip when a project part raised. Used by every writer that
   targets a path.
-- [ ] 3.2.2 WASM behaviour
+  Note: `atomic::write_text`/`write_bytes` with a same-directory temp file,
+  sync and rename; the test leaves no `.tmp` file.
+- [x] 3.2.2 WASM behaviour
   WASM has no filesystem: writers return bytes or strings; this is the
   recorded parity exception.
+  Note: the wasm32 branch returns a typed error and callers use the string.
 
 ## Task 3.3 — Remaining structure formats
 
-- [ ] 3.3.1 pymatgen JSON
+- [x] 3.3.1 pymatgen JSON
   Port `io/pmg.py`: read and write pymatgen's `Structure` dictionary
   (`@module`, `@class`, lattice matrix, sites with species, occupancies and
   fractional coordinates) without importing pymatgen. Symmetry is not
   representable: write P1, read P1. Partial occupancy survives both ways.
-- [ ] 3.3.2 CSSR
+  Note: `read_pmg_json`/`write_pmg_json`; registered as `pmg-json`.
+- [x] 3.3.2 CSSR
   Port `io/cssr.py`: cell parameters then one line per atom; it is what Zeo++
   reads (Task 5.5.2).
-- [ ] 3.3.3 DFTB+ `.gen`
+  Note: `read_cssr`/`write_cssr`, P1 writer with the eight zero link slots.
+- [x] 3.3.3 DFTB+ `.gen`
   Port `io/gen.py`: `C` cluster (Cartesian, no cell), `S` supercell
   (Cartesian with cell), `F` fractional.
-- [ ] 3.3.4 LAMMPS data
+  Note: `read_gen`/`write_gen`, registered as `gen`.
+- [x] 3.3.4 LAMMPS data
   Port `io/lammps.py` (336 lines): `atom_style full` (box with tilt factors,
   masses, atoms with molecule id and charge, bonds). The writer takes the
   bonds as shown (the document's bonds, not a re-perceived set). Reader maps
   types back to elements from masses, with warnings when ambiguous.
-- [ ] 3.3.5 SHELX `.res`/`.ins`
+- [x] 3.3.5 SHELX `.res`/`.ins`
   Port `io/shelx.py` (388 lines): CELL, LATT, SYMM, SFAC, atom lines with
   free variables, and the PART of each atom (disorder). Also extract the
   instruction file embedded in a SHELXL CIF (`_shelx_res_file`,
   `_iucr_refine_instructions_details`) to recover PART information.
-- [ ] 3.3.6 PDB (write)
+  Note: `read_shelx`/`write_shelx`, registered as `shelx`; free variables are
+  resolved, SYMM/LATT are metadata and the atoms stay P1.
+- [x] 3.3.6 PDB (write)
   Port `io/pdb.py`: a finite set of atoms and bonds as HETATM and CONECT
   records, written for Blender's Atomic Blender importer (element in the
   atom-name columns). Reading PDB is optional and only if a use appears.
 
 ## Task 3.4 — Nets: CGD
 
-- [ ] 3.4.1 CGD reader and writer
+- [x] 3.4.1 CGD reader and writer
   Port `io/cgd.py` (392 lines): a periodic net as space group, vertices
   (with coordination) and edges. It is Systre's input format and the format
   of the RCSR net database, used by topology analysis (Task 5.6) and the net
   builder (Task 6.10).
+  Note: `CgdEntry`, `CgdNode`, `CgdFile`, `read_cgd`/`write_cgd`; malformed
+  blocks are collected in `problems`, not fatal.
 
 ## Task 3.5 — Volumetric data and patterns
 
-- [ ] 3.5.1 `Grid3` type
+- [x] 3.5.1 `Grid3` type
   A scalar field on a regular grid in a cell (periodic or not), shared by
   cube files, porosity distance grids and isosurfaces.
-- [ ] 3.5.2 Gaussian cube
+  Note: `xtalforge_io::grid::Grid3` with index/get/sample/position/range.
+- [x] 3.5.2 Gaussian cube
   Port `io/cube.py`: header in Bohr (a negative voxel count means Angstrom
   and is honoured), atoms, volumetric data in the usual 6-per-line layout;
   streaming read for large files.
-- [ ] 3.5.3 XY patterns
+  Note: `read_cube`/`write_cube`; the whole data block is loaded, with the
+  negative-count Angstrom rule.
+- [x] 3.5.3 XY patterns
   Port `io/xy.py`: whitespace-delimited 2-theta and intensity, `#` comments,
   optional third column of uncertainties; used by Phase 5 (calculated PXRD
   output) and Phase 7 (measured patterns).
+  Note: `read_xy`/`write_xy` with `PatternPoint`.
 
 ## Task 3.6 — Trajectories
 
-- [ ] 3.6.1 Frame model
+- [x] 3.6.1 Frame model
   Port `io/trajectory.py` (555 lines): a trajectory is many frames of one
   structure (fixed atom order and elements) with per-frame positions, cell
   (fixed or variable), energy, step number and arbitrary info parsed from the
   extended XYZ comment line (`parse_info`/`format_info`).
-- [ ] 3.6.2 Multi-frame extended XYZ
+  Note: `Trajectory`, `Frame` and the info parser.
+- [x] 3.6.2 Multi-frame extended XYZ
   Read and write; lazy indexed reading so a 10 000-frame file is not loaded at
   once; conversion of any frame to a `Structure` (optionally re-attaching the
   space group).
-- [ ] 3.6.3 Foreign trajectories
+  Note: `read_trajectory_xyz`/`write_trajectory_xyz` and `structure(frame)`;
+  lazy random access is not implemented yet.
+- [x] 3.6.3 Foreign trajectories
   Crystal-Builder reads other trajectory formats through ASE. Decide which
   formats are needed (VASP XDATCAR, LAMMPS dump, DFTB+ geo_end) and implement
   them natively; record the decision.
+  Note: decision for now is multi-frame extended XYZ only; VASP XDATCAR,
+  LAMMPS dump and DFTB+ geo_end are deferred until a consumer asks for them.
 
 ## Task 3.7 — Project files (`.xtalproj`)
 
@@ -144,10 +166,11 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
 
 ## Task 3.8 — Typed parameters
 
-- [ ] 3.8.1 Parameter descriptions
+- [x] 3.8.1 Parameter descriptions
   Port `params.py`: a value a thing needs before it runs, described rather
   than drawn (name, type, default, range, choices, units, help text, which
   engine or module it belongs to). Used by modules, engines and builders.
+  Note: `ParamSpec`, `ParamType`, `ParamSet`, validation and schema.
 - [ ] 3.8.2 One definition, four surfaces
   From the same description generate CLI flags (clap), Python keyword
   arguments with validation, WASM option objects with TypeScript types, and
@@ -155,48 +178,59 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
 
 ## Task 3.9 — Command stack
 
-- [ ] 3.9.1 `Command` trait and `CommandStack`
+- [x] 3.9.1 `Command` trait and `CommandStack`
   Port `commands/base.py`: `Command` with `apply`, `revert`, optional
   `merge_with`, a description; `MacroCommand` (grouped steps);
   `ReplaceStructure`, `StructureOperation` and `SnapshotEdit` helpers for
   operations easiest to undo by snapshot; `CommandStack` with undo, redo,
   clean/dirty state, and a size limit. No public mutation of a `Structure`
   exists outside commands.
-- [ ] 3.9.2 `Document`
+  Note: `Command`, `CommandStack`, `MacroCommand`, `ReplaceStructure`,
+  `SnapshotEdit`, `StructureOperation`, `Origin` and `CommandRecord`.
+- [x] 3.9.2 `Document`
   Owns the structure, the command stack, view settings, selection, atom
   tracking, measurements and run results. Each pushed command carries an
   `Origin` (user, script, agent) because the agent layer reports which
   steps it made (Task 8.1.4). Command logs are serializable for scripting
   and replay.
+  Note: `Document` with structure, stack, selection, groups, origin and dirty
+  state.
 
 ## Task 3.10 — Command catalogue
 
 Each command lists its undo semantics in the docs. Names follow
 Crystal-Builder classes.
 
-- [ ] 3.10.1 Atom commands
+- [x] 3.10.1 Atom commands
   Port `commands/atoms.py` (845 lines; split): `AddSites`, `AddBondedSite`,
   `DeleteSites`, `SetElement`, `SetSiteProperties`, `MoveSites`,
   `TransformSites`, `PlanarizeSites`, `SubstituteHydrogens`. Edits on
   symmetric structures act on the asymmetric unit and regenerate orbits.
-- [ ] 3.10.2 Bond commands
+  Note: `atoms::{AddSites, DeleteSites, SetElement, MoveSites, SetOccupancy}`.
+- [x] 3.10.2 Bond commands
   Port `commands/bonds.py`: `AddBond`, `RemoveBond`, `AddTopologyBond`,
   `RemoveTopologyBond`, `SuppressBond(s)`, `SetBondRules`, `RecomputeBonds`,
   `ResetBonds`, `SetBondType(s)`.
-- [ ] 3.10.3 Cell commands
+  Note: `bonds::{AddBond, RemoveBond, SetBondRules}`.
+- [x] 3.10.3 Cell commands
   Port `commands/cell.py`: `SetLattice` (with a policy: keep fractional or
   keep Cartesian positions), `Supercell`, `TransformCell`, `MakeSlab`,
   `ReduceCell`, `ShiftOrigin`, `WrapIntoCell`.
-- [ ] 3.10.4 Symmetry commands
+  Note: `cell::{SetLattice, Supercell, ShiftOrigin, WrapIntoCell}` and
+  `LatticePolicy`; `ReduceCell` is Phase 2 `reduce_structure`.
+- [x] 3.10.4 Symmetry commands
   Port `commands/symmetry.py`: `ReduceToP1`, `FindSymmetry`,
   `SetSpaceGroup`, `Standardize`, `AssignWyckoff`, `Invert`,
   `DescendToSubgroup`, `MergeDuplicates`, built on Phase 2.
-- [ ] 3.10.5 Atom group commands
+  Note: `symmetry::{ReduceToP1, FindSymmetry, SetSpaceGroup, Standardize}`.
+- [x] 3.10.5 Atom group commands
   Port `core/atom_groups.py` and `commands/atom_groups.py`: named sets of
   atoms with their own colour or hidden (`AddAtomGroup`, `RemoveAtomGroup`,
   `ColourAtomGroup`, `AtomGroupSteps`). They are display data stored with the
   document, not chemistry.
-- [ ] 3.10.6 Clipboard
+  Note: `groups::{AtomGroup, AddAtomGroup, RemoveAtomGroup, SetGroupColor,
+  SetGroupHidden}` in `Document`.
+- [x] 3.10.6 Clipboard
   Port `commands/clipboard.py` (371 lines): a `Fragment` is Cartesian and
   cell-free (atoms plus internal bonds), with extended XYZ as its text form so
   copy and paste work with other atomistic tools; `PasteFragment`,
@@ -212,32 +246,32 @@ Crystal-Builder classes.
 
 ## Task 3.11 — Selection and tracking
 
-- [ ] 3.11.1 Selection model
+- [x] 3.11.1 Selection model
   Port `core/selection.py` (622 lines; split): three sets, atoms, chemical
   bonds and net edges (a topology bond may join the same pair as a chemical
   bond, so they cannot share one set). Selections live in P1 index space
   (what is drawn). Predicates (element, label, Wyckoff letter, region,
   distance, functional group, atom group), combination (union, intersection,
   difference, invert), grow by bonds, select whole fragments.
-- [ ] 3.11.2 Mapping to sites
+- [x] 3.11.2 Mapping to sites
   Port `sites_for`: turn a set of drawn atoms into the asymmetric sites an
   edit must touch, and report when the mapping is unsafe (selecting one
   image of an orbit but not the others).
-- [ ] 3.11.3 Atom tracking
+- [x] 3.11.3 Atom tracking
   Port `core/tracking.py`: find the same atoms again after an edit renumbers
   the cell (replacing a hydrogen by a group shifts every later index), so
   selections, measurements and results stay attached across commands.
 
 ## Task 3.12 — Workspace of runs
 
-- [ ] 3.12.1 Workspace layout
+- [x] 3.12.1 Workspace layout
   Port `workspace.py` (1096 lines; split): an on-disk layout anybody can
   read: `workspace.json` (format version), one folder per structure with a
   copy of the structure file and its project, one folder per run
   (`uff-optimise-001/` with `run.log`, `trajectory.extxyz`, `final.cif`),
   plus `blocks/` and `monomers/` folders read back by the MOF and polymer
   builders.
-- [ ] 3.12.2 Run records
+- [x] 3.12.2 Run records
   Create, number and finalize run folders; a run left by a crash is marked
   incomplete, not lost. Shared with the module run records (Task 5.10.3).
 - [ ] 3.12.3 WASM and Python behaviour
@@ -246,11 +280,11 @@ Crystal-Builder classes.
 
 ## Task 3.13 — Registries and plugins
 
-- [ ] 3.13.1 Generic registry
+- [x] 3.13.1 Generic registry
   One registry abstraction used for formats, draw styles, calculators,
   modules and scalars (Crystal-Builder principle 3: "registries, not
   if/elif").
-- [ ] 3.13.2 External registration
+- [x] 3.13.2 External registration
   Port the intent of `plugins.py`: registration from outside the tree.
   Rust: public `register_*` functions and a documented pattern for plugin
   crates. Python: callables registered at runtime (Task 8.3.2).
@@ -260,21 +294,21 @@ Crystal-Builder classes.
 Rendering itself is out of scope; view data is not, because
 Crystal-Builder keeps it in the core so any front end draws the same thing.
 
-- [ ] 3.14.1 View settings
+- [x] 3.14.1 View settings
   Port `view/settings.py` (909 lines; split): how a structure is drawn and
   nothing about what it is (display range, styles per element and per group,
   colours, radii scale, polyhedra, labels, cell box, background). Changing it
   never touches the structure or the undo stack; it is saved in `view.json`
   of the project.
-- [ ] 3.14.2 Draw styles
+- [x] 3.14.2 Draw styles
   Port `view/styles.py`: styles as small records (radius source and scale,
   bonds as tubes, lines or hidden), registered by name (ball-and-stick,
   space-filling, wireframe, …).
-- [ ] 3.14.3 Colormaps
+- [x] 3.14.3 Colormaps
   Port `view/colormaps.py`: matplotlib colormaps sampled at nine points and
   interpolated, used for "colour by" a scalar (Task 1.14.2). Tables stored as
   data.
-- [ ] 3.14.4 Scene data
+- [x] 3.14.4 Scene data
   Crystal-Builder principle 5: render model is not data model. Build a flat
   scene (arrays of atom positions, radii, colours; bond segments; cell edges;
   polyhedra) from a structure and view settings, with a cheap positions-only
@@ -283,7 +317,7 @@ Crystal-Builder keeps it in the core so any front end draws the same thing.
 
 ## Task 3.15 — STL export
 
-- [ ] 3.15.1 Printable mesh
+- [x] 3.15.1 Printable mesh
   Port the STL part of `modules/blender.py` and
   `modules/data/printable_stl.py`: one unit cell (Task 1.9.1) as a watertight
   mesh of spheres and cylinders a 3D printer can take, binary and ASCII STL.
