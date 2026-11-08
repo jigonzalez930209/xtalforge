@@ -165,6 +165,63 @@ fn shared_element_vectors() {
 }
 
 #[test]
+fn cell_human_output() {
+    let output = run(&["cell", "--params", "5", "5", "5", "90", "90", "90"]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    assert!(text.contains("volume=125.000000"));
+    assert!(text.contains("a=5.000000"));
+}
+
+#[test]
+fn cell_json_output() {
+    let output = run(&[
+        "--json", "cell", "--params", "3", "4", "5", "60", "70", "80",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    let volume = value["volume"].as_f64().expect("volume");
+    assert!((volume - 48.827_604_320_084_98).abs() < 1e-9);
+    assert_eq!(value["parameters"][0], 3.0);
+}
+
+#[test]
+fn invalid_cell_parameters_exit_with_code_three() {
+    let output = run(&["cell", "--params", "0", "1", "1", "90", "90", "90"]);
+    assert_eq!(output.status.code(), Some(3));
+}
+
+#[test]
+fn shared_lattice_vectors() {
+    let vectors: serde_json::Value =
+        serde_json::from_str(include_str!("../../../tests/vectors/lattice.json"))
+            .expect("lattice vectors must be valid JSON");
+    for case in vectors["cases"].as_array().expect("cases array") {
+        let number = |name: &str| case[name].as_f64().expect("numeric field").to_string();
+        let output = Command::new(env!("CARGO_BIN_EXE_xtalforge"))
+            .args([
+                "--json",
+                "cell",
+                "--params",
+                &number("a"),
+                &number("b"),
+                &number("c"),
+                &number("alpha"),
+                &number("beta"),
+                &number("gamma"),
+            ])
+            .output()
+            .expect("the CLI binary must run");
+        assert!(output.status.success());
+        let value: serde_json::Value =
+            serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+        let volume = value["volume"].as_f64().expect("volume");
+        assert!((volume - case["volume"].as_f64().expect("expected volume")).abs() < 1e-9);
+    }
+}
+
+#[test]
 fn help_lists_the_hello_world_commands_and_flags() {
     let output = run(&["--help"]);
     assert!(output.status.success());
