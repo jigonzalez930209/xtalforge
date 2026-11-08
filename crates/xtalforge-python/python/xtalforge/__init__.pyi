@@ -1,0 +1,23 @@
+from typing import Final
+
+class XtalforgeError(Exception):
+    """Base class for every xtalforge error.
+
+    ``args`` carries the stable error code first and the human-readable
+    message second, for example ``("invalid_input", "invalid input: ...")``.
+    """
+
+class InputError(XtalforgeError):
+    """A geometry or value does not satisfy the API preconditions."""
+
+__version__: Final[str]
+
+def version() -> str: ...
+def cell_volume(
+    a: float,
+    b: float,
+    c: float,
+    alpha: float,
+    beta: float,
+    gamma: float,
+) -> float: ...
