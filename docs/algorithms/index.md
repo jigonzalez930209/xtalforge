@@ -9,8 +9,12 @@ One page per ported algorithm. Template for every page:
 5. Complexity and numerical caveats
 6. Validation data and tolerances
 
-Pages are added with the feature that introduces them. Planned first pages:
+Pages are added with the feature that introduces them:
 
-- Symmetry backend (Task 0.3.5)
-- Validation tolerances (Task 0.9.3)
-- Neighbor search, bond detection, ring perception (Task 1.15.2)
+- [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
+- [Validation and tolerances](./validation) (Task 0.9.4)
+- [Golden data](./golden-data) (Task 0.9.3)
+- [sci-form reuse](./sci-form-reuse) (Task 0.4)
+- [Dependency replacement map](./dependency-map) (Task 0.10)
+
+Neighbor search, bond detection and ring perception follow in Task 1.15.2.
