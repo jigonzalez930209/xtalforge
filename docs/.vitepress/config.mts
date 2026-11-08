@@ -3,7 +3,9 @@ import { defineConfig } from 'vitepress'
 const roadmapItems = [
   { text: 'Overview', link: '/roadmap/' },
   { text: 'Phase 0 — Foundations', link: '/roadmap/phase-00-foundations' },
+  { text: 'Phase 0 — Remaining work', link: '/roadmap/phase-00-status' },
   { text: 'Phase 1 — Core', link: '/roadmap/phase-01-core' },
+  { text: 'Phase 1 — Methodology', link: '/roadmap/phase-01-methodology' },
   { text: 'Phase 2 — Symmetry', link: '/roadmap/phase-02-symmetry' },
   { text: 'Phase 3 — Formats, commands, view data', link: '/roadmap/phase-03-formats-commands' },
   { text: 'Phase 4 — Force fields', link: '/roadmap/phase-04-force-fields' },
@@ -51,6 +53,7 @@ export default defineConfig({
             { text: 'Overview', link: '/api/' },
             { text: 'Binding architecture', link: '/api/bindings' },
             { text: 'Core API', link: '/api/core' },
+            { text: 'Elements', link: '/api/elements' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
