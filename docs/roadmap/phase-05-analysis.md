@@ -159,7 +159,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   relations, and classify by Blatov's scheme: Class Ia (copies related by a
   translation; one net's lattice is an index-n sublattice of the array's),
   Class Ib, Class II (related by a non-translational symmetry operation).
-- [ ] 5.8.2 Generation
+- [x] 5.8.2 Generation
   Port `analysis/interpenetrate.py` (612 lines): generate an n-fold
   interpenetrated framework by placing copies at coset representatives
   (`pcu`, `dia`, `srs` are the labyrinth nets of the P, D and G minimal
