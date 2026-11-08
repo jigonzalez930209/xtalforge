@@ -1,0 +1,7 @@
+# Lattice conventions
+
+A lattice is described by three lengths and three angles. Distances are stored
+in Angstrom and angles in degrees at the API boundary.
+
+This file is ordinary documentation; the rule checker must not scan Markdown
+for Rust attributes.

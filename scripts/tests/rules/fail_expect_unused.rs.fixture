@@ -1,0 +1,4 @@
+#[expect(unused_variables)]
+fn unused_parameter(value: u32) -> u32 {
+    0
+}
