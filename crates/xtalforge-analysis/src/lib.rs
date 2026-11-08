@@ -15,6 +15,7 @@ pub mod pareto;
 pub mod peaks;
 pub mod profiles;
 pub mod pxrd;
+pub mod rietveld;
 
 pub use fit::{FitOptions, FitResult, least_squares};
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
@@ -26,4 +27,5 @@ pub use pareto::pareto_front;
 pub use peaks::{Peak, PeakOptions, find_peaks};
 pub use profiles::{Background, Profile, ProfileKind};
 pub use pxrd::{Pattern, PatternPoint, PxrdOptions, Radiation, Reflection, calculate_pxrd};
+pub use rietveld::{RietveldOptions, RietveldPhase, fit_phase};
 pub use xtalforge_core::Error;
