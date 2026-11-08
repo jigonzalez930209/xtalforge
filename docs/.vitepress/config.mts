@@ -60,6 +60,7 @@ export default defineConfig({
             { text: 'Structure schema', link: '/api/schema' },
             { text: 'P1 expansion', link: '/api/p1' },
             { text: 'Supercells', link: '/api/supercell' },
+            { text: 'Slabs', link: '/api/slab' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
