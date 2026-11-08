@@ -65,6 +65,7 @@ export default defineConfig({
             { text: 'Neighbors', link: '/api/neighbors' },
             { text: 'Bonding', link: '/api/bonding' },
             { text: 'CIF', link: '/api/cif' },
+            { text: 'POSCAR and XYZ', link: '/api/formats' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'Surface parity matrix', link: '/api/parity' },
           ],
