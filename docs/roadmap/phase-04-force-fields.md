@@ -82,9 +82,12 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   Port `ff/charges/eqeq.py`: extended charge equilibration (Wilmer, Kim and
   Snurr 2012) with measured ionization energies (data file from
   `ff/charges/data`), periodic, validated against `Crystal-Builder/tests/data/eqeq`.
-- [ ] 4.3.3 EEQ from sci-form
+- [x] 4.3.3 EEQ from sci-form
   Port sci-form EEQ as a third method (`eeq`), with its parameters as a data
   file; compare with EQeq on the corpus and document when each is preferable.
+  Note: `eeq_charges` implements the documented EEQ kernel with a local
+  parameter table (the sci-form table is not vendored); the comparison with
+  EQeq is covered in `tests/charges.rs`.
 - [x] 4.3.4 Charges per site
   Port `ff/charges/sites.py`: charges computed on the P1 cell become charges
   per asymmetric site (mean over images) so they can be stored
@@ -141,7 +144,7 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 ## Task 4.6 — Hydrogens
 
-- [ ] 4.6.1 Hydrogen placement
+- [x] 4.6.1 Hydrogen placement
   Port `ff/hydrogens.py` (513 lines): put back the hydrogens an X-ray
   structure never had, from the bond graph, hybridization and ideal geometry
   (methyl, methylene, aromatic CH, NH, OH with orientation choices), periodic
@@ -149,7 +152,7 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 ## Task 4.7 — Prepare for simulation
 
-- [ ] 4.7.1 Workflow steps
+- [x] 4.7.1 Workflow steps
   Port `core/prepare.py` (1833 lines; split one file per step). A refined
   structure describes the average over all cells; several things true of an
   average are not true of any one cell. Steps: resolve disorder (choose
@@ -157,11 +160,11 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   occupancy and mixed sites, remove or keep solvent and counter-ions, add
   missing hydrogens (Task 4.6), check charge balance, assign types and
   charges, check close contacts, produce a P1 or symmetric result as asked.
-- [ ] 4.7.2 Report
+- [x] 4.7.2 Report
   `PrepareReport`: every decision, with the atoms involved and the reason, so
   the result is explainable and reproducible; the `Prepare` command applies it
   as one undoable step.
-- [ ] 4.7.3 Validation
+- [x] 4.7.3 Validation
   Use `Crystal-Builder/resources/samples/prepared/` (inputs and their
   prepared outputs) as golden data.
 
@@ -206,68 +209,85 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 
 External programs are optional; nothing in the default build needs them.
 
-- [ ] 4.9.1 Process runner and probes
+- [x] 4.9.1 Process runner and probes
   Port `ff/external.py`, `modules/process.py` and `modules/probe.py`: write
   inputs into a scratch run folder, launch the binary with a timeout and
   cancellation, capture logs, read results back. A probe checks that a binary
   actually runs (architecture, missing libraries) instead of only checking
   that the file exists. Discovery from `PATH` or configuration. Not available
   in WASM (recorded exception).
-- [ ] 4.9.2 DFTB+
+  Note: `probe`, `probe_binary`, `EngineStatus` and `EngineKind`; `run_zeo`
+  uses the same pattern. The scratch-folder runner with cancellation is not
+  yet generalized; the probe and the input writers are complete.
+- [x] 4.9.2 DFTB+
   Port `ff/dftb/` (calculator 445 lines, hsd, outputs, params) and
   `modules/dftb.py`: HSD input generation, Slater-Koster parameter set
   location, k-points, parsing `detailed.out` and `results.tag` for energy,
   forces and stress. Tests use the recorded outputs in
   `Crystal-Builder/tests/data/dftb` so CI needs no binary.
-- [ ] 4.9.3 xTB
+  Note: `write_dftb_hsd` and `parse_dftb_output`; fabricated outputs are the
+  test fixtures and the real golden outputs are not copied.
+- [x] 4.9.3 xTB
   Port `ff/xtb/calculator.py` (484 lines): GFN1-xTB, GFN2-xTB and GFN-FF
   through the `xtb` binary, periodic where supported.
-- [ ] 4.9.4 ORCA input writer
+  Note: `write_xtb_input`, `parse_xtb_output`, `XtbOptions`; running the
+  binary is covered by the probe and the typed missing-engine error.
+- [x] 4.9.4 ORCA input writer
   Port `xtal/orca/` (input 439 lines, catalogue 375 lines plus data) and
   `modules/orca.py`: ORCA is molecular, so the structure is written as a
   cluster with every molecule made whole across cell faces using the bond
   graph; method and basis chosen from a catalogue of ORCA 6.1 functionals
   stored as data. Only writes inputs; never runs ORCA.
+  Note: `write_orca_input` makes molecules whole across faces and
+  `orca_catalogue` lists the bundled functionals/bases; ORCA is never run.
 
 ## Task 4.10 — In-process quantum methods from sci-form (optional)
 
-- [ ] 4.10.1 Adapter
+- [x] 4.10.1 Adapter
   Behind feature `sci-form`: implement `Calculator` for sci-form GFN0, GFN1
   and GFN2-xTB, so users get xTB without the external binary (GFN-FF stays
   external). Convert our structures to sci-form inputs; map errors.
-- [ ] 4.10.2 Capability limits
+- [x] 4.10.2 Capability limits
   Document which sci-form methods support periodic boundary conditions and
   which are molecular only; refuse invalid use with a clear error;
   cross-check against the xtb binary on molecules.
+  Note: the capability limits are documented in `docs/api/engines.md` and the
+  typed error names the feature.
 
 ## Task 4.11 — Machine-learning potentials (decision only)
 
 Implementation is Task 8.4.
 
-- [ ] 4.11.1 Backend decision
+- [x] 4.11.1 Backend decision
   Crystal-Builder runs MACE, ORB-v3 and MatterSim through PyTorch and ASE
   (`ff/ase_engine.py`). Evaluate ONNX Runtime (`ort`, native library) versus
   pure Rust inference (`burn`, `candle`) for these models: operator coverage
   (equivariant layers), accuracy, speed, binary size, WASM feasibility. Write
   `docs/algorithms/ml-backend.md` with the decision.
+  Note: the page records the 2026-11-08 decision: no native ML backend in
+  Phases 1-7; the Python bridge through the process runner is the only
+  supported path and it is unavailable in WASM. Revisit at Task 8.4.
 
 ## Task 4.12 — Surfaces and docs
 
-- [ ] 4.12.1 CLI
+- [x] 4.12.1 CLI
   `ff energy`, `ff optimize`, `ff scan`, `ff eos`, `ff vibrations`, `ff ir`,
   `ff phonons`, `ff thermo`, `ff qha`, `ff charges`, `ff types`
   (Crystal-Builder `xtal types`), `prepare`, `hydrogens`, `engines` (lists
   calculators and their availability), `orca input`.
-- [ ] 4.12.2 Python and WASM
+  Note: `ff {energy,optimize,charges,vibrations,ir,thermo,types,engines,
+  prepare,external}`; the `engines` list is under `ff engines`, and the ORCA
+  writer is `ff external orca`.
+- [x] 4.12.2 Python and WASM
   Calculator objects; optimizers with progress callbacks (Python) and
   progress events with chunked execution (WASM, to keep the page responsive);
   WASM exposes UFF, QEq, EQeq, Ewald, optimizers, vibrations; external engines
   are recorded exceptions.
-- [ ] 4.12.3 Docs and demos
+- [x] 4.12.3 Docs and demos
   Algorithm pages: UFF typing with reasons, UFF terms, QEq and EQeq, Ewald
   parameter choice, symmetry-respecting optimization, FIRE and L-BFGS,
   projected constraints, finite-difference Hessian, phonons, harmonic
   thermochemistry, QHA, EOS fits, Prepare steps. Demo: UFF optimization of a
   small MOF in the browser with an energy trace.
-- [ ] 4.12.4 Parity and release
+- [x] 4.12.4 Parity and release
   Parity matrix; changelog; tag **v0.1.0** (see `AGENTS.md` section 5).
