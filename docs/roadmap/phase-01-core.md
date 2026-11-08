@@ -173,16 +173,18 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.5 — Serialization schema
 
-- [ ] 1.5.1 Versioned JSON schema
+- [x] 1.5.1 Versioned JSON schema
   `serde` on every public data type with `schema_version` at the top level
   (integer, independent of the crate version, see `AGENTS.md` 5.2). Unknown
   fields are rejected on input except under an explicit `props` map.
   Document the schema in `docs/api/schema.md` and publish a JSON Schema file
   generated with `schemars` so other tools can validate.
-- [ ] 1.5.2 Round-trip and compatibility tests
+- [x] 1.5.2 Round-trip and compatibility tests
   Every type round-trips; a fixture of each schema version is kept in
   `tests/schema/` and must keep loading after future changes (migration code
   when the version changes).
+  Note: `tests/schema/structure-v1.json`; round-trip, unknown-field and
+  future-version tests are in `crates/xtalforge-core/tests/schema.rs`.
 
 ## Task 1.6 — P1 expansion
 
