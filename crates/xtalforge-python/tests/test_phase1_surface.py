@@ -386,3 +386,65 @@ def test_workspace_surface(tmp_path: Path) -> None:
     assert json.loads(xtalforge.workspace_read_run(str(root), "run-1"))["module"] == "demo"
     archive = xtalforge.workspace_archive(json.dumps([record]))
     assert xtalforge.workspace_read_archive(archive) == ["run-1"]
+
+
+def test_force_field_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    energy = xtalforge.ff_energy(text)
+    assert isinstance(energy, float)
+    types = xtalforge.ff_types(text)
+    assert types[0]["type"] == "Si3"
+    vibrations = xtalforge.ff_vibrations(text)
+    assert len(vibrations["frequencies"]) == 24
+    thermo = xtalforge.ff_thermo(text, temperature=300.0)
+    assert isinstance(thermo["gibbs"], float)
+    optimized = xtalforge.ff_optimize(text, max_steps=2)
+    assert isinstance(optimized["energy"], float)
+    salt = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "NaCl.cif").read_text(
+        encoding="utf-8"
+    )
+    charges = xtalforge.ff_charges(salt, "qeq")
+    assert abs(charges["total"]) < 1e-6
+
+
+def test_analysis_and_hydrogens_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    metrics = xtalforge.porosity(text, spacing=0.5)
+    assert metrics["cell_volume"] > 0.0
+    assert metrics["surface_area"] >= 0.0
+    names = xtalforge.rcsr_names()
+    assert "pcu" in names
+
+    cgd = """CRYSTAL
+NAME pcu
+GROUP P1
+NODE A 6 0 0 0
+NODE B 6 0.5 0 0
+EDGE 0 0 0 0.5 0 0
+END
+"""
+    invariants = xtalforge.net_invariants(cgd)
+    assert invariants[0]["name"] == "pcu"
+    assert invariants[0]["nodes"] == 2
+    overlay = xtalforge.net_overlay(cgd)
+    assert len(overlay["sites"]) == 2
+
+    methane = "1\nmethane\nC 0 0 0\n"
+    filled = xtalforge.add_hydrogens(methane)
+    assert filled["n_sites"] == 5
+
+
+def test_prepare_surface() -> None:
+    text = (Path(__file__).parents[3] / "tests" / "corpus" / "simple" / "Si.cif").read_text(
+        encoding="utf-8"
+    )
+    report = xtalforge.ff_prepare(
+        text, minimize=False, charges=True, ewald=False, vibrations=False
+    )
+    assert report["energy"] is not None
+    assert abs(report["total_charge"]) < 1e-6
+    assert report["steps"][0]["name"]
