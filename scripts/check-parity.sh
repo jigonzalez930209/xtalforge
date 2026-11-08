@@ -25,6 +25,7 @@ check_rust() {
   local name=$1
   case "$name" in
     bonds) name=bond_graph ;;
+    pxrd) name=calculate_pxrd ;;
     groups) name=find_groups ;;
     subgroups) name=translationengleiche_subgroups ;;
     slab) name=make_slab ;;
@@ -57,6 +58,7 @@ check_wasm() {
     change_setting) name=change_setting_info ;;
     band_path) name=kpath_info ;;
     molecular_point_group) name=pointgroup_info ;;
+    pxrd) name=pxrd_info ;;
   esac
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
@@ -83,6 +85,8 @@ check_cli() {
     structure_info) command=info ;;
     read_cif|read_structure) command=info ;;
     detect_symmetry|asymmetrize|to_p1|set_space_group|subgroups|lower_to_subgroup|standardize|primitive_cell|reduce_structure|wyckoff_assignments|tolerance_ladder|diagnose|brillouin_zone|detect_layer_symmetry|detect_magnetic_symmetry|change_setting|band_path|molecular_point_group) command=symmetry ;;
+    scene_summary|mesh_stl) command=mesh ;;
+    pxrd) command=pxrd ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
