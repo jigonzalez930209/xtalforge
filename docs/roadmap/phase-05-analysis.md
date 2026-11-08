@@ -95,21 +95,21 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.5 — Zeo++ bridge
 
-- [ ] 5.5.1 Result records and parsers
+- [x] 5.5.1 Result records and parsers
   Port `analysis/porosity.py` (1022 lines; split): parsers and result records
   for Zeo++'s outputs (the three diameters in `.res` — largest included
   sphere, largest free sphere, largest included sphere along the free path —
   surface area, volumes, pore size distribution), with the sentences that say
   what each number means, because these names are often reported wrongly.
   Parsers are tested on captured outputs, so no binary is needed in CI.
-- [ ] 5.5.2 Running Zeo++
+- [x] 5.5.2 Running Zeo++
   Port `modules/zeopp.py` (995 lines; split) on top of the process runner of
   Task 4.9.1: the `network` binary, CSSR input (Task 3.3.2), probe and gas
   defaults, channel and accessibility options. Excluded from WASM.
 
 ## Task 5.6 — Nets as periodic graphs
 
-- [ ] 5.6.1 Data and licensing
+- [x] 5.6.1 Data and licensing
   The RCSR snapshots shipped by Crystal-Builder (`analysis/data/RCSRnets-2019-06-01.cgd.gz`,
   `rcsr-2019-06-01.json.gz`, `rcsr-transitivity-2026-09-24.json.gz`): verify
   the RCSR terms of use and record them in `THIRD_PARTY.md` before copying
@@ -126,14 +126,14 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   Coordination sequences, vertex symbols, point symbols, periodicity
   dimension, and a canonical key (canonical labelling of the quotient graph
   with a normalized translation basis) so equal nets give equal keys.
-- [ ] 5.6.4 RCSR identification
+- [x] 5.6.4 RCSR identification
   Port `analysis/rcsr.py` (1249 lines): name a net against the RCSR (2665 of
   the 2679 3-periodic nets are distinguished uniquely by the Crystal-Builder
   method; the remaining ones and nets not in the RCSR are reported as such,
   with the nearest candidates). Build step that precomputes the keys of the
   database into a data file (`python -m xtal.analysis.rcsr build` in the
   original).
-- [ ] 5.6.5 Validation
+- [x] 5.6.5 Validation
   Known frameworks from the corpus identified correctly (HKUST-1 `tbo`, MOF-5
   `pcu`, UiO-66 `fcu`, ZIF-8 `sod`, MOF-74 `msf`; expected names taken from
   the Crystal-Builder golden data, not from memory);
@@ -147,7 +147,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   face, tile counts, from the RCSR data, unknown where the RCSR has none) and
   name. Shared by the MOF builder and the net builder so both lists answer the
   same query identically.
-- [ ] 5.7.2 Merged-net components
+- [x] 5.7.2 Merged-net components
   Port `analysis/components.py`: break a merged net (Eddaoudi and O'Keeffe;
   two or three edge-transitive nets sharing vertices) into the nets that each
   kind of edge spans.
@@ -169,7 +169,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 
 ## Task 5.9 — Overlays
 
-- [ ] 5.9.1 Overlay data
+- [x] 5.9.1 Overlay data
   Port `analysis/overlays.py`: what a run can draw over a crystal that is not
   part of it: atomic charges (as per-atom scalars) and an orbital's two lobes
   (two isosurfaces of a cube grid), plus the pore network surface. Output is
@@ -187,35 +187,35 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   parameters, run folder, cancellation token, progress sink, log) and returns
   a `JobResult` (sentence, optional new structure, report). A `Job` can grow
   fields without breaking existing modules.
-- [ ] 5.10.3 Run records
+- [x] 5.10.3 Run records
   Port `modules/record.py`: the module that runs writes its run folder
   (inputs, outputs, `run.log`), shared with the workspace (Task 3.12.2).
-- [ ] 5.10.4 Reports
+- [x] 5.10.4 Reports
   Port `modules/report.py` (987 lines; split): a report is presentation, not
   results; every number in it was already written to the run folder. A few
   frozen block types (key values, table, histogram, curve) and renderers to
   Markdown, JSON and HTML.
-- [ ] 5.10.5 Test stub module
+- [x] 5.10.5 Test stub module
   Port `modules/stub.py`: a module that does nothing, so the registry, the
   parameter forms of front ends, cancellation and run folders can be tested.
-- [ ] 5.10.6 References
+- [x] 5.10.6 References
   Port `references.py`: one small type for citations of methods, programs and
   databases, attached to calculators, modules and builders and printed in
   reports and docs.
 
 ## Task 5.11 — Surfaces and docs
 
-- [ ] 5.11.1 CLI
+- [x] 5.11.1 CLI
   `pxrd`, `grid`, `porosity` (grid-based), `zeopp`, `isosurface`, `net
   {extract,identify,search,components}`, `interpenetration {detect,generate}`,
   `modules`, `run <module> <action>`, `report`.
-- [ ] 5.11.2 Python and WASM
+- [x] 5.11.2 Python and WASM
   Same functions; NumPy and typed arrays for patterns, grids and meshes; WASM
   excludes Zeo++; long computations report progress and can be cancelled.
-- [ ] 5.11.3 Docs and demos
+- [x] 5.11.3 Docs and demos
   Algorithm pages: PXRD (with all corrections), distance grid, accessibility
   labelling, marching tetrahedra, quotient graphs and canonical keys, RCSR
   identification, Blatov classes. Demos: PXRD of a pasted CIF; accessible
   surface of a small MOF; net identification.
-- [ ] 5.11.4 Parity and release
+- [x] 5.11.4 Parity and release
   Parity matrix; changelog; MINOR release at phase completion.
