@@ -82,11 +82,11 @@ Crate: `xtalforge-powder`.
   otherwise, convergence and divergence handling, covariance and esds.
   Decide between `argmin` and an in-tree implementation (pure Rust either
   way); record the decision.
-- [ ] 7.4.2 Profile functions
+- [x] 7.4.2 Profile functions
   Pseudo-Voigt, Thompson-Cox-Hastings, Caglioti widths, size and strain
   broadening, axial divergence asymmetry (Finger-Cox-Jephcoat), March-Dollase
   preferred orientation, as needed by the scope report.
-- [ ] 7.4.3 Background models
+- [x] 7.4.3 Background models
   Chebyshev polynomial of chosen order; fixed interpolated background.
 
 ## Task 7.5 — Indexing
