@@ -26,6 +26,7 @@ check_rust() {
   case "$name" in
     bonds) name=bond_graph ;;
     groups) name=find_groups ;;
+    subgroups) name=translationengleiche_subgroups ;;
     slab) name=make_slab ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
@@ -43,6 +44,19 @@ check_wasm() {
     asymmetrize) name=asymmetrize_info ;;
     to_p1) name=to_p1_info ;;
     set_space_group) name=set_space_group_info ;;
+    subgroups) name=subgroups_info ;;
+    lower_to_subgroup) name=lower_to_subgroup_info ;;
+    standardize) name=standardize_info ;;
+    primitive_cell) name=primitive_info ;;
+    reduce_structure) name=reduce_info ;;
+    wyckoff_assignments) name=wyckoff_info ;;
+    tolerance_ladder) name=tolerance_ladder_info ;;
+    diagnose) name=diagnose_info ;;
+    detect_layer_symmetry) name=layer_group_info ;;
+    detect_magnetic_symmetry) name=magnetic_group_info ;;
+    change_setting) name=change_setting_info ;;
+    band_path) name=kpath_info ;;
+    molecular_point_group) name=pointgroup_info ;;
   esac
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
@@ -68,7 +82,7 @@ check_cli() {
     lattice_minimum_image) command=cell ;;
     structure_info) command=info ;;
     read_cif|read_structure) command=info ;;
-    detect_symmetry|asymmetrize|to_p1|set_space_group) command=symmetry ;;
+    detect_symmetry|asymmetrize|to_p1|set_space_group|subgroups|lower_to_subgroup|standardize|primitive_cell|reduce_structure|wyckoff_assignments|tolerance_ladder|diagnose|brillouin_zone|detect_layer_symmetry|detect_magnetic_symmetry|change_setting|band_path|molecular_point_group) command=symmetry ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
