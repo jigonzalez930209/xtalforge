@@ -13,6 +13,7 @@ mod format;
 mod input;
 mod measure;
 mod output;
+mod symmetry;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use std::process::ExitCode;
@@ -178,6 +179,11 @@ enum Command {
         /// Third atom index.
         k: usize,
     },
+    /// Detect the space group and Wyckoff positions.
+    Symmetry {
+        #[command(subcommand)]
+        action: SymmetryAction,
+    },
     /// Torsion i-j-k-l in degrees.
     Torsion {
         /// Input path, or `-` for standard input.
@@ -190,6 +196,24 @@ enum Command {
         k: usize,
         /// Fourth atom index.
         l: usize,
+    },
+}
+
+#[derive(Debug, Subcommand)]
+enum SymmetryAction {
+    /// Detect the symmetry of a structure.
+    Detect {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Position tolerance in Angstrom.
+        #[arg(long, value_name = "A", default_value_t = 1e-3)]
+        symprec: f64,
+        /// Angle tolerance in degrees.
+        #[arg(long, value_name = "DEG")]
+        angle_tolerance: Option<f64>,
+        /// Preferred Hall number (1 to 530).
+        #[arg(long, value_name = "N")]
+        hall_number: Option<u32>,
     },
 }
 
@@ -342,6 +366,20 @@ fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Neighbors { path, cutoff } => analyze::neighbors(cli, path, *cutoff),
         Command::Distance { path, i, j } => measure::distance(cli, path, *i, *j),
         Command::Angle { path, i, j, k } => measure::angle(cli, path, *i, *j, *k),
+        Command::Symmetry { action } => match action {
+            SymmetryAction::Detect {
+                path,
+                symprec,
+                angle_tolerance,
+                hall_number,
+            } => symmetry::detect(
+                cli,
+                path,
+                *symprec,
+                angle_tolerance.map(f64::to_radians),
+                *hall_number,
+            ),
+        },
         Command::Torsion { path, i, j, k, l } => measure::torsion(cli, path, *i, *j, *k, *l),
     }
 }
