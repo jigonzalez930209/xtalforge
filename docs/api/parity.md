@@ -27,6 +27,9 @@ compares this table with the symbols each surface actually exports.
 | `angle` | 1 | done | done | done | done | Measures (Task 1.14) |
 | `torsion` | 1 | done | done | done | done | Measures (Task 1.14) |
 | `detect_symmetry` | 2 | done | done | done | done | Symmetry search (Task 2.1.4); CLI `symmetry detect` |
+| `asymmetrize` | 2 | done | done | done | done | Workflow (Task 2.3.3); WASM `asymmetrize_info` |
+| `to_p1` | 2 | done | done | done | done | Workflow (Task 2.3.4); WASM `to_p1_info` |
+| `set_space_group` | 2 | done | done | done | done | Workflow (Task 2.3.2); WASM `set_space_group_info` |
 
 ## Planned exceptions
 

@@ -49,6 +49,23 @@ The structure is expanded to P1 first; the input is never modified. Atom types
 are `(element, occupancy)` pairs rounded to three decimals, so a mixed site is
 not equivalent to a pure one and dummy `X` has its own type.
 
+## Workflow
+
+- `detect_and_symmetrize(structure, options)` returns a `SymmetryResult` with
+  the asymmetric-unit structure and the dataset.
+- `asymmetrize(structure, options)` returns only the reduced structure.
+- `to_p1(structure)` expands to an explicit P1 structure.
+- `set_space_group(structure, &SpaceGroup, SetMode::Reinterpret)` keeps the
+  sites as the asymmetric unit of the new group.
+- `set_space_group(structure, &SpaceGroup, SetMode::Impose)` averages the full
+  cell onto the group orbits and reports the largest displacement.
+
+```rust
+let result = detect_and_symmetrize(&structure, SymmetryOptions::default())?;
+let report = set_space_group(&distorted, &SpaceGroup::from_number(225)?, SetMode::Impose)?;
+println!("max displacement {:.3} A", report.max_displacement);
+```
+
 ## Space groups
 
 `SpaceGroup::from_number(225)`, `SpaceGroup::from_hall_number(525)` and
@@ -73,3 +90,43 @@ The small-corpus test compares the detected number with the Crystal-Builder
 golden header for the `simple/` structures. The full corpus sweep is an
 ignored test because the large MOFs take minutes; six files are recorded as
 exceptions on the algorithm page.
+
+## Standard cells and reduction
+
+`standardize(structure, options)` returns a `StandardizedStructure` with the
+conventional standardized cell, the asymmetric unit, the origin shift and the
+rotation matrix. `primitive_cell` does the same for the primitive standardized
+cell; `idealize` exposes moyo's refined positions.
+
+`reduce_structure(structure, Reduction::{Niggli,Delaunay,Minkowski})` returns a
+P1 structure in the reduced cell, the row transformation and its determinant.
+`lattices_equivalent(first, second, tolerance)` compares Niggli parameters.
+moyo 0.22 exposes all three reductions publicly, so no local port is needed.
+
+## Wyckoff and diagnostics
+
+`wyckoff_assignments(structure, options)` returns, per atom, the letter,
+multiplicity, site-symmetry symbol, coordinate template and free parameters
+(`free_parameters` extracts the current x/y/z values).
+
+`tolerance_ladder(structure, &DEFAULT_LADDER)` groups consecutive tolerances
+that give the same Hall setting into ranges. `diagnose(structure, &SpaceGroup)`
+returns the per-atom deviation from the nearest orbit image, sorted by
+decreasing displacement, with `max_displacement` and `mean_displacement`.
+
+## Subgroups
+
+`primitive_operations(hall_number)` returns the primitive operations.
+`translationengleiche_subgroups(hall_number, epsilon)` and
+`klassengleiche_subgroups(hall_number, transformation, epsilon)` return the
+conjugacy-class representatives with index, depth, operations and conjugate
+count. `identify_space_group(operations)` names a primitive operation list.
+Subgroup naming and symmetry lowering are not implemented yet.
+
+## Brillouin zone
+
+`brillouin_zone(lattice)` returns the Wigner-Seitz cell of the reciprocal
+lattice as `BrillouinZone { vertices, faces, edges }`. Reciprocal vectors
+include `2 pi`, so coordinates are in `1/Angstrom`. The fcc primitive cell
+gives a truncated octahedron with 14 faces, 24 vertices and 36 edges. The
+special points and k-path of Task 2.10.2-2.10.4 are pending.
