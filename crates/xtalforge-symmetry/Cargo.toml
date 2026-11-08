@@ -14,12 +14,15 @@ description = "Symmetry types, space-group operations and reductions for xtalfor
 
 [dependencies]
 moyo = { workspace = true }
+xtalforge-core = { workspace = true }
+serde = { workspace = true }
 nalgebra = { workspace = true }
 rayon = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
+xtalforge-io = { workspace = true }
 
 [features]
 parallel = ["dep:rayon"]
