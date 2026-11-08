@@ -243,12 +243,11 @@ Independent version numbers that do NOT follow the crate version:
 - Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
   Actions are disabled at repository level until the maintainer enables them
   explicitly (2026-11-08).
-- Current phase: Phase 1 — Core (`docs/roadmap/phase-01-core.md`) is complete
-  locally; Phase 0 external work is tracked in
-  `docs/roadmap/phase-00-status.md`. Every Phase 1 task is implemented,
-  tested and committed; Task 1.18.5 waits on the Phase 0 release dry run,
-  which needs GitHub Actions enabled by the maintainer. Phase 2 (symmetry)
-  is next.
+- Current phase: Phase 2 — Symmetry (`docs/roadmap/phase-02-symmetry.md`).
+  Phase 1 is complete locally; Task 1.18.5 waits on the Phase 0 release dry
+  run, which needs GitHub Actions enabled by the maintainer. Task 2.1 (moyo
+  integration and `detect_symmetry` on all surfaces) is complete; space-group
+  catalogue and the symmetry workflow are next.
 - Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
   committed but have not run because GitHub Actions are disabled by maintainer
   instruction. Task 0.6.5 (name reservation) waits for explicit approval; the
