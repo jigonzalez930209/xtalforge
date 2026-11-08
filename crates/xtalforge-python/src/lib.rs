@@ -12,6 +12,7 @@ use pyo3::prelude::*;
 
 mod analysis;
 mod classes;
+mod phase3;
 mod structures;
 mod symmetry;
 mod symmetry_analysis;
@@ -19,6 +20,10 @@ mod view;
 
 use analysis::{angle, bonds, distance, groups, neighbors, pxrd, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
+use phase3::{
+    Document, param_schema, project_pack, project_read, workspace_archive, workspace_open,
+    workspace_read_archive, workspace_read_run, workspace_runs, workspace_write_run,
+};
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
 };
@@ -251,5 +256,15 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_class::<Site>()?;
     module.add_class::<Structure>()?;
     module.add_class::<P1Cell>()?;
+    module.add_class::<Document>()?;
+    module.add_function(wrap_pyfunction!(param_schema, module)?)?;
+    module.add_function(wrap_pyfunction!(project_pack, module)?)?;
+    module.add_function(wrap_pyfunction!(project_read, module)?)?;
+    module.add_function(wrap_pyfunction!(workspace_open, module)?)?;
+    module.add_function(wrap_pyfunction!(workspace_write_run, module)?)?;
+    module.add_function(wrap_pyfunction!(workspace_runs, module)?)?;
+    module.add_function(wrap_pyfunction!(workspace_read_run, module)?)?;
+    module.add_function(wrap_pyfunction!(workspace_archive, module)?)?;
+    module.add_function(wrap_pyfunction!(workspace_read_archive, module)?)?;
     Ok(())
 }
