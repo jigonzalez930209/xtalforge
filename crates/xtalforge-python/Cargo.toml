@@ -18,6 +18,11 @@ name = "xtalforge_python"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+pyo3 = { workspace = true }
+xtalforge = { workspace = true }
+
+[features]
+extension-module = ["pyo3/extension-module"]
 
 [lints]
 workspace = true

@@ -1,0 +1,21 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "xtalforge"
+description = "Python bindings for the xtalforge crystal-structure library"
+requires-python = ">=3.9"
+license = { text = "MIT OR Apache-2.0" }
+dynamic = ["version"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Rust",
+  "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+[tool.maturin]
+module-name = "xtalforge._xtalforge"
+python-source = "python"
+features = ["extension-module"]
+strip = true
