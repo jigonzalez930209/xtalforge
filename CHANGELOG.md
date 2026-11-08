@@ -62,6 +62,9 @@ essential release, then `0.x.y`).
   decisions and license status for every Python dependency.
 - Mandatory test layout (AGENTS.md section 2.2): Rust tests live in
   `crates/<crate>/tests/`, independent of the source files.
+- Phase 1 Task 1.1: periodic table, deuterium and dummy species, Pyykko radii,
+  symbol parsing, `element_info` in Rust, CLI, Python and WASM, the generated
+  API table and the shared element vectors.
 
 ### Changed
 

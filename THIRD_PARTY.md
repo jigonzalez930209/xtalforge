@@ -27,4 +27,6 @@ origin. Status: `verified` (license read in the source), `to verify`,
 | Zeo++ radii (`Crystal-Builder/tests/data/zeo_radii.cc`) | to verify (Zeo++ license) | Radii set for porosity (Task 5.2.2) | to verify |
 | rietx and rietx-kernels (https://github.com/yue-here/rietx) | stated as MIT in Crystal-Builder's `pyproject.toml`; no license field on PyPI | Reference for powder refinement (Phase 7) | to verify |
 | UFF and UFF4MOF parameters (Rappé et al. 1992; Addicoat et al. 2014; Coupry et al. 2016) | published parameters, cited in the data file | Force field (Task 4.2.1) | planned |
-| Pyykkö and Atsumi covalent radii (2009) | published data, cited in the data file | Element data (Task 1.1.3) | planned |
+| Pyykkö and Atsumi covalent radii (2009) | published data, cited in the Crystal-Builder source | Element data (Task 1.1.3); stored in `crates/xtalforge-core/data/elements.json.gz` | verified, redistributed |
+| Cordero 2008 covalent radii, Bondi van der Waals radii, Jmol/CPK colours, Pauling electronegativity | published data via gemmi and Crystal-Builder | Element data (Task 1.1) | verified, redistributed |
+| Crystal-Builder element table (`core/elements.py`, `core/pyykko.py`, `ff/isotopes.py`) | MIT, "Copyright (c) 2026 Jules Oppenheim" | Source of the embedded element bundle (Task 1.1) | verified, redistributed |

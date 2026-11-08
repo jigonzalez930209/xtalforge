@@ -242,11 +242,14 @@ Independent version numbers that do NOT follow the crate version:
 - Remote: https://github.com/jigonzalez930209/xtalforge (private). GitHub
   Actions are disabled at repository level until the maintainer enables them
   explicitly (2026-11-08).
-- Current phase: Phase 0 — Foundations (`docs/roadmap/phase-00-foundations.md`).
-  Tasks 0.1 to 0.7, 0.9 and 0.10 are implemented locally. Tasks 0.6.3, 0.7.5
-  and 0.8.1 to 0.8.5 have their workflows committed but have not run because
-  GitHub Actions are disabled by maintainer instruction. Task 0.6.5 (name
-  reservation) waits for explicit approval; the names were free on 2026-11-08.
+- Current phase: Phase 1 — Core (`docs/roadmap/phase-01-core.md`). Phase 0 is
+  implemented locally; its remaining external work is tracked in
+  `docs/roadmap/phase-00-status.md`. Task 1.1 (elements) is complete; Task 1.2
+  (lattice) is next.
+- Phase 0 blockers: Tasks 0.6.3, 0.7.5 and 0.8.1 to 0.8.5 have their workflows
+  committed but have not run because GitHub Actions are disabled by maintainer
+  instruction. Task 0.6.5 (name reservation) waits for explicit approval; the
+  names were free on 2026-11-08.
 - Testing: integration tests live in `crates/<crate>/tests/` (AGENTS.md
   section 2.2). Shared vectors are in `tests/vectors/`, the curated corpus in
   `tests/corpus/`, and the Crystal-Builder golden data in `tests/golden/`
