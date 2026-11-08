@@ -16,5 +16,8 @@ uses a direct lattice scan and buckets atoms into the tube cell, which is
 correct for the common armchair/zigzag cases and is validated by atom counts
 and cell dimensions.
 
+`fullerene(60)` builds C60 from the embedded ASE-derived coordinates; the
+result is a padded molecule with 60 atoms and 90 perceived bonds.
+
 The remaining builders (SMILES molecules, fragments, fullerenes, amorphous
 carbon, polymers) are later Phase 6 tasks.
