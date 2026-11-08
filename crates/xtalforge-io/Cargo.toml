@@ -16,6 +16,7 @@ description = "File-format readers and writers for xtalforge."
 rayon = { workspace = true, optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+zip = { workspace = true }
 xtalforge-core = { workspace = true }
 
 [features]
