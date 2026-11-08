@@ -59,6 +59,8 @@ not equivalent to a pure one and dummy `X` has its own type.
   sites as the asymmetric unit of the new group.
 - `set_space_group(structure, &SpaceGroup, SetMode::Impose)` averages the full
   cell onto the group orbits and reports the largest displacement.
+- `change_setting(structure, hall_number)` standardizes in a requested Hall
+  setting (origin choice, axis or cell choice) and preserves the geometry.
 
 ```rust
 let result = detect_and_symmetrize(&structure, SymmetryOptions::default())?;
@@ -120,8 +122,32 @@ decreasing displacement, with `max_displacement` and `mean_displacement`.
 `translationengleiche_subgroups(hall_number, epsilon)` and
 `klassengleiche_subgroups(hall_number, transformation, epsilon)` return the
 conjugacy-class representatives with index, depth, operations and conjugate
-count. `identify_space_group(operations)` names a primitive operation list.
+count. `lower_to_subgroup(structure, number, tolerance)` keeps the first atom
+of every subgroup orbit and returns the lowered structure. `identify_space_group(operations)` names a primitive operation list.
 Subgroup naming and symmetry lowering are not implemented yet.
+
+## Layer groups
+
+`detect_layer_symmetry(structure, symprec)` wraps `MoyoLayerDataset` for slabs:
+the lattice must have `c` perpendicular to `a` and `b`, and the result carries
+the layer-group number (1 to 80), Hall number, operations, orbits, Wyckoff
+letters and Pearson symbol. `detect_magnetic_symmetry(structure, symprec)`
+reads the `magmom` site property and returns the UNI number, operations and
+orbits; it is marked experimental. Molecular point groups are still pending.
+
+## Band paths and molecular point groups
+
+`band_path(lattice)` classifies the lattice into one of the 14 Bravais types
+and returns the special points and path from the ASE 3.29 table;
+`band_path_for_structure(structure, options)` uses the detected space group so
+the centering (cF, cI, ...) is correct. `KPath::cartesian_points` and
+`vertices` express them in the user's reciprocal basis with `2 pi`.
+
+`molecular_point_group(points, tolerance)` detects the Schoenflies symbol of a
+finite molecule by mapping a non-collinear atom frame over candidate triples.
+Water C2v, ammonia C3v and methane Td are tested; linear molecules (infinite
+groups) are rejected. `MolecularPointGroup` reports the order, proper and
+improper counts, inversion and mirror count.
 
 ## Brillouin zone
 

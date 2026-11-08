@@ -30,6 +30,20 @@ compares this table with the symbols each surface actually exports.
 | `asymmetrize` | 2 | done | done | done | done | Workflow (Task 2.3.3); WASM `asymmetrize_info` |
 | `to_p1` | 2 | done | done | done | done | Workflow (Task 2.3.4); WASM `to_p1_info` |
 | `set_space_group` | 2 | done | done | done | done | Workflow (Task 2.3.2); WASM `set_space_group_info` |
+| `subgroups` | 2 | done | done | done | done | Enumeration (Task 2.7.1/2.7.4); WASM `subgroups_info` |
+| `lower_to_subgroup` | 2 | done | done | done | done | Lowering (Task 2.7.3/2.7.4); WASM `lower_to_subgroup_info` |
+| `standardize` | 2 | done | done | done | done | Task 2.5.1 |
+| `primitive_cell` | 2 | done | done | done | done | Task 2.5.2 |
+| `reduce_structure` | 2 | done | done | done | done | Task 2.6.3 |
+| `wyckoff_assignments` | 2 | done | done | done | done | Task 2.4.2 |
+| `tolerance_ladder` | 2 | done | done | done | done | Task 2.9.1 |
+| `diagnose` | 2 | done | done | done | done | Task 2.9.2 |
+| `brillouin_zone` | 2 | done | done | done | done | Task 2.10.1 |
+| `detect_layer_symmetry` | 2 | done | done | done | done | Layer groups (Task 2.8.1); WASM `layer_group_info` |
+| `detect_magnetic_symmetry` | 2 | done | done | done | done | Magnetic groups (Task 2.8.2, experimental); WASM `magnetic_group_info` |
+| `change_setting` | 2 | done | done | done | done | Setting change (Task 2.3.5); WASM `change_setting_info` |
+| `band_path` | 2 | done | done | done | done | Bravais/k-path (Task 2.10.2-2.10.4); WASM `kpath_info` |
+| `molecular_point_group` | 2 | done | done | done | done | Point groups (Task 2.8.3); WASM `pointgroup_info` |
 
 ## Planned exceptions
 
