@@ -1,4 +1,4 @@
-//! The `build` command family (graphene and nanotubes).
+//! The `build` command family (graphene, nanotubes and fullerenes).
 
 use clap::Subcommand;
 
@@ -22,6 +22,110 @@ pub(crate) enum BuildAction {
         /// Vacuum above the stack in Angstrom.
         #[arg(long, default_value_t = 15.0)]
         vacuum: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a C20 dodecahedron.
+    C20 {
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a C60 fullerene.
+    C60 {
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build two graphene layers with a relative twist.
+    Twist {
+        /// Repeats along a.
+        n: u32,
+        /// Repeats along b.
+        m: u32,
+        /// Requested twist angle in degrees.
+        theta: f64,
+        /// Number of layers.
+        #[arg(long, default_value_t = 2)]
+        layers: u32,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a honeycomb nanoribbon with vacuum.
+    Ribbon {
+        /// Width in repeat units.
+        width: u32,
+        /// Length in repeat units.
+        length: u32,
+        /// Vacuum on both sides in Angstrom.
+        #[arg(long, default_value_t = 12.0)]
+        vacuum: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a gyroid ZTC carbon model.
+    Ztc {
+        /// Samples per cube axis.
+        #[arg(long, default_value_t = 16)]
+        samples: usize,
+        /// Cubic cell side in Angstrom.
+        #[arg(long, default_value_t = 12.0)]
+        cell: f64,
+        /// Level-set value.
+        #[arg(long, default_value_t = 0.0)]
+        isovalue: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a Schwarz P carbon model.
+    Schwarzite {
+        /// Samples per cube axis.
+        #[arg(long, default_value_t = 16)]
+        samples: usize,
+        /// Cubic cell side in Angstrom.
+        #[arg(long, default_value_t = 12.0)]
+        cell: f64,
+        /// Level-set value.
+        #[arg(long, default_value_t = 0.0)]
+        isovalue: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a polymer chain from a repeat-unit SMILES.
+    Polymer {
+        /// Repeat-unit SMILES (`C=C` or `C=Cc1ccccc1`).
+        smiles: String,
+        /// Number of monomers.
+        monomers: u32,
+        /// Target density in gram per cubic centimetre.
+        #[arg(long, default_value_t = 1.0)]
+        density: f64,
         /// Output path; defaults to standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
@@ -100,6 +204,152 @@ pub(crate) fn nanotube(
     format: Option<StructureFormat>,
 ) -> Result<(), CliError> {
     let structure = xtalforge::build::nanotube(n, m, length, vacuum).map_err(CliError::core)?;
+    output::emit_structure(cli, &structure, out, format)
+}
+
+/// Builds a C20 dodecahedron.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn c20(
+    cli: &Cli,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure = xtalforge::build::face_spiral(20).map_err(CliError::core)?;
+    output::emit_structure(cli, &structure, out, format)
+}
+
+/// Builds two twisted graphene layers.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn twist(
+    cli: &Cli,
+    n: u32,
+    m: u32,
+    theta: f64,
+    layers: u32,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure =
+        xtalforge::build::commensurate_twist(n, m, theta, layers).map_err(CliError::core)?;
+    output::emit_structure(cli, &structure, out, format)
+}
+
+/// Builds a honeycomb nanoribbon.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn ribbon(
+    cli: &Cli,
+    width: u32,
+    length: u32,
+    vacuum: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure = xtalforge::build::nanoribbon(width, length, vacuum).map_err(CliError::core)?;
+    output::emit_structure(cli, &structure, out, format)
+}
+
+fn ztc_options(samples: usize, cell: f64, isovalue: f64) -> xtalforge::build::ZtcOptions {
+    xtalforge::build::ZtcOptions {
+        samples,
+        cell,
+        isovalue,
+    }
+}
+
+/// Builds a gyroid ZTC carbon model.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn ztc(
+    cli: &Cli,
+    samples: usize,
+    cell: f64,
+    isovalue: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure = xtalforge::build::build_ztc(&ztc_options(samples, cell, isovalue))
+        .map_err(CliError::core)?;
+    output::emit_structure(cli, &structure, out, format)
+}
+
+/// Builds a Schwarz P carbon model.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn schwarzite(
+    cli: &Cli,
+    samples: usize,
+    cell: f64,
+    isovalue: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure = xtalforge::build::build_schwarzite(&ztc_options(samples, cell, isovalue))
+        .map_err(CliError::core)?;
+    output::emit_structure(cli, &structure, out, format)
+}
+
+/// Builds a polymer chain and records its steps.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn polymer(
+    cli: &Cli,
+    smiles: &str,
+    monomers: u32,
+    density: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let build = xtalforge::build::build_polymer(
+        smiles,
+        monomers,
+        &xtalforge::build::PolymerOptions { density },
+    )
+    .map_err(CliError::core)?;
+    if out.is_none() && cli.json {
+        println!(
+            "{}",
+            serde_json::json!({
+                "structure": build.structure,
+                "steps": build.steps,
+            })
+        );
+        return Ok(());
+    }
+    output::emit_structure(cli, &build.structure, out, format)?;
+    if !cli.quiet && !cli.json {
+        for step in &build.steps {
+            println!("step: {step}");
+        }
+    }
+    Ok(())
+}
+
+/// Builds a C60 fullerene.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+pub(crate) fn c60(
+    cli: &Cli,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let structure = xtalforge::build::fullerene(60).map_err(CliError::core)?;
     output::emit_structure(cli, &structure, out, format)
 }
 

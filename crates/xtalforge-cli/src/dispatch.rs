@@ -134,6 +134,57 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
                 out,
                 format,
             } => build_structures::nanotube(cli, *n, *m, *length, *vacuum, out.as_deref(), *format),
+            build_structures::BuildAction::C20 { out, format } => {
+                build_structures::c20(cli, out.as_deref(), *format)
+            }
+            build_structures::BuildAction::C60 { out, format } => {
+                build_structures::c60(cli, out.as_deref(), *format)
+            }
+            build_structures::BuildAction::Twist {
+                n,
+                m,
+                theta,
+                layers,
+                out,
+                format,
+            } => build_structures::twist(cli, *n, *m, *theta, *layers, out.as_deref(), *format),
+            build_structures::BuildAction::Ribbon {
+                width,
+                length,
+                vacuum,
+                out,
+                format,
+            } => build_structures::ribbon(cli, *width, *length, *vacuum, out.as_deref(), *format),
+            build_structures::BuildAction::Ztc {
+                samples,
+                cell,
+                isovalue,
+                out,
+                format,
+            } => build_structures::ztc(cli, *samples, *cell, *isovalue, out.as_deref(), *format),
+            build_structures::BuildAction::Schwarzite {
+                samples,
+                cell,
+                isovalue,
+                out,
+                format,
+            } => build_structures::schwarzite(
+                cli,
+                *samples,
+                *cell,
+                *isovalue,
+                out.as_deref(),
+                *format,
+            ),
+            build_structures::BuildAction::Polymer {
+                smiles,
+                monomers,
+                density,
+                out,
+                format,
+            } => {
+                build_structures::polymer(cli, smiles, *monomers, *density, out.as_deref(), *format)
+            }
         },
         Command::Mesh {
             path,
