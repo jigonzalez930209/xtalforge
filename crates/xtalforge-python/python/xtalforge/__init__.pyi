@@ -268,3 +268,18 @@ def pxrd(
     step: float = 0.02,
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
+
+def build_graphene(
+    nx: int,
+    ny: int,
+    layers: int = 1,
+    interlayer: float = 3.35,
+    vacuum: float = 15.0,
+) -> StructureDict: ...
+def build_nanotube(
+    n: int,
+    m: int,
+    length: int = 1,
+    vacuum: float = 10.0,
+) -> StructureDict: ...
+def build_c60() -> StructureDict: ...
