@@ -8,6 +8,20 @@
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(target_arch = "wasm32")]
+mod common;
+#[cfg(target_arch = "wasm32")]
+mod phase1;
+
+#[cfg(target_arch = "wasm32")]
+use common::{array3, array6, set, to_js_error};
+
+#[cfg(target_arch = "wasm32")]
+pub use phase1::{
+    angle, bonds, convert_structure, distance, groups, neighbors, read_cif, read_structure, rings,
+    slab_info, slab_text, supercell_info, supercell_text, torsion,
+};
+
 /// Installs the panic hook in debug builds only.
 #[cfg(all(target_arch = "wasm32", debug_assertions))]
 #[wasm_bindgen(start)]
@@ -104,24 +118,6 @@ pub fn lattice_minimum_image(
     set(&object, "delta", array3(vector).into());
     set(&object, "distance", JsValue::from_f64(distance));
     Ok(object.into())
-}
-
-#[cfg(target_arch = "wasm32")]
-fn array3(values: [f64; 3]) -> js_sys::Array {
-    let array = js_sys::Array::new();
-    for value in values {
-        array.push(&JsValue::from_f64(value));
-    }
-    array
-}
-
-#[cfg(target_arch = "wasm32")]
-fn array6(values: [f64; 6]) -> js_sys::Array {
-    let array = js_sys::Array::new();
-    for value in values {
-        array.push(&JsValue::from_f64(value));
-    }
-    array
 }
 
 /// Soft and hard bounds for a profile and budget.
@@ -259,20 +255,4 @@ pub fn element_info(input: &str) -> Result<JsValue, JsValue> {
             .map_or(JsValue::NULL, JsValue::from_f64),
     );
     Ok(object.into())
-}
-
-#[cfg(target_arch = "wasm32")]
-fn set(object: &js_sys::Object, key: &str, value: JsValue) {
-    let _ = js_sys::Reflect::set(object, &JsValue::from_str(key), &value);
-}
-
-#[cfg(target_arch = "wasm32")]
-fn to_js_error(error: xtalforge::core::Error) -> JsValue {
-    let js_error = js_sys::Error::new(&error.message());
-    let _ = js_sys::Reflect::set(
-        &js_error,
-        &JsValue::from_str("code"),
-        &JsValue::from_str(error.code()),
-    );
-    js_error.into()
 }
