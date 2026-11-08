@@ -163,3 +163,87 @@ fn symmetry_set_impose() {
         serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
     assert_eq!(value["sites"].as_array().expect("sites").len(), 1);
 }
+
+#[test]
+fn symmetry_subgroups_and_lowering() {
+    let output = run(&["--json", "symmetry", "subgroups", "525"]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    let groups = value.as_array().expect("array");
+    assert!(!groups.is_empty());
+    assert!(groups.iter().any(|group| group["subgroup_number"] == 216));
+
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let output = run(&[
+        "--json",
+        "symmetry",
+        "lower",
+        &path.to_string_lossy(),
+        "216",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
+    assert_eq!(value["structure"]["hall"], "F -4 2 3");
+}
+
+#[test]
+fn symmetry_analysis_commands() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let path = path.to_string_lossy();
+
+    let output = run(&[
+        "--json",
+        "symmetry",
+        "standardize",
+        &path,
+        "--symprec",
+        "0.001",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(
+        value["structure"]["sites"].as_array().expect("sites").len(),
+        1
+    );
+
+    let output = run(&["--json", "symmetry", "primitive", &path]);
+    assert!(output.status.success());
+
+    let output = run(&[
+        "--json",
+        "symmetry",
+        "reduce",
+        &path,
+        "--algorithm",
+        "niggli",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(value["structure"]["lattice"].is_array());
+
+    let output = run(&["--json", "symmetry", "wyckoff", &path, "--symprec", "0.001"]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(
+        value
+            .as_array()
+            .expect("array")
+            .iter()
+            .all(|item| item["letter"] == "b")
+    );
+
+    let output = run(&["--json", "symmetry", "brillouin", &path]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(value["faces"].as_array().expect("faces").len() >= 6);
+
+    let output = run(&["--json", "symmetry", "scan", &path]);
+    assert!(output.status.success());
+
+    let output = run(&["--json", "symmetry", "diagnose", &path, "227"]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert!(value["max_displacement"].as_f64().expect("max") < 1e-6);
+}
