@@ -9,6 +9,12 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 2 Task 2.8: layer-group detection for slabs, experimental collinear
+  magnetic groups and molecular point groups.
+- Phase 2 Task 2.10.2-2.10.4: Bravais classification, ASE-derived special
+  points and band paths in the user's reciprocal basis.
+- Phase 2 Task 2.3.5: change of setting by Hall number.
+
 - Project bootstrap: `AGENTS.md` rules and versioning policy, roadmap (phases 0
   to 8, verified against the Crystal-Builder, sci-form and moyo sources),
   rule-check script, and VitePress documentation scaffold.
