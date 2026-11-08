@@ -202,7 +202,7 @@ fn parse_stress(lines: &[&str], index: usize) -> Result<[[f64; 3]; 3], Error> {
         )));
     }
     let mut tensor = [[0.0; 3]; 3];
-    for (row, values) in values.chunks_exact(3).enumerate() {
+    for (row, values) in values.as_chunks::<3>().0.iter().enumerate() {
         for (column, value) in values.iter().enumerate() {
             if let Some(slot) = tensor.get_mut(row).and_then(|row| row.get_mut(column)) {
                 *slot = value * scale;
