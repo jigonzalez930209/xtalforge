@@ -497,3 +497,9 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 - [ ] 1.18.5 Release prerequisites for v0.0.1
   Release dry run (Task 0.6.3) succeeds; changelog prepared; `AGENTS.md`
   section 6 ready to update. Tag `v0.0.1` once Task 2.1 is also done.
+  Note: every local prerequisite is complete (changelog, AGENTS section 6,
+  parity matrix, full local checks, docs build). The remaining blocker is the
+  external release dry run: GitHub Actions are disabled by maintainer
+  instruction, and Task 0.6.5 (name reservation) needs explicit approval.
+  This item stays open until the maintainer enables Actions and approves the
+  placeholders; nothing in the code is missing.
