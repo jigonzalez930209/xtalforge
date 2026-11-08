@@ -20,12 +20,17 @@
 //! Coordinates in `data/blocks.json` are illustrative geometries, not
 //! quantum-chemistry-optimized structures. The builder does not relax them.
 
+pub mod advanced;
 pub mod block;
 pub mod build;
 pub mod error;
 pub mod orient;
 pub mod topology;
 
+pub use advanced::{
+    LinkerSpan, build_layered_framework, build_rod_framework, decorate_super_tetrahedron,
+    invent_linker, linkers_by_span, merge_frameworks, partition_pore_space,
+};
 pub use block::{Block, BlockKind, blocks, find_block};
 pub use build::{BuiltMof, MofRequest, build_mof, build_request_json};
 pub use error::Error;
