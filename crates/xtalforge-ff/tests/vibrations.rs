@@ -19,7 +19,7 @@ use xtalforge_core::elements::mass_of;
 use xtalforge_core::{Lattice, Site, Structure, StructureBuilder};
 use xtalforge_ff::uff::{bond_force_constant, natural_bond_length};
 use xtalforge_ff::{
-    CM_PER_SQRT_EV_PER_A2_AMU, Calculator, CalculatorOptions, DisplacementMode, Error,
+    Broadening, CM_PER_SQRT_EV_PER_A2_AMU, Calculator, CalculatorOptions, DisplacementMode, Error,
     HessianOptions, IrOptions, PhononOptions, UffCalculator, VibrationalModes, hessian,
     ir_spectrum, phonons, vibrational_modes,
 };
@@ -165,6 +165,18 @@ fn ir_spectrum_has_positive_intensities_and_a_broadened_curve() {
     for peak in &spectrum.peaks {
         assert!(peak.intensity.is_finite() && peak.intensity >= 0.0);
     }
+
+    let gaussian = ir_spectrum(
+        &structure,
+        &modes,
+        &IrOptions {
+            broadening: Broadening::Gaussian,
+            ..IrOptions::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(gaussian.points.len(), spectrum.points.len());
+    assert!(gaussian.max_intensity() > 0.0);
 }
 
 #[test]
