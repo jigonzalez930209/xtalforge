@@ -52,6 +52,7 @@ check_cli() {
     element_info) command=element ;;
     lattice_info) command=cell ;;
     lattice_minimum_image) command=cell ;;
+    structure_info) command=info ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
