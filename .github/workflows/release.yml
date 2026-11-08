@@ -151,12 +151,12 @@ jobs:
         include:
           - os: ubuntu-22.04
             manylinux: auto
-          - os: macos-13
-            manylinux: "off"
-          - os: macos-14
-            manylinux: "off"
+          - os: macos-15-intel
+            manylinux: auto
+          - os: macos-15
+            manylinux: auto
           - os: windows-latest
-            manylinux: "off"
+            manylinux: auto
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -168,16 +168,40 @@ jobs:
         with:
           command: build
           args: --release --out dist
+          working-directory: crates/xtalforge-python
           manylinux: ${{ matrix.manylinux }}
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}
-          path: dist
+          path: crates/xtalforge-python/dist
+          if-no-files-found: error
+
+  sdist:
+    name: Python sdist
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-sdist
+          cache-on-failure: true
+      - uses: PyO3/maturin-action@v1
+        with:
+          command: sdist
+          args: --out dist
+          working-directory: crates/xtalforge-python
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-sdist
+          path: crates/xtalforge-python/dist
           if-no-files-found: error
 
   publish-pypi:
     name: Publish PyPI
-    needs: wheels
+    needs: [wheels, sdist]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -189,12 +213,15 @@ jobs:
           path: dist
           pattern: wheels-*
           merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-sdist
+          path: dist
       # Trusted Publishing needs no secret. If the project is not configured
       # for it yet, add PYPI_API_TOKEN and pass it as `password` below.
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist
-          attestations: true
 
   npm:
     name: Publish npm
@@ -304,10 +331,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-13
+          - os: macos-15-intel
             arch: x86_64
             target: x86_64-apple-darwin
-          - os: macos-14
+          - os: macos-15
             arch: arm64
             target: aarch64-apple-darwin
     steps:
