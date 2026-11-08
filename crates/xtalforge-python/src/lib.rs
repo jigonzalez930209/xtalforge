@@ -10,6 +10,14 @@ use pyo3::create_exception;
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 
+mod analysis;
+mod classes;
+mod structures;
+
+use analysis::{angle, bonds, distance, groups, neighbors, rings, torsion};
+use classes::{Lattice, P1Cell, Site, Structure};
+use structures::{read_cif, read_structure, slab, supercell};
+
 create_exception!(
     _xtalforge,
     XtalforgeError,
@@ -35,6 +43,10 @@ fn map_error(error: xtalforge::core::Error) -> PyErr {
         xtalforge::core::Error::InvalidInput(_) => InputError::new_err(args),
         _ => XtalforgeError::new_err(args),
     }
+}
+
+pub(crate) fn invalid_input(message: impl Into<String>) -> PyErr {
+    InputError::new_err(("invalid_input", message.into()))
 }
 
 /// Volume of a cell in cubic Angstrom.
@@ -186,5 +198,20 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(limits_bounds, module)?)?;
     module.add_function(wrap_pyfunction!(limits_check, module)?)?;
     module.add_function(wrap_pyfunction!(structure_info, module)?)?;
+    module.add_function(wrap_pyfunction!(angle, module)?)?;
+    module.add_function(wrap_pyfunction!(bonds, module)?)?;
+    module.add_function(wrap_pyfunction!(distance, module)?)?;
+    module.add_function(wrap_pyfunction!(groups, module)?)?;
+    module.add_function(wrap_pyfunction!(neighbors, module)?)?;
+    module.add_function(wrap_pyfunction!(read_cif, module)?)?;
+    module.add_function(wrap_pyfunction!(read_structure, module)?)?;
+    module.add_function(wrap_pyfunction!(rings, module)?)?;
+    module.add_function(wrap_pyfunction!(slab, module)?)?;
+    module.add_function(wrap_pyfunction!(supercell, module)?)?;
+    module.add_function(wrap_pyfunction!(torsion, module)?)?;
+    module.add_class::<Lattice>()?;
+    module.add_class::<Site>()?;
+    module.add_class::<Structure>()?;
+    module.add_class::<P1Cell>()?;
     Ok(())
 }
