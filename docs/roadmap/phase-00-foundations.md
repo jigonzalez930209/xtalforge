@@ -367,9 +367,11 @@ duplicating.
 - [ ] 0.7.5 Deployment
   GitHub Pages workflow building on push to `main` and on tags; versioned
   documentation per MINOR release from `v0.1.0`; link checking.
-  Note: `.github/workflows/docs.yml` builds, link-checks and deploys to Pages;
-  it has not run because GitHub Actions are disabled. Versioned docs remain for
-  the first MINOR release.
+  Note: the `docs` job of `.github/workflows/release.yml` builds and deploys to
+  Pages on a version tag, after the verification and WASM jobs and reusing the
+  built WASM artifact. The maintainer changed the policy to tag-only
+  deployment (no `main` deployment). It has not run because GitHub Actions are
+  disabled; versioned docs remain for the first MINOR release.
 
 ## Task 0.8 — Continuous integration
 
@@ -385,6 +387,9 @@ duplicating.
   check; TypeScript type check of the generated definitions.
 - [ ] 0.8.4 Docs CI
   VitePress build, dead-link check, rules script, parity script.
+  Note: `.github/workflows/ci.yml` builds the site with the WASM package and
+  runs the parity script; the tag deployment lives in `release.yml` and reuses
+  the `wasm` artifact.
 - [ ] 0.8.5 Speed
   `Swatinem/rust-cache`, sharing build artifacts between jobs, path filters
   so documentation-only changes skip the heavy jobs; target under 15 minutes.

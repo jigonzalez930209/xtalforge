@@ -31,8 +31,11 @@ To close it: approve the placeholders, add the registry tokens, publish
 
 ## 0.7.5 Documentation deployment
 
-`.github/workflows/docs.yml` builds the WASM demo, runs VitePress, checks links
-and deploys to GitHub Pages. It has not run because Actions are disabled.
+The docs deployment is the `docs` job of `.github/workflows/release.yml`. It
+runs on a version tag, waits for the verification and WASM jobs, downloads the
+already-built web package (no second Rust build), runs VitePress and deploys to
+GitHub Pages. It has not run because Actions are disabled. A manual
+`Docs` workflow remains for recovery deployments; it does not run on `main`.
 Versioned documentation per MINOR release starts at `v0.1.0` and is not needed
 for Phase 0.
 

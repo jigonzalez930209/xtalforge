@@ -29,7 +29,7 @@ are in `AGENTS.md` at the repository root.
 
 - Phases 0-7 are implemented locally and pushed; the Rust API, CLI, Python and
   WASM surfaces build and pass their checks. Nothing is published yet
-  (`0.0.0`).
+  (`0.0.1`, release prepared).
 - Phase 8 (agent and distribution) has not started. It is the remaining
   planned phase: session verbs, MCP server, plugins, ML potentials,
   distribution, performance/fuzzing and the API freeze.
