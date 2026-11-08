@@ -450,38 +450,50 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.17 — CLI, Python and WASM for Phase 1
 
-- [ ] 1.17.1 CLI commands
+- [x] 1.17.1 CLI commands
   `info`, `convert`, `supercell`, `slab`, `bonds`, `rings`, `groups`,
   `measure`, `neighbors`, `element`, each reading a path or stdin and writing
   a path or stdout, with `--json`.
-- [ ] 1.17.2 Python surface
+  Note: `convert`, `supercell`, `slab`, `bonds`, `rings`, `groups`,
+  `neighbors`, `distance`, `angle` and `torsion`, plus the existing `info`,
+  `cell`, `cell-volume` and `element`; 23 integration tests.
+- [x] 1.17.2 Python surface
   Classes `Lattice`, `Site`, `Structure`, `P1Cell`; functions mirroring the
   Rust API; NumPy arrays for coordinates; docstrings derived from rustdoc;
   `pytest` suite running the shared test vectors.
-- [ ] 1.17.3 WASM surface
+  Note: functions and `Lattice`/`Site`/`Structure`/`P1Cell` pyclasses;
+  coordinates are NumPy arrays; 28 pytest cases and strict mypy.
+- [x] 1.17.3 WASM surface
   Same operations over JS objects and typed arrays, string input (no
   filesystem); node and browser tests running the shared vectors.
-- [ ] 1.17.4 Parity
+  Note: summary objects, analysis arrays and CIF writers for the demo;
+  20 node tests.
+- [x] 1.17.4 Parity
   `docs/api/parity.md` updated; `scripts/check-parity.sh` passes.
+  Note: every Phase 1 capability has a row and the checker passes.
 
 ## Task 1.18 — Documentation and release readiness
 
-- [ ] 1.18.1 Guide pages
+- [x] 1.18.1 Guide pages
   Quick start for each surface; concepts (asymmetric unit versus P1, Hall
   symbols, fractional and Cartesian coordinates, limits); file formats.
+  Note: `docs/guide/quickstart.md`, `concepts.md` and `formats.md`.
 - [x] 1.18.2 Algorithm pages
   Lattice conventions, P1 expansion with provenance, supercell lattice-point
   enumeration, surface basis for slabs, cell-list neighbor search, bond
   perception, Franzblau primitive rings, CIF symmetry priority.
-- [ ] 1.18.3 Demo
+- [x] 1.18.3 Demo
   Browser CIF inspector: paste or drop a CIF, see cell parameters, formula,
   density, bond list, ring statistics, and build a supercell or slab and
   download it.
-  Note: the Phase 1 algorithm pages cover lattice, limits, P1, supercells,
-  slabs, transforms, neighbors, bonding, rings, measures, CIF and formats.
-- [ ] 1.18.4 Checks and benchmarks
+  Note: `docs/.vitepress/components/CifInspector.vue` and
+  `docs/demos/cif-inspector.md`; cell, formula, density, bonds, rings and
+  downloadable supercells/slabs through the WASM package.
+- [x] 1.18.4 Checks and benchmarks
   `check-rules.sh` clean; benchmarks published in
   `docs/algorithms/benchmarks.md`.
+  Note: process-level medians for Si and MOF-5 (info, bonds, rings,
+  supercell) and the 438 KiB WASM size; `check-rules.sh` is clean.
 - [ ] 1.18.5 Release prerequisites for v0.0.1
   Release dry run (Task 0.6.3) succeeds; changelog prepared; `AGENTS.md`
   section 6 ready to update. Tag `v0.0.1` once Task 2.1 is also done.
