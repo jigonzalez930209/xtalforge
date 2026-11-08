@@ -69,7 +69,7 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.2 — Lattice
 
-- [ ] 1.2.1 `Lattice` type and conventions
+- [x] 1.2.1 `Lattice` type and conventions
   Port `core/lattice.py` (465 lines). Conventions fixed once and documented:
   the matrix ROWS are the vectors a, b, c in Angstrom; fractional to Cartesian
   is `frac · M` (row-vector convention); the standard orientation puts a along
@@ -77,23 +77,34 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   `a, b, c, alpha, beta, gamma`. Derived quantities: parameters, volume,
   metric tensor, reciprocal lattice (with and without 2π), interplanar
   spacing d(hkl), angle between planes.
-- [ ] 1.2.2 Coordinate conversions and periodic geometry
+  Note: `Lattice` in `xtalforge-core::lattice`; the matrix rows and the
+  standard orientation are tested in `crates/xtalforge-core/tests/lattice.rs`.
+- [x] 1.2.2 Coordinate conversions and periodic geometry
   Fractional/Cartesian conversion for one point and for slices of points;
   wrapping into the cell with a tolerance that maps 0.9999999 to 0;
   minimum-image vector and distance, correct for strongly skewed triclinic
   cells (search the 27 neighbouring images or more when the cell is not
   reduced; document the guarantee).
-- [ ] 1.2.3 Lattice transforms
+  Note: `minimum_image` uses the `||M^-1||_F` bound and is exact for any
+  non-singular cell; `wrap_with_tolerance` maps values near 1 to 0.
+- [x] 1.2.3 Lattice transforms
   `transform(P)` with the same convention as Crystal-Builder's
   `Lattice.transform` (integer or rational 3x3 matrix, determinant sign
   checks), scaling to a target volume, applying a strain tensor (needed by the
   cell optimizers of Phase 4). Lattice reduction lives in Task 2.6.
-- [ ] 1.2.4 Validation
+  Note: `transform`, `strained`, `strained_isotropic`, `scaled_to_volume`,
+  `with_parameters` and `standard_orientation` are implemented and tested.
+- [x] 1.2.4 Validation
   Reject zero or negative volume, non-finite values, angles outside (0, 180),
   impossible angle combinations; error messages state the offending values.
-- [ ] 1.2.5 Surfaces and docs
+  Note: lengths, angles, non-finite values and impossible angle triples are
+  rejected with the offending values in the message.
+- [x] 1.2.5 Surfaces and docs
   Rust, CLI (`xtalforge cell --params 5 5 5 90 90 90`), Python, WASM; an
   algorithm page on the conventions with a worked triclinic example.
+  Note: CLI `cell --params`, Python `lattice_info`/`lattice_minimum_image`,
+  WASM equivalents, `docs/api/lattice.md` and
+  `docs/algorithms/lattice.md`; shared vectors in `tests/vectors/lattice.json`.
 
 ## Task 1.3 — Limits
 
