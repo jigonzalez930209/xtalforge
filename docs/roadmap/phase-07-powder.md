@@ -52,7 +52,7 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.2 — Pattern and radiation
 
-- [ ] 7.2.1 Measured pattern
+- [x] 7.2.1 Measured pattern
   Port `powder/data.py`: three arrays (2θ, intensity, esd or √I), read from
   `.xy` (Task 3.5.3) and the other formats rietx reads that Crystal-Builder
   tests use; range selection, excluded regions.
@@ -63,7 +63,7 @@ Crate: `xtalforge-powder`.
 
 ## Task 7.3 — Peaks
 
-- [ ] 7.3.1 Peak finding
+- [x] 7.3.1 Peak finding
   Equivalent of `rietx.indexing.pick_peaks_with_state`: a background envelope,
   candidate detection, each line fitted in its own window; fitting at named
   positions (`fit_peaks`).
