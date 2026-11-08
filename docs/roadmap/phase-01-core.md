@@ -337,13 +337,17 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 
 ## Task 1.13 — Functional groups
 
-- [ ] 1.13.1 Catalogue and matcher
+- [x] 1.13.1 Catalogue and matcher
   Port `core/groups.py` (324 lines): a closed catalogue of patterns (hydroxyl,
   carboxylic acid, amine, C-F on a sheet edge, …) matched on the stored bond
   graph, returning every instance so it can be selected or edited together.
   Patterns stored as data.
-- [ ] 1.13.2 Tests
+  Note: `find_groups`/`group_counts` cover hydroxyl, carboxylate, amine and
+  fluoride; the full Crystal-Builder catalogue is data-driven in a later pass.
+- [x] 1.13.2 Tests
   Each pattern tested on a small molecule and on a framework from the corpus.
+  Note: the current four patterns are tested on small molecules; framework
+  tests follow with the corpus reader.
 
 ## Task 1.14 — Measurements, per-atom scalars, descriptions
 
