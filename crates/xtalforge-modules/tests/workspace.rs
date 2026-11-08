@@ -53,3 +53,22 @@ fn workspace_writes_and_reads_runs() {
     assert_eq!(workspace.runs().unwrap(), vec!["run-1".to_owned()]);
     std::fs::remove_dir_all(&root).unwrap();
 }
+
+#[test]
+fn in_memory_archive_round_trips() {
+    let records = vec![RunRecord {
+        id: "run-2".to_owned(),
+        module: "pxrd".to_owned(),
+        input: "Si.cif".to_owned(),
+        status: RunStatus::Done,
+        outputs: vec![],
+        data: serde_json::json!({"peaks": 3}),
+        created: 2,
+    }];
+    let bytes = xtalforge_modules::archive_records(&records).unwrap();
+    assert_eq!(&bytes[..2], b"PK");
+    assert_eq!(
+        xtalforge_modules::read_archived_records(&bytes).unwrap(),
+        records
+    );
+}
