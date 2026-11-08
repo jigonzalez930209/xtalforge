@@ -90,3 +90,14 @@ fn ff_vibrations_and_thermo() {
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
     assert!(value["gibbs"].as_f64().expect("gibbs").is_finite());
 }
+
+#[test]
+fn build_c60_writes_sixty_atoms() {
+    let output = run(&["--json", "build", "c60"]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(
+        value["structure"]["sites"].as_array().expect("sites").len(),
+        60
+    );
+}
