@@ -18,6 +18,10 @@ essential release, then `0.x.y`).
 - Phase 3 Task 3.6.3: add LAMMPS text dump (element column or type map,
   orthogonal/triclinic, Cartesian/scaled coordinates) and DFTB+ `geo_end`
   readers to the trajectory dispatcher.
+- Phase 4 Task 4.8.3: add supercell force constants, shortest-image folding,
+  the acoustic sum rule, a Monkhorst-Pack q-mesh, Gaussian phonon DOS and a
+  phonopy spring-model golden comparison. An explicit `q_path` samples a band
+  path.
 
 ## [0.0.3] - 2026-11-09
 
