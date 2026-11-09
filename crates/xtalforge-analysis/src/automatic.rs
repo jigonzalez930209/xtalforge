@@ -1,9 +1,10 @@
 //! Automatic peak search, indexing, Le Bail and Rietveld run (Task 7.10).
 //!
-//! The pipeline copies the order of `powder/auto.py`: find the lines, index a
-//! cubic cell, extract Le Bail intensities, then fit the phase. Every completed
-//! step is recorded in [`AutomaticResult::steps`] in execution order, so a CLI
-//! or a run folder can replay the decision without guessing what happened.
+//! The pipeline copies the order of `powder/auto.py`: find the lines, index the
+//! metric families, extract Le Bail intensities, fit a Pawley model of the
+//! indexed cell, then fit the phase. Every completed step is recorded in
+//! [`AutomaticResult::steps`] in execution order, so a CLI or a run folder can
+//! replay the decision without guessing what happened.
 //!
 //! # Approximations
 //!
@@ -11,18 +12,20 @@
 //!   entry point has no radiation argument; callers with another source should
 //!   use [`crate::indexing::index_cubic`] and [`crate::lebail::le_bail`]
 //!   directly.
-//! * Only a cubic cell is indexed (Task 7.5.1); other crystal systems need the
-//!   general indexing engines that are not part of this phase slice.
+//! * The indexed cell is the ranked best of the five metric families. The
+//!   Pawley step rebuilds the structure in that cell before fitting, so the
+//!   intensities and cell esds describe the indexed lattice.
 //! * The Rietveld step uses [`crate::rietveld::fit_phase`], which refines the
 //!   scale and a constant background, not the structural parameters; the
 //!   structural refinement lives in [`crate::refine`] and is a separate step.
 
 use serde::{Deserialize, Serialize};
-use xtalforge_core::{Error, Structure};
+use xtalforge_core::{Error, Lattice, Structure};
 use xtalforge_io::xy::PatternPoint;
 
-use crate::indexing::{CubicIndex, index_cubic};
+use crate::indexing::{IndexedCell, IndexingOptions, index_pattern};
 use crate::lebail::{LebailOptions, LebailResult, le_bail};
+use crate::pawley::{PawleyOptions, PawleyResult, pawley_refine};
 use crate::peaks::{Peak, PeakOptions, find_peaks};
 use crate::pxrd::Radiation;
 use crate::rietveld::{RietveldOptions, RietveldPhase, fit_phase};
@@ -53,10 +56,12 @@ impl Default for AutomaticOptions {
 pub struct AutomaticResult {
     /// Detected peaks, ordered by increasing two-theta.
     pub peaks: Vec<Peak>,
-    /// Accepted cubic index, if any candidate passed `min_completeness`.
-    pub index: Option<CubicIndex>,
+    /// Best indexed cell, if any candidate passed `min_completeness`.
+    pub index: Option<IndexedCell>,
     /// Le Bail extraction.
     pub lebail: Option<LebailResult>,
+    /// Pawley fit of the indexed cell.
+    pub pawley: Option<PawleyResult>,
     /// Rietveld scale/background phase fit.
     pub phase: Option<RietveldPhase>,
     /// Completed steps, in execution order.
@@ -123,11 +128,51 @@ pub fn run_automatic(
 
     let mut steps = vec!["peaks".to_owned()];
     let wavelength = Radiation::CuKa.wavelength()?;
-    let index = index_cubic(&peaks, wavelength, 10, options.index_tolerance)?
-        .filter(|candidate| candidate.completeness >= options.min_completeness);
+    let index = index_pattern(
+        &peaks,
+        wavelength,
+        &IndexingOptions {
+            max_index: 10,
+            tolerance: options.index_tolerance,
+            min_completeness: options.min_completeness,
+            ..IndexingOptions::default()
+        },
+    )?
+    .best()
+    .cloned();
     steps.push("index".to_owned());
     let lebail = le_bail(structure, observed, &LebailOptions::default())?;
     steps.push("le_bail".to_owned());
+    let pawley_structure = match &index {
+        Some(candidate) => structure.clone().with_lattice(Lattice::from_parameters(
+            candidate.cell.a,
+            candidate.cell.b,
+            candidate.cell.c,
+            candidate.cell.alpha,
+            candidate.cell.beta,
+            candidate.cell.gamma,
+        )?),
+        None => structure.clone(),
+    };
+    let pawley = match pawley_refine(
+        &pawley_structure,
+        observed,
+        &PawleyOptions {
+            background_order: 2,
+            ..PawleyOptions::default()
+        },
+    ) {
+        Ok(pawley) => {
+            steps.push("pawley".to_owned());
+            Some(pawley)
+        }
+        Err(error) => {
+            // A cell that indexes the peaks but predicts too many reflections
+            // must not sink the rest of the run.
+            steps.push(format!("pawley_skipped: {}", error.message()));
+            None
+        }
+    };
     let first = observed.first().map_or(5.0, |point| point.two_theta);
     let last = observed.last().map_or(80.0, |point| point.two_theta);
     let phase = fit_phase(
@@ -144,6 +189,7 @@ pub fn run_automatic(
         peaks,
         index,
         lebail: Some(lebail),
+        pawley,
         phase: Some(phase),
         steps,
     })

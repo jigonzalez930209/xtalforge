@@ -330,9 +330,9 @@ fn reduced_key(cell: &CellMetric) -> ReducedKey {
     ]
 }
 
-/// A few unindexed lines are an impurity; 95% counts as fully indexed.
+/// A few unindexed lines are an impurity; 90% counts as fully indexed.
 fn completeness_bucket(cell: &IndexedCell) -> i64 {
-    (cell.completeness.min(0.95) * 100.0).round() as i64
+    (cell.completeness.min(0.90) * 100.0).round() as i64
 }
 
 /// Completeness first, then symmetry, then M20.
