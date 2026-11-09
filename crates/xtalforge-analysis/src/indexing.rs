@@ -341,9 +341,17 @@ fn completeness_bucket(cell: &IndexedCell) -> i64 {
 /// same lines, so among cells with the same coverage the highest symmetry is
 /// the physical answer; M20 orders the candidates inside one family.
 fn rank(first: &IndexedCell, second: &IndexedCell) -> std::cmp::Ordering {
-    completeness_bucket(second)
-        .cmp(&completeness_bucket(first))
-        .then_with(|| first.system.cmp(&second.system))
+    // The highest-symmetry description wins first, as it does in the
+    // reference: a cubic cell that indexes the lines is not reported as one
+    // of its orthorhombic subgroups. Within one family, coverage separates a
+    // cell from its supercells: the true cell predicts few lines and observes
+    // most of them, while a multiple cell predicts the same strong lines plus
+    // many absences that are not there.
+    first
+        .system
+        .cmp(&second.system)
+        .then_with(|| second.coverage.total_cmp(&first.coverage))
+        .then_with(|| second.completeness.total_cmp(&first.completeness))
         .then_with(|| second.m20.total_cmp(&first.m20))
         .then_with(|| first.cell.volume().total_cmp(&second.cell.volume()))
         .then_with(|| second.f_n.total_cmp(&first.f_n))

@@ -96,7 +96,9 @@ impl RcsrIdentification {
 pub struct RcsrIndex {
     entries: Vec<RcsrEntry>,
     /// Sorted by fingerprint hash; each row is `(hash, entry)`.
-    hashes: Vec<(u64, usize)>,
+    hashes: Vec<(u32, usize)>,
+    /// Salt the embedded index was built with.
+    salt: u32,
 }
 
 impl RcsrIndex {
@@ -110,7 +112,7 @@ impl RcsrIndex {
     }
 
     fn parse(bytes: &[u8]) -> Result<Self, Error> {
-        if bytes.len() < 12 || bytes.get(..8) != Some(MAGIC) {
+        if bytes.len() < 16 || bytes.get(..8) != Some(MAGIC) {
             return Err(Error::InvalidInput(
                 "the RCSR index has no header".to_owned(),
             ));
@@ -121,7 +123,13 @@ impl RcsrIndex {
                 .and_then(|slice| slice.try_into().ok())
                 .ok_or_else(|| Error::InvalidInput("the RCSR index count is missing".to_owned()))?,
         ) as usize;
-        let mut cursor = 12usize;
+        let salt = u32::from_le_bytes(
+            bytes
+                .get(12..16)
+                .and_then(|slice| slice.try_into().ok())
+                .ok_or_else(|| Error::InvalidInput("the RCSR index salt is missing".to_owned()))?,
+        );
+        let mut cursor = 16usize;
         let mut entries = Vec::with_capacity(count);
         let mut hashes = Vec::with_capacity(count);
         for _ in 0..count {
@@ -154,13 +162,13 @@ impl RcsrIndex {
                 .map(|value| *value as usize)
                 .collect();
             cursor += coordination_len;
-            let hash = u64::from_le_bytes(
+            let hash = u32::from_le_bytes(
                 bytes
-                    .get(cursor..cursor + 8)
+                    .get(cursor..cursor + 4)
                     .and_then(|slice| slice.try_into().ok())
                     .ok_or_else(|| Error::InvalidInput("a short RCSR index".to_owned()))?,
             );
-            cursor += 8;
+            cursor += 4;
             let entry = RcsrEntry {
                 name,
                 periodicity: usize::from(periodicity),
@@ -171,7 +179,11 @@ impl RcsrIndex {
             hashes.push((hash, index));
         }
         hashes.sort_unstable();
-        Ok(Self { entries, hashes })
+        Ok(Self {
+            entries,
+            hashes,
+            salt,
+        })
     }
 
     /// Number of catalogue nets.
@@ -208,7 +220,7 @@ impl RcsrIndex {
     /// Returns the errors of [`fingerprint`].
     pub fn identify(&self, graph: &QuotientGraph) -> Result<RcsrIdentification, Error> {
         let fingerprint = fingerprint(graph)?;
-        let hash = fingerprint.hash();
+        let hash = fingerprint.hash_with_salt(self.salt);
         let names: Vec<String> = self
             .hashes
             .iter()
@@ -295,7 +307,7 @@ impl RcsrIndex {
 
 /// Number of names per fingerprint hash.
 #[must_use]
-pub fn shared_fingerprints(index: &RcsrIndex) -> BTreeMap<u64, usize> {
+pub fn shared_fingerprints(index: &RcsrIndex) -> BTreeMap<u32, usize> {
     let mut counts = BTreeMap::new();
     for (hash, _) in &index.hashes {
         *counts.entry(*hash).or_insert(0) += 1;

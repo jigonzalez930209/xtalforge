@@ -82,6 +82,20 @@ impl NetFingerprint {
         fnv1a(self.token().as_bytes())
     }
 
+    /// Salted 32-bit FNV-1a hash, the embedded index's lookup key.
+    ///
+    /// The generator picks the salt so that two different tokens cannot
+    /// share a hash; the index header carries it.
+    #[must_use]
+    pub fn hash_with_salt(&self, salt: u32) -> u32 {
+        let mut hash = 0xcbf2_9ce4_8422_2325_u64;
+        for byte in salt.to_le_bytes().iter().chain(self.token().as_bytes()) {
+            hash ^= u64::from(*byte);
+            hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
+        }
+        (hash ^ (hash >> 32)) as u32
+    }
+
     /// FNV-1a 64-bit hash of [`NetFingerprint::sequence_token`].
     #[must_use]
     pub fn sequence_hash(&self) -> u64 {

@@ -35,8 +35,8 @@ pub use cells::{
     free_cell_parameters_with_setting,
 };
 pub use extinction::{
-    MAX_CANDIDATES as MAX_SPACE_GROUP_CANDIDATES, SpaceGroupMatch, is_systematically_absent,
-    space_group_candidates,
+    ExtinctionClass, MAX_CANDIDATES as MAX_SPACE_GROUP_CANDIDATES, SpaceGroupMatch,
+    extinction_classes, is_systematically_absent, space_group_candidates,
 };
 pub use fit::{FitOptions, FitResult, least_squares};
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};

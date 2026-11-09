@@ -14,22 +14,23 @@
 //!   use [`crate::indexing::index_cubic`] and [`crate::lebail::le_bail`]
 //!   directly.
 //! * The indexed cells are the ranked candidates of the five metric families.
-//!   The leading-cell table fits a Pawley model of each of the first
-//!   [`AutomaticOptions::leading_cells`] candidates and ranks the table by
-//!   the Pawley Rwp, which is the reference `b_indy -> c_paw` order. Every
-//!   row also carries the space groups whose systematic absences are
-//!   compatible with its indexed reflections (see
-//!   [`crate::extinction`]); they are ranked by group order, not by a Le Bail
-//!   class fit.
+//!   For each of the first [`AutomaticOptions::leading_cells`] candidates the
+//!   extinction classes of its crystal system are fitted with Le Bail and
+//!   ranked by BIC against the absence-free lattice class; the leading
+//!   [`AutomaticOptions::classes`] classes are then Pawley fitted. The table
+//!   is ranked by the Pawley Rwp, which is the reference `b_indy -> c_paw`
+//!   order, and every row names its class and the groups that share it.
 //! * The Rietveld step uses [`crate::rietveld::fit_phase`], which refines the
 //!   scale and a constant background, not the structural parameters; the
 //!   structural refinement lives in [`crate::refine`] and is a separate step.
 
+#![allow(clippy::indexing_slicing)] // bounded local row slices
+
 use serde::{Deserialize, Serialize};
-use xtalforge_core::{Error, Lattice, Structure};
+use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder};
 use xtalforge_io::xy::PatternPoint;
 
-use crate::extinction::{SpaceGroupMatch, space_group_candidates};
+use crate::extinction::{ExtinctionClass, SpaceGroupMatch, extinction_classes};
 use crate::indexing::{IndexedCell, IndexingOptions, index_pattern};
 use crate::lebail::{LebailOptions, LebailResult, le_bail};
 use crate::pawley::{PawleyOptions, PawleyResult, pawley_refine};
@@ -46,8 +47,10 @@ pub struct AutomaticOptions {
     pub index_tolerance: f64,
     /// Minimum fraction of peaks that must index for a cell to be kept.
     pub min_completeness: f64,
-    /// Leading cells that receive a Pawley fit in the ranking table.
+    /// Leading cells that receive an extinction-class ranking.
     pub leading_cells: usize,
+    /// Leading surviving classes Pawley fitted per cell.
+    pub classes: usize,
 }
 
 impl Default for AutomaticOptions {
@@ -55,8 +58,9 @@ impl Default for AutomaticOptions {
         Self {
             max_peaks: 30,
             index_tolerance: 0.1,
-            min_completeness: 0.3,
-            leading_cells: 3,
+            min_completeness: 0.6,
+            leading_cells: 5,
+            classes: 3,
         }
     }
 }
@@ -66,21 +70,88 @@ impl Default for AutomaticOptions {
 pub struct LeadingCell {
     /// Indexing candidate: metric family, cell, peaks and figures of merit.
     pub index: IndexedCell,
-    /// Pawley Rwp of this cell, when the fit ran.
+    /// Rank of the indexing cell (1 is best).
+    pub cell_rank: usize,
+    /// Rank of the extinction class within its cell (1 is best).
+    pub class_rank: usize,
+    /// Hermann-Mauguin symbol of the class representative.
+    pub class_symbol: String,
+    /// BIC of the class minus the BIC of the absence-free lattice class.
+    pub delta_bic: f64,
+    /// Pawley Rwp of this (cell, class), when the fit ran.
     pub pawley_rwp: Option<f64>,
     /// Pawley cell esds, when the fit ran.
     pub pawley_cell_esds: Option<[f64; 6]>,
-    /// Space groups whose systematic absences the indexed reflections obey.
+    /// Groups that share this extinction class.
     pub space_groups: Vec<SpaceGroupMatch>,
 }
 
-/// Screens the indexed reflections of one candidate cell.
-fn screen(
-    peaks: &[crate::indexing::IndexedPeak],
-    system: crate::indexing::LatticeSystem,
-) -> Result<Vec<SpaceGroupMatch>, Error> {
-    let hkl: Vec<[i32; 3]> = peaks.iter().map(|peak| peak.hkl).collect();
-    space_group_candidates(system, &hkl)
+/// Two Pawley fits whose Rwp are this close are a tie, and the indexing and
+/// class order breaks it.
+const RWP_TIE: f64 = 0.01;
+
+/// Ranks the table: Rwp first, ties in indexing and class order, failed last.
+fn ranked_rows(mut rows: Vec<LeadingCell>) -> Vec<LeadingCell> {
+    rows.sort_by(|first, second| {
+        first
+            .pawley_rwp
+            .unwrap_or(f64::INFINITY)
+            .total_cmp(&second.pawley_rwp.unwrap_or(f64::INFINITY))
+    });
+    let mut out = Vec::with_capacity(rows.len());
+    let mut cursor = 0usize;
+    while cursor < rows.len() {
+        let Some(best) = rows[cursor].pawley_rwp else {
+            break;
+        };
+        let limit = best * (1.0 + RWP_TIE);
+        let start = cursor;
+        while cursor < rows.len() && rows[cursor].pawley_rwp.is_some_and(|value| value <= limit) {
+            cursor += 1;
+        }
+        let mut group = rows[start..cursor].to_vec();
+        group.sort_by_key(|row| (row.cell_rank, row.class_rank));
+        out.extend(group);
+    }
+    let mut failed = rows[cursor..].to_vec();
+    failed.sort_by_key(|row| (row.cell_rank, row.class_rank));
+    out.extend(failed);
+    out
+}
+
+/// Median FWHM of the detected lines, used by the class fits.
+fn median_fwhm(peaks: &[Peak]) -> f64 {
+    let mut widths: Vec<f64> = peaks
+        .iter()
+        .map(|peak| peak.fwhm)
+        .filter(|value| value.is_finite() && *value > 0.0)
+        .collect();
+    widths.sort_by(|first, second| first.total_cmp(second));
+    widths
+        .get(widths.len() / 2)
+        .copied()
+        .unwrap_or(0.1)
+        .clamp(0.01, 0.5)
+}
+
+/// A structure with one general-position atom in the class's group.
+fn class_structure(cell: Lattice, class: &ExtinctionClass, name: &str) -> Result<Structure, Error> {
+    let mut builder =
+        StructureBuilder::new(name, cell).hall(class.representative.hall_symbol.clone());
+    for operation in &class.representative.operations {
+        builder = builder.operation(*operation);
+    }
+    builder
+        .site(Site::new("C1", "C", [0.137, 0.281, 0.419])?)
+        .build()
+}
+
+/// BIC of one Le Bail fit, using the weighted residual sum.
+fn profile_bic(result: &LebailResult, observed: usize) -> f64 {
+    let n = observed.max(1) as f64;
+    let rss = result.weighted_sum.max(1e-12);
+    let parameters = (result.intensities.len() + 2) as f64;
+    n * (rss / n).ln() + parameters * n.ln()
 }
 
 /// Result of one automatic run.
@@ -137,6 +208,11 @@ pub fn run_automatic(
             "automatic run needs at least one leading cell".to_owned(),
         ));
     }
+    if options.classes == 0 {
+        return Err(Error::InvalidInput(
+            "automatic run needs at least one extinction class".to_owned(),
+        ));
+    }
     let maximum = observed
         .iter()
         .map(|point| point.intensity)
@@ -183,7 +259,8 @@ pub fn run_automatic(
     let mut leading_cells = Vec::new();
     let mut pawley = None;
     let mut pawley_error = None;
-    for (position, candidate) in indexing
+    let fwhm = median_fwhm(&peaks);
+    for (cell_rank, candidate) in indexing
         .candidates
         .iter()
         .take(options.leading_cells)
@@ -197,47 +274,95 @@ pub fn run_automatic(
             candidate.cell.beta,
             candidate.cell.gamma,
         )?;
-        let pawley_structure = structure.clone().with_lattice(cell);
-        match pawley_refine(
-            &pawley_structure,
-            observed,
-            &PawleyOptions {
-                background_order: 2,
-                ..PawleyOptions::default()
-            },
-        ) {
-            Ok(fit) => {
-                if position == 0 {
-                    pawley = Some(fit.clone());
+        let hkl: Vec<[i32; 3]> = candidate.peaks.iter().map(|peak| peak.hkl).collect();
+        let classes = extinction_classes(candidate.system, &hkl)?;
+        let reference = classes
+            .iter()
+            .find(|class| class.absences == 0)
+            .and_then(|class| class_structure(cell, class, "reference").ok())
+            .and_then(|structure| {
+                le_bail(
+                    &structure,
+                    observed,
+                    &LebailOptions {
+                        fwhm,
+                        ..LebailOptions::default()
+                    },
+                )
+                .ok()
+            })
+            .map(|result| profile_bic(&result, observed.len()))
+            .unwrap_or(0.0);
+        let mut alive = Vec::new();
+        for class in classes.into_iter().filter(|class| !class.refuted) {
+            let Ok(structure) = class_structure(cell, &class, "class") else {
+                continue;
+            };
+            let Ok(fit) = le_bail(
+                &structure,
+                observed,
+                &LebailOptions {
+                    fwhm,
+                    ..LebailOptions::default()
+                },
+            ) else {
+                continue;
+            };
+            let delta_bic = profile_bic(&fit, observed.len()) - reference;
+            alive.push((delta_bic, class));
+        }
+        alive.sort_by(|first, second| first.0.total_cmp(&second.0));
+        for (class_rank, (delta_bic, class)) in alive.into_iter().take(options.classes).enumerate()
+        {
+            let Ok(structure) = class_structure(cell, &class, "pawley") else {
+                continue;
+            };
+            match pawley_refine(
+                &structure,
+                observed,
+                &PawleyOptions {
+                    fwhm,
+                    background_order: 2,
+                    ..PawleyOptions::default()
+                },
+            ) {
+                Ok(fit) => {
+                    if pawley
+                        .as_ref()
+                        .is_none_or(|best: &PawleyResult| fit.rwp < best.rwp)
+                    {
+                        pawley = Some(fit.clone());
+                    }
+                    leading_cells.push(LeadingCell {
+                        index: candidate.clone(),
+                        cell_rank: cell_rank + 1,
+                        class_rank: class_rank + 1,
+                        class_symbol: class.symbol,
+                        delta_bic,
+                        pawley_rwp: Some(fit.rwp),
+                        pawley_cell_esds: Some(fit.cell_esds),
+                        space_groups: class.groups,
+                    });
                 }
-                leading_cells.push(LeadingCell {
-                    index: candidate.clone(),
-                    pawley_rwp: Some(fit.rwp),
-                    pawley_cell_esds: Some(fit.cell_esds),
-                    space_groups: screen(&candidate.peaks, candidate.system)?,
-                });
-            }
-            Err(error) => {
-                if pawley_error.is_none() {
-                    pawley_error = Some(error.message());
+                Err(error) => {
+                    if pawley_error.is_none() {
+                        pawley_error = Some(error.message());
+                    }
+                    leading_cells.push(LeadingCell {
+                        index: candidate.clone(),
+                        cell_rank: cell_rank + 1,
+                        class_rank: class_rank + 1,
+                        class_symbol: class.symbol,
+                        delta_bic,
+                        pawley_rwp: None,
+                        pawley_cell_esds: None,
+                        space_groups: class.groups,
+                    });
                 }
-                leading_cells.push(LeadingCell {
-                    index: candidate.clone(),
-                    pawley_rwp: None,
-                    pawley_cell_esds: None,
-                    space_groups: screen(&candidate.peaks, candidate.system)?,
-                });
             }
         }
     }
-    leading_cells.sort_by(
-        |first, second| match (first.pawley_rwp, second.pawley_rwp) {
-            (Some(left), Some(right)) => left.total_cmp(&right),
-            (Some(_), None) => std::cmp::Ordering::Less,
-            (None, Some(_)) => std::cmp::Ordering::Greater,
-            (None, None) => second.index.m20.total_cmp(&first.index.m20),
-        },
-    );
+    leading_cells = ranked_rows(leading_cells);
     steps.push("leading_cells".to_owned());
     let lebail = le_bail(structure, observed, &LebailOptions::default())?;
     steps.push("le_bail".to_owned());

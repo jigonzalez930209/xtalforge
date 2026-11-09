@@ -56,6 +56,8 @@ pub struct LebailResult {
     pub rwp: f64,
     /// Reduced chi-squared of the extracted intensities.
     pub chi_squared: f64,
+    /// Weighted residual sum of squares of the profile fit.
+    pub weighted_sum: f64,
     /// Standard uncertainty of every intensity, in reflection order.
     pub intensity_esds: Vec<f64>,
 }
@@ -140,12 +142,14 @@ pub fn le_bail(
         })
         .collect();
     let weights = weights(observed);
-    let (r_factor, rwp, chi_squared) = statistics(observed, &pattern_values, &weights);
+    let (r_factor, rwp, chi_squared, weighted_sum) =
+        statistics(observed, &pattern_values, &weights);
     let intensity_esds = intensity_esds(&positions, observed, options, &weights, chi_squared);
     Ok(LebailResult {
         r_factor,
         rwp,
         chi_squared,
+        weighted_sum,
         intensity_esds,
         intensities,
         positions,
@@ -272,7 +276,8 @@ pub fn pawley(
             uncertainty: None,
         })
         .collect();
-    let (r_factor, rwp, chi_squared) = statistics(observed, &pattern_values, &weights);
+    let (r_factor, rwp, chi_squared, weighted_sum) =
+        statistics(observed, &pattern_values, &weights);
     let intensity_esds = intensity_esds(&positions, observed, options, &weights, chi_squared);
     Ok(LebailResult {
         intensities,
@@ -281,6 +286,7 @@ pub fn pawley(
         r_factor,
         rwp,
         chi_squared,
+        weighted_sum,
         intensity_esds,
     })
 }

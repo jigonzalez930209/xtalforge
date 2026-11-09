@@ -51,6 +51,21 @@ const ABSENT: f64 = 1e-6;
 /// Two generic fractional points used to evaluate the structure factor.
 const TRIAL_POINTS: [[f64; 3]; 2] = [[0.137, 0.281, 0.419], [0.217, 0.353, 0.071]];
 
+/// One extinction class: every group that forbids the same reflections.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExtinctionClass {
+    /// Hermann-Mauguin symbol of the representative group.
+    pub symbol: String,
+    /// The group with the most operations in the class.
+    pub representative: SpaceGroup,
+    /// Every group in the class, highest symmetry first.
+    pub groups: Vec<SpaceGroupMatch>,
+    /// Whether an observed indexed reflection is forbidden by the class.
+    pub refuted: bool,
+    /// Number of absences in the fixed probe grid (0 is the lattice class).
+    pub absences: usize,
+}
+
 /// One space group compatible with the indexed reflections.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SpaceGroupMatch {
@@ -99,6 +114,129 @@ pub fn is_systematically_absent(operations: &[SymOp], hkl: [i32; 3]) -> Result<b
         }
     }
     Ok(true)
+}
+
+/// Groups of one crystal system, deduplicated by ITA number.
+fn system_groups(system: LatticeSystem) -> Result<Vec<SpaceGroup>, Error> {
+    let mut groups: BTreeMap<u32, SpaceGroup> = BTreeMap::new();
+    for name in systems_of(system) {
+        for group in catalogue(SpaceGroupFilter {
+            crystal_system: Some(name),
+            ..SpaceGroupFilter::default()
+        })? {
+            groups.entry(group.number).or_insert(group);
+        }
+    }
+    Ok(groups.into_values().collect())
+}
+
+/// The reflection-condition signature of one group over a fixed hkl grid.
+fn signature(operations: &[SymOp]) -> Result<String, Error> {
+    let mut out = String::with_capacity(729);
+    for h in -4..=4i32 {
+        for k in -4..=4i32 {
+            for l in -4..=4i32 {
+                if (h, k, l) == (0, 0, 0) {
+                    continue;
+                }
+                out.push(if is_systematically_absent(operations, [h, k, l])? {
+                    '0'
+                } else {
+                    '1'
+                });
+            }
+        }
+    }
+    Ok(out)
+}
+
+/// Enumerates the extinction classes of a metric family.
+///
+/// Groups with the same reflection conditions are one class; the class's
+/// representative is the group with the most operations, so a rutile
+/// reflection list is represented by `P 4_2/m n m`, not by one of its
+/// subgroups. A class is refuted when an observed indexed reflection is
+/// forbidden by it.
+///
+/// # Errors
+///
+/// Returns [`Error::Symmetry`] when the catalogue cannot be read and the
+/// errors of [`is_systematically_absent`].
+pub fn extinction_classes(
+    system: LatticeSystem,
+    hkl: &[[i32; 3]],
+) -> Result<Vec<ExtinctionClass>, Error> {
+    let mut classes: BTreeMap<String, Vec<SpaceGroup>> = BTreeMap::new();
+    for group in system_groups(system)? {
+        classes
+            .entry(signature(&group.operations)?)
+            .or_default()
+            .push(group);
+    }
+    let mut out = Vec::with_capacity(classes.len());
+    for members in classes.into_values() {
+        let representative = members
+            .iter()
+            .max_by(|first, second| {
+                first
+                    .operations
+                    .len()
+                    .cmp(&second.operations.len())
+                    .then_with(|| second.number.cmp(&first.number))
+            })
+            .cloned()
+            .ok_or_else(|| Error::Symmetry("an empty extinction class".to_owned()))?;
+        let mut groups = Vec::with_capacity(members.len());
+        for group in &members {
+            let unexplained = hkl
+                .iter()
+                .filter(|reflection| **reflection != [0, 0, 0])
+                .filter(|reflection| {
+                    is_systematically_absent(&group.operations, **reflection).unwrap_or(false)
+                })
+                .count();
+            groups.push(SpaceGroupMatch {
+                number: group.number,
+                symbol: group.hm_short.clone(),
+                centering: group.centering,
+                point_group: group.point_group.clone(),
+                order: group.operations.len(),
+                unexplained_peaks: unexplained,
+            });
+        }
+        groups.sort_by(|first, second| {
+            second
+                .order
+                .cmp(&first.order)
+                .then_with(|| first.number.cmp(&second.number))
+        });
+        let refuted = groups.iter().any(|group| group.unexplained_peaks > 0);
+        let absences = signature(&representative.operations)?
+            .chars()
+            .filter(|value| *value == '0')
+            .count();
+        out.push(ExtinctionClass {
+            symbol: representative.hm_short.clone(),
+            representative,
+            groups,
+            refuted,
+            absences,
+        });
+    }
+    out.sort_by(|first, second| {
+        second
+            .representative
+            .operations
+            .len()
+            .cmp(&first.representative.operations.len())
+            .then_with(|| {
+                first
+                    .representative
+                    .number
+                    .cmp(&second.representative.number)
+            })
+    });
+    Ok(out)
 }
 
 /// Crystal-system names searched for an indexed metric family.
