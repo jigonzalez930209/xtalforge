@@ -28,6 +28,7 @@ mod ir;
 mod modes;
 mod phonons;
 mod qha;
+mod qmesh;
 mod rigid;
 mod thermo;
 
@@ -38,7 +39,7 @@ pub use ir::{
     ir_spectrum,
 };
 pub use modes::{IMAGINARY_BELOW_CM, VibrationalModes, ZERO_MODE_TOLERANCE_CM, vibrational_modes};
-pub use phonons::{PhononOptions, PhononResult, phonons};
+pub use phonons::{DosOptions, PhononDos, PhononOptions, PhononResult, phonons};
 pub use qha::{QhaFreeEnergy, QhaPoint, QhaResult, quasi_harmonic_free_energy};
 pub use thermo::{
     LINEAR_MOMENT_AMU_ANGSTROM2, ThermoOptions, ThermoResult, ideal_gas_thermochemistry,
