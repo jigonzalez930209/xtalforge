@@ -11,6 +11,20 @@ prints the registry including the reason.
 On WASM the probe always reports `Missing` with "not available in the browser";
 this is the recorded parity exception for every external engine.
 
+## Process runner
+
+`run_in_scratch(&RunSpec, &AtomicBool)` writes the request's relative input
+files into a private scratch folder, launches the program there with stdin
+closed, and redirects stdout/stderr to log files so a chatty engine cannot
+deadlock the poll loop. It waits with a wall-clock `timeout`, checks the
+cancellation flag every 10 ms, kills the child on either condition, and returns
+`RunOutcome { status: Success | Failed | TimedOut | Cancelled, exit_code,
+stdout, stderr, stdout_truncated, stderr_truncated, scratch, duration }`.
+Scratch is removed by default; `keep_scratch` leaves it for inspection. Input
+names must be relative and may not escape the folder. The tests use generated
+shell scripts for success, timeout, cancellation, log caps and cleanup; no
+external engine binary is needed.
+
 ## DFTB+
 
 `write_dftb_hsd(structure, &DftbOptions)` writes a `dftb_in.hsd` with
