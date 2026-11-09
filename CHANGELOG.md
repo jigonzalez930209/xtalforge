@@ -19,6 +19,9 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.12: replace the chordless-cycle scan with the periodic
   Franzblau walk, expose `Ring::path`/`ring_paths` with lattice images on all
   four surfaces, and validate counts and paths against the golden corpus.
+- Phase 1 Task 1.15.4: round-trip Uij (matched by label), disorder
+  group/assembly, the oxidation-number charge fallback and the explicit-bond
+  loop; split the CIF writer and structure extraction under `cif/`.
 
 ## [0.0.2] - 2026-11-09
 
