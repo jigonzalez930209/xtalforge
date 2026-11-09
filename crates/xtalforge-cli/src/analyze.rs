@@ -69,7 +69,14 @@ pub(crate) fn rings(cli: &Cli, path: &str, max_size: usize) -> Result<(), CliErr
     if cli.json {
         let payload: Vec<serde_json::Value> = rings
             .iter()
-            .map(|ring| json!({ "size": ring.size(), "atoms": ring.atoms }))
+            .map(|ring| {
+                let path: Vec<serde_json::Value> = ring
+                    .path
+                    .iter()
+                    .map(|step| json!([step.atom, step.image]))
+                    .collect();
+                json!({ "size": ring.size(), "atoms": ring.atoms, "path": path })
+            })
             .collect();
         println!(
             "{}",
