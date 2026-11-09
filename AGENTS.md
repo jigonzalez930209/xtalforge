@@ -267,18 +267,19 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `0.0.1` (first release prepared; nothing published yet).
+- Version: `0.0.1` (published 2026-11-09 on crates.io, PyPI, npm, the GitHub
+  release and GitHub Pages; the tag is `v0.0.1`).
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
 - Current phase: Phase 8 — Agent and distribution
   (`docs/roadmap/phase-08-distribution.md`); no Phase 8 subtask is implemented
-  yet. Phases 1-7 are complete locally at the documented-subset level; the
-  remaining reference gaps (neighbour acceleration, phonon q-mesh, preparation
-  steps, general indexing, profile simplifications and others) are listed in
-  `docs/roadmap/index.md` under "Known subsets". Phase 1's Task 1.18.5 is the
-  only unchecked item in Phases 1-7 and waits on the first tag release after
-  the local CI gate.
+  yet. Phases 1-7 are complete and released at `0.0.1`; the remaining
+  reference gaps (phonon q-mesh, preparation steps, general indexing, profile
+  simplifications and others) are listed in `docs/roadmap/index.md` under
+  "Known subsets". Post-release performance work on `main` adds the linked-cell
+  neighbor search, grid-based P1/supercell deduplication and the 10^3-10^5 atom
+  benchmark, so the next PATCH carries them.
   Phase 2 covers moyo integration, the space-group catalogue, the
   detect/asymmetrize/P1/set workflow, Wyckoff assignments, standardized and
   primitive cells, lattice reduction, subgroup enumeration and lowering,
@@ -296,13 +297,13 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   the net/structure and MOF builders, twists, ribbons, carbon surfaces and
   polymers. Phase 7 covers measured patterns/instrument, whole-range and
   structural refinement, cells/extinction, the automatic run and the powder
-  surfaces. Phase 2-7 releases wait for the v0.0.1 gate and the external
-  release dry run.
-- Phase 0 blockers: Task 0.6.3 (release dry run) and Task 0.7.5 (docs
-  deployment) now live in the tag-driven `release.yml`; Task 0.6.5 (name
-  reservation) waits for explicit approval. Tasks 0.8.1 to 0.8.5 (CI) were
-  removed by maintainer decision on 2026-11-08 because the runner cost was not
-  wanted; the checks are run locally. The names were free on 2026-11-08.
+  surfaces. Phase 2-7 releases follow the `0.0.x` line.
+- Phase 0 blockers: Tasks 0.6.3 (release workflow), 0.6.5 (name reservation)
+  and 0.7.5 (docs deployment) completed with the `v0.0.1` release on
+  2026-11-09. Tasks 0.8.1 to 0.8.5 (CI) remain open by maintainer decision on
+  2026-11-08 because the runner cost was not wanted; the checks are run
+  locally. The names were free on 2026-11-08 and are now reserved by the
+  publication.
 - Testing: integration tests live in `crates/<crate>/tests/` (AGENTS.md
   section 2.2). Shared vectors are in `tests/vectors/`, the curated corpus in
   `tests/corpus/`, and the Crystal-Builder golden data in `tests/golden/`

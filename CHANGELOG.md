@@ -17,6 +17,13 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.7.1: supercell boundary duplicates use the same fractional
   grid, cutting the 2x2x2 MOF-5 build from 37.5 ms to 5.5 ms.
 
+### Fixed
+
+- Rename the Linux desktop entry to the reverse-DNS component ID so
+  `appimagetool` finds the AppStream metadata; the AppImage build no longer
+  reports the missing-metadata warning, and the `.deb`/`.rpm` payloads carry
+  the matching desktop ID.
+
 ## [0.0.1] - 2026-11-08
 
 ### Changed
