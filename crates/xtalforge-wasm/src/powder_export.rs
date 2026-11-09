@@ -59,6 +59,14 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
     for row in &result.leading_cells {
         let item = js_sys::Object::new();
         set(&item, "system", JsValue::from_str(row.index.system.name()));
+        set(&item, "cell_rank", JsValue::from_f64(row.cell_rank as f64));
+        set(
+            &item,
+            "class_rank",
+            JsValue::from_f64(row.class_rank as f64),
+        );
+        set(&item, "class_symbol", JsValue::from_str(&row.class_symbol));
+        set(&item, "delta_bic", JsValue::from_f64(row.delta_bic));
         for (key, value) in [
             ("a", row.index.cell.a),
             ("b", row.index.cell.b),
