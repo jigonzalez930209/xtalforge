@@ -9,6 +9,14 @@ essential release, then `0.x.y`).
 
 ### Changed
 
+- Phase 7 Task 7.8: run the Rietveld refinement in McCusker order
+  (analytic scale/background, zero shift and free cell numbers, width, then
+  Wyckoff coordinates, isotropic ADPs, occupancies and March-Dollase texture)
+  with a bounded direct search per stage, covariance-based parameter esds and
+  the `stages` list. Coordinates move only along the Wyckoff null space
+  (`free_directions`), the metric-family cell ties are restored after every
+  move, and the copper K alpha doublet can be placed. A rutile golden pattern
+  from Crystal-Builder validates the recovered position, cell and zero shift.
 - Phase 7 Task 7.6.2: add the Pawley fit with one intensity per reflection,
   exact linear covariance and intensity esds, free cell numbers, zero shift and
   size/strain width model, R-factors and chi-squared; a Python-generated golden
