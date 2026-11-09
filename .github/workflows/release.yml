@@ -223,7 +223,7 @@ jobs:
             crates/xtalforge-python/dist-sdist/*
 
       - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        run: command -v wasm-pack >/dev/null || cargo install wasm-pack --version 0.13.1 --locked
       - name: Build the npm package
         working-directory: crates/xtalforge-wasm
         run: wasm-pack build --release --target bundler --out-dir pkg-bundler
