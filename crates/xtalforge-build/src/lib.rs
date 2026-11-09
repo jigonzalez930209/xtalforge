@@ -1,6 +1,8 @@
 //! Builders: graphene, nanotubes and the carbon family (Phase 6).
 
 pub mod carbon;
+pub mod carbon_recipe;
+pub use carbon_recipe::{CarbonBuild, CarbonRecipe, build_carbon, carbon_surface};
 pub mod embed;
 pub mod fragments;
 pub mod fullerene;
