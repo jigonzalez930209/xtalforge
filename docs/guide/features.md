@@ -8,7 +8,7 @@ downstream crate can be built directly with or without them.
 | Feature | Default | Domains | Effect |
 |---|---|---|---|
 | `parallel` | yes | core, io, symmetry | Reserves Rayon for the parallel algorithms. The current algorithms are single-threaded and deterministic; the feature exists so builds can already opt out with `--no-default-features`. |
-| `sci-form` | no | force fields | Adapter contract for the in-process GFN0/GFN1/GFN2 backend (Task 4.10). The dependency is not vendored, so the adapter returns a typed error naming the feature. |
+| `sci-form` | no | force fields | Links the published MIT crate `sci-form` 2.0.0 for in-process GFN0/GFN1/GFN2 (Task 4.10). The methods are molecular only; GFN2 returns forces and the registry lists `gfn0`, `gfn1` and `gfn2`. |
 | `ml` | no | force fields | Reserved for machine-learned potentials (Task 8.4). The decision is recorded in `docs/algorithms/ml-backend.md`; currently a no-op. |
 | `external` | no | force fields | Reserved; the runtime engine probes and input writers for DFTB+, xTB and ORCA are always compiled and need no feature (Task 4.9). |
 | `mof-data` | no | MOF builder | Reserved for a future full MOF bundle; the curated six-topology/eight-block subset is always embedded (Tasks 6.11-6.16). |
