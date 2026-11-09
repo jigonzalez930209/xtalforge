@@ -7,7 +7,7 @@
     clippy::indexing_slicing
 )]
 
-use xtalforge_core::{Lattice, Site, StructureBuilder};
+use xtalforge_core::{ExplicitBond, Lattice, Site, StructureBuilder};
 use xtalforge_io::cif::{CifDocument, read_cif, read_cif_all, read_cif_block, write_cif};
 
 const SI: &str = include_str!("../../../tests/corpus/simple/Si.cif");
@@ -156,4 +156,76 @@ fn out_of_range_occupancy_is_clamped_and_reported() {
     let structure = read_cif(text).unwrap();
     assert_eq!(structure.sites()[0].occupancy(), 1.0);
     assert_eq!(structure.metadata()["occupancy_clamped"].as_u64(), Some(1));
+}
+
+#[test]
+fn round_trips_aniso_disorder_and_assembly() {
+    let text = "data_aniso\n_cell_length_a 10\n_cell_length_b 10\n_cell_length_c 10\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                _atom_site_occupancy\n_atom_site_disorder_group\n\
+                _atom_site_disorder_assembly\n\
+                C1 C 0 0 0 0.5 1 A\nO1 O 0.2 0 0 1 . .\n\
+                loop_\n_atom_site_aniso_label\n_atom_site_aniso_U_11\n\
+                _atom_site_aniso_U_22\n_atom_site_aniso_U_33\n\
+                _atom_site_aniso_U_12\n_atom_site_aniso_U_13\n\
+                _atom_site_aniso_U_23\nC1 0.01 0.02 0.03 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    assert_eq!(structure.sites()[0].disorder_group(), Some(1));
+    assert_eq!(
+        structure.sites()[0].props().get("disorder_assembly"),
+        Some(&serde_json::Value::String("A".to_owned()))
+    );
+    assert!(structure.sites()[0].u_aniso().is_some());
+    assert!(structure.sites()[1].u_aniso().is_none());
+    let written = write_cif(&structure).unwrap();
+    assert!(written.contains("_atom_site_aniso_label"));
+    assert!(written.contains("_atom_site_disorder_group"));
+    assert!(written.contains("_atom_site_disorder_assembly"));
+    let back = read_cif(&written).unwrap();
+    assert_eq!(back.sites()[0].disorder_group(), Some(1));
+    assert_eq!(
+        back.sites()[0].u_aniso(),
+        Some([0.01, 0.02, 0.03, 0.0, 0.0, 0.0])
+    );
+    assert!(back.sites()[1].u_aniso().is_none());
+}
+
+#[test]
+fn oxidation_number_fills_a_missing_site_charge() {
+    let text = "data_oxidation\n_cell_length_a 10\n_cell_length_b 10\n_cell_length_c 10\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                loop_\n_atom_type_symbol\n_atom_type_oxidation_number\nFe3+ 3\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                Fe1 Fe3+ 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    assert_eq!(structure.sites()[0].charge(), Some(3.0));
+}
+
+#[test]
+fn round_trips_the_explicit_bond_loop() {
+    let structure = StructureBuilder::new("explicit", Lattice::cubic(10.0).unwrap())
+        .site(Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap())
+        .site(Site::new("C2", "C", [0.1, 0.0, 0.0]).unwrap())
+        .explicit_bond(ExplicitBond {
+            i: 0,
+            j: 1,
+            image: [0, 0, 0],
+            order: 2.0,
+            remove: false,
+        })
+        .build()
+        .unwrap();
+    let written = write_cif(&structure).unwrap();
+    assert!(written.contains("_geom_bond_atom_site_label_1"));
+    assert!(written.contains("_xtal_bond_kind"));
+    let back = read_cif(&written).unwrap();
+    let bonds = back.explicit_bonds();
+    assert_eq!(bonds.len(), 1);
+    assert_eq!((bonds[0].i, bonds[0].j), (0, 1));
+    assert_eq!(bonds[0].image, [0, 0, 0]);
+    assert_eq!(bonds[0].order, 2.0);
+    assert!(!bonds[0].remove);
 }

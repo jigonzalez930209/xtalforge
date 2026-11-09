@@ -64,6 +64,17 @@ fn full_corpus_bond_sets_and_coordination_match_the_golden_data() {
         );
         let expected = expected_bonds(entries);
         let (found, found_coordination) = found_bonds(&structure, &mapping);
+        if found.len() != expected.len() {
+            let extra: Vec<_> = found
+                .keys()
+                .filter(|key| !expected.contains_key(*key))
+                .collect();
+            let missing: Vec<_> = expected
+                .keys()
+                .filter(|key| !found.contains_key(*key))
+                .collect();
+            eprintln!("{} extra {:?} missing {:?}", path.display(), extra, missing);
+        }
         assert_eq!(
             found.len(),
             expected.len(),
