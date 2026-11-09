@@ -34,7 +34,14 @@ folder naming and the k-point mesh. `parse_dftb_output` reads `detailed.out`
 `DftbCalculator::new(options)` writes the input into a scratch folder, launches
 `dftb+` through `run_in_scratch`, reads `detailed.out`, checks the force count
 and exposes the result through `Calculator`. `with_program`, `with_timeout`,
-`keep_scratch` and `cancel_handle` configure the run.
+`keep_scratch` and `cancel_handle` configure the run. The parser is validated
+against the recorded `si_scc_detailed.out` fixture, not only against a
+simulated executable.
+
+sci-form carries the SCC-DFTB Fock/gamma building blocks
+(`scf::fock_matrix`) but not a Slater-Koster parameter set or a complete DFTB
+driver, so DFTB+ remains an external program; the xTB GFN methods are the ones
+available in-process (Task 4.10).
 
 ## xTB
 

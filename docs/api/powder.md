@@ -75,25 +75,30 @@ the Bravais extinction letter for the 14 Bravais types.
 ## Automatic run
 
 `run_automatic(structure, observed, &AutomaticOptions)` finds the peaks, runs
-the general metric-family indexing, builds a leading-cell table, extracts Le
-Bail intensities, fits a Pawley model of the best indexed cell and fits the
+the general metric-family indexing, builds the leading-cell table, extracts Le
+Bail intensities, fits a Pawley model of the best (cell, class) and fits the
 phase, recording every step in order in `AutomaticResult { peaks, index,
-leading_cells, lebail, pawley, phase, steps }`. `leading_cells` holds the first
-`AutomaticOptions::leading_cells` indexing candidates (default 3), each with its
-`IndexedCell`, Pawley `pawley_rwp`, `pawley_cell_esds` and `space_groups`. The
-space groups are the candidates whose systematic absences every indexed
-reflection of that cell obeys; they are enumerated from the cell's crystal
-system with `space_group_candidates` and ranked by the number of operations
-(higher symmetry first), not by a Le Bail class fit. `unexplained_peaks` is
-zero when a candidate explains every indexed reflection, and the fewest
-violations are reported when no group is perfect. The table is sorted by
-Pawley Rwp, so the best fit is first even when the indexing ranking differs.
-The `steps` list contains `peaks`, `index`, `leading_cells`, `le_bail`,
-`pawley` and `rietveld` (a Pawley fit the cell makes impossible is recorded as
-`pawley_skipped`). It refuses fewer than three points or peaks and a zero
-`leading_cells`. `IndexedPeak` is one indexed reflection.
-`is_systematically_absent(operations, hkl)` is the underlying reflection
-condition test; see [Extinction screening](../algorithms/extinction.md).
+leading_cells, lebail, pawley, phase, steps }`.
+
+For each of the first `AutomaticOptions::leading_cells` indexing candidates
+(default 5) the extinction classes of its crystal system are enumerated: groups
+with the same reflection-condition signature are one class, its representative
+is the group with the most operations, and a class is refuted when an indexed
+reflection violates it. Every surviving class is fitted with Le Bail and ranked
+by BIC against the absence-free lattice class; the leading
+`AutomaticOptions::classes` classes (default 3) are Pawley fitted.
+
+`leading_cells` holds one row per fitted (cell, class): its `IndexedCell`,
+`cell_rank`, `class_rank`, `class_symbol`, `delta_bic`, Pawley `pawley_rwp`,
+`pawley_cell_esds` and the `space_groups` that share the class. The table is
+sorted by Pawley Rwp; fits within 1 % of each other are a tie and are ordered by
+the indexing and class ranks, as in the reference. The `steps` list contains
+`peaks`, `index`, `leading_cells`, `le_bail`, `pawley` and `rietveld` (a Pawley
+fit the cell makes impossible is recorded as `pawley_skipped`). It refuses fewer
+than three points or peaks, a zero `leading_cells` and a zero `classes`.
+`IndexedPeak` is one indexed reflection. `is_systematically_absent(operations,
+hkl)` is the underlying reflection-condition test; see
+[Extinction screening](../algorithms/extinction.md).
 
 ## Indexing
 
