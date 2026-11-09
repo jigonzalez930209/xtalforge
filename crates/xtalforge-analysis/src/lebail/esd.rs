@@ -23,7 +23,7 @@ pub(super) fn statistics(
     observed: &[PatternPoint],
     calculated: &[f64],
     weights: &[f64],
-) -> (f64, f64, f64) {
+) -> (f64, f64, f64, f64) {
     let mut numerator = 0.0;
     let mut denominator = 0.0;
     let mut weighted = 0.0;
@@ -49,7 +49,7 @@ pub(super) fn statistics(
         .len()
         .saturating_sub(calculated.len().max(1))
         .max(1) as f64;
-    (r_factor, rwp, weighted / degrees)
+    (r_factor, rwp, weighted / degrees, weighted)
 }
 
 /// Covariance diagonal of the intensities at fixed positions and profile.
