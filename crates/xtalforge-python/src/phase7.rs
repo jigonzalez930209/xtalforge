@@ -44,6 +44,10 @@ pub(crate) fn powder_automatic<'py>(
     for row in &result.leading_cells {
         let item = PyDict::new(py);
         item.set_item("system", row.index.system.name())?;
+        item.set_item("cell_rank", row.cell_rank)?;
+        item.set_item("class_rank", row.class_rank)?;
+        item.set_item("class_symbol", &row.class_symbol)?;
+        item.set_item("delta_bic", row.delta_bic)?;
         item.set_item("a", row.index.cell.a)?;
         item.set_item("b", row.index.cell.b)?;
         item.set_item("c", row.index.cell.c)?;
