@@ -333,9 +333,14 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
 - [x] 1.11.5 Validation
   Golden comparison of bond lists and coordination numbers for the full
   corpus; every intentional deviation documented.
-  Note: MOF-5 and Si bond counts match the Crystal-Builder golden data;
-  coordination-number comparison across the full corpus is pending because
-  the metal-specific rules still add bonds in several MOFs.
+  Note: every golden structure with a bond list matches Crystal-Builder:
+  atoms are mapped by element and periodic position, then the canonical
+  `(i, j, image)` set and every coordination number are compared
+  (`crates/xtalforge-io/tests/golden_bonds.rs`). The default rules moved to
+  scale 1.15 with metal-metal pairs forbidden, which reproduces the corpus;
+  six prepared structures above the generator's atom limit have no golden
+  bond list and are skipped. The comparison uses 0.05 Angstrom for the P1
+  mapping because some golden cells are symmetry-standardized.
 
 ## Task 1.12 — Rings
 
@@ -419,8 +424,9 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   (`_atom_type_oxidation_number`, `_atom_site_charge`), disorder assembly and
   group, explicit bonds (`_geom_bond`), and properties CIF has no tag for
   (kept in `props`).
-  Note: cell, sites, occupancy, Uiso/Uij and charge are read; explicit
-  `_geom_bond` and disorder assembly are pending.
+  Note: cell, sites, occupancy, Uiso/Uij, charge and Hall/H-M operation
+  resolution are read; explicit `_geom_bond` and disorder assembly remain
+  pending.
 - [x] 1.15.5 Robustness
   Never panic: malformed numbers, missing loops, truncated files, duplicate
   labels all return typed errors or warnings with line numbers. Fuzz target

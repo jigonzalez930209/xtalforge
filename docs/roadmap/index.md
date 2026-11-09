@@ -48,9 +48,6 @@ and exposed on the surfaces. The following reference behaviours are subsets or
 simplified ports rather than complete reproductions; they are the first
 candidates for Phase 8 or a follow-up and are not silent approximations:
 
-- 1.11.5: bond counts for Si and MOF-5 match the golden data; the full-corpus
-  bond-set and coordination comparison is pending because the metal-specific
-  perception rules are still simplified.
 - 1.12: chordless primitive cycles on the P1 graph with counts, per-atom
   membership and a heuristic aromaticity flag; periodic ring shifts that need
   another copy of the start atom and the full Franzblau shortest-path weights
