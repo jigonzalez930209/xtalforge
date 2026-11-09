@@ -37,6 +37,9 @@ must record the reason in the algorithm page.
 | UFF forces | absolute | 1e-4 eV/Angstrom | 4 |
 | UFF stress | absolute | 1e-3 GPa | 4 |
 | Phonon q frequencies | absolute | 0.5 cm^-1 (phonopy spring golden) | 4 |
+| Indexing figures of merit | relative to the Python reference | 1e-4 | 7 |
+| Indexed lattice (golden) | Q-spectrum agreement | 5e-4 relative | 7 |
+| Peak fit centre | absolute | 2e-3 degree (synthetic Gaussian) | 7 |
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |
