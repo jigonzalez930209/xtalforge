@@ -51,7 +51,7 @@ pub use peaks::{Peak, PeakOptions, background_envelope, find_peaks, fit_peaks};
 pub use profiles::{Background, Profile, ProfileKind};
 pub use pxrd::{Pattern, PatternPoint, PxrdOptions, Radiation, Reflection, calculate_pxrd};
 pub use rcsr::{RCSR_LICENSE_NOTE, RcsrEntry, RcsrIndex};
-pub use refine::{RefineOptions, RefinedPhase, combined_objective, refine_phase};
+pub use refine::{RefineOptions, RefinedPhase, combined_objective, free_directions, refine_phase};
 pub use rietveld::{RietveldOptions, RietveldPhase, fit_phase};
 pub use rietx::{
     ACCEPTANCE_MAX_POSITION_ERROR, ACCEPTANCE_MAX_RWP, AcceptanceMetrics, RIETX_LICENSE_NOTE,

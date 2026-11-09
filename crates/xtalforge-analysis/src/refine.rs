@@ -1,50 +1,53 @@
 //! Whole-range and structural refinement (Tasks 7.3.2, 7.8 and 7.9.1).
 //!
-//! [`refine_phase`] builds the calculated pattern of one phase, fits the scale
-//! and a constant, linear or quadratic background **analytically**, then runs a
-//! small bounded Gauss-Newton loop on the requested structural parameters:
+//! [`refine_phase`] builds the calculated pattern of one phase and refines it
+//! in the McCusker order: the scale and background are fitted analytically,
+//! then the zero shift and the free cell numbers, then the profile width, and
+//! finally the structure (Wyckoff-allowed coordinates, isotropic ADPs,
+//! occupancies and March-Dollase texture).
 //!
-//! * fractional coordinates of every asymmetric site (three per site),
-//! * one global isotropic ADP multiplier applied to every site's `U_iso`,
-//! * one occupancy per asymmetric site.
-//!
-//! The structure is edited through [`xtalforge_core::StructureBuilder`] with the original
-//! Hall symbol, lattice and symmetry operations, so the space group is kept and
-//! the result is the input structure with new numbers on the same sites. Atoms
-//! are never added, removed or bonded.
+//! The structure is edited through [`xtalforge_core::StructureBuilder`] with the
+//! original Hall symbol, lattice and symmetry operations, so the space group is
+//! kept and the result is the input structure with new numbers on the same
+//! sites. Atoms are never added, removed or bonded.
 //!
 //! # Approximations
 //!
-//! * The least-squares step uses central finite differences of the *current*
-//!   calculated pattern; the scale and background are refitted analytically
-//!   after every trial step, but their derivatives are not part of the
-//!   Jacobian.
-//! * Position steps are limited to 0.05 fractional units per iteration, ADP
-//!   scale steps to 0.25 and occupancy steps to 0.10, so a single iteration can
-//!   never move an atom across the cell.
-//! * Sites without a `U_iso` start from a 0.005 Angstrom^2 baseline that the
-//!   global multiplier scales; sites on special positions should not free
-//!   coordinates, because the builder keeps the operations rather than deriving
-//!   Wyckoff-allowed directions (Task 2.4.3 does that separately).
-//! * The scattering factor, profile and Lorentz-polarisation approximations are
-//!   those documented on [`crate::pxrd`]; Rwp inherits them. The model uses the
-//!   same area-normalised Gaussian as the PXRD engine, so
-//!   [`RietveldOptions::kind`] does not change the profile here.
+//! * Every stage except the analytic scale/background solve uses a bounded
+//!   Nelder-Mead simplex, because the zero shift, cell and width are strongly
+//!   correlated with each other and with the scale. The esds come from central
+//!   differences of the complete model at the final values, so the analytic
+//!   scale/background refit is projected into every Jacobian column.
+//! * A site on a special position moves only along the null space of its
+//!   stabilizer, computed from the operations; a general position has three
+//!   directions, a mirror or axis one, an inversion centre none. The free
+//!   subspace is public as [`free_directions`].
+//! * Only the numbers the metric family leaves free are refined, and the
+//!   family ties (`a = b = c`, `a = b`, right angles) are restored after every
+//!   move.
+//! * The profile uses the area-normalised Gaussian of the PXRD engine;
+//!   `RietveldOptions::kind` is accepted but does not change the curve here.
+//!   With [`RefineOptions::doublet`] the copper K alpha 1/K alpha 2 pair is
+//!   placed from the K alpha 1 position with the 0.5 intensity ratio.
+//! * The ADP is one global multiplier on every site's `U_iso`; a free `U_ij`
+//!   per site is not implemented.
 //! * [`RefineOptions::combined_energy`] is the weight `w` of the combined
-//!   objective. This signature has no force-field calculator, so the energy term
-//!   is a constant zero during the fit; the weight is used for the reported
-//!   `combined_objective` entry, and callers with an energy model should pass
-//!   its normalised value to [`combined_objective`] themselves.
+//!   objective. This signature has no force-field calculator, so the energy
+//!   term is a constant zero during the fit.
 
+mod curve;
 mod fit;
 mod model;
+mod stage;
+mod wyckoff;
 
 use serde::{Deserialize, Serialize};
-use xtalforge_core::{Error, Structure};
+use xtalforge_core::{Error, Structure, SymOp};
 use xtalforge_io::xy::PatternPoint;
 
-use self::fit::{gradient, normal_matrix, solve_linear, weighted_residual};
-use self::model::{ModelContext, bounds, build_parameters, clamp, initial_value, max_step};
+use self::fit::{invert, weighted_residual};
+use self::model::{ModelContext, ParameterKind, build_parameters, initial_value, pxrd_options};
+use self::stage::run_stage;
 use crate::peaks::{PeakOptions, find_peaks};
 use crate::profiles::Background;
 use crate::rietveld::RietveldOptions;
@@ -52,16 +55,28 @@ use crate::rietveld::RietveldOptions;
 /// Options for [`refine_phase`].
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RefineOptions {
-    /// Maximum number of outer least-squares iterations.
+    /// Maximum number of outer least-squares iterations per stage.
     pub max_iterations: usize,
     /// Relative convergence tolerance on the Rwp improvement and step size.
     pub tolerance: f64,
-    /// Refine the fractional coordinates of every asymmetric site.
+    /// Refine the Wyckoff-allowed coordinates of every asymmetric site.
     pub refine_positions: bool,
     /// Refine a global isotropic ADP multiplier.
     pub refine_adps: bool,
     /// Refine one occupancy per asymmetric site.
     pub refine_occupancies: bool,
+    /// Refine the zero shift.
+    pub refine_zero: bool,
+    /// Refine the cell numbers the metric family leaves free.
+    pub refine_cell: bool,
+    /// Refine the profile width multiplier.
+    pub refine_width: bool,
+    /// Refine the March-Dollase texture coefficient.
+    pub refine_texture: bool,
+    /// Preferred-orientation axis in fractional direct coordinates.
+    pub texture_axis: [f64; 3],
+    /// Refine against the copper K alpha 1/K alpha 2 doublet.
+    pub doublet: bool,
     /// Optional weight `w` for the combined energy-plus-fit objective.
     pub combined_energy: Option<f64>,
 }
@@ -74,6 +89,12 @@ impl Default for RefineOptions {
             refine_positions: false,
             refine_adps: false,
             refine_occupancies: false,
+            refine_zero: false,
+            refine_cell: false,
+            refine_width: false,
+            refine_texture: false,
+            texture_axis: [0.0, 0.0, 1.0],
+            doublet: false,
             combined_energy: None,
         }
     }
@@ -87,27 +108,36 @@ pub struct RefinedPhase {
     /// Weighted profile R factor of the final model.
     pub rwp: f64,
     /// Refined parameters in a deterministic order: scale, background terms,
-    /// then the requested structural parameters.
+    /// then the requested parameters.
     pub parameters: Vec<(String, f64)>,
-    /// Whether the fit reached a stationary point within the tolerance.
+    /// Standard uncertainties of the refined parameters.
+    pub parameter_esds: Vec<(String, f64)>,
+    /// Stages run, in McCusker order.
+    pub stages: Vec<String>,
+    /// Whether every stage reached a stationary point.
     pub converged: bool,
-    /// Outer iterations used.
+    /// Outer iterations used by all stages.
     pub iterations: usize,
+}
+
+/// Orthonormal directions a site may move along without leaving its Wyckoff
+/// position.
+///
+/// A displacement belongs to the null space of every stabilizer operation:
+/// three directions on a general position, one on a mirror or rotation axis,
+/// none at an inversion centre. The basis is deterministic and empty when the
+/// site is fully fixed.
+#[must_use]
+pub fn free_directions(operations: &[SymOp], frac: [f64; 3]) -> Vec<[f64; 3]> {
+    wyckoff::allowed_directions(operations, frac)
 }
 
 /// Combined energy-plus-fit objective of Task 7.9.1.
 ///
-/// The documented objective is
-///
-/// ```text
-/// f = (1 - w) * chi^2 / chi^2_0 + w * (E - E_0) / Delta E
-/// ```
-///
 /// This function expects both arguments **already normalised** by their
 /// starting values (`chi^2 / chi^2_0` and `(E - E_0) / Delta E`), so a weight
 /// means the same thing on a small cell and on a large framework. The weight is
-/// clamped to `[0, 1]`. A non-finite argument returns `f64::INFINITY` rather
-/// than panicking.
+/// clamped to `[0, 1]`. A non-finite argument returns `f64::INFINITY`.
 #[must_use]
 pub fn combined_objective(energy: f64, rwp: f64, weight: f64) -> f64 {
     if !energy.is_finite() || !rwp.is_finite() {
@@ -141,6 +171,18 @@ pub fn refine_phase(
             "refinement tolerance must be positive and finite".to_owned(),
         ));
     }
+    if refine.refine_texture {
+        let norm = refine
+            .texture_axis
+            .iter()
+            .map(|value| value * value)
+            .sum::<f64>();
+        if !norm.is_finite() || norm <= 1e-12 {
+            return Err(Error::InvalidInput(
+                "the texture axis must be a finite non-zero direction".to_owned(),
+            ));
+        }
+    }
     if let Some(weight) = refine.combined_energy
         && (!weight.is_finite() || !(0.0..=1.0).contains(&weight))
     {
@@ -153,89 +195,64 @@ pub fn refine_phase(
     let peaks = count_peaks(observed)?;
     if parameters.len() > peaks {
         return Err(Error::InvalidInput(format!(
-            "refinement would free {} structural parameters but the observed pattern supports only {peaks} peaks; disable positions, ADPs or occupancies, or observe a wider range",
+            "refinement would free {} parameters but the observed pattern supports only {peaks} peaks; disable positions, ADPs, occupancies, cell or width, or observe a wider range",
             parameters.len()
         )));
     }
-    let base_sites = structure.sites().to_vec();
-    let base_u: Vec<f64> = base_sites
+    let base_u: Vec<f64> = structure
+        .sites()
         .iter()
         .map(|site| site.u_iso().unwrap_or(model::DEFAULT_U_ISO))
         .collect();
     let mut values: Vec<f64> = parameters
         .iter()
-        .map(|parameter| initial_value(parameter.kind, &base_sites))
+        .map(|parameter| initial_value(parameter.kind, structure))
         .collect();
-    let pxrd = model::pxrd_options(options, observed);
+    let pxrd = pxrd_options(options, observed);
     let context = ModelContext {
         base: structure,
         base_u: &base_u,
         parameters: &parameters,
         observed,
         pxrd: &pxrd,
+        texture_axis: refine.texture_axis,
+        doublet: refine.doublet,
     };
+    let mut stages = vec!["background_scale".to_owned()];
     let mut current = context.model(&values, terms)?;
-    let initial_rwp = current.rwp.max(1e-12);
     let mut iterations = 0;
-    let mut converged = parameters.is_empty();
-    let mut lambda = 1e-3;
-
-    while !parameters.is_empty() && iterations < refine.max_iterations && !converged {
-        iterations += 1;
-        let residual = weighted_residual(observed, &current.model);
-        let jacobian = context.jacobian(&values)?;
-        let normal = normal_matrix(&jacobian);
-        let gradient = gradient(&jacobian, &residual);
-        let rhs: Vec<f64> = gradient.iter().map(|value| -value).collect();
-        let mut accepted = false;
-        for _ in 0..6 {
-            let mut damped = normal.clone();
-            for index in 0..parameters.len() {
-                if let Some(slot) = damped.get_mut(index).and_then(|row| row.get_mut(index)) {
-                    *slot += lambda * (1.0 + slot.abs());
-                }
-            }
-            let Some(step) = solve_linear(&damped, &rhs) else {
-                lambda = (lambda * 10.0).min(1e12);
-                continue;
-            };
-            let mut candidate_values = values.clone();
-            let mut largest = 0.0_f64;
-            for (index, parameter) in parameters.iter().enumerate() {
-                let (low, high) = bounds(parameter.kind);
-                let limit = max_step(parameter.kind);
-                let raw = step.get(index).copied().unwrap_or(0.0);
-                let delta = raw.clamp(-limit, limit);
-                let Some(value) = values.get(index).copied() else {
-                    continue;
-                };
-                let candidate = clamp(value + delta, low, high);
-                if let Some(slot) = candidate_values.get_mut(index) {
-                    *slot = candidate;
-                }
-                largest = largest.max(delta.abs() / (1.0 + value.abs()));
-            }
-            if largest < refine.tolerance {
-                converged = true;
-                break;
-            }
-            let candidate = context.model(&candidate_values, terms)?;
-            if candidate.rwp < current.rwp {
-                let improvement = (current.rwp - candidate.rwp) / initial_rwp;
-                values = candidate_values;
-                current = candidate;
-                lambda = (lambda / 3.0).max(1e-12);
-                accepted = true;
-                if improvement < refine.tolerance {
-                    converged = true;
-                }
-                break;
-            }
-            lambda = (lambda * 5.0).min(1e12);
+    let mut converged = true;
+    type StageSelector = fn(ParameterKind) -> bool;
+    let stage_order: [(&str, StageSelector); 3] = [
+        ("zero_cell", |kind| {
+            matches!(kind, ParameterKind::Zero | ParameterKind::Cell { .. })
+        }),
+        ("width", |kind| matches!(kind, ParameterKind::WidthScale)),
+        ("structure", |kind| {
+            matches!(
+                kind,
+                ParameterKind::Position { .. }
+                    | ParameterKind::AdpScale
+                    | ParameterKind::Occupancy { .. }
+                    | ParameterKind::Texture
+            )
+        }),
+    ];
+    for (name, predicate) in stage_order {
+        let indices: Vec<usize> = parameters
+            .iter()
+            .enumerate()
+            .filter(|(_, parameter)| predicate(parameter.kind))
+            .map(|(index, _)| index)
+            .collect();
+        if indices.is_empty() {
+            continue;
         }
-        if !accepted {
-            converged = true;
-        }
+        let result = run_stage(&context, &mut values, terms, &indices, refine)?;
+        current = result.model;
+        iterations += result.iterations;
+        converged &= result.converged;
+        stages.push(name.to_owned());
     }
 
     let mut reported = vec![("scale".to_owned(), current.scale)];
@@ -245,17 +262,54 @@ pub fn refine_phase(
     for (parameter, value) in parameters.iter().zip(values.iter()) {
         reported.push((parameter.name.clone(), *value));
     }
+    let parameter_esds = parameter_errors(&context, &values, terms, &parameters)?;
     if let Some(weight) = refine.combined_energy {
-        let merit = combined_objective(0.0, current.rwp / initial_rwp, weight);
+        let merit = combined_objective(0.0, current.rwp / current.rwp.max(1e-12), weight);
         reported.push(("combined_objective".to_owned(), merit));
     }
     Ok(RefinedPhase {
         structure: current.structure,
         rwp: current.rwp,
         parameters: reported,
+        parameter_esds,
+        stages,
         converged,
         iterations,
     })
+}
+
+/// Covariance-based esds of the free parameters at the final values.
+fn parameter_errors(
+    context: &ModelContext,
+    values: &[f64],
+    terms: usize,
+    parameters: &[model::Parameter],
+) -> Result<Vec<(String, f64)>, Error> {
+    if parameters.is_empty() {
+        return Ok(Vec::new());
+    }
+    let indices: Vec<usize> = (0..parameters.len()).collect();
+    let model = context.model(values, terms)?;
+    let jacobian = context.jacobian(values, &indices, terms)?;
+    let normal = fit::normal_matrix(&jacobian);
+    let residual = weighted_residual(context.observed, &model.model);
+    let chi_squared: f64 = residual.iter().map(|value| value * value).sum();
+    let free = parameters.len() + terms + 1;
+    let degrees = context.observed.len().saturating_sub(free).max(1) as f64;
+    let variance = chi_squared / degrees;
+    let covariance = invert(&normal).unwrap_or_default();
+    Ok(parameters
+        .iter()
+        .enumerate()
+        .map(|(index, parameter)| {
+            let value = covariance
+                .get(index)
+                .and_then(|row| row.get(index))
+                .copied()
+                .unwrap_or(0.0);
+            (parameter.name.clone(), (value * variance).max(0.0).sqrt())
+        })
+        .collect())
 }
 
 fn validate_observed(observed: &[PatternPoint]) -> Result<(), Error> {
