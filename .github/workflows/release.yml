@@ -59,7 +59,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes appstream
-          cargo install --locked cargo-deb cargo-generate-rpm
+          command -v cargo-deb >/dev/null || cargo install --locked cargo-deb
+          command -v cargo-generate-rpm >/dev/null || cargo install --locked cargo-generate-rpm
       - name: Build the binary
         run: cargo build --release -p xtalforge-cli --locked
       - name: Package deb and rpm
