@@ -456,6 +456,7 @@ def test_prepare_surface() -> None:
     assert abs(report["total_charge"]) < 1e-6
     assert isinstance(report["structure"], str)
     assert report["charge_balance"] is None
+    assert report["close_contacts"] == []
     assert report["steps"][0]["name"] == "duplicates"
 
 
