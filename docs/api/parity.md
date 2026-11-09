@@ -67,7 +67,7 @@ compares this table with the symbols each surface actually exports.
 | `build_schwarzite` | 6 | done | done | done | done | Schwarz P carbon model (Task 6.8); CLI `build schwarzite` |
 | `build_carbon` | 6 | done | done | done | done | Disordered carbon recipe with convolution surface, remesh, ribbons and termination (Task 6.8); CLI `build carbon`, Python `build_carbon`, WASM `build_carbon_recipe_info` |
 | `build_polymer` | 6 | done | done | done | done | Polymer chain (Task 6.9); CLI `build polymer` |
-| `run_automatic` | 7 | done | done | done | done | Automatic run with the Pawley-ranked leading-cell table (Task 7.10); Python `powder_automatic` |
+| `run_automatic` | 7 | done | done | done | done | Automatic run with the Pawley-ranked leading-cell table and the systematic-absence space-group screen (Task 7.10); Python `powder_automatic` |
 | `refine_phase` | 7 | done | done | done | done | McCusker-order structural refinement with esds and stages (Task 7.8); Python `powder_refine` |
 | `powder_index` | 7 | done | done | done | done | General metric-family indexing with M20/F_N (Task 7.5); Python `powder_index`, WASM `powder_index_info` |
 | `powder_pawley` | 7 | done | done | done | done | Pawley fit with esds and free cell/instrument parameters (Task 7.6.2); Python `powder_pawley`, WASM `powder_pawley_info` |

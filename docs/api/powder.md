@@ -80,12 +80,20 @@ Bail intensities, fits a Pawley model of the best indexed cell and fits the
 phase, recording every step in order in `AutomaticResult { peaks, index,
 leading_cells, lebail, pawley, phase, steps }`. `leading_cells` holds the first
 `AutomaticOptions::leading_cells` indexing candidates (default 3), each with its
-`IndexedCell`, Pawley `pawley_rwp` and `pawley_cell_esds`; the table is sorted
-by Pawley Rwp, so the best fit is first even when the indexing ranking differs.
+`IndexedCell`, Pawley `pawley_rwp`, `pawley_cell_esds` and `space_groups`. The
+space groups are the candidates whose systematic absences every indexed
+reflection of that cell obeys; they are enumerated from the cell's crystal
+system with `space_group_candidates` and ranked by the number of operations
+(higher symmetry first), not by a Le Bail class fit. `unexplained_peaks` is
+zero when a candidate explains every indexed reflection, and the fewest
+violations are reported when no group is perfect. The table is sorted by
+Pawley Rwp, so the best fit is first even when the indexing ranking differs.
 The `steps` list contains `peaks`, `index`, `leading_cells`, `le_bail`,
 `pawley` and `rietveld` (a Pawley fit the cell makes impossible is recorded as
 `pawley_skipped`). It refuses fewer than three points or peaks and a zero
 `leading_cells`. `IndexedPeak` is one indexed reflection.
+`is_systematically_absent(operations, hkl)` is the underlying reflection
+condition test; see [Extinction screening](../algorithms/extinction.md).
 
 ## Indexing
 
