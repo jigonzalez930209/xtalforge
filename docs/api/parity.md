@@ -79,6 +79,7 @@ compares this table with the symbols each surface actually exports.
 | Reading and writing paths, atomic writes | WASM | No filesystem in the browser | String and `Uint8Array` APIs |
 | On-disk workspace of runs | WASM | No filesystem | In-memory workspace exported as a zip |
 | External engines (DFTB+, xtb, Zeo++) and process probes | WASM | No subprocesses in the browser | Native engines (UFF, QEq, EQeq, grid porosity) |
+| In-process GFN0/GFN1/GFN2 (`sci-form` feature) | CLI, Python, WASM | Optional build-time feature whose methods are molecular only; the Rust `Calculator` and the registry listing are the supported surface, and no binding negotiation for the feature exists yet | Rust `quantum::adapter`; CLI `ff engines` lists the registry entries |
 | Multi-threading | WASM | Threads need cross-origin isolation | Optional threaded build |
 | MCP server over stdio | Python, WASM | It is a process, served by the CLI | `xtalforge mcp` |
 | Embedded MOF and RCSR bundles | WASM | Package size | The curated MOF/RCSR subsets are embedded; the full bundles are fetched on demand |

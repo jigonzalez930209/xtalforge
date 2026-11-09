@@ -53,11 +53,26 @@ functionals and bases. Only inputs are written; ORCA is never launched.
 
 ## Quantum adapter
 
-`quantum::adapter(method)` is the in-process path for sci-form GFN0/GFN1/GFN2.
-Without the `sci-form` feature it returns a clear typed error telling the user
-to rebuild with the feature; the dependency is not vendored, so the feature is
-reserved and the capability table (`periodic`, `forces`, `stress`) is what a
-future adapter must satisfy. The table documents that stress is not provided.
+`quantum::adapter(method)` is the in-process path for sci-form GFN0/GFN1/GFN2,
+behind the optional `sci-form` feature (the published MIT crate `sci-form`
+2.0.0). Without the feature it returns a clear typed error telling the user to
+rebuild with `--features sci-form`. The adapter implements `Calculator`, so
+`energy` and `energy_forces` have the same units and error contract as UFF.
+
+The methods are **molecular**. sci-form takes element numbers and Cartesian
+positions with no lattice, so the adapter refuses a structure that carries
+space-group symmetry and documents that the P1 cell of a
+`Structure::molecule` is evaluated as an isolated cluster. GFN2 returns forces
+(central-difference gradient); GFN0 and GFN1 return an energy only and refuse
+`energy_forces` instead of reporting zero forces. None returns an analytic
+stress. Occupancies other than one and dummy `X` atoms are refused, and the
+methods solve the neutral molecule (GFN0 is passed charge `0` because the
+GFN1/GFN2 entry points take no charge).
+
+The registry lists `gfn0`, `gfn1` and `gfn2`; they are `Available` only when
+the feature is enabled. The cross-check against a real `xtb` binary is not run
+here because the binary is not installed; the tests check finite water
+energies, conservative GFN2 forces and the refusal paths.
 
 ## Machine-learning potentials
 
