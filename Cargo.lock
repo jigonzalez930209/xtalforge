@@ -1168,6 +1168,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "xtalforge-build",
  "xtalforge-core",
  "xtalforge-io",
 ]
