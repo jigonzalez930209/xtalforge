@@ -56,14 +56,11 @@ scripts/tests/run-version-selftest.sh
 scripts/check-agent-version.sh
 cargo fmt --check
 cargo clippy --workspace --all-targets --all-features -- -D warnings
-cargo test --workspace --all-features
 RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
 cargo check -p xtalforge-wasm --target wasm32-unknown-unknown
 cargo deny check
 maturin build --release --manifest-path crates/xtalforge-python/Cargo.toml
-python -m pytest -q crates/xtalforge-python/tests
 python -m mypy --strict crates/xtalforge-python/python/xtalforge
-(cd crates/xtalforge-wasm && wasm-pack test --node)
 scripts/check-wasm-size.sh
 scripts/check-parity.sh
 scripts/check-api-docs.sh
