@@ -1266,6 +1266,7 @@ dependencies = [
 name = "xtalforge-io"
 version = "0.0.3"
 dependencies = [
+ "flate2",
  "rayon",
  "serde",
  "serde_json",

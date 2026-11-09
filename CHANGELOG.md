@@ -9,6 +9,12 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 5 Task 5.6: bundle the full RCSR 2019-06-01 snapshot in `data/rcsr/`
+  and identify nets by coordination sequence and point symbol against all
+  2,931 entries. `RcsrIndex::from_embedded()` returns `RcsrIdentification`
+  with the unique name, an ambiguous set, or the nearest candidates; the
+  2,909 keyed entries are validated against their canonical keys at index
+  build time. The CGD reader now accepts both RCSR edge dialects.
 - Phase 6 Task 6.8: the disordered-carbon recipe builder: convolution surface
   around a periodic net, split/collapse/flip remesh with tangential relaxation
   and projection, ribbon paths over the triangle graph, a three-coordinate
