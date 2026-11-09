@@ -28,9 +28,10 @@ are in `AGENTS.md` at the repository root.
 ## Current status (2026-11-09)
 
 - Phases 0-7 are implemented, tested and pushed; the Rust API, CLI, Python and
-  WASM surfaces build and pass their checks. `v0.0.1` is published on
-  crates.io (twelve crates), PyPI (`xtalforge`), npm (`xtalforge-wasm`), the
-  GitHub release and GitHub Pages.
+  WASM surfaces build and pass their checks. `v0.0.1` and `v0.0.2` are
+  published on crates.io (twelve crates), PyPI (`xtalforge`), npm
+  (`xtalforge-wasm`), the GitHub release and GitHub Pages; `0.0.2` carries the
+  linked-cell search, supercell deduplication and the AppStream fix.
 - Phase 8 (agent and distribution) has not started. It is the remaining
   planned phase: session verbs, MCP server, plugins, ML potentials,
   distribution, performance/fuzzing and the API freeze.
