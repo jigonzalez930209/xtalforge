@@ -80,3 +80,12 @@ fn powder_refine_reports_the_mccusker_stages() {
     let rwp = property(&result, "rwp").as_f64().unwrap();
     assert!(rwp < 0.3, "Rwp {rwp}");
 }
+
+#[wasm_bindgen_test]
+fn powder_automatic_returns_the_leading_cell_table() {
+    let cif = include_str!("../../../tests/corpus/simple/TiO2.cif");
+    let pattern = include_str!("../../../tests/golden/phase-7/rietveld/rutile.xy");
+    let result = xtalforge_wasm::powder_automatic_info(cif, pattern).expect("automatic run");
+    let rows = as_array(&property(&result, "leading_cells"));
+    assert!(rows.length() > 0);
+}
