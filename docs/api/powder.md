@@ -22,6 +22,18 @@ sample_radius }` applies a zero shift and the sample-displacement correction,
 and `doublet` splits a reflection into the Kα1/Kα2 pair. `Geometry` is
 `BraggBrentano` or `DebyeScherrer`. `doublet_checked` validates the ratio.
 
+## Pawley
+
+`pawley_refine(structure, observed, &PawleyOptions)` fits the whole pattern
+with one free intensity per allowed reflection, a Chebyshev background and
+optional free cell, zero-shift, size and strain parameters. It returns
+`PawleyResult { reflections, cell, cell_esds, zero_shift, zero_shift_esd, size,
+strain, rp, rwp, rexp, chi_squared, pattern, converged, iterations }`; every
+`PawleyReflection` carries `hkl`, `d`, `two_theta`, `intensity` and `esd`. The
+linear intensities and their covariance are solved exactly for each non-linear
+point and the cell/zero/width model is refined by variable projection. See
+[Powley fit](../algorithms/pawley.md) for the conventions and limits.
+
 ## Whole-range and structural refinement
 
 `refine_phase(structure, observed, &RietveldOptions, &RefineOptions)` fits the
@@ -45,10 +57,13 @@ the Bravais extinction letter for the 14 Bravais types.
 ## Automatic run
 
 `run_automatic(structure, observed, &AutomaticOptions)` finds the peaks, runs
-the general metric-family indexing, extracts Le Bail intensities and fits the
-phase, recording every step in order in `AutomaticResult { peaks, index,
-lebail, phase, steps }`. It refuses fewer than three points or peaks.
-`IndexedPeak` is one indexed reflection.
+the general metric-family indexing, extracts Le Bail intensities, fits a Pawley
+model of the indexed cell and fits the phase, recording every step in order in
+`AutomaticResult { peaks, index, lebail, pawley, phase, steps }`. The indexed
+cell is the ranked best of the five families; a Pawley fit that the cell makes
+impossible is recorded as a skipped step instead of aborting the run. It
+refuses fewer than three points or peaks. `IndexedPeak` is one indexed
+reflection.
 
 ## Indexing
 
@@ -62,8 +77,9 @@ rules are on the [indexing algorithm page](../algorithms/indexing.md).
 ## Surfaces
 
 `xtalforge powder {index,lebail,pawley,rietveld,automatic,cells,rietx}`;
-`powder index --general` prints the ranked metric families and
-`--background`/`--refine-peaks` control peak detection. Python
-`powder_index`, `powder_automatic`, `powder_refine`, `powder_cells`, `rietx`;
-WASM `powder_index_info`, `powder_automatic_info`, `powder_refine_info`,
-`powder_cells_info`, `rietx_inventory_info`.
+`powder index --general` prints the ranked metric families,
+`--background`/`--refine-peaks` control peak detection, and `powder pawley`
+prints the full fit with Rwp and esds. Python `powder_index`, `powder_pawley`,
+`powder_automatic`, `powder_refine`, `powder_cells`, `rietx`; WASM
+`powder_index_info`, `powder_pawley_info`, `powder_automatic_info`,
+`powder_refine_info`, `powder_cells_info`, `rietx_inventory_info`.

@@ -69,6 +69,7 @@ compares this table with the symbols each surface actually exports.
 | `run_automatic` | 7 | done | done | done | done | Automatic powder run (Task 7.10); Python `powder_automatic` |
 | `refine_phase` | 7 | done | done | done | done | Structural refinement (Task 7.8); Python `powder_refine` |
 | `powder_index` | 7 | done | done | done | done | General metric-family indexing with M20/F_N (Task 7.5); Python `powder_index`, WASM `powder_index_info` |
+| `powder_pawley` | 7 | done | done | done | done | Pawley fit with esds and free cell/instrument parameters (Task 7.6.2); Python `powder_pawley`, WASM `powder_pawley_info` |
 
 ## Recorded exceptions
 
