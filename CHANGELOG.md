@@ -9,6 +9,9 @@ essential release, then `0.x.y`).
 
 ### Changed
 
+- Phase 7 Task 7.6.3: Le Bail extraction returns intensity esds from the
+  profile normal matrix, plus Rwp and the reduced chi-squared; the CLI report
+  includes them.
 - Phase 7 Task 7.10.1: the automatic run fits a Pawley model of every leading
   indexing candidate and returns a table sorted by Pawley Rwp, with the cell
   esds; CLI, Python and WASM expose the table.
