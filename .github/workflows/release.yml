@@ -248,48 +248,12 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
+      - name: Compile the workspace once
+        run: cargo build --workspace --all-features --locked
       - name: Publish crates in dependency order
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: |
-          set -euo pipefail
-          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
-          crates=(
-            xtalforge-core
-            xtalforge-io
-            xtalforge-symmetry
-            xtalforge-view
-            xtalforge-commands
-            xtalforge-ff
-            xtalforge-analysis
-            xtalforge-build
-            xtalforge-mof
-            xtalforge-modules
-            xtalforge
-            xtalforge-cli
-          )
-          for crate in "${crates[@]}"; do
-            echo "::group::${crate}"
-            if curl --fail --silent --show-error \
-              -A "xtalforge-release/${version} (https://github.com/jigonzalez930209/xtalforge)" \
-              "https://crates.io/api/v1/crates/${crate}/${version}" >/dev/null 2>&1; then
-              echo "${crate} ${version} is already published; skipping"
-              echo "::endgroup::"
-              continue
-            fi
-            for attempt in 1 2 3 4 5 6; do
-              if cargo publish -p "${crate}" --locked; then
-                break
-              fi
-              if [ "${attempt}" -eq 6 ]; then
-                echo "could not publish ${crate}" >&2
-                exit 1
-              fi
-              sleep $((attempt * 60))
-            done
-            sleep 60
-            echo "::endgroup::"
-          done
+        run: scripts/publish-crates.sh
 
   docs:
     name: Build and deploy the documentation
