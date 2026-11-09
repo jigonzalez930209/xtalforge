@@ -13,7 +13,10 @@ must record the reason in the algorithm page.
 | Atom sets | up to translation and permutation | 1e-6 fractional | 1 |
 | Bond length | absolute | 1e-4 Angstrom | 1 |
 | Bond order | absolute | 1e-3 | 1 |
-| Bond count | exact | 0 (MOF-5 and Si golden) | 1 |
+| Bond set | canonical (i, j, image) after P1 atom mapping | exact | 1 |
+| Bond length (full corpus) | absolute | 0.05 Angstrom (inherits the P1 mapping tolerance) | 1 |
+| Coordination numbers | exact | 0 | 1 |
+| P1 atom mapping (golden) | absolute periodic distance | 0.05 Angstrom (symmetry-standardized sites) | 1 |
 | Ring size/count | exact | 0 | 1 |
 | Minimum-image distance | absolute | 1e-9 Angstrom | 1 |
 | CIF cell parameters | absolute | 1e-6 Angstrom / degree | 1 |

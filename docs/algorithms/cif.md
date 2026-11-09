@@ -12,13 +12,13 @@
 
 ## Symmetry priority
 
-The operation loop is the setting when present; the Hall symbol is stored for
-the space-group identity; an H-M symbol alone cannot fix the operations, so the
-reader records a `symmetry_warning` and the P1 expansion uses the identity.
-This is the implemented Crystal-Builder priority rule. The Hall lookup is
-available through `xtalforge-symmetry` when a caller needs to turn a symbol into
-operations; inconsistency warnings beyond the missing-operation warning are
-still limited.
+The operation loop is the setting when present. Without a loop, the reader
+resolves the Hall symbol (or H-M symbol) through
+`xtalforge_symmetry::SpaceGroup::parse` and installs its operations, recording
+`symmetry_source = "Hall symbol"`. Only an unrecognised symbol falls back to
+the identity and records a `symmetry_warning`. This closes the common CIF case
+where the space group is named but the operation loop is omitted (graphene is
+the corpus example). Inconsistency warnings beyond that are still limited.
 
 ## Numbers
 
