@@ -23,13 +23,13 @@ the documented subset instead.
 
 ## License status
 
-The full RCSR snapshots, the Zeo++ radii table and the PORMAKE recording are not
-copied. `crates/xtalforge-analysis/data/rcsr_subset.json` is a hand-written
-signature list for 17 nets, and `crates/xtalforge-mof/data/` contains
-hand-written illustrative blocks, so neither redistributes the upstream data
-sets. The DFTB+ and EQeq files are reference outputs, not third-party data
-sets; their origin is recorded when they are copied. See `THIRD_PARTY.md` for
-the current status of every item.
+The full RCSR snapshots are bundled in `data/rcsr/` with the maintainer's
+authorisation (2026-11-09) and their checksums; the licensing note is in
+`THIRD_PARTY.md`. The Zeo++ radii table and the PORMAKE recording are not
+copied, and `crates/xtalforge-mof/data/` contains hand-written illustrative
+blocks rather than the upstream package. The DFTB+ and EQeq files are
+reference outputs, not third-party data sets; their origin is recorded when
+they are copied.
 
 ## Copy rule
 
