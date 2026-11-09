@@ -72,6 +72,8 @@ more accurate, and the choice is recorded in the algorithm page.
   include it as an opt-in build; it is disabled in the default WASM build for
   size and because the engines need threads and external data.
 - Default: off everywhere; the default build stays pure Rust.
-- Validation: quantum results are compared with recorded sci-form outputs on a
-  small molecule set; tolerances are added to `validation.md` when Task 4.10
-  starts.
+- Validation: the `sci-form` feature links the published crate and the quantum
+  tests check finite water energies, conservative GFN2 forces and the refusal
+  paths. A cross-check against a real `xtb` binary is not run here because the
+  binary is not installed; the external-engine tests elsewhere use simulated
+  executables.
