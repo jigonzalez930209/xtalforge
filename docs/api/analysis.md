@@ -34,10 +34,13 @@ residual)` points, minimising both objectives.
 `fit_phase(structure, observed, &RietveldOptions)` simulates the phase from the
 structure and PXRD engine, then fits its scale and background, returning
 `RietveldPhase { scale, background, rwp, pattern }`. The structural
-least-squares loop is `refine_phase(structure, observed, &RietveldOptions,
-&RefineOptions)` in the [powder refinement](./powder) page; it refines
-fractional coordinates, a global isotropic ADP multiplier and occupancies and
-returns `RefinedPhase { structure, rwp, parameters, converged, iterations }`.
+refinement is `refine_phase(structure, observed, &RietveldOptions,
+&RefineOptions)` in the [powder refinement](./powder) page; it runs the
+McCusker stages (zero/cell, width, then Wyckoff coordinates, a global isotropic
+ADP multiplier, occupancies and texture) and returns
+`RefinedPhase { structure, rwp, parameters, parameter_esds, stages, converged,
+iterations }`. `free_directions(operations, frac)` is the Wyckoff-allowed
+subspace helper.
 
 ## Le Bail
 

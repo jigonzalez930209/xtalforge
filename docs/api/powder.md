@@ -32,18 +32,27 @@ strain, rp, rwp, rexp, chi_squared, pattern, converged, iterations }`; every
 `PawleyReflection` carries `hkl`, `d`, `two_theta`, `intensity` and `esd`. The
 linear intensities and their covariance are solved exactly for each non-linear
 point and the cell/zero/width model is refined by variable projection. See
-[Powley fit](../algorithms/pawley.md) for the conventions and limits.
+[Pawley fit](../algorithms/pawley.md) for the conventions and limits.
 
 ## Whole-range and structural refinement
 
-`refine_phase(structure, observed, &RietveldOptions, &RefineOptions)` fits the
-scale and background analytically, then iterates a finite-difference
-least-squares step over the requested fractional coordinates, a global
-isotropic ADP multiplier and occupancies. It refuses to refine more parameters
-than the observed peaks support, and returns
-`RefinedPhase { structure, rwp, parameters, converged, iterations }`.
+`refine_phase(structure, observed, &RietveldOptions, &RefineOptions)` runs the
+McCusker stages: the scale and background analytically, then the zero shift and
+free cell numbers, the profile width, and the structure. `RefineOptions`
+selects them with `refine_positions`, `refine_adps`, `refine_occupancies`,
+`refine_zero`, `refine_cell`, `refine_width`, `refine_texture`, `texture_axis`
+and `doublet`. Positions move only along the directions
+`free_directions(operations, frac)` allows for each Wyckoff site, the cell ties
+of the metric family are restored after every move, and a
+`March-Dollase` coefficient is refined about `texture_axis`.
+
+It refuses to refine more parameters than the observed peaks support and
+returns `RefinedPhase { structure, rwp, parameters, parameter_esds, stages,
+converged, iterations }`. `parameter_esds` holds the covariance-based esds of
+the free parameters, and `stages` is the order that actually ran.
 `combined_objective(energy, rwp, weight)` is the energy-plus-fit objective of
-Task 7.9.1.
+Task 7.9.1. See [Rietveld refinement](../algorithms/rietveld.md) for the
+stage details, the Wyckoff rules and the documented deviations.
 
 ## Cells and extinction
 
@@ -78,8 +87,9 @@ rules are on the [indexing algorithm page](../algorithms/indexing.md).
 
 `xtalforge powder {index,lebail,pawley,rietveld,automatic,cells,rietx}`;
 `powder index --general` prints the ranked metric families,
-`--background`/`--refine-peaks` control peak detection, and `powder pawley`
-prints the full fit with Rwp and esds. Python `powder_index`, `powder_pawley`,
+`--background`/`--refine-peaks` control peak detection, `powder pawley`
+prints the full fit with Rwp and esds, and `powder rietveld --refine` runs the
+McCusker stages (`--occupancies` and `--texture` add those parameters). Python `powder_index`, `powder_pawley`,
 `powder_automatic`, `powder_refine`, `powder_cells`, `rietx`; WASM
 `powder_index_info`, `powder_pawley_info`, `powder_automatic_info`,
 `powder_refine_info`, `powder_cells_info`, `rietx_inventory_info`.
