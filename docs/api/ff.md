@@ -62,8 +62,12 @@ cm^-1.
 finite-difference dipole derivative (documented approximation) and broadens
 the sticks into `IrSpectrum { points, peaks }`.
 
-`phonons(...)` returns the Gamma-point dynamical matrix and frequencies;
-the q-mesh and DOS are pending. `thermochemistry(&modes, &ThermoOptions)` and
+`phonons(...)` uses the primitive-cell Hessian at Gamma. With
+`PhononOptions { q_grid, supercell, q_path, dos }` it builds the supercell
+force constants, folds them onto the primitive cell, samples a Monkhorst-Pack
+mesh or the explicit `q_path` (a band path) and returns `q_points`,
+`frequencies` per q-point, the Gamma `modes` and an optional Gaussian-smeared
+`PhononDos`. `thermochemistry(&modes, &ThermoOptions)` and
 `ideal_gas_thermochemistry` give ZPE, thermal U/H/S/G and Cv; imaginary modes
 are excluded and reported. `quasi_harmonic_free_energy(&points, options)`
 minimizes `F(V, T) = E(V) + F_vib(V, T)` by a parabola through the best sampled
