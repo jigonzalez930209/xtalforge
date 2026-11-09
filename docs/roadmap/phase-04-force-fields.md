@@ -161,11 +161,12 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   missing hydrogens (Task 4.6), check charge balance, assign types and
   charges, check close contacts, produce a P1 or symmetric result as asked.
   Note: `prepare` merges duplicate sites, groups disorder by the bond-graph
-  component or `_atom_site_disorder_group`, chooses the highest-occupancy
-  component, removes known solvents, optionally adds hydrogens, lists close
-  contacts and checks charge balance. The prepared structure is returned in
-  the report and applies through `ReplaceStructure` as one undoable edit. The
-  formula/charge-driven component choice remains the documented subset.
+  component or `_atom_site_disorder_group`, chooses between overlapping
+  components by the declared CIF formula and cell neutrality, removes known
+  solvents, optionally adds
+  hydrogens, lists close contacts and checks charge balance. The prepared
+  structure is returned in the report and applies through `ReplaceStructure`
+  as one undoable edit.
 - [x] 4.7.2 Report
   `PrepareReport`: every decision, with the atoms involved and the reason, so
   the result is explainable and reproducible; the `Prepare` command applies it
