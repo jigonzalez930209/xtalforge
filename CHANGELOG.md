@@ -21,7 +21,8 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.15.4: write non-P1 explicit bonds back as a validated
   P1-index CIF loop and compare the full symmetry-operation set with the named
   space group, not only its count.
-- Phase 4 Task 4.7: make the disorder planner graph-aware, add hydrogen
+- Phase 4 Task 4.7: choose overlapping disorder components from the declared
+  CIF formula and cell charge, make the planner graph-aware, add hydrogen
   filling, the close-contact list, the prepared-structure undoable command
   path and their tests.
 - Phase 4 Task 4.9.2/4.9.3: wire `DftbCalculator` and `XtbCalculator` to the
