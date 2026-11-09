@@ -387,6 +387,8 @@ def ff_prepare(
     order_disorder: bool = False,
     remove_solvent: bool = False,
     check_charge_balance: bool = False,
+    hydrogens: bool = False,
+    check_close_contacts: bool = False,
 ) -> dict[str, object]: ...
 
 def mof_topologies() -> list[dict[str, object]]: ...
