@@ -160,10 +160,11 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   occupancy and mixed sites, remove or keep solvent and counter-ions, add
   missing hydrogens (Task 4.6), check charge balance, assign types and
   charges, check close contacts, produce a P1 or symmetric result as asked.
-  Note: `prepare` covers geometry relaxation, QEq charges, Ewald and
-  Gamma-point vibrations. Disorder/partial-occupancy resolution, solvent
-  removal, close-contact checks and the P1/symmetric choice are not
-  implemented.
+  Note: `prepare` merges duplicate sites, chooses one component per disorder
+  group, sets survivors to full occupancy, removes known solvent molecules,
+  runs relaxation/charges/Ewald/vibrations and checks charge balance. The
+  prepared structure is returned in the report. Close-contact checks and the
+  full Crystal-Builder graph planner remain a documented subset.
 - [x] 4.7.2 Report
   `PrepareReport`: every decision, with the atoms involved and the reason, so
   the result is explainable and reproducible; the `Prepare` command applies it
@@ -171,8 +172,9 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 - [x] 4.7.3 Validation
   Use `Crystal-Builder/resources/samples/prepared/` (inputs and their
   prepared outputs) as golden data.
-  Note: the in-process stages are tested with synthetic fixtures; the
-  prepared-sample golden comparison is not implemented.
+  Note: the in-process stages are tested with synthetic fixtures; the prepared
+  samples in `tests/corpus/prepared/` are read back and checked for full
+  occupancy and a reported charge balance (golden sanity pass).
 
 ## Task 4.8 — Vibrations, IR, phonons, thermochemistry
 
