@@ -199,22 +199,33 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
     }
     for explicit in structure.explicit_bonds() {
         if explicit.remove {
-            bonds.retain(|bond| {
-                !(bond.i == explicit.i && bond.j == explicit.j && bond.image == explicit.image)
-            });
-        } else if let Some(existing) = bonds.iter_mut().find(|bond| {
-            bond.i == explicit.i && bond.j == explicit.j && bond.image == explicit.image
-        }) {
+            bonds.retain(|bond| !same_bond(bond, explicit.i, explicit.j, explicit.image));
+        } else if let Some(existing) = bonds
+            .iter_mut()
+            .find(|bond| same_bond(bond, explicit.i, explicit.j, explicit.image))
+        {
             existing.order = explicit.order;
             existing.explicit = true;
         } else if let (Some(first), Some(second)) =
             (p1.atoms.get(explicit.i), p1.atoms.get(explicit.j))
         {
+            let delta = [
+                second.frac[0] + f64::from(explicit.image[0]) - first.frac[0],
+                second.frac[1] + f64::from(explicit.image[1]) - first.frac[1],
+                second.frac[2] + f64::from(explicit.image[2]) - first.frac[2],
+            ];
+            let matrix = p1.lattice.matrix();
+            let cart = [
+                delta[0] * matrix[0][0] + delta[1] * matrix[1][0] + delta[2] * matrix[2][0],
+                delta[0] * matrix[0][1] + delta[1] * matrix[1][1] + delta[2] * matrix[2][1],
+                delta[0] * matrix[0][2] + delta[1] * matrix[1][2] + delta[2] * matrix[2][2],
+            ];
+            let (i, j, image) = canonical(explicit.i, explicit.j, explicit.image);
             bonds.push(Bond {
-                i: explicit.i,
-                j: explicit.j,
-                image: explicit.image,
-                distance: p1.lattice.distance(first.frac, second.frac),
+                i,
+                j,
+                image,
+                distance: cart.iter().map(|value| value * value).sum::<f64>().sqrt(),
                 order: explicit.order,
                 explicit: true,
             });
@@ -256,4 +267,22 @@ fn p1_to_structure(cell: &crate::P1Cell) -> Result<Structure, Error> {
         );
     }
     builder.build()
+}
+
+fn same_bond(bond: &Bond, i: usize, j: usize, image: [i32; 3]) -> bool {
+    (bond.i == i && bond.j == j && bond.image == image)
+        || (bond.i == j && bond.j == i && bond.image == [-image[0], -image[1], -image[2]])
+}
+
+fn canonical(i: usize, j: usize, image: [i32; 3]) -> (usize, usize, [i32; 3]) {
+    if i > j
+        || (i == j
+            && (image[0] < 0
+                || (image[0] == 0 && image[1] < 0)
+                || (image[0] == 0 && image[1] == 0 && image[2] < 0)))
+    {
+        (j, i, [-image[0], -image[1], -image[2]])
+    } else {
+        (i, j, image)
+    }
 }
