@@ -151,3 +151,56 @@ fn automatic_run_indexes_a_tetragonal_cell() {
             .any(|row| row.index.system == xtalforge_analysis::LatticeSystem::Tetragonal)
     );
 }
+
+#[test]
+fn automatic_run_screens_space_groups_from_absences() {
+    let cif = include_str!("../../../tests/corpus/simple/TiO2.cif");
+    let base = xtalforge_io::cif::read_cif(cif).unwrap();
+    let mut builder = StructureBuilder::new(
+        "rutile",
+        Lattice::from_parameters(4.5937, 4.5937, 2.9587, 90.0, 90.0, 90.0).unwrap(),
+    )
+    .hall(base.hall());
+    builder = builder.site(Site::new("Ti", "Ti", [0.0, 0.0, 0.0]).unwrap());
+    builder = builder.site(Site::new("O", "O", [0.30478, 0.30478, 0.0]).unwrap());
+    for operation in base.operations() {
+        builder = builder.operation(*operation);
+    }
+    let structure = builder.build().unwrap();
+    let observed: Vec<PatternPoint> = calculate_pxrd(
+        &structure,
+        &PxrdOptions {
+            radiation: Radiation::CuKa,
+            two_theta_range: [10.0, 80.0],
+            step: 0.02,
+            fwhm: 0.1,
+        },
+    )
+    .unwrap()
+    .points
+    .iter()
+    .map(|point| PatternPoint {
+        two_theta: point.two_theta,
+        intensity: point.intensity,
+        uncertainty: None,
+    })
+    .collect();
+    let result = run_automatic(&structure, &observed, &AutomaticOptions::default()).unwrap();
+    for row in &result.leading_cells {
+        println!(
+            "{}: {:?}",
+            row.index.system.name(),
+            row.space_groups
+                .iter()
+                .map(|group| (group.number, group.symbol.as_str(), group.unexplained_peaks))
+                .collect::<Vec<_>>()
+        );
+    }
+    assert!(
+        result
+            .leading_cells
+            .iter()
+            .any(|row| row.space_groups.iter().any(|group| group.number == 136)),
+        "the rutile space group is missing from the table"
+    );
+}
