@@ -226,6 +226,8 @@ pub(super) fn parse_lattice(text: &str) -> Option<[[f64; 3]; 3]> {
     ])
 }
 
+mod foreign;
 mod indexed;
 
+pub use foreign::{read_geo_end, read_lammps_dump, read_lammps_dump_with_types};
 pub use indexed::{XyzIndex, read_trajectory, read_xdatcar};
