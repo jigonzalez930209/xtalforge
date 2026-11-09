@@ -23,5 +23,9 @@ thiserror = { workspace = true }
 [features]
 parallel = ["dep:rayon"]
 
+[[bench]]
+name = "neighbors"
+harness = false
+
 [lints]
 workspace = true
