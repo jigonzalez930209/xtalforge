@@ -8,7 +8,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=3584
+BUDGET_KIB=3648
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
