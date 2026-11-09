@@ -34,7 +34,6 @@ fn main() -> Result<(), Failure> {
         .and_then(serde_json::Value::as_array)
         .ok_or("the RCSR JSON has no nets array")?;
     let mut names = BTreeMap::new();
-    let mut hashes: BTreeMap<u64, String> = BTreeMap::new();
     let mut entries = Vec::with_capacity(rows.len());
     let mut keyed = 0usize;
     for row in rows {
@@ -85,17 +84,42 @@ fn main() -> Result<(), Failure> {
             }
             found
         };
-        let hash = actual.hash();
-        // Two nets may share both invariants; the reference reports them as an
-        // ambiguous pair, so the index keeps both names under one hash.
-        hashes.insert(hash, name.clone());
-        entries.push((name, expected, hash));
+        entries.push((name, actual));
+    }
+    // Find a salt that gives every distinct fingerprint token a distinct
+    // 32-bit hash. Shared tokens (ambiguous nets) are allowed to share.
+    let mut salt = 0u32;
+    loop {
+        let mut seen: BTreeMap<u32, String> = BTreeMap::new();
+        let mut ok = true;
+        for (_name, fingerprint) in &entries {
+            let token = fingerprint.token();
+            let hash = fingerprint.hash_with_salt(salt);
+            if let Some(other) = seen.get(&hash) {
+                if *other != token {
+                    ok = false;
+                    break;
+                }
+            } else {
+                seen.insert(hash, token.clone());
+            }
+        }
+        if ok {
+            break;
+        }
+        salt = salt
+            .checked_add(1)
+            .ok_or("no hash salt avoids a collision")?;
     }
     let mut bytes = Vec::new();
     bytes.extend_from_slice(MAGIC);
     let count = u32::try_from(entries.len())?;
     bytes.extend_from_slice(&count.to_le_bytes());
-    for (name, fingerprint, hash) in &entries {
+    bytes.extend_from_slice(&salt.to_le_bytes());
+    let mut hashes: BTreeMap<u32, String> = BTreeMap::new();
+    for (name, fingerprint) in &entries {
+        let hash = fingerprint.hash_with_salt(salt);
+        hashes.insert(hash, name.clone());
         let name_bytes = name.as_bytes();
         let name_len = u8::try_from(name_bytes.len())?;
         bytes.push(name_len);
@@ -110,11 +134,12 @@ fn main() -> Result<(), Failure> {
     }
     std::fs::write(&output, &bytes)?;
     println!(
-        "wrote {} entries ({} keyed, {} unkeyed, {} shared hashes) to {} ({} bytes)",
+        "wrote {} entries ({} keyed, {} unkeyed, {} shared hashes, salt {}) to {} ({} bytes)",
         entries.len(),
         keyed,
         entries.len() - keyed,
         entries.len() - hashes.len(),
+        salt,
         output.display(),
         bytes.len()
     );
