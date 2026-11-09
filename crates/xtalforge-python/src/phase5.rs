@@ -61,7 +61,7 @@ pub(crate) fn net_invariants<'py>(
     tolerance: f64,
 ) -> PyResult<Bound<'py, PyList>> {
     let file = xtalforge::io::read_cgd(text);
-    let index = RcsrIndex::from_subset();
+    let index = RcsrIndex::from_embedded().map_err(crate::map_error)?;
     let items = PyList::empty(py);
     for entry in &file.entries {
         let graph = quotient_graph(entry, tolerance).map_err(crate::map_error)?;
@@ -72,7 +72,10 @@ pub(crate) fn net_invariants<'py>(
         dict.set_item("edges", invariants.edges)?;
         dict.set_item("cycle_rank", invariants.cycle_rank)?;
         dict.set_item("coordination", invariants.coordination)?;
-        dict.set_item("identified", index.identify(&graph))?;
+        dict.set_item(
+            "identified",
+            identification(py, &index.identify(&graph).map_err(crate::map_error)?)?,
+        )?;
         dict.set_item("components", graph.components().len())?;
         items.append(dict)?;
     }
@@ -131,16 +134,28 @@ pub(crate) fn net_overlay<'py>(
     Ok(dict)
 }
 
-/// Returns the RCSR subset names and validates it.
+/// Returns the RCSR names and validates the index.
 #[pyfunction]
 pub(crate) fn rcsr_names() -> PyResult<Vec<String>> {
-    let index = RcsrIndex::from_subset();
+    let index = RcsrIndex::from_embedded().map_err(crate::map_error)?;
     index.validate().map_err(crate::map_error)?;
-    Ok(index
-        .invariant_entries()
-        .into_iter()
-        .map(|(name, _)| name.to_owned())
-        .collect())
+    Ok(index.names().into_iter().map(str::to_owned).collect())
+}
+
+/// One identification as a Python dictionary.
+fn identification<'py>(
+    py: Python<'py>,
+    found: &xtalforge::analysis::rcsr::RcsrIdentification,
+) -> PyResult<Bound<'py, PyDict>> {
+    let dict = PyDict::new(py);
+    dict.set_item("verdict", found.verdict())?;
+    dict.set_item("names", found.names.clone())?;
+    dict.set_item("nearest", found.nearest.clone())?;
+    dict.set_item("nearest_by", &found.nearest_by)?;
+    dict.set_item("periodicity", found.fingerprint.periodicity)?;
+    dict.set_item("sequences", found.fingerprint.sequences.clone())?;
+    dict.set_item("symbols", found.fingerprint.symbols.clone())?;
+    Ok(dict)
 }
 
 /// Runs Zeo++ if the binary is available.
