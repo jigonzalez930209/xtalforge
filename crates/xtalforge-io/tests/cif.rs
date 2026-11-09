@@ -229,3 +229,26 @@ fn round_trips_the_explicit_bond_loop() {
     assert_eq!(bonds[0].order, 2.0);
     assert!(!bonds[0].remove);
 }
+
+#[test]
+fn non_p1_explicit_bonds_map_to_the_golden_count() {
+    let structure = read_cif(include_str!("../../../tests/corpus/MIL53.cif")).unwrap();
+    let golden: serde_json::Value =
+        serde_json::from_str(include_str!("../../../tests/golden/phase-1/MIL53.json")).unwrap();
+    let stated = golden["bonds"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|bond| bond["stated"].as_bool().unwrap_or(false))
+        .count();
+    assert_eq!(structure.explicit_bonds().len(), stated);
+    assert_eq!(structure.explicit_bonds().len(), 36);
+    assert!(
+        structure
+            .explicit_bonds()
+            .iter()
+            .all(|bond| (bond.order - 1.5).abs() < 1e-12)
+    );
+    let graph = structure.bond_graph().unwrap();
+    assert_eq!(graph.bonds.len(), golden["bonds"].as_array().unwrap().len());
+}
