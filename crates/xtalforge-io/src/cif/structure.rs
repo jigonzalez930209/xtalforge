@@ -298,6 +298,15 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
         builder = builder.site(site);
     }
     builder = builder.metadata("cif_block", serde_json::Value::String(block.name.clone()));
+    if let Some(formula) = block
+        .item("_chemical_formula_sum")
+        .or_else(|| block.item("_chemical_formula_structural"))
+    {
+        builder = builder.metadata(
+            "chemical_formula",
+            serde_json::Value::String(formula.trim_matches('\'').to_owned()),
+        );
+    }
     if occupancy_clamped > 0 {
         builder = builder.metadata(
             "occupancy_clamped",
