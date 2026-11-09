@@ -10,7 +10,7 @@ mod search;
 
 use std::collections::BTreeSet;
 
-use crate::{Error, Structure};
+use crate::{BondGraph, Error, Structure};
 
 /// One atom of a ring path, with its lattice image relative to the first atom.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -51,6 +51,45 @@ pub fn rings(structure: &Structure, max_size: usize) -> Result<Vec<Ring>, Error>
         ));
     }
     search::find(structure, max_size)
+}
+
+/// Finds primitive rings using only the stored explicit bonds.
+///
+/// Builders state their bonds; this is the census those bonds describe,
+/// without distance perception adding a close contact across a pore.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for `max_size < 3`, a non-P1 structure
+/// or a graph too dense to search.
+pub fn rings_explicit(structure: &Structure, max_size: usize) -> Result<Vec<Ring>, Error> {
+    if max_size < 3 {
+        return Err(Error::InvalidInput(
+            "ring size limit must be at least 3".to_owned(),
+        ));
+    }
+    let graph = BondGraph::from_explicit(structure)?;
+    search::find_graph(&graph, max_size)
+}
+
+/// Counts explicit-bond rings by size.
+///
+/// # Errors
+///
+/// Returns the errors of [`rings_explicit`].
+pub fn ring_counts_explicit(
+    structure: &Structure,
+    max_size: usize,
+) -> Result<Vec<(usize, usize)>, Error> {
+    let mut counts: Vec<(usize, usize)> = Vec::new();
+    for ring in rings_explicit(structure, max_size)? {
+        if let Some(entry) = counts.iter_mut().find(|(size, _)| *size == ring.size()) {
+            entry.1 += 1;
+        } else {
+            counts.push((ring.size(), 1));
+        }
+    }
+    Ok(counts)
 }
 
 /// Ring paths with the lattice image of every atom, in ring order.

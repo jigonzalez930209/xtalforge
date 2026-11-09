@@ -76,6 +76,53 @@ pub struct BondGraph {
 }
 
 impl BondGraph {
+    /// Connectivity from the explicit bonds only.
+    ///
+    /// This is the graph a builder states: distances are not perceived, so
+    /// a close contact across a pore is not silently made a bond. The
+    /// structure must be P1 (the carbon builders are), because an explicit
+    /// bond names an atom index in the P1 cell.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for a non-P1 structure or a failed
+    /// P1 expansion.
+    pub fn from_explicit(structure: &Structure) -> Result<Self, Error> {
+        if !structure.is_p1() {
+            return Err(Error::InvalidInput(
+                "an explicit-only bond graph needs a P1 structure".to_owned(),
+            ));
+        }
+        let p1 = structure.p1()?;
+        let mut bonds = Vec::new();
+        for explicit in structure.explicit_bonds() {
+            if explicit.remove {
+                continue;
+            }
+            let distance = explicit_distance(&p1, explicit).unwrap_or(0.0);
+            bonds.push(Bond {
+                i: explicit.i,
+                j: explicit.j,
+                image: explicit.image,
+                distance,
+                order: explicit.order,
+                explicit: true,
+            });
+        }
+        let mut adjacency = vec![Vec::new(); p1.atoms.len()];
+        for (index, bond) in bonds.iter().enumerate() {
+            if let Some(list) = adjacency.get_mut(bond.i) {
+                list.push(index);
+            }
+            if bond.j != bond.i
+                && let Some(list) = adjacency.get_mut(bond.j)
+            {
+                list.push(index);
+            }
+        }
+        Ok(Self { bonds, adjacency })
+    }
+
     /// Number of atoms.
     #[must_use]
     pub fn n_atoms(&self) -> usize {
