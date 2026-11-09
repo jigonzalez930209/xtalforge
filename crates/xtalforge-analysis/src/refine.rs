@@ -310,6 +310,7 @@ fn count_peaks(observed: &[PatternPoint]) -> Result<usize, Error> {
             min_height: 0.0,
             min_distance: (2.0 * step).max(0.01),
             smoothing: 1,
+            ..PeakOptions::default()
         },
     )?;
     Ok(peaks.len())

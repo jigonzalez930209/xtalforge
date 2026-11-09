@@ -103,6 +103,7 @@ pub fn run_automatic(
             min_height: 0.01 * maximum,
             min_distance: (2.0 * step).max(0.01),
             smoothing: 1,
+            ..PeakOptions::default()
         },
     )?;
     if peaks.len() < 3 {

@@ -33,7 +33,11 @@ pub use cells::{
 };
 pub use fit::{FitOptions, FitResult, least_squares};
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
-pub use indexing::{CubicIndex, IndexedPeak, index_cubic};
+pub use indexing::{
+    CellMetric, CubicIndex, FiguresOfMerit, IndexedCell, IndexedPeak, IndexingOptions,
+    IndexingResult, LatticeSystem, figures_of_merit, index_cubic, index_pattern, match_peaks,
+    peak_q, predict_reflections, two_theta_of_q,
+};
 pub use instrument::{Geometry, Instrument, doublet, doublet_checked};
 pub use isosurface::{TriangleMesh, isosurface};
 pub use lebail::{LebailOptions, LebailResult, le_bail, pawley};
@@ -41,7 +45,7 @@ pub use merge::merge_nets;
 pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, interpenetrate, quotient_graph};
 pub use overlay::{Overlay, OverlaySet, OverlayStyle, overlay_net};
 pub use pareto::pareto_front;
-pub use peaks::{Peak, PeakOptions, find_peaks};
+pub use peaks::{Peak, PeakOptions, background_envelope, find_peaks, fit_peaks};
 pub use profiles::{Background, Profile, ProfileKind};
 pub use pxrd::{Pattern, PatternPoint, PxrdOptions, Radiation, Reflection, calculate_pxrd};
 pub use rcsr::{RCSR_LICENSE_NOTE, RcsrEntry, RcsrIndex};
