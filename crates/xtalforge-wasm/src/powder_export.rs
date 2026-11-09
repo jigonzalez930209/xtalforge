@@ -119,3 +119,66 @@ pub fn rietx_inventory_info() -> Result<JsValue, JsValue> {
     set(&object, "capabilities", capabilities.into());
     Ok(object.into())
 }
+
+/// Finds peaks and indexes the metric families of a measured XY pattern.
+///
+/// Returns `{ peaks: [{ two_theta, intensity, fwhm }], candidates: [{ system,
+/// a, b, c, alpha, beta, gamma, m20, f_n, coverage, completeness }] }`.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a failed search.
+#[wasm_bindgen]
+pub fn powder_index_info(
+    pattern_text: &str,
+    wavelength: f64,
+    max_index: i32,
+    tolerance: f64,
+) -> Result<JsValue, JsValue> {
+    let observed = pattern(pattern_text)?;
+    let peaks =
+        xtalforge::analysis::find_peaks(&observed, &xtalforge::analysis::PeakOptions::default())
+            .map_err(to_js_error)?;
+    let result = xtalforge::analysis::index_pattern(
+        &peaks,
+        wavelength,
+        &xtalforge::analysis::IndexingOptions {
+            max_index,
+            tolerance,
+            ..xtalforge::analysis::IndexingOptions::default()
+        },
+    )
+    .map_err(to_js_error)?;
+    let peak_array = js_sys::Array::new();
+    for peak in &peaks {
+        let item = js_sys::Object::new();
+        set(&item, "two_theta", JsValue::from_f64(peak.two_theta));
+        set(&item, "intensity", JsValue::from_f64(peak.intensity));
+        set(&item, "fwhm", JsValue::from_f64(peak.fwhm));
+        peak_array.push(&item.into());
+    }
+    let candidate_array = js_sys::Array::new();
+    for candidate in &result.candidates {
+        let item = js_sys::Object::new();
+        set(&item, "system", JsValue::from_str(candidate.system.name()));
+        for (key, value) in [
+            ("a", candidate.cell.a),
+            ("b", candidate.cell.b),
+            ("c", candidate.cell.c),
+            ("alpha", candidate.cell.alpha),
+            ("beta", candidate.cell.beta),
+            ("gamma", candidate.cell.gamma),
+            ("m20", candidate.m20),
+            ("f_n", candidate.f_n),
+            ("coverage", candidate.coverage),
+            ("completeness", candidate.completeness),
+        ] {
+            set(&item, key, JsValue::from_f64(value));
+        }
+        candidate_array.push(&item.into());
+    }
+    let object = js_sys::Object::new();
+    set(&object, "peaks", peak_array.into());
+    set(&object, "candidates", candidate_array.into());
+    Ok(object.into())
+}

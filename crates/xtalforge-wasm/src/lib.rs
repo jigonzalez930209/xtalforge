@@ -58,7 +58,8 @@ pub use phase6_export::{
 };
 #[cfg(target_arch = "wasm32")]
 pub use powder_export::{
-    powder_automatic_info, powder_cells_info, powder_refine_info, rietx_inventory_info,
+    powder_automatic_info, powder_cells_info, powder_index_info, powder_refine_info,
+    rietx_inventory_info,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{
