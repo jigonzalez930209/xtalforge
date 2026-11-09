@@ -269,6 +269,7 @@ jobs:
           for crate in "${crates[@]}"; do
             echo "::group::${crate}"
             if curl --fail --silent --show-error \
+              -A "xtalforge-release/${version} (https://github.com/jigonzalez930209/xtalforge)" \
               "https://crates.io/api/v1/crates/${crate}/${version}" >/dev/null 2>&1; then
               echo "${crate} ${version} is already published; skipping"
               echo "::endgroup::"
