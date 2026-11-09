@@ -12,10 +12,18 @@ ARCH=${ARCH:-x86_64}
 OUT=${1:-"$ROOT/artifacts"}
 BIN="$ROOT/target/release/xtalforge"
 TOOL="$ROOT/target/appimagetool-$ARCH.AppImage"
+RUNTIME="$ROOT/target/appimage-runtime-$ARCH"
+COMPRESSION=zstd
 
 [ -x "$BIN" ] || { echo "package-appimage: build $BIN first" >&2; exit 2; }
 [ -f "$ROOT/assets/io.github.jigonzalez930209.xtalforge.desktop" ] || { echo "package-appimage: missing desktop file" >&2; exit 2; }
 [ -f "$ROOT/assets/xtalforge.png" ] || { echo "package-appimage: missing icon" >&2; exit 2; }
+[ -f "$ROOT/assets/io.github.jigonzalez930209.xtalforge.appdata.xml" ] \
+  || { echo "package-appimage: missing AppStream metadata" >&2; exit 2; }
+if command -v appstreamcli >/dev/null 2>&1; then
+  appstreamcli validate --no-net \
+    "$ROOT/assets/io.github.jigonzalez930209.xtalforge.appdata.xml" >/dev/null
+fi
 
 mkdir -p "$OUT"
 appdir=$(mktemp -d)
@@ -41,11 +49,37 @@ APPRUN
 chmod +x "$appdir/AppRun"
 
 if [ ! -x "$TOOL" ]; then
-  curl --fail --location --retry 3 --output "$TOOL" \
+  curl --fail --location --retry 5 --retry-all-errors --output "$TOOL" \
     "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$ARCH.AppImage"
   chmod +x "$TOOL"
 fi
+if [ ! -x "$RUNTIME" ]; then
+  for url in \
+    "https://github.com/AppImage/type2-runtime/releases/latest/download/runtime-$ARCH" \
+    "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-$ARCH"; do
+    if curl --fail --location --retry 5 --retry-all-errors \
+      --output "$RUNTIME.tmp" "$url"; then
+      mv "$RUNTIME.tmp" "$RUNTIME"
+      chmod +x "$RUNTIME"
+      break
+    fi
+  done
+  if [ ! -x "$RUNTIME" ]; then
+    # The appimagetool AppImage starts with the same type2 runtime; the last
+    # squashfs magic marks where its payload begins. Extracting the prefix
+    # keeps the release independent of a transient GitHub asset timeout.
+    offset=$(grep -abo 'hsqs' "$TOOL" | tail -n 1 | cut -d: -f1)
+    if [ -n "$offset" ] && [ "$offset" -gt 0 ]; then
+      dd if="$TOOL" of="$RUNTIME" bs=1 count="$offset" status=none
+      chmod +x "$RUNTIME"
+    fi
+  fi
+fi
+[ -x "$RUNTIME" ] || { echo "package-appimage: no AppImage runtime" >&2; exit 2; }
 
-APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$ARCH" "$TOOL" \
+# The metadata was validated above without network access; skip the tool's
+# network check, which fails a release on a transient URL timeout.
+APPIMAGE_EXTRACT_AND_RUN=1 ARCH="$ARCH" "$TOOL" --no-appstream \
+  --comp "$COMPRESSION" --runtime-file "$RUNTIME" \
   "$appdir" "$OUT/xtalforge-$VERSION-$ARCH.AppImage"
 echo "wrote $OUT/xtalforge-$VERSION-$ARCH.AppImage"
