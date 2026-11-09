@@ -1,0 +1,33 @@
+{
+ "net": "dia",
+ "repeat": [
+  1,
+  1,
+  1
+ ],
+ "density": 0.42,
+ "radius_ratio": 0.25,
+ "coverage": 0.38,
+ "seed": 0,
+ "atoms": 420,
+ "built_density": 0.41889395430320364,
+ "ratios": {
+  "H/C": 0.07023411371237458,
+  "F/C": 0.2909698996655518,
+  "O/C": 0.043478260869565216
+ },
+ "edge_fraction": 0.432258064516129,
+ "pieces": 1,
+ "periodicity": 3,
+ "census": {
+  "4": 1,
+  "5": 7,
+  "6": 43,
+  "7": 27,
+  "8": 4
+ },
+ "closed_carbons": 754,
+ "edge_length": 10.546031762517412,
+ "euler": -16,
+ "gauss_bonnet": -96
+}
