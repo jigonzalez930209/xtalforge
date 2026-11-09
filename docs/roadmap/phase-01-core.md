@@ -430,11 +430,11 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   `_atom_type_oxidation_number` fallback), disorder group/assembly and the
   program's explicit-bond loop are read and written; Hall/H-M symbols resolve
   to operations when the loop is missing. Explicit bonds round-trip for P1
-  structures. A non-P1 record is mapped from its site labels, operation and
-  image to the P1 contact (MIL53 matches the golden count), but it is only
-  applied where perception already found that contact and is not written
-  back. An operation-loop count that disagrees with the named group records
-  a `symmetry_warning`.
+  and non-P1 structures. A non-P1 record is mapped from its site labels, operation and
+  image to the P1 contact (MIL53 matches the golden count), and a non-P1
+  explicit set is written back as a P1-index loop with its atom count. An
+  operation-loop count or full operation set that disagrees with the named
+  group records a `symmetry_warning`.
 - [x] 1.15.5 Robustness
   Never panic: malformed numbers, missing loops, truncated files, duplicate
   labels all return typed errors or warnings with line numbers. Fuzz target
