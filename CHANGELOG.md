@@ -13,6 +13,8 @@ essential release, then `0.x.y`).
   operation code and image to P1 contacts (MIL53 matches the 36 golden
   contacts), collapsing symmetry-equivalent images by their minimum-image
   vector. Unmatched records annotate nothing instead of inventing an edge.
+- Phase 1 Task 1.15.4: warn when a CIF operation loop's count disagrees with
+  the named space group.
 
 ## [0.0.3] - 2026-11-09
 
