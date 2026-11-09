@@ -5,7 +5,9 @@ Franzblau on the periodic bond graph. A cycle with a shortcut through the graph
 is a sum of smaller rings, so it is not primitive. `ring_counts` aggregates by
 size, `ring_membership` counts rings per atom and `is_aromatic` is a labelled
 heuristic (five- or six-membered, all C/N/O) until bond orders and planarity
-are available.
+are available. `rings_explicit` and `ring_counts_explicit` use only the stored
+explicit bonds, which is the census a builder states: distance perception is
+not allowed to add a close contact across a pore.
 
 ```rust
 for ring in rings(&structure, 8)? {

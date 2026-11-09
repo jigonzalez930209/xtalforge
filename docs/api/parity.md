@@ -65,6 +65,7 @@ compares this table with the symbols each surface actually exports.
 | `ribbon` | 6 | done | done | done | done | Nanoribbon (Task 6.8.3); CLI `build ribbon` |
 | `build_ztc` | 6 | done | done | done | done | Gyroid carbon model (Task 6.8); CLI `build ztc` |
 | `build_schwarzite` | 6 | done | done | done | done | Schwarz P carbon model (Task 6.8); CLI `build schwarzite` |
+| `build_carbon` | 6 | done | done | done | done | Disordered carbon recipe with convolution surface, remesh, ribbons and termination (Task 6.8); CLI `build carbon`, Python `build_carbon`, WASM `build_carbon_recipe_info` |
 | `build_polymer` | 6 | done | done | done | done | Polymer chain (Task 6.9); CLI `build polymer` |
 | `run_automatic` | 7 | done | done | done | done | Automatic run with the Pawley-ranked leading-cell table (Task 7.10); Python `powder_automatic` |
 | `refine_phase` | 7 | done | done | done | done | McCusker-order structural refinement with esds and stages (Task 7.8); Python `powder_refine` |

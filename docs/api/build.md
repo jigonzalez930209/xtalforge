@@ -65,6 +65,16 @@ approximated by the nearest of the two and recorded in the structure metadata
 adds vacuum to a periodic honeycomb strip.
 
 `ZtcOptions { samples, cell, isovalue }` controls the level-set surfaces.
+`build_carbon(&CarbonRecipe)` builds a disordered carbon on a periodic net:
+a convolution surface of Gaussians along the net edges, an isotropic
+remesh to the 2.46 Angstrom target, a ribbon cut that follows the net, a
+three-coordinate dual and the requested edge termination. It returns
+`CarbonBuild { structure, recipe, census, density, ratios, edge_fraction,
+pieces, periodicity, edge_length, closed_carbons, bare_edges, mean_bond,
+notes }`. `CarbonSurface` exposes the remeshed sheet for tests. The CLI is
+`build carbon`, Python `build_carbon`, WASM `build_carbon_recipe_info`.
+See [Disordered carbons](../algorithms/carbon.md).
+
 `build_ztc` samples the gyroid `sin x cos y + sin y cos z + sin z cos x` and
 `build_schwarzite` the Schwarz P surface `cos x + cos y + cos z = 0`;
 `ztc_surface_mesh` and `schwarzite_surface_mesh` return the periodic
@@ -98,6 +108,7 @@ invented linkers and the pore-space partition are documented in the
 | Twist | `commensurate_twist` | `build twist` | `twist` | `twist_info` |
 | Ribbon | `nanoribbon` | `build ribbon` | `ribbon` | `ribbon_info` |
 | ZTC | `build_ztc` | `build ztc` | `build_ztc` | `ztc_info` |
+| Disordered carbon | `build_carbon` | `build carbon` | `build_carbon` | `build_carbon_recipe_info` |
 | Schwarz P | `build_schwarzite` | `build schwarzite` | `build_schwarzite` | `schwarzite_info` |
 | Polymer | `build_polymer` | `build polymer` | `build_polymer` | `polymer_info` |
 | Hydrogens | `add_hydrogens` | `hydrogens` | `add_hydrogens` | `hydrogens_info` |
