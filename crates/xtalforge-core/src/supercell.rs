@@ -1,6 +1,7 @@
 //! Supercells and origin shifts (Task 1.7).
 
 use crate::limits::{Limits, check_supercell};
+use crate::spatial::{FractionalGrid, perpendicular_widths};
 use crate::{Error, Lattice, Site, Structure, StructureBuilder};
 
 impl Structure {
@@ -85,6 +86,8 @@ impl Structure {
             .map(|value| value.abs())
             .fold(0.0, f64::max);
         let range = (max_inverse * 4.0).ceil() as i64 + 2;
+        let widths = perpendicular_widths(&lattice)?;
+        let mut grid = FractionalGrid::new(widths, 1e-6);
         let mut sites: Vec<Site> = Vec::new();
         for site in self.sites() {
             for i in -range..=range {
@@ -99,13 +102,23 @@ impl Structure {
                         if !frac.iter().all(|value| (-1e-9..1.0).contains(value)) {
                             continue;
                         }
-                        let duplicate = sites.iter().any(|existing| {
-                            existing.element() == site.element()
-                                && lattice.distance(existing.frac(), frac) <= 1e-6
+                        let mut duplicate = false;
+                        grid.for_each_candidate(site.element(), frac, |existing_index| {
+                            let Some(existing) = sites.get(existing_index) else {
+                                return true;
+                            };
+                            if lattice.distance(existing.frac(), frac) <= 1e-6 {
+                                duplicate = true;
+                                return false;
+                            }
+                            true
                         });
-                        if !duplicate {
-                            sites.push(site.clone().with_frac(frac)?);
+                        if duplicate {
+                            continue;
                         }
+                        let index = sites.len();
+                        sites.push(site.clone().with_frac(frac)?);
+                        grid.insert(site.element(), frac, index);
                     }
                 }
             }

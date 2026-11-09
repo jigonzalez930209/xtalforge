@@ -22,6 +22,7 @@ pub mod scalars;
 pub mod selection;
 pub mod site;
 pub mod slab;
+mod spatial;
 pub mod structure;
 pub mod supercell;
 pub mod symop;

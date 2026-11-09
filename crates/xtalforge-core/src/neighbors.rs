@@ -8,6 +8,7 @@
 
 use std::collections::HashMap;
 
+use crate::spatial::{bin_counts, bin_index, offsets, perpendicular_widths, wrap};
 use crate::{Error, Structure};
 
 /// A pair of atoms within a cutoff, with the lattice image of `j`.
@@ -43,14 +44,8 @@ pub fn neighbors(structure: &Structure, cutoff: f64) -> Result<Vec<Neighbor>, Er
     if p1.atoms.is_empty() {
         return Ok(Vec::new());
     }
-    let reciprocal = p1.lattice.reciprocal(false)?;
-    let spacing = reciprocal
-        .matrix()
-        .map(|row| 1.0 / row.iter().map(|value| value * value).sum::<f64>().sqrt());
-    let counts = spacing.map(|width| {
-        let bins = (width / cutoff).floor();
-        if bins >= 1.0 { bins as usize } else { 1 }
-    });
+    let spacing = perpendicular_widths(&p1.lattice)?;
+    let counts = bin_counts(spacing, cutoff);
     let matrix = p1.lattice.matrix();
 
     let mut bins: HashMap<[usize; 3], Vec<usize>> = HashMap::new();
@@ -187,25 +182,6 @@ impl Search<'_> {
             }
         }
     }
-}
-
-fn bin_index(value: f64, count: usize) -> usize {
-    let scaled = value.rem_euclid(1.0) * count as f64;
-    let index = scaled.floor() as usize;
-    index.min(count.saturating_sub(1))
-}
-
-fn offsets(count: usize) -> &'static [isize] {
-    match count {
-        0 | 1 => &[0],
-        2 => &[-1, 0],
-        _ => &[-1, 0, 1],
-    }
-}
-
-fn wrap(index: usize, offset: isize, count: usize) -> usize {
-    let count = count as isize;
-    (index as isize + offset).rem_euclid(count) as usize
 }
 
 fn multiply_row(vector: [f64; 3], matrix: [[f64; 3]; 3]) -> [f64; 3] {
