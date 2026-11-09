@@ -3,9 +3,7 @@
 The release is driven by `.github/workflows/release.yml`. A tag `vX.Y.Z` builds the CLI for Linux, Windows and macOS, publishes the
 GitHub release, then publishes PyPI, npm and crates.io from `ubuntu-24.04`,
 then builds and deploys the documentation. A manual `workflow_dispatch` only
-runs the CLI builds and the version check. The separate `Docs` workflow is
-manual-only and exists as a recovery path; it does not run on pushes to
-`main`.
+runs the CLI builds and the version check.
 
 ## 1. Enable Actions and Pages
 
@@ -13,6 +11,11 @@ manual-only and exists as a recovery path; it does not run on pushes to
 2. **Settings → Pages → Build and deployment**: source **GitHub Actions**,
    not “Deploy from a branch”. The site is VitePress; the legacy Jekyll build
    of `main` is not the site.
+3. **Settings → Environments → github-pages → Deployment branches and tags**:
+   allow the tag pattern `v*` in addition to `main`. The docs job runs on a
+   version tag; without this rule GitHub rejects the deployment before any
+   step runs, with “Tag is not allowed to deploy to github-pages due to
+   environment protection rules”.
 
 ## 2. Secrets
 
