@@ -13,6 +13,7 @@ categories.workspace = true
 description = "Force fields, charges, optimizers and thermochemistry for xtalforge."
 
 [dependencies]
+xtalforge-build = { workspace = true }
 xtalforge-core = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
