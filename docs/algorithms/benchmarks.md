@@ -13,7 +13,7 @@ is shown to indicate noise. Wall-clock values are rounded to 0.1 ms.
 | MOF-5 (asymmetric unit) | `info` | 2.7 ms | 2.2 ms |
 | MOF-5 | `bonds` | 3.5 ms | 2.7 ms |
 | MOF-5 | `rings` | 3.3 ms | 2.9 ms |
-| MOF-5 | `supercell 2 2 2` | 37.5 ms | 36.0 ms |
+| MOF-5 | `supercell 2 2 2` | 5.5 ms | 5.2 ms |
 
 Notes:
 
@@ -22,9 +22,8 @@ Notes:
   linked-cell index of Task 1.10.2 brings both to about 3.5 ms while keeping the
   output identical; the scaling benchmark is on the
   [neighbor-search page](./neighbors.md).
-- The `supercell` command is now dominated by its own candidate deduplication,
-  not by the neighbor search. That path is a candidate for the same kind of
-  index in a later performance pass.
+- The `supercell` command now uses the same fractional grid to drop boundary
+  duplicates: the 2x2x2 MOF-5 case fell from 37.5 ms to 5.5 ms.
 - The CLI `supercell` command replicates the asymmetric unit; callers that
   want every atom of the crystal expand to P1 first (the Python and WASM
   bindings do).
