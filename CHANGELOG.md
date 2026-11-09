@@ -7,6 +7,17 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+### Added
+
+- Phase 6 Task 6.8: the disordered-carbon recipe builder: convolution surface
+  around a periodic net, split/collapse/flip remesh with tangential relaxation
+  and projection, ribbon paths over the triangle graph, a three-coordinate
+  dual and H/F/O edge termination. `CarbonBuild` reports density, ratios,
+  ring census, mean C-C, pieces and periodicity; CLI `build carbon`, Python
+  `build_carbon`, WASM `build_carbon_recipe_info`.
+- Phase 1 Task 1.12: `rings_explicit` and `ring_counts_explicit` census a
+  builder's stored bonds without distance perception.
+
 ### Fixed
 
 - Phase 5 Task 5.4: order the four crossings of a marching-tetrahedra 2-2 split around their quadrilateral. The fan taken in the generation order crossed itself, leaving non-manifold edges and a surface that was not watertight.
