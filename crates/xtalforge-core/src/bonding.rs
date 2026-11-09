@@ -60,7 +60,7 @@ pub struct BondRules {
 impl Default for BondRules {
     fn default() -> Self {
         Self {
-            scale: 1.2,
+            scale: 1.15,
             minimum_distance: 0.4,
         }
     }
@@ -148,9 +148,12 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
     let p1 = structure.p1()?;
     let mut radii = Vec::with_capacity(p1.atoms.len());
     let mut dummy = Vec::with_capacity(p1.atoms.len());
+    let mut metal = Vec::with_capacity(p1.atoms.len());
     for atom in &p1.atoms {
-        radii.push(element_by_symbol(&atom.element)?.covalent_radius);
+        let element = element_by_symbol(&atom.element)?;
+        radii.push(element.covalent_radius);
         dummy.push(atom.element == "X");
+        metal.push(element.is_metal);
     }
     let maximum = radii.iter().copied().fold(0.0, f64::max);
     let cutoff = 2.0 * maximum * rules.scale;
@@ -173,6 +176,7 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
             || distance < rules.minimum_distance
             || dummy.get(i).copied().unwrap_or(true)
             || dummy.get(j).copied().unwrap_or(true)
+            || (metal.get(i).copied().unwrap_or(false) && metal.get(j).copied().unwrap_or(false))
         {
             continue;
         }

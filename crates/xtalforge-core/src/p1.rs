@@ -56,9 +56,11 @@ impl P1Cell {
             structure.operations()
         };
         let widths = perpendicular_widths(structure.lattice())?;
-        let mut grid = FractionalGrid::new(widths, tolerance);
         let mut atoms: Vec<P1Atom> = Vec::new();
         for (site_idx, site) in structure.sites().iter().enumerate() {
+            // Coincidences are per site: two disordered sites may occupy the
+            // same point and both must survive the expansion.
+            let mut grid = FractionalGrid::new(widths, tolerance);
             for (op_idx, operation) in operations.iter().enumerate() {
                 let base = operation.apply(site.frac());
                 let [bx, by, bz] = base;
