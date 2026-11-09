@@ -399,8 +399,12 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
         }
         for (rank, row) in result.leading_cells.iter().enumerate() {
             println!(
-                "{}. {} a={:.4} b={:.4} c={:.4} beta={:.2} M20={:.1} F_N={:.1} Rwp={}",
+                "{}. cell {} class {} {} dBIC={:.2} {} a={:.4} b={:.4} c={:.4} beta={:.2} M20={:.1} F_N={:.1} Rwp={}",
                 rank + 1,
+                row.cell_rank,
+                row.class_rank,
+                row.class_symbol,
+                row.delta_bic,
                 row.index.system.name(),
                 row.index.cell.a,
                 row.index.cell.b,
