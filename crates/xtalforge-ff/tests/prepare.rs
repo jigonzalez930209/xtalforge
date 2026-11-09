@@ -62,16 +62,18 @@ fn prepare_relaxes_water_and_records_every_step() {
             "duplicates",
             "disorder",
             "solvent",
+            "hydrogens",
             "minimize",
             "charges",
             "ewald",
             "vibrations",
+            "close_contacts",
             "charge_balance",
         ]
     );
-    assert!(report.steps[3].done && report.steps[4].done);
-    assert!(!report.steps[5].done && !report.steps[6].done);
-    assert!(!report.steps[7].done);
+    assert!(report.steps[4].done && report.steps[5].done);
+    assert!(!report.steps[6].done && !report.steps[7].done);
+    assert!(!report.steps[8].done && !report.steps[9].done);
     assert!(report.energy.is_finite(), "energy {}", report.energy);
     assert!(report.total_charge.abs() < 1e-8, "{}", report.total_charge);
     assert!(report.ewald_energy.is_none());
@@ -87,7 +89,7 @@ fn prepare_can_evaluate_ewald_on_the_assigned_charges() {
     settings.minimize = false;
     settings.ewald = true;
     let report = prepare(&calculator, &distorted_water(), &settings).unwrap();
-    assert!(report.steps[5].done);
+    assert!(report.steps[6].done);
     let energy = report.ewald_energy.expect("Ewald energy");
     assert!(energy.is_finite(), "Ewald energy {energy}");
     assert!(report.total_charge.abs() < 1e-8);
@@ -120,7 +122,7 @@ fn prepare_can_build_gamma_frequencies() {
         ..PrepareOptions::default()
     };
     let report = prepare(&calculator, &distorted_water(), &settings).unwrap();
-    assert!(report.steps[6].done);
+    assert!(report.steps[7].done);
     assert_eq!(report.frequencies.len(), 9);
     assert!(report.frequencies.iter().all(|value| value.is_finite()));
 }
@@ -270,4 +272,61 @@ fn prepared_golden_samples_are_ordered_and_neutral() {
         checked += 1;
     }
     assert!(checked >= 5, "prepared golden samples checked: {checked}");
+}
+
+#[test]
+fn cleanup_adds_missing_hydrogens() {
+    let structure = cell_with(vec![Site::new("C1", "C", [0.5, 0.5, 0.5]).unwrap()]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let options = PrepareOptions {
+        hydrogens: true,
+        minimize: false,
+        charges: false,
+        ..PrepareOptions::default()
+    };
+    let report = prepare(&calculator, &structure, &options).unwrap();
+    assert_eq!(report.structure.sites().len(), 5);
+    assert!(
+        report
+            .steps
+            .iter()
+            .any(|step| step.name == "hydrogens" && step.done)
+    );
+}
+
+#[test]
+fn cleanup_lists_close_contacts() {
+    let structure = cell_with(vec![
+        Site::new("H1", "H", [0.0, 0.0, 0.0]).unwrap(),
+        Site::new("H2", "H", [0.08, 0.0, 0.0]).unwrap(),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let options = PrepareOptions {
+        check_close_contacts: true,
+        minimize: false,
+        charges: false,
+        ..PrepareOptions::default()
+    };
+    let report = prepare(&calculator, &structure, &options).unwrap();
+    assert!(!report.close_contacts.is_empty());
+}
+
+#[test]
+fn graph_planner_keeps_a_connected_disorder_unit() {
+    let structure = cell_with(vec![
+        Site::new("O1", "O", [0.0, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.6)
+            .unwrap(),
+        Site::new("O2", "O", [0.18, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.4)
+            .unwrap(),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let mut options = cleanup_options();
+    options.remove_solvent = false;
+    let report = prepare(&calculator, &structure, &options).unwrap();
+    assert_eq!(report.removed_sites, 1);
+    assert_eq!(report.structure.sites().len(), 1);
 }
