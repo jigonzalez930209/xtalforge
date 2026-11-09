@@ -88,4 +88,10 @@ fn powder_automatic_returns_the_leading_cell_table() {
     let result = xtalforge_wasm::powder_automatic_info(cif, pattern).expect("automatic run");
     let rows = as_array(&property(&result, "leading_cells"));
     assert!(rows.length() > 0);
+    let first = rows.get(0);
+    let groups = as_array(&property(&first, "space_groups"));
+    assert!(groups.length() > 0);
+    let group = groups.get(0);
+    assert!(property(&group, "number").as_f64().unwrap() > 0.0);
+    assert!(!property(&group, "symbol").as_string().unwrap().is_empty());
 }
