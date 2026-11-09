@@ -227,30 +227,61 @@ Independent version numbers that do NOT follow the crate version:
 
 ### 5.4 Release checklist (copy into the release PR)
 
+**There is no GitHub CI.** The maintainer runs the full local CI on the exact
+commit that will be tagged; the tag-driven `release.yml` only builds and
+publishes, and runs no tests. Never create a tag before this gate passes.
+
 1. All roadmap checkboxes for the shipped scope are ticked.
-2. `scripts/check-rules.sh` passes (500 lines, no warning suppressions).
-3. `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`,
-   `cargo test --workspace`, Python tests, WASM tests, `npm run docs:build`.
-4. Decide the new version with section 5.1; bump the root `Cargo.toml`; run
+2. Run the **local CI gate** from the repository root on the commit to tag:
+
+   ```bash
+   scripts/check-rules.sh
+   scripts/sync-version.sh --check
+   scripts/check-agent-version.sh
+   scripts/check-parity.sh
+   scripts/check-api-docs.sh
+   cargo fmt --check
+   cargo clippy --workspace --all-targets --all-features -- -D warnings
+   cargo test --workspace --all-features
+   RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
+   cargo deny check
+   cargo check -p xtalforge-wasm --target wasm32-unknown-unknown
+   (cd crates/xtalforge-wasm && wasm-pack test --node)
+   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
+   scripts/check-wasm-size.sh
+   (cd crates/xtalforge-python && maturin build --release)
+   python -m pytest -q crates/xtalforge-python/tests
+   python -m mypy --strict crates/xtalforge-python/python/xtalforge
+   (cd docs && npm ci && npm run docs:build)
+   ```
+
+   The Python commands use the virtual environment that has the freshly built
+   wheel installed. The docs link check is the same one the release job runs.
+3. Decide the new version with section 5.1; bump the root `Cargo.toml`; run
    `scripts/sync-version.sh`.
-5. Move `Unreleased` in `CHANGELOG.md` into the new version section with the
+4. Move `Unreleased` in `CHANGELOG.md` into the new version section with the
    date; update the parity matrix and section 6 below.
-6. Tag `vX.Y.Z`; CI publishes crates, wheels, the npm package and the docs.
+5. Commit and push everything; the working tree must be clean.
+6. Tag the commit that passed the local gate: `git tag -a vX.Y.Z -m
+   "xtalforge X.Y.Z"` and `git push origin vX.Y.Z`.
+7. The `Release` workflow builds the three CLIs, creates the GitHub release,
+   publishes PyPI/npm/crates.io from `ubuntu-24.04`, and deploys the docs in
+   that order. It does not run tests.
 
 ## 6. Current state (update at every release)
 
 - Version: `0.0.1` (first release prepared; nothing published yet).
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
-  Actions are disabled at repository level until the maintainer enables them
-  explicitly (2026-11-08); the release workflow requires them to be enabled.
+  Actions are enabled (2026-11-08); only the tag-driven release workflow is
+  kept. CI runs locally before each tag (section 5.4).
 - Current phase: Phase 8 — Agent and distribution
   (`docs/roadmap/phase-08-distribution.md`); no Phase 8 subtask is implemented
   yet. Phases 1-7 are complete locally at the documented-subset level; the
   remaining reference gaps (neighbour acceleration, phonon q-mesh, preparation
   steps, general indexing, profile simplifications and others) are listed in
   `docs/roadmap/index.md` under "Known subsets". Phase 1's Task 1.18.5 is the
-  only unchecked item in Phases 1-7 and is external (release dry run, Actions
-  disabled).
+  only unchecked item in Phases 1-7 and waits on the first tag release after
+  the local CI gate.
   Phase 2 covers moyo integration, the space-group catalogue, the
   detect/asymmetrize/P1/set workflow, Wyckoff assignments, standardized and
   primitive cells, lattice reduction, subgroup enumeration and lowering,
