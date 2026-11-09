@@ -22,3 +22,44 @@ def test_powder_index_surface() -> None:
     assert abs(best["a"] - 4.5937) < 0.05
     assert abs(best["c"] - 2.9587) < 0.05
     assert best["m20"] > 0.0
+
+
+def test_powder_pawley_surface() -> None:
+    import json
+    from pathlib import Path
+
+    golden = json.loads(
+        (Path(__file__).parents[3] / "tests" / "golden" / "phase-7" / "pawley" / "one-atom-cubic.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    cell = golden["cell"]
+    cif = f"""data_one
+_cell_length_a {cell[0]}
+_cell_length_b {cell[1]}
+_cell_length_c {cell[2]}
+_cell_angle_alpha {cell[3]}
+_cell_angle_beta {cell[4]}
+_cell_angle_gamma {cell[5]}
+loop_
+_atom_site_label
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_occupancy
+C1 C 0 0 0 1
+"""
+    pattern = "\n".join(f"{peak[0]} {peak[1]}" for peak in golden["peaks"])
+    result = xtalforge.powder_pawley(
+        cif,
+        pattern,
+        refine_cell=True,
+        refine_zero=True,
+        profile="gaussian",
+    )
+    assert abs(result["cell"][0] - cell[0]) < 5e-3
+    assert abs(result["zero_shift"] - golden["zero_shift"]) < 5e-3
+    assert result["rwp"] < 0.02
+    assert len(result["reflections"]) == len(golden["reflections"])
+    assert all(reflection["esd"] > 0.0 for reflection in result["reflections"])
