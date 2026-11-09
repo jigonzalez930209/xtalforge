@@ -254,6 +254,8 @@ pub fn ff_prepare_info(
     order_disorder: Option<bool>,
     remove_solvent: Option<bool>,
     check_charge_balance: Option<bool>,
+    hydrogens: Option<bool>,
+    check_close_contacts: Option<bool>,
 ) -> Result<JsValue, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
     let options = xtalforge::ff::PrepareOptions {
@@ -265,6 +267,8 @@ pub fn ff_prepare_info(
         order_disorder: order_disorder.unwrap_or(false),
         remove_solvent: remove_solvent.unwrap_or(false),
         check_charge_balance: check_charge_balance.unwrap_or(false),
+        hydrogens: hydrogens.unwrap_or(false),
+        check_close_contacts: check_close_contacts.unwrap_or(false),
         ..Default::default()
     };
     let report = xtalforge::ff::prepare(&calculator()?, &structure, &options).map_err(ff_error)?;
@@ -302,6 +306,20 @@ pub fn ff_prepare_info(
     } else {
         set(&object, "charge_balance", JsValue::NULL);
     }
+    let contacts = js_sys::Array::new();
+    for contact in &report.close_contacts {
+        let item = js_sys::Object::new();
+        set(&item, "i", JsValue::from_f64(contact.i as f64));
+        set(&item, "j", JsValue::from_f64(contact.j as f64));
+        set(&item, "distance", JsValue::from_f64(contact.distance));
+        let elements = js_sys::Array::new();
+        for element in &contact.elements {
+            elements.push(&JsValue::from_str(element));
+        }
+        set(&item, "elements", elements.into());
+        contacts.push(&item.into());
+    }
+    set(&object, "close_contacts", contacts.into());
     let structure = serde_json::to_string(&report.structure)
         .map_err(|error| ff_error(xtalforge::ff::Error::InvalidInput(error.to_string())))?;
     set(&object, "structure", JsValue::from_str(&structure));
