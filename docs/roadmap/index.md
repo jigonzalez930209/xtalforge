@@ -51,8 +51,8 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 1.15.4: explicit-bond loops round-trip for P1 structures; a non-P1
   structure keeps its explicit bonds in memory only. Inconsistency warnings
   beyond an unknown Hall symbol are limited.
-- 3.6.2/3.6.3: multi-frame extended XYZ with eager loading; lazy random access
-  and foreign trajectory formats (XDATCAR, LAMMPS dump, geo_end) are deferred.
+- 3.6.2/3.6.3: extended XYZ has lazy frame indexing and VASP XDATCAR is read;
+  LAMMPS dump and DFTB+ `geo_end` remain deferred.
 - 4.7: the preparation pipeline covers relax, charges, Ewald and vibrations;
   disorder/partial-occupancy resolution, solvent removal, charge-balance
   checks and the prepared-sample golden comparison are not implemented.

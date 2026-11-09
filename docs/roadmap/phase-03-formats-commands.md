@@ -138,14 +138,16 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
   Read and write; lazy indexed reading so a 10 000-frame file is not loaded at
   once; conversion of any frame to a `Structure` (optionally re-attaching the
   space group).
-  Note: `read_trajectory_xyz`/`write_trajectory_xyz` and `structure(frame)`;
-  lazy random access is not implemented yet.
+  Note: `XyzIndex` records frame offsets, elements, lattice and header
+  metadata and parses one frame on demand; `structure(frame)` remains the
+  conversion path.
 - [x] 3.6.3 Foreign trajectories
   Crystal-Builder reads other trajectory formats through ASE. Decide which
   formats are needed (VASP XDATCAR, LAMMPS dump, DFTB+ geo_end) and implement
   them natively; record the decision.
-  Note: decision for now is multi-frame extended XYZ only; VASP XDATCAR,
-  LAMMPS dump and DFTB+ geo_end are deferred until a consumer asks for them.
+  Note: VASP XDATCAR is implemented (`read_xdatcar`, `Direct` and
+  `Cartesian`); `read_trajectory` detects XYZ or XDATCAR. LAMMPS dump and
+  DFTB+ `geo_end` remain deferred until a consumer asks for them.
 
 ## Task 3.7 — Project files (`.xtalproj`)
 
