@@ -44,6 +44,10 @@ must record the reason in the algorithm page.
 | Pawley zero shift | absolute | 5e-3 degree (golden pattern) | 7 |
 | Pawley intensity | absolute | 3 esds | 7 |
 | Pawley Rwp / chi^2 | absolute | 0.02 (golden pattern) | 7 |
+| Rietveld position | absolute | 3e-3 fractional (rutile golden) | 7 |
+| Rietveld cell | absolute | 2e-3 Angstrom (rutile golden) | 7 |
+| Rietveld zero shift | absolute | 0.02 degree (rutile golden) | 7 |
+| Rietveld Rwp | absolute | 0.25 (rutile golden, single-Gaussian model) | 7 |
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |

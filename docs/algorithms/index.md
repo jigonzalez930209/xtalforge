@@ -31,6 +31,7 @@ Pages are added with the feature that introduces them:
 - [Vibrations and thermodynamics](./vibrations) (Task 4.8)
 - [Powder indexing](./indexing) (Task 7.5)
 - [Pawley fit](./pawley) (Task 7.6)
+- [Rietveld refinement](./rietveld) (Task 7.8)
 - [Machine-learning backend](./ml-backend) (Task 4.11)
 - [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
 - [Validation and tolerances](./validation) (Task 0.9.4)
