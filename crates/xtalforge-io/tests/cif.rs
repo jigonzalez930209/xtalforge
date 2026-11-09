@@ -303,3 +303,21 @@ fn a_mismatched_operation_set_warns() {
         .expect("a mismatch warning");
     assert!(warning.contains("does not match"));
 }
+
+#[test]
+fn chemical_formula_is_kept_for_the_disorder_planner() {
+    let text = "data_formula\n_chemical_formula_sum 'C1 N1'\n\
+                _cell_length_a 10\n_cell_length_b 10\n_cell_length_c 10\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                C1 C 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    assert_eq!(
+        structure
+            .metadata()
+            .get("chemical_formula")
+            .and_then(|value| value.as_str()),
+        Some("C1 N1")
+    );
+}
