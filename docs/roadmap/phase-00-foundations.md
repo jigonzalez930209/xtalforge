@@ -308,26 +308,30 @@ duplicating.
   `docs/changelog.md` includes the root file with VitePress
   `<!--@include: ../CHANGELOG.md-->` so there is a single source. Every pull
   request adds an `Unreleased` entry.
-- [ ] 0.6.3 Release workflow
+- [x] 0.6.3 Release workflow
   Triggered by a tag `vX.Y.Z`: checks version sync and changelog; runs the full
   test matrix; publishes crates in dependency order (`cargo publish` with
   retries for index propagation); builds and uploads wheels (maturin-action,
   trusted publishing); publishes the npm package (provenance enabled); creates
   the GitHub release with notes from the changelog; deploys the docs. A
   `workflow_dispatch` dry-run mode must succeed before `v0.0.1`.
-  Note: `.github/workflows/release.yml` is written; the dry run is blocked
-  because GitHub Actions are disabled until the maintainer enables them.
+  Note: released `v0.0.1` on 2026-11-09. The maintainer removed the test matrix
+  and Trusted Publishing from the workflow (tests run in the local gate; PyPI
+  uses `PYPI_API_TOKEN` with twine), and the crates publisher now waits on the
+  crates.io 429 retry time. `workflow_dispatch` builds the CLIs and runs the
+  version check without publishing.
 - [x] 0.6.4 Agent memory discipline
   CI check: the version in `AGENTS.md` section 6 equals the workspace version
   on tagged commits. Pull request template with the checklist: roadmap ticked,
   parity matrix, docs, changelog, rules script.
-- [ ] 0.6.5 Name reservation
+- [x] 0.6.5 Name reservation
   Reserve `xtalforge` on crates.io (publish `0.0.0` placeholder only if the
   maintainer agrees), PyPI and npm (`xtalforge-wasm`, optionally the
   `@xtalforge` scope). All were free on 2026-11-08.
-  Note: `xtalforge`, `xtalforge-core` and `xtalforge-wasm` were checked free on
-  2026-11-08 (crates.io search empty, PyPI 404, npm 404). No placeholder was
-  published; reservation waits for explicit maintainer approval.
+  Note: the `0.0.1` publication on 2026-11-09 reserved `xtalforge` and its
+  eleven companion crates on crates.io, `xtalforge` on PyPI and
+  `xtalforge-wasm` on npm. No placeholder was needed. The `@xtalforge` npm
+  scope was not claimed.
 
 ## Task 0.7 — Documentation site (VitePress)
 
@@ -363,14 +367,15 @@ duplicating.
   after load.
   Note: `docs/demos/cell-volume.md` runs the WASM package in the browser; the
   VitePress build bundles the `.wasm` asset and the page works offline.
-- [ ] 0.7.5 Deployment
+- [x] 0.7.5 Deployment
   GitHub Pages workflow building on push to `main` and on tags; versioned
   documentation per MINOR release from `v0.1.0`; link checking.
   Note: the `docs` job of `.github/workflows/release.yml` builds and deploys to
-  Pages on a version tag, after the verification and WASM jobs and reusing the
-  built WASM artifact. The maintainer changed the policy to tag-only
-  deployment (no `main` deployment). It has not run because GitHub Actions are
-  disabled; versioned docs remain for the first MINOR release.
+  Pages on a version tag, after the package publication and reusing the built
+  WASM artifact. The maintainer changed the policy to tag-only deployment (no
+  `main` deployment), and the `github-pages` environment must allow the `v*`
+  tag pattern. `v0.0.1` deployed successfully on 2026-11-09; versioned docs
+  remain for the first MINOR release.
 
 ## Task 0.8 — Continuous integration
 

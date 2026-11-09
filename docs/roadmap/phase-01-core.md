@@ -334,7 +334,8 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   Golden comparison of bond lists and coordination numbers for the full
   corpus; every intentional deviation documented.
   Note: MOF-5 and Si bond counts match the Crystal-Builder golden data;
-  coordination-number comparison across the full corpus is pending.
+  coordination-number comparison across the full corpus is pending because
+  the metal-specific rules still add bonds in several MOFs.
 
 ## Task 1.12 — Rings
 
@@ -345,12 +346,14 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   parameter. Compare with sci-form `rings/sssr.rs` (SSSR, molecular) and keep
   both: SSSR for molecules, primitive rings for frameworks.
   Note: `rings`/`ring_counts` find chordless simple cycles on the P1 bond
-  graph; the full Franzblau weight and framework statistics are pending.
+  graph; periodic ring shifts that need another copy of the start atom and the
+  full Franzblau shortest-path weights remain open.
 - [x] 1.12.2 Ring statistics
   Counts per size, per-atom ring membership, aromaticity flag for molecules
   (sci-form `rings/aromaticity.rs`).
-  Note: counts per size are implemented; per-atom membership and aromaticity
-  are pending.
+  Note: counts per size, `ring_membership` and the heuristic `is_aromatic`
+  flag are implemented and tested on a hexagon; bond-order Hückel perception
+  waits for stored bond orders.
 
 ## Task 1.13 — Functional groups
 
@@ -501,12 +504,13 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   `docs/algorithms/benchmarks.md`.
   Note: process-level medians for Si and MOF-5 (info, bonds, rings,
   supercell) and the 438 KiB WASM size; `check-rules.sh` is clean.
-- [ ] 1.18.5 Release prerequisites for v0.0.1
+- [x] 1.18.5 Release prerequisites for v0.0.1
   Release dry run (Task 0.6.3) succeeds; changelog prepared; `AGENTS.md`
   section 6 ready to update. Tag `v0.0.1` once Task 2.1 is also done.
-  Note: every local prerequisite is complete (changelog, AGENTS section 6,
-  parity matrix, full local checks, docs build). The remaining blocker is the
-  external release dry run: GitHub Actions are disabled by maintainer
-  instruction, and Task 0.6.5 (name reservation) needs explicit approval.
-  This item stays open until the maintainer enables Actions and approves the
-  placeholders; nothing in the code is missing.
+  Note: released on 2026-11-09. The GitHub release carries the Linux
+  `.deb`/`.rpm`/AppImage, Windows `.zip` and macOS universal `.tar.gz`/`.dmg`;
+  PyPI `xtalforge 0.0.1`, npm `xtalforge-wasm 0.0.1` and all twelve crates are
+  published; the VitePress site is deployed at
+  https://jigonzalez930209.github.io/xtalforge/. The crates publisher waited
+  out the crates.io new-crate limit and the docs job needed the `v*` tag in the
+  `github-pages` environment policy.

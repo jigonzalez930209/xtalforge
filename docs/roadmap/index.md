@@ -25,20 +25,20 @@ are in `AGENTS.md` at the repository root.
 | 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
 | 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
 
-## Current status (2026-11-08)
+## Current status (2026-11-09)
 
-- Phases 0-7 are implemented locally and pushed; the Rust API, CLI, Python and
-  WASM surfaces build and pass their checks. Nothing is published yet
-  (`0.0.1`, release prepared).
+- Phases 0-7 are implemented, tested and pushed; the Rust API, CLI, Python and
+  WASM surfaces build and pass their checks. `v0.0.1` is published on
+  crates.io (twelve crates), PyPI (`xtalforge`), npm (`xtalforge-wasm`), the
+  GitHub release and GitHub Pages.
 - Phase 8 (agent and distribution) has not started. It is the remaining
   planned phase: session verbs, MCP server, plugins, ML potentials,
   distribution, performance/fuzzing and the API freeze.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
   manual docs workflows were removed by maintainer decision (2026-11-08) to
   avoid runner cost. The release runs on a version tag: three CLI packages,
-  PyPI/npm/crates.io from `ubuntu-24.04`, then the docs deployment. Name
-  reservation (Task 0.6.5) still needs explicit approval; Task 1.18.5 waits on
-  the first release run.
+  PyPI/npm/crates.io from `ubuntu-24.04`, then the docs deployment. The
+  `github-pages` environment allows `main` and the `v*` tag pattern.
 
 ### Known subsets
 
@@ -47,8 +47,13 @@ and exposed on the surfaces. The following reference behaviours are subsets or
 simplified ports rather than complete reproductions; they are the first
 candidates for Phase 8 or a follow-up and are not silent approximations:
 
-- 1.12: chordless rings and counts; full Franzblau weights, per-atom
-  membership and aromaticity statistics are missing.
+- 1.11.5: bond counts for Si and MOF-5 match the golden data; the full-corpus
+  bond-set and coordination comparison is pending because the metal-specific
+  perception rules are still simplified.
+- 1.12: chordless primitive cycles on the P1 graph with counts, per-atom
+  membership and a heuristic aromaticity flag; periodic ring shifts that need
+  another copy of the start atom and the full Franzblau shortest-path weights
+  are missing.
 - 1.15.4: CIF explicit-bond loops, disorder assembly and Uij writing are not
   round-tripped; inconsistency warnings are limited.
 - 3.6.2/3.6.3: multi-frame extended XYZ with eager loading; lazy random access
