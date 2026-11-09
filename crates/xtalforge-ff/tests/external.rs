@@ -233,3 +233,25 @@ fn writers_reject_bad_inputs() {
     };
     assert!(write_orca_input(&water(), &injected).is_err());
 }
+
+#[test]
+fn the_recorded_dftb_output_parses() {
+    let text = include_str!("fixtures/dftb/si_scc_detailed.out");
+    let result = parse_dftb_output(text).unwrap();
+    assert!(
+        (result.energy - (-69.2989)).abs() < 1e-3,
+        "{}",
+        result.energy
+    );
+    assert_eq!(result.forces.len(), 2);
+    let sum = result.forces.iter().fold([0.0; 3], |total, force| {
+        [
+            total[0] + force[0],
+            total[1] + force[1],
+            total[2] + force[2],
+        ]
+    });
+    assert!(sum.iter().all(|value| value.abs() < 1e-6));
+    let stress = result.stress.expect("a stress tensor");
+    assert!(stress.iter().flatten().all(|value| value.is_finite()));
+}
