@@ -20,6 +20,9 @@ zip = { workspace = true }
 xtalforge-core = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 
+[dev-dependencies]
+flate2 = { workspace = true }
+
 [features]
 parallel = ["dep:rayon"]
 
