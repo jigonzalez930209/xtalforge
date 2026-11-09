@@ -19,7 +19,9 @@ resolves the Hall symbol (or H-M symbol) through
 `symmetry_source = "Hall symbol"`. Only an unrecognised symbol falls back to
 the identity and records a `symmetry_warning`. This closes the common CIF case
 where the space group is named but the operation loop is omitted (graphene is
-the corpus example). Inconsistency warnings beyond that are still limited.
+the corpus example). When both an operation loop and a symbol are present, a
+loop whose operation count disagrees with the named group records a
+`symmetry_warning`; comparing the individual operations is not implemented.
 
 ## Numbers
 
