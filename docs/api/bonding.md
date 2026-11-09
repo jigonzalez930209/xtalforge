@@ -2,8 +2,8 @@
 
 `Structure::bond_graph()` perceives distance-based bonds on the P1 cell with
 `BondRules::default()`: a bond exists when the distance is at least 0.4 A and
-at most 1.2 times the sum of the two covalent radii. Dummy `X` atoms never
-bond. Each `Bond` carries `i`, `j`, the lattice `image`, `distance`, `order`
+at most 1.15 times the sum of the two covalent radii. Dummy `X` atoms and
+metal-metal pairs never bond. Each `Bond` carries `i`, `j`, the lattice `image`, `distance`, `order`
 and the `explicit` flag.
 
 ```rust
@@ -31,6 +31,7 @@ serialized with the structure.
 ## Status
 
 Distance perception, explicit additions/removals, topology edges and the
-connectivity graph are complete. Bond symmetry propagation to every image
-(1.11.2) and the full corpus comparison (1.11.5) follow with the command
-layer.
+connectivity graph are complete. The full golden corpus comparison of bond
+sets and coordination numbers is in `crates/xtalforge-io/tests/golden_bonds.rs`
+(Task 1.11.5). Bond symmetry propagation to every image (1.11.2) remains a
+later refinement.
