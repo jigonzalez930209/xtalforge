@@ -58,9 +58,10 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   full RCSR catalogue and canonical keys are not bundled.
 - 6.8: the gyroid/Schwarz P structures are geometric level-set models, not
   relaxed carbons.
-- 7.3/7.5/7.6/7.8/7.10: simple peak picking, cubic-only indexing without the
-  M20/F_N figures of merit, simplified Le Bail/Pawley profiles, a bounded
-  structural least-squares loop and a cubic-only automatic run.
+- 7.6/7.8/7.10: simplified Le Bail/Pawley intensity extraction (no esds or
+  free instrument parameters), a bounded structural least-squares loop instead
+  of the McCusker plan and a cubic-only automatic run. Peak picking (7.3) and
+  general metric indexing with M20/F_N (7.5) are implemented.
 
 ## Release milestones
 
