@@ -107,7 +107,9 @@ canonical keys are not bundled.
 
 `isosurface(&Grid3, value)` extracts a `TriangleMesh { vertices, triangles }`
 with marching tetrahedra (six tetrahedra per cell, no ambiguous marching-cube
-cases). It rejects grids with fewer than two samples along an axis.
+cases). The four crossings of a 2-2 sign pattern are ordered around their
+quadrilateral, so adjacent tetrahedra share the same diagonal and the surface
+is watertight. It rejects grids with fewer than two samples along an axis.
 
 ## Distance grid
 
