@@ -15,9 +15,9 @@ use wasm_bindgen_test::*;
 use xtalforge_wasm::{
     angle, bonds, build_c60_info, build_graphene_info, build_nanotube_info, cell_volume,
     convert_structure, distance, element_info, groups, lattice_info, lattice_minimum_image,
-    limits_bounds, limits_check, mesh_stl, neighbors, pxrd_info, read_cif, read_structure, rings,
-    scene_summary, slab_info, slab_text, structure_info, supercell_info, supercell_text, torsion,
-    version,
+    limits_bounds, limits_check, mesh_stl, neighbors, powder_index_info, pxrd_info, read_cif,
+    read_structure, rings, scene_summary, slab_info, slab_text, structure_info, supercell_info,
+    supercell_text, torsion, version,
 };
 
 const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
@@ -435,4 +435,33 @@ fn carbon_builder_exports() {
     assert!(property(&tube, "n_sites").as_f64().unwrap_or(0.0) > 0.0);
     let c60 = build_c60_info().expect("c60");
     assert_eq!(property(&c60, "n_sites").as_f64(), Some(60.0));
+}
+
+#[wasm_bindgen_test]
+fn powder_index_reports_the_tetragonal_cell() {
+    let centers = [
+        19.32, 27.46, 30.21, 36.11, 39.22, 41.27, 44.08, 54.37, 56.68,
+    ];
+    let mut text = String::new();
+    for step in 0..3000 {
+        let two_theta = 15.0 + step as f64 * 0.02;
+        let intensity: f64 = centers
+            .iter()
+            .enumerate()
+            .map(|(index, center)| {
+                let delta = (two_theta - center) / 0.12;
+                (-delta * delta).exp() / (1.0 + index as f64)
+            })
+            .sum();
+        text.push_str(&format!("{two_theta:.3} {intensity:.6}\n"));
+    }
+    let value = powder_index_info(&text, 1.541_84, 3, 0.05).expect("indexing");
+    let candidates = as_array(&property(&value, "candidates"));
+    assert!(candidates.length() > 0);
+    let best = candidates.get(0);
+    assert_eq!(property(&best, "system").as_string().unwrap(), "tetragonal");
+    let a = property(&best, "a").as_f64().unwrap();
+    let c = property(&best, "c").as_f64().unwrap();
+    assert!((a - 4.5937).abs() < 0.05);
+    assert!((c - 2.9587).abs() < 0.05);
 }
