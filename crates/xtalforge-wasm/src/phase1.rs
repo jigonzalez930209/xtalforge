@@ -144,6 +144,14 @@ pub fn rings(text: &str, max_size: u32) -> Result<js_sys::Array, JsValue> {
         let object = js_sys::Object::new();
         set(&object, "size", JsValue::from_f64(ring.size() as f64));
         set(&object, "atoms", array_usize(&ring.atoms).into());
+        let path = js_sys::Array::new();
+        for step in &ring.path {
+            let pair = js_sys::Array::new();
+            pair.push(&JsValue::from_f64(step.atom as f64));
+            pair.push(&array_i32(step.image).into());
+            path.push(&pair.into());
+        }
+        set(&object, "path", path.into());
         array.push(&object.into());
     }
     Ok(array)
