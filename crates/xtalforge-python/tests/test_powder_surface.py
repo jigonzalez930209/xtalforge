@@ -113,3 +113,14 @@ def test_powder_automatic_leading_cell_table() -> None:
     assert any(row["pawley_rwp"] is not None for row in rows)
     fitted = [row["pawley_rwp"] for row in rows if row["pawley_rwp"] is not None]
     assert fitted == sorted(fitted)
+    assert all(row["space_groups"] for row in rows)
+    numbers = {
+        group["number"]
+        for row in rows
+        for group in row["space_groups"]
+    }
+    assert numbers
+    first = rows[0]["space_groups"][0]
+    assert first["symbol"]
+    assert first["centering"] in "PABCIRF"
+    assert first["order"] > 0
