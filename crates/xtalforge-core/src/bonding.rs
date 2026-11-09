@@ -198,34 +198,44 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
         }
     }
     for explicit in structure.explicit_bonds() {
+        let distance = explicit_distance(&p1, explicit);
         if explicit.remove {
-            bonds.retain(|bond| !same_bond(bond, explicit.i, explicit.j, explicit.image));
-        } else if let Some(existing) = bonds
+            bonds.retain(|bond| {
+                !same_bond(bond, explicit.i, explicit.j, explicit.image)
+                    && !same_contact(bond, explicit, distance)
+            });
+            continue;
+        }
+        if let Some(existing) = bonds
             .iter_mut()
             .find(|bond| same_bond(bond, explicit.i, explicit.j, explicit.image))
         {
             existing.order = explicit.order;
             existing.explicit = true;
-        } else if let (Some(first), Some(second)) =
-            (p1.atoms.get(explicit.i), p1.atoms.get(explicit.j))
+            continue;
+        }
+        if let Some(existing) = bonds
+            .iter_mut()
+            .find(|bond| same_contact(bond, explicit, distance))
         {
-            let delta = [
-                second.frac[0] + f64::from(explicit.image[0]) - first.frac[0],
-                second.frac[1] + f64::from(explicit.image[1]) - first.frac[1],
-                second.frac[2] + f64::from(explicit.image[2]) - first.frac[2],
-            ];
-            let matrix = p1.lattice.matrix();
-            let cart = [
-                delta[0] * matrix[0][0] + delta[1] * matrix[1][0] + delta[2] * matrix[2][0],
-                delta[0] * matrix[0][1] + delta[1] * matrix[1][1] + delta[2] * matrix[2][1],
-                delta[0] * matrix[0][2] + delta[1] * matrix[1][2] + delta[2] * matrix[2][2],
-            ];
+            existing.order = explicit.order;
+            existing.explicit = true;
+            continue;
+        }
+        if !structure.is_p1() {
+            // A non-P1 record names a site and an operation; the P1 mapping
+            // may land on a different image representative. Only an existing
+            // perceived contact is safe to annotate; an unmatched record is
+            // kept in memory but does not invent a bond.
+            continue;
+        }
+        if let (Some(distance), Some(_)) = (distance, p1.atoms.get(explicit.j)) {
             let (i, j, image) = canonical(explicit.i, explicit.j, explicit.image);
             bonds.push(Bond {
                 i,
                 j,
                 image,
-                distance: cart.iter().map(|value| value * value).sum::<f64>().sqrt(),
+                distance,
                 order: explicit.order,
                 explicit: true,
             });
@@ -285,4 +295,33 @@ fn canonical(i: usize, j: usize, image: [i32; 3]) -> (usize, usize, [i32; 3]) {
     } else {
         (i, j, image)
     }
+}
+
+fn explicit_distance(cell: &crate::P1Cell, explicit: &ExplicitBond) -> Option<f64> {
+    let first = cell.atoms.get(explicit.i)?;
+    let second = cell.atoms.get(explicit.j)?;
+    let delta = [
+        second.frac[0] + f64::from(explicit.image[0]) - first.frac[0],
+        second.frac[1] + f64::from(explicit.image[1]) - first.frac[1],
+        second.frac[2] + f64::from(explicit.image[2]) - first.frac[2],
+    ];
+    let matrix = cell.lattice.matrix();
+    let cart = [
+        delta[0] * matrix[0][0] + delta[1] * matrix[1][0] + delta[2] * matrix[2][0],
+        delta[0] * matrix[0][1] + delta[1] * matrix[1][1] + delta[2] * matrix[2][1],
+        delta[0] * matrix[0][2] + delta[1] * matrix[1][2] + delta[2] * matrix[2][2],
+    ];
+    Some(cart.iter().map(|value| value * value).sum::<f64>().sqrt())
+}
+
+/// The same atom pair with a length that agrees to a milliangstrom.
+///
+/// A non-P1 CIF stores the operation and image of the second site, and the
+/// P1 expansion may choose the neighbouring cell's representative for one
+/// end. The pair and length identify the contact; the perceived image is kept
+/// because it is the one the graph is drawn with.
+fn same_contact(bond: &Bond, explicit: &ExplicitBond, distance: Option<f64>) -> bool {
+    let same_pair = (bond.i == explicit.i && bond.j == explicit.j)
+        || (bond.i == explicit.j && bond.j == explicit.i);
+    same_pair && distance.is_some_and(|value| (bond.distance - value).abs() <= 1e-3)
 }
