@@ -64,13 +64,15 @@ pub fn isosurface(grid: &Grid3, isovalue: f64) -> Result<TriangleMesh, Error> {
                     (x + 1, y + 1, z + 1),
                     (x, y + 1, z + 1),
                 ];
+                // Kuhn decomposition about the 0-7 diagonal, in the corner
+                // order of the reference marching-tetrahedra table.
                 let tetrahedra = [
-                    [0, 1, 2, 6],
-                    [0, 2, 3, 6],
-                    [0, 3, 7, 6],
-                    [0, 7, 4, 6],
+                    [0, 4, 7, 6],
                     [0, 4, 5, 6],
-                    [0, 5, 1, 6],
+                    [0, 3, 7, 6],
+                    [0, 3, 2, 6],
+                    [0, 1, 5, 6],
+                    [0, 1, 2, 6],
                 ];
                 for tetrahedron in tetrahedra {
                     let points = tetrahedron.map(|index| corners[index]);
@@ -88,45 +90,67 @@ fn tetrahedron_triangles(
     isovalue: f64,
     mesh: &mut TriangleMesh,
 ) -> Result<(), Error> {
-    let mut inside = Vec::new();
-    let mut outside = Vec::new();
-    for corner in corners {
-        let value = grid
+    let mut points = [[0.0; 3]; 4];
+    let mut values = [0.0; 4];
+    for index in 0..4 {
+        let corner = corners[index];
+        values[index] = grid
             .get(corner.0, corner.1, corner.2)
             .ok_or_else(|| Error::InvalidInput("grid corner is out of range".to_owned()))?;
-        if value >= isovalue {
-            inside.push((corner, value));
-        } else {
-            outside.push((corner, value));
+        points[index] = grid.position(corner.0, corner.1, corner.2);
+    }
+    let mut pattern = 0u8;
+    for (index, value) in values.iter().enumerate() {
+        if *value >= isovalue {
+            pattern |= 1 << index;
         }
     }
-    if inside.is_empty() || outside.is_empty() {
-        return Ok(());
-    }
-    let mut points = Vec::new();
-    for (a, va) in &inside {
-        for (b, vb) in &outside {
-            let denominator = va - vb;
-            if denominator.abs() < 1e-15 {
-                continue;
-            }
-            let t = (isovalue - vb) / denominator;
-            let pa = grid.position(a.0, a.1, a.2);
-            let pb = grid.position(b.0, b.1, b.2);
-            points.push([
-                pa[0] + t * (pb[0] - pa[0]),
-                pa[1] + t * (pb[1] - pa[1]),
-                pa[2] + t * (pb[2] - pa[2]),
-            ]);
+    let triangles: &[[usize; 3]] = match pattern {
+        0b0001 | 0b1110 => &[[0, 1, 2]],
+        0b0010 | 0b1101 => &[[0, 3, 4]],
+        0b0100 | 0b1011 => &[[1, 3, 5]],
+        0b1000 | 0b0111 => &[[2, 4, 5]],
+        0b0011 | 0b1100 => &[[1, 2, 4], [1, 4, 3]],
+        0b0101 | 0b1010 => &[[0, 2, 5], [0, 5, 3]],
+        0b1001 | 0b0110 => &[[0, 1, 5], [0, 5, 4]],
+        _ => &[],
+    };
+    for triangle in triangles {
+        let mut crossing = [[0.0; 3]; 3];
+        for (slot, edge) in triangle.iter().enumerate() {
+            let (u, v) = tet_edge(*edge);
+            crossing[slot] = crossing_point(points[u], points[v], values[u], values[v], isovalue);
         }
-    }
-    if points.len() == 3 {
-        add_triangle(mesh, points[0], points[1], points[2]);
-    } else if points.len() == 4 {
-        add_triangle(mesh, points[0], points[1], points[2]);
-        add_triangle(mesh, points[0], points[2], points[3]);
+        add_triangle(mesh, crossing[0], crossing[1], crossing[2]);
     }
     Ok(())
+}
+
+/// The six edges of a tetrahedron, in the reference table's order.
+const TET_EDGES: [(usize, usize); 6] = [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (2, 3)];
+
+fn tet_edge(index: usize) -> (usize, usize) {
+    TET_EDGES.get(index).copied().unwrap_or((0, 1))
+}
+
+fn crossing_point(
+    start: [f64; 3],
+    end: [f64; 3],
+    start_value: f64,
+    end_value: f64,
+    isovalue: f64,
+) -> [f64; 3] {
+    let span = end_value - start_value;
+    let t = if span.abs() < 1e-12 {
+        0.5
+    } else {
+        (isovalue - start_value) / span
+    };
+    [
+        start[0] + t * (end[0] - start[0]),
+        start[1] + t * (end[1] - start[1]),
+        start[2] + t * (end[2] - start[2]),
+    ]
 }
 
 fn add_triangle(mesh: &mut TriangleMesh, a: [f64; 3], b: [f64; 3], c: [f64; 3]) {
