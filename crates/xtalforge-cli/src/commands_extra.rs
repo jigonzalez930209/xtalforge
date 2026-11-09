@@ -192,10 +192,32 @@ pub(crate) fn trajectory(
     format: Option<StructureFormat>,
 ) -> Result<(), CliError> {
     let text = input::read_source(path).map_err(CliError::core)?;
-    let trajectory = xtalforge::io::read_trajectory_xyz(&text).map_err(CliError::core)?;
+    if let Ok(index) = xtalforge::io::XyzIndex::new(&text) {
+        return match frame {
+            Some(at) => {
+                let structure = index.structure(at).map_err(CliError::core)?;
+                output::emit_structure(cli, &structure, out, format)
+            }
+            None => {
+                let payload = json!({
+                    "frames": index.len(),
+                    "elements": index.elements(),
+                    "lattice": index.lattice(),
+                    "energies": index.energies(),
+                });
+                if cli.json {
+                    println!("{payload}");
+                } else {
+                    println!("{} frames, {} atoms", index.len(), index.elements().len());
+                }
+                Ok(())
+            }
+        };
+    }
+    let trajectory = xtalforge::io::read_trajectory(&text).map_err(CliError::core)?;
     match frame {
-        Some(index) => {
-            let structure = trajectory.structure(index).map_err(CliError::core)?;
+        Some(at) => {
+            let structure = trajectory.structure(at).map_err(CliError::core)?;
             output::emit_structure(cli, &structure, out, format)
         }
         None => {
