@@ -124,6 +124,13 @@ def test_rings_on_a_molecular_hexagon() -> None:
     assert found == [[0, 1, 2, 3, 4, 5]]
 
 
+def test_ring_paths_carry_lattice_images() -> None:
+    paths = xtalforge.ring_paths(HEXAGON, 8)
+    assert len(paths) == 1
+    assert len(paths[0]) == 6
+    assert all(len(step[1]) == 3 for step in paths[0])
+
+
 def test_groups_on_mof5() -> None:
     data = xtalforge.read_cif(MOF5)
     assert data["name"] == "MOF-5_prepared"
