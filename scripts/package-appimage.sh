@@ -14,7 +14,7 @@ BIN="$ROOT/target/release/xtalforge"
 TOOL="$ROOT/target/appimagetool-$ARCH.AppImage"
 
 [ -x "$BIN" ] || { echo "package-appimage: build $BIN first" >&2; exit 2; }
-[ -f "$ROOT/assets/xtalforge.desktop" ] || { echo "package-appimage: missing desktop file" >&2; exit 2; }
+[ -f "$ROOT/assets/io.github.jigonzalez930209.xtalforge.desktop" ] || { echo "package-appimage: missing desktop file" >&2; exit 2; }
 [ -f "$ROOT/assets/xtalforge.png" ] || { echo "package-appimage: missing icon" >&2; exit 2; }
 
 mkdir -p "$OUT"
@@ -23,13 +23,14 @@ chmod 755 "$appdir"
 trap 'rm -rf "$appdir"' EXIT
 
 install -Dm755 "$BIN" "$appdir/usr/bin/xtalforge"
-install -Dm644 "$ROOT/assets/xtalforge.desktop" \
-  "$appdir/usr/share/applications/xtalforge.desktop"
+install -Dm644 "$ROOT/assets/io.github.jigonzalez930209.xtalforge.desktop" \
+  "$appdir/usr/share/applications/io.github.jigonzalez930209.xtalforge.desktop"
 install -Dm644 "$ROOT/assets/xtalforge.png" \
   "$appdir/usr/share/icons/hicolor/256x256/apps/xtalforge.png"
 install -Dm644 "$ROOT/assets/io.github.jigonzalez930209.xtalforge.appdata.xml" \
   "$appdir/usr/share/metainfo/io.github.jigonzalez930209.xtalforge.appdata.xml"
-ln -s usr/share/applications/xtalforge.desktop "$appdir/xtalforge.desktop"
+ln -s usr/share/applications/io.github.jigonzalez930209.xtalforge.desktop \
+  "$appdir/io.github.jigonzalez930209.xtalforge.desktop"
 ln -s usr/share/icons/hicolor/256x256/apps/xtalforge.png "$appdir/xtalforge.png"
 
 cat > "$appdir/AppRun" <<'APPRUN'
