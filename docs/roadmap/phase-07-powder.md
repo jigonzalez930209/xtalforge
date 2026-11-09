@@ -166,10 +166,14 @@ Crate: `xtalforge-powder`.
   axis), or one of the predefined refinement plans. A refinement moves atoms;
   it never adds, removes or bonds them: the result is the input structure
   with new numbers on the same sites.
-  Note: `refine_phase` uses the PXRD engine Gaussian, a global isotropic ADP
-  multiplier, occupancies and a bounded finite-difference step; the full
-  McCusker plan, Chebyshev backgrounds, Kα2 placement and esds are not
-  implemented.
+  Note: `refine_phase` runs the McCusker order (`background_scale`,
+  `zero_cell`, `width`, `structure`) with a bounded Nelder-Mead search per
+  stage and the analytic scale/background solve. Coordinates move along the
+  Wyckoff null space (`free_directions`), the cell ties are restored after
+  every move, the copper K alpha doublet can be placed, and the parameter esds
+  come from the full-model covariance. The profile is the PXRD Gaussian (not a
+  Caglioti pseudo-Voigt) and the ADP is one global multiplier; both deviations
+  are documented on the algorithm page.
 - [x] 7.8.2 Structure to phase and back
   Port the phase-building logic of `bridge.py`: a phase is built from the
   sites (not by writing and reading a CIF), and the refined phase comes back
@@ -177,6 +181,10 @@ Crate: `xtalforge-powder`.
 - [x] 7.8.3 Validation
   Rietveld refinements of benchmark patterns match the rietx golden results
   within the acceptance metrics of Task 7.1.4.
+  Note: the rutile golden (`tests/golden/phase-7/rietveld/rutile.xy`, from the
+  Crystal-Builder `_rutile_xy` fixture) recovers the generating oxygen position,
+  cell and zero shift; the Rwp threshold is 0.25 because the port uses one
+  Gaussian line where the reference uses the full instrument profile.
 
 ## Task 7.9 — Rietveld with energies and the Pareto sweep
 

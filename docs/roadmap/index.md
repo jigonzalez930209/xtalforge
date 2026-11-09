@@ -58,12 +58,11 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   full RCSR catalogue and canonical keys are not bundled.
 - 6.8: the gyroid/Schwarz P structures are geometric level-set models, not
   relaxed carbons.
-- 7.6/7.8/7.10: Le Bail remains an iterative extraction without esds (the
-  Pawley fit carries them), the structural refinement is a bounded
-  least-squares loop instead of the McCusker plan, and the automatic run
-  reports one ranked cell instead of a table of leading cells and space
-  groups. Peak picking (7.3), general metric indexing (7.5) and the Pawley fit
-  (7.6.2) are implemented.
+- 7.6/7.10: Le Bail remains an iterative extraction without esds (the Pawley
+  fit carries them) and the automatic run reports one ranked cell instead of a
+  table of leading cells and space groups. Peak picking (7.3), general metric
+  indexing (7.5), the Pawley fit (7.6.2) and the McCusker-order structural
+  refinement (7.8) are implemented.
 
 ## Release milestones
 
