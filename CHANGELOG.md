@@ -9,6 +9,13 @@ essential release, then `0.x.y`).
 
 ### Changed
 
+- Phase 7 Task 7.6.2: add the Pawley fit with one intensity per reflection,
+  exact linear covariance and intensity esds, free cell numbers, zero shift and
+  size/strain width model, R-factors and chi-squared; a Python-generated golden
+  pattern validates the recovery.
+- Phase 7 Task 7.10: the automatic run indexes the five metric families and
+  adds a Pawley step of the indexed cell; Python `powder_pawley` and WASM
+  `powder_pawley_info` expose the fit.
 - Phase 7 Task 7.5.1/7.5.2: add general metric-family indexing (cubic,
   tetragonal, hexagonal, orthorhombic, monoclinic) with cell refinement, de
   Wolff M20, Smith-Snyder F_N and a coverage-ranked table; Python
