@@ -8,7 +8,13 @@
 
 use std::collections::BTreeMap;
 
-use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder, SymOp};
+use xtalforge_core::{Error, Structure};
+
+mod structure;
+mod writer;
+
+use structure::structure_from_block;
+pub use writer::write_cif;
 
 /// One parsed CIF data block.
 #[derive(Debug, Clone, PartialEq)]
@@ -187,180 +193,6 @@ pub fn read_cif_all(text: &str) -> Result<Vec<Structure>, Error> {
     document.blocks.iter().map(structure_from_block).collect()
 }
 
-/// Writes a structure as a CIF data block.
-///
-/// # Errors
-///
-/// Returns [`Error::InvalidInput`] if a site has no usable label.
-pub fn write_cif(structure: &Structure) -> Result<String, Error> {
-    let mut out = String::new();
-    out.push_str(&format!("data_{}\n", sanitize_name(structure.name())));
-    let [a, b, c, alpha, beta, gamma] = structure.lattice().parameters();
-    for (tag, value) in [
-        ("_cell_length_a", a),
-        ("_cell_length_b", b),
-        ("_cell_length_c", c),
-        ("_cell_angle_alpha", alpha),
-        ("_cell_angle_beta", beta),
-        ("_cell_angle_gamma", gamma),
-    ] {
-        out.push_str(&format!("{tag} {value:.6}\n"));
-    }
-    out.push_str(&format!("_space_group_name_Hall '{}'\n", structure.hall()));
-    if !structure.operations().is_empty() {
-        out.push_str("loop_\n_symmetry_equiv_pos_as_xyz\n");
-        for operation in structure.operations() {
-            out.push_str(&format!("'{}'\n", operation.triplet()));
-        }
-    }
-    out.push_str("loop_\n_atom_site_label\n_atom_site_type_symbol\n");
-    out.push_str("_atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n");
-    out.push_str("_atom_site_occupancy\n_atom_site_U_iso_or_equiv\n_atom_site_charge\n");
-    for site in structure.sites() {
-        let [x, y, z] = site.frac();
-        out.push_str(&format!(
-            "{} {} {} {} {} {} {} {}\n",
-            site.label(),
-            site.element(),
-            format_number(x),
-            format_number(y),
-            format_number(z),
-            format_number(site.occupancy()),
-            site.u_iso().map_or("?".to_owned(), format_number),
-            site.charge().map_or("?".to_owned(), format_number)
-        ));
-    }
-    Ok(out)
-}
-
-fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
-    let a = number(block.item("_cell_length_a")).ok_or_else(|| missing("_cell_length_a"))?;
-    let b = number(block.item("_cell_length_b")).ok_or_else(|| missing("_cell_length_b"))?;
-    let c = number(block.item("_cell_length_c")).ok_or_else(|| missing("_cell_length_c"))?;
-    let alpha =
-        number(block.item("_cell_angle_alpha")).ok_or_else(|| missing("_cell_angle_alpha"))?;
-    let beta = number(block.item("_cell_angle_beta")).ok_or_else(|| missing("_cell_angle_beta"))?;
-    let gamma =
-        number(block.item("_cell_angle_gamma")).ok_or_else(|| missing("_cell_angle_gamma"))?;
-    let lattice = Lattice::from_parameters(a, b, c, alpha, beta, gamma)?;
-    let hall = block
-        .item("_space_group_name_Hall")
-        .or_else(|| block.item("_symmetry_space_group_name_Hall"))
-        .or_else(|| block.item("_symmetry_space_group_name_H-M"))
-        .or_else(|| block.item("_space_group_name_H-M_alt"))
-        .unwrap_or("P 1")
-        .trim_matches('\'')
-        .to_owned();
-    let mut operations = Vec::new();
-    for loop_ in &block.loops {
-        let column = loop_.tags.iter().position(|tag| {
-            tag == "_symmetry_equiv_pos_as_xyz" || tag == "_space_group_symop_operation_xyz"
-        });
-        if let Some(column) = column {
-            for row in &loop_.rows {
-                if let Some(text) = row.get(column) {
-                    operations.push(SymOp::parse(text)?);
-                }
-            }
-        }
-    }
-    let atoms = block
-        .loop_with("_atom_site_fract_x")
-        .ok_or_else(|| Error::InvalidInput("CIF has no _atom_site loop".to_owned()))?;
-    let mut sites = Vec::new();
-    let mut occupancy_clamped = 0u32;
-    for row in 0..atoms.rows.len() {
-        let label = atoms
-            .value(row, "_atom_site_label")
-            .or_else(|| atoms.value(row, "_atom_site_type_symbol"))
-            .unwrap_or("X");
-        let element = atoms.value(row, "_atom_site_type_symbol").unwrap_or(label);
-        let x = number(atoms.value(row, "_atom_site_fract_x"))
-            .ok_or_else(|| missing("_atom_site_fract_x"))?;
-        let y = number(atoms.value(row, "_atom_site_fract_y"))
-            .ok_or_else(|| missing("_atom_site_fract_y"))?;
-        let z = number(atoms.value(row, "_atom_site_fract_z"))
-            .ok_or_else(|| missing("_atom_site_fract_z"))?;
-        let raw_occupancy = number(atoms.value(row, "_atom_site_occupancy")).unwrap_or(1.0);
-        let occupancy = raw_occupancy.clamp(0.0, 1.0);
-        if (occupancy - raw_occupancy).abs() > 1e-9 {
-            occupancy_clamped += 1;
-        }
-        let mut site = Site::new(label, element, [x, y, z])?.with_occupancy(occupancy)?;
-        if let Some(u_iso) = number(atoms.value(row, "_atom_site_U_iso_or_equiv")) {
-            site = site.with_u_iso(u_iso)?;
-        }
-        if let Some(charge) = number(atoms.value(row, "_atom_site_charge")) {
-            site = site.with_charge(charge)?;
-        }
-        sites.push(site);
-    }
-    if let Some(aniso) = block.loop_with("_atom_site_aniso_U_11") {
-        for (row, site) in sites.iter_mut().enumerate() {
-            let values = [
-                number(aniso.value(row, "_atom_site_aniso_U_11")),
-                number(aniso.value(row, "_atom_site_aniso_U_22")),
-                number(aniso.value(row, "_atom_site_aniso_U_33")),
-                number(aniso.value(row, "_atom_site_aniso_U_12")),
-                number(aniso.value(row, "_atom_site_aniso_U_13")),
-                number(aniso.value(row, "_atom_site_aniso_U_23")),
-            ];
-            if let [
-                Some(u11),
-                Some(u22),
-                Some(u33),
-                Some(u12),
-                Some(u13),
-                Some(u23),
-            ] = values
-            {
-                *site = site.clone().with_u_aniso([u11, u22, u33, u12, u13, u23])?;
-            }
-        }
-    }
-    let mut source = "operation loop";
-    if operations.is_empty() && hall != "P 1" && hall != "P1" {
-        match xtalforge_symmetry::SpaceGroup::parse(&hall) {
-            Ok(group) => {
-                operations = group.operations;
-                source = "Hall symbol";
-            }
-            Err(_) => {
-                source = "identity";
-            }
-        }
-    }
-    let has_operations = !operations.is_empty();
-    let mut builder = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
-    for operation in operations {
-        builder = builder.operation(operation);
-    }
-    if !has_operations && hall != "P 1" && hall != "P1" {
-        builder = builder.metadata(
-            "symmetry_warning",
-            serde_json::Value::String(
-                "no symmetry operation loop and the Hall symbol was not recognised; P1 expansion uses the identity".to_owned(),
-            ),
-        );
-    } else if has_operations {
-        builder = builder.metadata(
-            "symmetry_source",
-            serde_json::Value::String(source.to_owned()),
-        );
-    }
-    for site in sites {
-        builder = builder.site(site);
-    }
-    builder = builder.metadata("cif_block", serde_json::Value::String(block.name.clone()));
-    if occupancy_clamped > 0 {
-        builder = builder.metadata(
-            "occupancy_clamped",
-            serde_json::Value::from(occupancy_clamped),
-        );
-    }
-    builder.build()
-}
-
 fn tokenize(text: &str) -> Vec<String> {
     let mut tokens = Vec::new();
     let mut text_block: Option<String> = None;
@@ -415,34 +247,4 @@ fn tokenize(text: &str) -> Vec<String> {
         tokens.push(block);
     }
     tokens
-}
-
-fn number(text: Option<&str>) -> Option<f64> {
-    let text = text?.trim();
-    if text.is_empty() || text == "?" || text == "." {
-        return None;
-    }
-    let text = text.split('(').next().unwrap_or(text);
-    text.parse().ok()
-}
-
-fn missing(tag: &str) -> Error {
-    Error::InvalidInput(format!("CIF is missing {tag}"))
-}
-
-fn format_number(value: f64) -> String {
-    let text = format!("{value:.6}");
-    text.trim_end_matches('0').trim_end_matches('.').to_owned()
-}
-
-fn sanitize_name(name: &str) -> String {
-    name.chars()
-        .map(|character| {
-            if character.is_ascii_alphanumeric() || character == '_' {
-                character
-            } else {
-                '_'
-            }
-        })
-        .collect()
 }
