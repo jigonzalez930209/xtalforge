@@ -36,6 +36,7 @@ must record the reason in the algorithm page.
 | UFF energy | absolute | 1e-6 eV per atom | 4 |
 | UFF forces | absolute | 1e-4 eV/Angstrom | 4 |
 | UFF stress | absolute | 1e-3 GPa | 4 |
+| Phonon q frequencies | absolute | 0.5 cm^-1 (phonopy spring golden) | 4 |
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |

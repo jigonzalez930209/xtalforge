@@ -32,10 +32,21 @@ Gaussian or Lorentzian into `IrSpectrum { points, peaks }`.
 
 ## Phonons
 
-`phonons` builds the Gamma-point dynamical matrix from the same Hessian and
-returns `PhononResult`. The full supercell force constants, a q-mesh and the
-phonon DOS are documented as pending; a q-grid other than `[1, 1, 1]` returns a
-typed error rather than a silent approximation.
+`phonons` with `q_grid = [1, 1, 1]` and `supercell = [1, 1, 1]` uses the
+primitive-cell Hessian. Any other grid builds the supercell, takes the
+finite-difference Hessian there, folds the force constants onto the primitive
+cell with the shortest periodic image, applies the acoustic sum rule and
+diagonalizes the mass-weighted dynamical matrix at every Monkhorst-Pack point.
+The grid q-points are `(n + 1/2) / N - 1/2` per axis, in fractional reciprocal
+coordinates; an explicit `q_path` replaces the grid, which is how the Task 2.10
+band path is sampled. The optional DOS is a Gaussian-smeared histogram normalized to
+unit area.
+
+The Gamma path remains the acoustic reference. The q-mesh path is validated
+against the analytic dispersion of a nearest-neighbour spring model and
+against a phonopy-generated golden file
+(`tests/golden/phase-4/phonons/spring-sc.json`) for the same model; the
+generator is `scripts/golden/phonons_spring.py`.
 
 ## Thermochemistry
 
