@@ -252,3 +252,22 @@ fn non_p1_explicit_bonds_map_to_the_golden_count() {
     let graph = structure.bond_graph().unwrap();
     assert_eq!(graph.bonds.len(), golden["bonds"].as_array().unwrap().len());
 }
+
+#[test]
+fn an_operation_loop_count_disagreement_warns() {
+    let text = "data_warn\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                _symmetry_space_group_name_H-M 'P 21/c'\n\
+                loop_\n_symmetry_equiv_pos_as_xyz\nx,y,z\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                C1 C 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    let warning = structure
+        .metadata()
+        .get("symmetry_warning")
+        .and_then(|value| value.as_str())
+        .expect("a mismatch warning");
+    assert!(warning.contains("operation loop"));
+    assert!(warning.contains("P 21/c"));
+}
