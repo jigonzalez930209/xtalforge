@@ -35,3 +35,19 @@ use Bohr for the header and coordinates; a negative voxel count switches the
 step unit to Angstrom. XY patterns are two or three whitespace columns.
 `Trajectory` keeps elements and atom order fixed across frames; multi-frame
 extended XYZ carries `Lattice`, `energy`, `step` and arbitrary key/value info.
+
+## Trajectories
+
+Extended XYZ is indexed by frame header: `XyzIndex` stores the byte offset,
+comment metadata, lattice and element sequence of each frame, then parses
+coordinates only when `frame(i)` or `structure(i)` asks for one. The element
+sequence is validated during the index pass, so a file that changes atom order
+between frames is refused before any frame is returned.
+
+VASP XDATCAR is read as a fixed-cell trajectory: the positive scale multiplies
+the three lattice rows, the species/count lines expand the element sequence,
+and each `Direct configuration=` block supplies fractional coordinates.
+`Cartesian configuration=` is converted through the cell. A negative VASP
+scale (target volume) is refused rather than guessed. LAMMPS dump and DFTB+
+`geo_end` are not implemented;
+the reader leaves them to a caller that needs their atom-style variants.
