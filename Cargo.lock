@@ -1096,6 +1096,7 @@ dependencies = [
 name = "xtalforge"
 version = "0.0.3"
 dependencies = [
+ "serde_json",
  "xtalforge-analysis",
  "xtalforge-build",
  "xtalforge-commands",
@@ -1223,7 +1224,6 @@ dependencies = [
  "serde",
  "serde_json",
  "xtalforge-core",
- "xtalforge-io",
 ]
 
 [[package]]
