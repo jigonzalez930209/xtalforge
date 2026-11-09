@@ -77,7 +77,8 @@ volume.
 
 `prepare(&calculator, &structure, &PrepareOptions)` runs the optional cleanup
 and force-field stages in order: duplicate merging, graph-aware disorder
-choice, solvent removal, optional hydrogens, FIRE relaxation, QEq charges,
+choice guided by the declared formula and cell charge, solvent removal,
+optional hydrogens, FIRE relaxation, QEq charges,
 periodic Ewald, Gamma frequencies, close-contact listing and the charge-balance
 check. `PrepareReport` records every step, including skipped ones, the prepared
 `structure`, removed-site count, close contacts, energy, total charge, Ewald
