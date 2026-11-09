@@ -9,6 +9,9 @@ essential release, then `0.x.y`).
 
 ### Changed
 
+- Phase 7 Task 7.10.1: the automatic run fits a Pawley model of every leading
+  indexing candidate and returns a table sorted by Pawley Rwp, with the cell
+  esds; CLI, Python and WASM expose the table.
 - Phase 7 Task 7.8: run the Rietveld refinement in McCusker order
   (analytic scale/background, zero shift and free cell numbers, width, then
   Wyckoff coordinates, isotropic ADPs, occupancies and March-Dollase texture)
