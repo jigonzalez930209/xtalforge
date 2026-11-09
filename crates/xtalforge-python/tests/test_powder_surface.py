@@ -63,3 +63,34 @@ C1 C 0 0 0 1
     assert result["rwp"] < 0.02
     assert len(result["reflections"]) == len(golden["reflections"])
     assert all(reflection["esd"] > 0.0 for reflection in result["reflections"])
+
+
+def test_powder_refine_surface() -> None:
+    from pathlib import Path
+
+    root = Path(__file__).parents[3]
+    cif = (root / "tests" / "corpus" / "simple" / "TiO2.cif").read_text(
+        encoding="utf-8"
+    )
+    pattern = (
+        root / "tests" / "golden" / "phase-7" / "rietveld" / "rutile.xy"
+    ).read_text(encoding="utf-8")
+    result = xtalforge.powder_refine(
+        cif,
+        pattern,
+        refine_positions=True,
+        refine_zero=True,
+        refine_cell=True,
+        refine_width=True,
+        doublet=True,
+    )
+    assert result["stages"] == [
+        "background_scale",
+        "zero_cell",
+        "width",
+        "structure",
+    ]
+    assert result["rwp"] < 0.3
+    assert result["parameter_esds"]
+    assert any(name == "zero" for name, _ in result["parameter_esds"])
+    assert all(esd >= 0.0 for _, esd in result["parameter_esds"])
