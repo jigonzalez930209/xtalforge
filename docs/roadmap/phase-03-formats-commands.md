@@ -145,9 +145,10 @@ Crates: `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`.
   Crystal-Builder reads other trajectory formats through ASE. Decide which
   formats are needed (VASP XDATCAR, LAMMPS dump, DFTB+ geo_end) and implement
   them natively; record the decision.
-  Note: VASP XDATCAR is implemented (`read_xdatcar`, `Direct` and
-  `Cartesian`); `read_trajectory` detects XYZ or XDATCAR. LAMMPS dump and
-  DFTB+ `geo_end` remain deferred until a consumer asks for them.
+  Note: VASP XDATCAR (`read_xdatcar`), LAMMPS text dumps
+  (`read_lammps_dump`, with the type-map variant) and DFTB+ `geo_end.xyz`/
+  `geo_end.gen` (`read_geo_end`) are implemented; `read_trajectory` detects
+  all four.
 
 ## Task 3.7 — Project files (`.xtalproj`)
 
