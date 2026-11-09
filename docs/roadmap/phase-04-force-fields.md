@@ -231,9 +231,10 @@ External programs are optional; nothing in the default build needs them.
   actually runs (architecture, missing libraries) instead of only checking
   that the file exists. Discovery from `PATH` or configuration. Not available
   in WASM (recorded exception).
-  Note: `probe`, `probe_binary`, `EngineStatus` and `EngineKind`; `run_zeo`
-  uses the same pattern. The scratch-folder runner with cancellation is not
-  yet generalized; the probe and the input writers are complete.
+  Note: `probe`, `probe_binary`, `EngineStatus`, `EngineKind` and
+  `run_in_scratch`; the runner writes inputs into a private scratch folder,
+  applies a wall-clock timeout, checks cancellation, captures capped logs and
+  cleans up. Tests use simulated executables.
 - [x] 4.9.2 DFTB+
   Port `ff/dftb/` (calculator 445 lines, hsd, outputs, params) and
   `modules/dftb.py`: HSD input generation, Slater-Koster parameter set
