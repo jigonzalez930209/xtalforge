@@ -272,8 +272,15 @@ External programs are optional; nothing in the default build needs them.
   Document which sci-form methods support periodic boundary conditions and
   which are molecular only; refuse invalid use with a clear error;
   cross-check against the xtb binary on molecules.
-  Note: the capability limits are documented in `docs/api/engines.md` and the
-  typed error names the feature.
+  Note: the adapter is implemented against the published MIT crate `sci-form`
+  2.0.0. The methods are molecular only, so the capability table reports
+  `periodic: false`; a structure with space-group symmetry is refused, and a
+  P1 `Structure::molecule` is evaluated as an isolated cluster. Only GFN2
+  provides forces (central differences); GFN0/GFN1 refuse `energy_forces`.
+  The registry lists `gfn0`, `gfn1` and `gfn2`, available when the feature is
+  enabled. The cross-check against a real `xtb` binary is not run in this
+  environment because the binary is not installed; the tests cover finite
+  energies, conservative forces and the refusal paths.
 
 ## Task 4.11 — Machine-learning potentials (decision only)
 

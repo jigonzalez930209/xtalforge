@@ -52,8 +52,6 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 4.9: the DFTB+ and xTB calculators launch their binaries through the
   scratch runner; the tests use simulated executables, so a real installation
   is not exercised in CI. ORCA remains input-only by design.
-- 4.10: the sci-form quantum adapter is a typed contract; the backend is not
-  linked in this build.
 - 5.6: a curated 17-net RCSR subset with count/rank/coordination matching; the
   full RCSR catalogue and canonical keys are not bundled.
 - 7.10: the leading-cell table now screens space groups from systematic
