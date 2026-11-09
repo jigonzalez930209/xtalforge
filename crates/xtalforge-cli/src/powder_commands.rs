@@ -3,9 +3,9 @@
 use clap::Subcommand;
 use serde_json::json;
 use xtalforge::analysis::{
-    AutomaticOptions, IndexingOptions, LebailOptions, PeakOptions, RefineOptions, RietveldOptions,
-    extinction_symbol, find_peaks, free_cell_parameters, index_cubic, index_pattern, le_bail,
-    pawley, refine_phase, rietx_inventory, run_automatic,
+    AutomaticOptions, IndexingOptions, LebailOptions, PawleyOptions, PeakOptions, RefineOptions,
+    RietveldOptions, extinction_symbol, find_peaks, free_cell_parameters, index_cubic,
+    index_pattern, le_bail, pawley_refine, refine_phase, rietx_inventory, run_automatic,
 };
 
 use crate::{Cli, CliError, input};
@@ -49,6 +49,9 @@ pub(crate) enum PowderAction {
         structure: String,
         /// Measured XY pattern.
         pattern: String,
+        /// Profile shape: gaussian, lorentzian or pseudo-voigt.
+        #[arg(long, default_value = "pseudo-voigt")]
+        profile: String,
     },
     /// Rietveld scale/background or structural refinement.
     Rietveld {
@@ -101,8 +104,12 @@ pub(crate) fn run(cli: &Cli, action: &PowderAction) -> Result<(), CliError> {
             *background,
             *refine_peaks,
         ),
-        PowderAction::Lebail { structure, pattern } => lebail(cli, structure, pattern, false),
-        PowderAction::Pawley { structure, pattern } => lebail(cli, structure, pattern, true),
+        PowderAction::Lebail { structure, pattern } => lebail(cli, structure, pattern, false, None),
+        PowderAction::Pawley {
+            structure,
+            pattern,
+            profile,
+        } => lebail(cli, structure, pattern, true, Some(profile)),
         PowderAction::Rietveld {
             structure,
             pattern,
@@ -216,15 +223,49 @@ fn lebail(
     structure_path: &str,
     pattern_path: &str,
     use_pawley: bool,
+    profile: Option<&str>,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(structure_path).map_err(CliError::core)?;
     let points = pattern(pattern_path)?;
-    let result = if use_pawley {
-        pawley(&structure, &points, &LebailOptions::default())
-    } else {
-        le_bail(&structure, &points, &LebailOptions::default())
+    if use_pawley {
+        let kind = match profile
+            .unwrap_or("pseudo-voigt")
+            .to_ascii_lowercase()
+            .as_str()
+        {
+            "gaussian" => xtalforge::analysis::ProfileKind::Gaussian,
+            "lorentzian" => xtalforge::analysis::ProfileKind::Lorentzian,
+            _ => xtalforge::analysis::ProfileKind::PseudoVoigt,
+        };
+        let result = pawley_refine(
+            &structure,
+            &points,
+            &PawleyOptions {
+                kind,
+                ..PawleyOptions::default()
+            },
+        )
+        .map_err(CliError::analysis)?;
+        if cli.json {
+            println!("{}", json!(result));
+        } else {
+            println!(
+                "{} reflections, Rp = {:.4}, Rwp = {:.4}, Rexp = {:.4}, chi2 = {:.4}",
+                result.reflections.len(),
+                result.rp,
+                result.rwp,
+                result.rexp,
+                result.chi_squared
+            );
+            println!(
+                "a = {:.6} (esd {:.6}), zero = {:.5} (esd {:.5})",
+                result.cell[0], result.cell_esds[0], result.zero_shift, result.zero_shift_esd
+            );
+        }
+        return Ok(());
     }
-    .map_err(CliError::analysis)?;
+    let result =
+        le_bail(&structure, &points, &LebailOptions::default()).map_err(CliError::analysis)?;
     if cli.json {
         println!(
             "{}",
@@ -313,6 +354,7 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
             json!({
                 "peaks": result.peaks.len(),
                 "index": result.index,
+                "pawley_rwp": result.pawley.as_ref().map(|pawley| pawley.rwp),
                 "lebail": result.lebail.as_ref().map(|lebail| lebail.r_factor),
                 "rwp": result.phase.as_ref().map(|phase| phase.rwp),
                 "steps": result.steps,
