@@ -55,6 +55,38 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
             .pawley
             .map_or(JsValue::NULL, |pawley| JsValue::from_f64(pawley.rwp)),
     );
+    let leading = js_sys::Array::new();
+    for row in &result.leading_cells {
+        let item = js_sys::Object::new();
+        set(&item, "system", JsValue::from_str(row.index.system.name()));
+        for (key, value) in [
+            ("a", row.index.cell.a),
+            ("b", row.index.cell.b),
+            ("c", row.index.cell.c),
+            ("alpha", row.index.cell.alpha),
+            ("beta", row.index.cell.beta),
+            ("gamma", row.index.cell.gamma),
+            ("m20", row.index.m20),
+            ("f_n", row.index.f_n),
+            ("coverage", row.index.coverage),
+        ] {
+            set(&item, key, JsValue::from_f64(value));
+        }
+        set(
+            &item,
+            "pawley_rwp",
+            row.pawley_rwp.map_or(JsValue::NULL, JsValue::from_f64),
+        );
+        let esds = js_sys::Array::new();
+        if let Some(values) = row.pawley_cell_esds {
+            for value in values {
+                esds.push(&JsValue::from_f64(value));
+            }
+        }
+        set(&item, "pawley_cell_esds", esds.into());
+        leading.push(&item.into());
+    }
+    set(&object, "leading_cells", leading.into());
     Ok(object.into())
 }
 
