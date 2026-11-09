@@ -171,3 +171,48 @@ fn absence_test_matches_known_conditions() {
     let empty = is_systematically_absent(&[], [1, 0, 0]);
     assert!(empty.is_err());
 }
+
+#[test]
+fn the_rutile_classes_match_the_crystal_builder_golden() {
+    use std::collections::BTreeSet;
+    use xtalforge_symmetry::spacegroup::SpaceGroup;
+
+    let golden: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../tests/golden/phase-7/extinction/rutile-classes.json"
+    ))
+    .unwrap();
+    let all = xtalforge_analysis::extinction_classes(LatticeSystem::Tetragonal, &[]).unwrap();
+    let number_of = |symbol: &str| -> u32 {
+        SpaceGroup::parse(symbol)
+            .unwrap_or_else(|error| panic!("{symbol}: {}", error.message()))
+            .number
+    };
+    let mut checked = 0;
+    for class in golden["classes"].as_array().unwrap() {
+        let representative = number_of(class["representative"].as_str().unwrap());
+        let wanted: BTreeSet<u32> = class["groups"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|value| number_of(value.as_str().unwrap()))
+            .collect();
+        let found = all
+            .iter()
+            .find(|candidate| {
+                candidate
+                    .groups
+                    .iter()
+                    .any(|group| group.number == representative)
+            })
+            .unwrap_or_else(|| panic!("no class for {representative}"));
+        let numbers: BTreeSet<u32> = found.groups.iter().map(|group| group.number).collect();
+        assert_eq!(
+            numbers,
+            wanted,
+            "class {}",
+            class["symbol"].as_str().unwrap()
+        );
+        checked += 1;
+    }
+    assert!(checked >= 20, "only {checked} classes compared");
+}

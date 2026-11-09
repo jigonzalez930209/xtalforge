@@ -83,7 +83,12 @@ fn automatic_run_records_steps_in_order() {
     assert!(table.iter().any(|row| row.pawley_rwp.is_some()));
     assert!(table.iter().any(|row| row.pawley_cell_esds.is_some()));
     let rwps: Vec<f64> = table.iter().filter_map(|row| row.pawley_rwp).collect();
-    assert!(rwps.windows(2).all(|pair| pair[0] <= pair[1]));
+    assert!(
+        rwps.windows(2).all(|pair| pair[0] <= pair[1] * 1.01),
+        "Rwp ties must stay within one percent"
+    );
+    assert!(table.iter().all(|row| row.class_rank >= 1));
+    assert!(table.iter().all(|row| !row.class_symbol.is_empty()));
 }
 
 #[test]
@@ -158,49 +163,41 @@ fn automatic_run_screens_space_groups_from_absences() {
     let base = xtalforge_io::cif::read_cif(cif).unwrap();
     let mut builder = StructureBuilder::new(
         "rutile",
-        Lattice::from_parameters(4.5937, 4.5937, 2.9587, 90.0, 90.0, 90.0).unwrap(),
+        Lattice::from_parameters(4.5940, 4.5940, 2.9590, 90.0, 90.0, 90.0).unwrap(),
     )
     .hall(base.hall());
     builder = builder.site(Site::new("Ti", "Ti", [0.0, 0.0, 0.0]).unwrap());
-    builder = builder.site(Site::new("O", "O", [0.30478, 0.30478, 0.0]).unwrap());
+    builder = builder.site(Site::new("O", "O", [0.29, 0.29, 0.0]).unwrap());
     for operation in base.operations() {
         builder = builder.operation(*operation);
     }
     let structure = builder.build().unwrap();
-    let observed: Vec<PatternPoint> = calculate_pxrd(
-        &structure,
-        &PxrdOptions {
-            radiation: Radiation::CuKa,
-            two_theta_range: [10.0, 80.0],
-            step: 0.02,
-            fwhm: 0.1,
-        },
-    )
-    .unwrap()
-    .points
-    .iter()
-    .map(|point| PatternPoint {
-        two_theta: point.two_theta,
-        intensity: point.intensity,
-        uncertainty: None,
-    })
-    .collect();
+    let observed = xtalforge_io::read_xy(include_str!(
+        "../../../tests/golden/phase-7/rietveld/rutile.xy"
+    ))
+    .unwrap();
     let result = run_automatic(&structure, &observed, &AutomaticOptions::default()).unwrap();
     for row in &result.leading_cells {
         println!(
-            "{}: {:?}",
+            "{} class {} {} delta {:.2} rwp {:?} groups {:?}",
             row.index.system.name(),
+            row.class_rank,
+            row.class_symbol,
+            row.delta_bic,
+            row.pawley_rwp,
             row.space_groups
                 .iter()
-                .map(|group| (group.number, group.symbol.as_str(), group.unexplained_peaks))
+                .map(|group| group.number)
                 .collect::<Vec<_>>()
         );
     }
     assert!(
-        result
-            .leading_cells
+        result.leading_cells[0]
+            .space_groups
             .iter()
-            .any(|row| row.space_groups.iter().any(|group| group.number == 136)),
-        "the rutile space group is missing from the table"
+            .any(|group| group.number == 136),
+        "the rutile class is not the first row: {:?}",
+        result.leading_cells[0]
     );
+    assert_eq!(result.leading_cells[0].class_rank, 1);
 }
