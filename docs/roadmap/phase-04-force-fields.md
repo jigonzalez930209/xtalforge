@@ -169,6 +169,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   `PrepareReport`: every decision, with the atoms involved and the reason, so
   the result is explainable and reproducible; the `Prepare` command applies it
   as one undoable step.
+  Note: the report is exposed by CLI/Python/WASM, but the undoable command
+  wrapper is still the command-layer subset.
 - [x] 4.7.3 Validation
   Use `Crystal-Builder/resources/samples/prepared/` (inputs and their
   prepared outputs) as golden data.

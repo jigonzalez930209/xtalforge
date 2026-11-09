@@ -55,6 +55,10 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   found and is not written back. Warnings cover an unknown Hall symbol and an
   operation-count mismatch; comparing the individual operations is not
   implemented.
+- 4.7: cleanup covers duplicate sites, a deterministic disorder grouping,
+  known solvent molecules and the charge balance; the full Crystal-Builder
+  graph planner, close-contact checks, automatic hydrogens and the undoable
+  command layer remain simplified.
 - 4.9: engine probes and DFTB+/xTB/ORCA input writers and output parsers are
   implemented; the scratch-folder runner with timeout/cancellation and actual
   DFTB+/xTB execution are not.
