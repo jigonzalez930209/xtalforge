@@ -1,0 +1,365 @@
+{
+ "source": "Crystal-Builder index + rietx determine_extinction_symbol",
+ "cell": [
+  4.594013376518612,
+  4.594013376518612,
+  2.958996512442233,
+  90.0,
+  90.0,
+  90.0
+ ],
+ "classes": [
+  {
+   "symbol": "P - n -",
+   "representative": "P 42/m n m",
+   "groups": [
+    "P 42 n m",
+    "P -4 n 2",
+    "P 42/m n m"
+   ],
+   "delta_bic": -477.36492546988427,
+   "refuted": false,
+   "conditions": [
+    "0kl: k+l = 2n",
+    "h0l: h+l = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42 21 -",
+   "representative": "P 42 21 2",
+   "groups": [
+    "P 42 21 2"
+   ],
+   "delta_bic": -267.97915846172367,
+   "refuted": false,
+   "conditions": [
+    "h00: h = 2n",
+    "0k0: k = 2n",
+    "00l: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P - 21 -",
+   "representative": "P 4 21 2",
+   "groups": [
+    "P 4 21 2",
+    "P -4 21 m"
+   ],
+   "delta_bic": -187.1453603584567,
+   "refuted": false,
+   "conditions": [
+    "h00: h = 2n",
+    "0k0: k = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42 - -",
+   "representative": "P 42 2 2",
+   "groups": [
+    "P 42",
+    "P 42/m",
+    "P 42 2 2"
+   ],
+   "delta_bic": -75.80623465760002,
+   "refuted": false,
+   "conditions": [
+    "00l: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P - - -",
+   "representative": "P 4/m m m",
+   "groups": [
+    "P 4",
+    "P -4",
+    "P 4/m",
+    "P 4 2 2",
+    "P 4 m m",
+    "P -4 2 m",
+    "P -4 m 2",
+    "P 4/m m m"
+   ],
+   "delta_bic": 0.0,
+   "refuted": false,
+   "conditions": []
+  },
+  {
+   "symbol": "P 42/n n -",
+   "representative": "P 42/n n m:2",
+   "groups": [
+    "P 42/n n m:1",
+    "P 42/n n m:2"
+   ],
+   "delta_bic": -518.3791598376955,
+   "refuted": true,
+   "conditions": [
+    "0kl: k+l = 2n",
+    "h0l: h+l = 2n",
+    "hk0: h+k = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42/n - -",
+   "representative": "P 42/n:2",
+   "groups": [
+    "P 42/n:1",
+    "P 42/n:2"
+   ],
+   "delta_bic": -326.93961717739546,
+   "refuted": true,
+   "conditions": [
+    "hk0: h+k = 2n",
+    "00l: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P n - -",
+   "representative": "P 4/n m m:2",
+   "groups": [
+    "P 4/n:1",
+    "P 4/n:2",
+    "P 4/n m m:1",
+    "P 4/n m m:2"
+   ],
+   "delta_bic": -247.972864067397,
+   "refuted": true,
+   "conditions": [
+    "hk0: h+k = 2n"
+   ]
+  },
+  {
+   "symbol": "P 41 21 -",
+   "representative": "P 41 21 2",
+   "groups": [
+    "P 41 21 2",
+    "P 43 21 2"
+   ],
+   "delta_bic": 76.88898277135507,
+   "refuted": true,
+   "conditions": [
+    "h00: h = 2n",
+    "0k0: k = 2n",
+    "00l: l = 3n"
+   ]
+  },
+  {
+   "symbol": "P 41 - -",
+   "representative": "P 41 2 2",
+   "groups": [
+    "P 41",
+    "P 43",
+    "P 41 2 2",
+    "P 43 2 2"
+   ],
+   "delta_bic": 232.977021588657,
+   "refuted": true,
+   "conditions": [
+    "00l: l = 3n"
+   ]
+  },
+  {
+   "symbol": "P n n c",
+   "representative": "P 4/n n c:2",
+   "groups": [
+    "P 4/n n c:1",
+    "P 4/n n c:2"
+   ],
+   "delta_bic": 588.4993417593847,
+   "refuted": true,
+   "conditions": [
+    "0kl: k+l = 2n",
+    "h0l: h+l = 2n",
+    "hk0: h+k = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P - n c",
+   "representative": "P 4/m n c",
+   "groups": [
+    "P 4 n c",
+    "P 4/m n c"
+   ],
+   "delta_bic": 606.3007230925155,
+   "refuted": true,
+   "conditions": [
+    "0kl: k+l = 2n",
+    "h0l: h+l = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42/n - c",
+   "representative": "P 42/n m c:2",
+   "groups": [
+    "P 42/n m c:1",
+    "P 42/n m c:2"
+   ],
+   "delta_bic": 772.2666984272421,
+   "refuted": true,
+   "conditions": [
+    "hk0: h+k = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P - 21 c",
+   "representative": "P -4 21 c",
+   "groups": [
+    "P -4 21 c"
+   ],
+   "delta_bic": 809.589867966077,
+   "refuted": true,
+   "conditions": [
+    "hhl: l = 2n",
+    "h-hl: l = 2n",
+    "h00: h = 2n",
+    "0k0: k = 2n"
+   ]
+  },
+  {
+   "symbol": "P - - c",
+   "representative": "P 42/m m c",
+   "groups": [
+    "P 42 m c",
+    "P -4 2 c",
+    "P 42/m m c"
+   ],
+   "delta_bic": 933.9346280364169,
+   "refuted": true,
+   "conditions": [
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42/n c -",
+   "representative": "P 42/n c m:2",
+   "groups": [
+    "P 42/n c m:1",
+    "P 42/n c m:2"
+   ],
+   "delta_bic": 2629.0554928930865,
+   "refuted": true,
+   "conditions": [
+    "0kl: l = 2n",
+    "h0l: l = 2n",
+    "hk0: h+k = 2n"
+   ]
+  },
+  {
+   "symbol": "P n b -",
+   "representative": "P 4/n b m:2",
+   "groups": [
+    "P 4/n b m:1",
+    "P 4/n b m:2"
+   ],
+   "delta_bic": 2669.37351007656,
+   "refuted": true,
+   "conditions": [
+    "0kl: k = 2n",
+    "h0l: h = 2n",
+    "hk0: h+k = 2n"
+   ]
+  },
+  {
+   "symbol": "P - b -",
+   "representative": "P 4/m b m",
+   "groups": [
+    "P 4 b m",
+    "P -4 b 2",
+    "P 4/m b m"
+   ],
+   "delta_bic": 2689.333989089805,
+   "refuted": true,
+   "conditions": [
+    "0kl: k = 2n",
+    "h0l: h = 2n"
+   ]
+  },
+  {
+   "symbol": "P - c -",
+   "representative": "P 42/m c m",
+   "groups": [
+    "P 42 c m",
+    "P -4 c 2",
+    "P 42/m c m"
+   ],
+   "delta_bic": 2717.483216505875,
+   "refuted": true,
+   "conditions": [
+    "0kl: l = 2n",
+    "h0l: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42/n b c",
+   "representative": "P 42/n b c:2",
+   "groups": [
+    "P 42/n b c:1",
+    "P 42/n b c:2"
+   ],
+   "delta_bic": 3062.8920701810225,
+   "refuted": true,
+   "conditions": [
+    "0kl: k = 2n",
+    "h0l: h = 2n",
+    "hk0: h+k = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P 42 b c",
+   "representative": "P 42/m b c",
+   "groups": [
+    "P 42 b c",
+    "P 42/m b c"
+   ],
+   "delta_bic": 3075.4240115231696,
+   "refuted": true,
+   "conditions": [
+    "0kl: k = 2n",
+    "h0l: h = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P n c c",
+   "representative": "P 4/n c c:2",
+   "groups": [
+    "P 4/n c c:1",
+    "P 4/n c c:2"
+   ],
+   "delta_bic": 3079.076791525926,
+   "refuted": true,
+   "conditions": [
+    "0kl: l = 2n",
+    "h0l: l = 2n",
+    "hk0: h+k = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  },
+  {
+   "symbol": "P - c c",
+   "representative": "P 4/m c c",
+   "groups": [
+    "P 4 c c",
+    "P 4/m c c"
+   ],
+   "delta_bic": 3150.143485482535,
+   "refuted": true,
+   "conditions": [
+    "0kl: l = 2n",
+    "h0l: l = 2n",
+    "hhl: l = 2n",
+    "h-hl: l = 2n"
+   ]
+  }
+ ]
+}
