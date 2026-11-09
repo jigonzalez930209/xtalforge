@@ -58,16 +58,27 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
     Ok(object.into())
 }
 
-/// Refines positions with a whole-pattern least-squares step.
+/// Refines a phase with the McCusker stages.
+///
+/// The March-Dollase axis is the `c` axis. Returns `rwp`, `converged`,
+/// `iterations`, `stages`, `parameters` and `parameter_esds`.
 ///
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or a failed fit.
 #[wasm_bindgen]
+#[allow(clippy::too_many_arguments)] // one boolean per documented stage switch
 pub fn powder_refine_info(
     text: &str,
     pattern_text: &str,
     refine_positions: bool,
+    refine_adps: bool,
+    refine_occupancies: bool,
+    refine_zero: bool,
+    refine_cell: bool,
+    refine_width: bool,
+    refine_texture: bool,
+    doublet: bool,
 ) -> Result<JsValue, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
     let observed = pattern(pattern_text)?;
@@ -77,6 +88,13 @@ pub fn powder_refine_info(
         &xtalforge::analysis::RietveldOptions::default(),
         &xtalforge::analysis::RefineOptions {
             refine_positions,
+            refine_adps,
+            refine_occupancies,
+            refine_zero,
+            refine_cell,
+            refine_width,
+            refine_texture,
+            doublet,
             ..Default::default()
         },
     )
@@ -89,6 +107,21 @@ pub fn powder_refine_info(
         "iterations",
         JsValue::from_f64(result.iterations as f64),
     );
+    let stages = js_sys::Array::new();
+    for stage in &result.stages {
+        stages.push(&JsValue::from_str(stage));
+    }
+    set(&object, "stages", stages.into());
+    let parameters = js_sys::Object::new();
+    for (name, value) in &result.parameters {
+        set(&parameters, name, JsValue::from_f64(*value));
+    }
+    set(&object, "parameters", parameters.into());
+    let esds = js_sys::Object::new();
+    for (name, value) in &result.parameter_esds {
+        set(&esds, name, JsValue::from_f64(*value));
+    }
+    set(&object, "parameter_esds", esds.into());
     Ok(object.into())
 }
 
