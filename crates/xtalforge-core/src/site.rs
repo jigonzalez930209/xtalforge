@@ -200,6 +200,13 @@ impl Site {
         self
     }
 
+    /// Copy without a disorder group.
+    #[must_use]
+    pub fn without_disorder_group(mut self) -> Self {
+        self.disorder_group = None;
+        self
+    }
+
     /// Copy with one extension property.
     #[must_use]
     pub fn with_prop(mut self, key: impl Into<String>, value: Value) -> Self {
