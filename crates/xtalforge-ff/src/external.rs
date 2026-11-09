@@ -37,6 +37,7 @@
 mod dftb;
 mod orca;
 mod probe;
+mod runner;
 mod text;
 mod xtb;
 
@@ -45,6 +46,7 @@ use serde::{Deserialize, Serialize};
 pub use dftb::{DftbOptions, parse_dftb_output, write_dftb_hsd};
 pub use orca::{OrcaOptions, orca_catalogue, write_orca_input};
 pub use probe::{probe, probe_binary};
+pub use runner::{RunOutcome, RunSpec, RunStatus, run_in_scratch};
 pub use xtb::{XtbOptions, parse_xtb_output, write_xtb_input};
 
 /// Hartree in eV.
