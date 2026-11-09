@@ -2,7 +2,9 @@
 
 use std::collections::BTreeMap;
 
-use xtalforge_core::{Error, ExplicitBond, Lattice, Site, Structure, StructureBuilder, SymOp};
+use xtalforge_core::{
+    Error, ExplicitBond, Lattice, P1Cell, Site, Structure, StructureBuilder, SymOp,
+};
 
 use super::CifBlock;
 
@@ -172,11 +174,9 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
         }
     }
     let has_operations = !operations.is_empty();
-    // A P1 cell names its atoms one-to-one with the site loop. In a higher
-    // symmetry the same pair needs the operation and tau bookkeeping of
-    // `map_explicit_bond`; until that lands, keep the bonds in memory only
-    // and do not invent a wrong periodic image.
-    let explicit = if operations.is_empty() {
+    let explicit = if raw_bonds.is_empty() {
+        Vec::new()
+    } else if operations.is_empty() {
         raw_bonds
             .iter()
             .map(|&(i, j, _, image, order, remove)| ExplicitBond {
@@ -188,7 +188,16 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
             })
             .collect()
     } else {
-        Vec::new()
+        let mut base = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
+        for operation in &operations {
+            base = base.operation(*operation);
+        }
+        for site in &sites {
+            base = base.site(site.clone());
+        }
+        let base = base.build()?;
+        let p1 = base.p1()?;
+        map_explicit(&raw_bonds, &sites, &operations, &p1)
     };
     let mut builder = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
     for operation in operations {
@@ -267,4 +276,124 @@ fn parse_symmetry_code(text: &str) -> Option<(usize, [i32; 3])> {
     let code = code.parse::<u32>().ok()?;
     let digits = [code / 100, (code / 10) % 10, code % 10];
     Some((operation, digits.map(|digit| digit as i32 - 5)))
+}
+
+type RawBond = (usize, usize, usize, [i32; 3], f64, bool);
+
+fn map_explicit(
+    raw: &[RawBond],
+    sites: &[Site],
+    operations: &[SymOp],
+    p1: &P1Cell,
+) -> Vec<ExplicitBond> {
+    let identity = [SymOp::identity()];
+    let operations = if operations.is_empty() {
+        identity.as_slice()
+    } else {
+        operations
+    };
+    let mut found = BTreeMap::new();
+    for &(site_i, site_j, operation, image, order, remove) in raw {
+        let (Some(near), Some(far), Some(partner)) = (
+            sites.get(site_i),
+            sites.get(site_j),
+            operations.get(operation),
+        ) else {
+            continue;
+        };
+        let start = near.frac();
+        let far = add(partner.apply(far.frac()), image.map(f64::from));
+        for symmetry in operations {
+            let here_raw = symmetry.apply(start);
+            let (here, tau) = wrap_with_tau(here_raw);
+            let there_raw = add(symmetry.apply(far), tau);
+            let (there, _) = wrap_with_tau(there_raw);
+            let (Some(a), Some(b)) = (find_atom(p1, here), find_atom(p1, there)) else {
+                continue;
+            };
+            let (Some(atom_a), Some(atom_b)) = (p1.atoms.get(a), p1.atoms.get(b)) else {
+                continue;
+            };
+            let bond_image = [
+                round(there_raw[0] - atom_b.frac[0] - (here_raw[0] - atom_a.frac[0])),
+                round(there_raw[1] - atom_b.frac[1] - (here_raw[1] - atom_a.frac[1])),
+                round(there_raw[2] - atom_b.frac[2] - (here_raw[2] - atom_a.frac[2])),
+            ];
+            let (i, j, image) = canonical(a, b, bond_image);
+            found.insert(
+                (i, j, image, remove),
+                ExplicitBond {
+                    i,
+                    j,
+                    image,
+                    order,
+                    remove,
+                },
+            );
+        }
+    }
+    let mut unique = BTreeMap::new();
+    for bond in found.into_values() {
+        if let Some(key) = contact_key(p1, &bond) {
+            unique.entry(key).or_insert(bond);
+        }
+    }
+    unique.into_values().collect()
+}
+
+fn contact_key(p1: &P1Cell, bond: &ExplicitBond) -> Option<(usize, usize, [i64; 3])> {
+    let first = p1.atoms.get(bond.i)?.frac;
+    let second = p1.atoms.get(bond.j)?.frac;
+    let mut delta = [
+        second[0] + f64::from(bond.image[0]) - first[0],
+        second[1] + f64::from(bond.image[1]) - first[1],
+        second[2] + f64::from(bond.image[2]) - first[2],
+    ];
+    for value in &mut delta {
+        *value -= value.round();
+    }
+    Some((
+        bond.i,
+        bond.j,
+        delta.map(|value| (value * 1e6).round() as i64),
+    ))
+}
+
+fn wrap_with_tau(raw: [f64; 3]) -> ([f64; 3], [f64; 3]) {
+    let floor = raw.map(f64::floor);
+    (
+        [raw[0] - floor[0], raw[1] - floor[1], raw[2] - floor[2]],
+        [-floor[0], -floor[1], -floor[2]],
+    )
+}
+
+fn find_atom(p1: &P1Cell, frac: [f64; 3]) -> Option<usize> {
+    p1.atoms
+        .iter()
+        .position(|atom| p1.lattice.distance(atom.frac, frac) < 1e-3)
+}
+
+fn add(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
+    [
+        first[0] + second[0],
+        first[1] + second[1],
+        first[2] + second[2],
+    ]
+}
+
+fn round(value: f64) -> i32 {
+    value.round() as i32
+}
+
+fn canonical(i: usize, j: usize, image: [i32; 3]) -> (usize, usize, [i32; 3]) {
+    if i > j
+        || (i == j
+            && (image[0] < 0
+                || (image[0] == 0 && image[1] < 0)
+                || (image[0] == 0 && image[1] == 0 && image[2] < 0)))
+    {
+        (j, i, [-image[0], -image[1], -image[2]])
+    } else {
+        (i, j, image)
+    }
 }
