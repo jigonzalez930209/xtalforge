@@ -22,6 +22,8 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.15.4: round-trip Uij (matched by label), disorder
   group/assembly, the oxidation-number charge fallback and the explicit-bond
   loop; split the CIF writer and structure extraction under `cif/`.
+- Phase 3 Task 3.6.2/3.6.3: add lazy `XyzIndex` frame access and the VASP
+  XDATCAR reader with XYZ/XDATCAR detection in the CLI.
 
 ## [0.0.2] - 2026-11-09
 
