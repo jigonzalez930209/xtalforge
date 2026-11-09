@@ -18,6 +18,9 @@ essential release, then `0.x.y`).
 - Phase 3 Task 3.6.3: add LAMMPS text dump (element column or type map,
   orthogonal/triclinic, Cartesian/scaled coordinates) and DFTB+ `geo_end`
   readers to the trajectory dispatcher.
+- Phase 1 Task 1.15.4: write non-P1 explicit bonds back as a validated
+  P1-index CIF loop and compare the full symmetry-operation set with the named
+  space group, not only its count.
 - Phase 4 Task 4.9.2/4.9.3: wire `DftbCalculator` and `XtbCalculator` to the
   runner, parse `detailed.out`/xTB stdout, validate force counts and support
   timeout, cancellation and scratch inspection.
