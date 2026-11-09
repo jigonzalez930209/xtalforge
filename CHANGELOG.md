@@ -7,8 +7,9 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
-### Changed
+### Fixed
 
+- Phase 5 Task 5.4: order the four crossings of a marching-tetrahedra 2-2 split around their quadrilateral. The fan taken in the generation order crossed itself, leaving non-manifold edges and a surface that was not watertight.
 - Phase 7 Task 7.6.3: Le Bail extraction returns intensity esds from the
   profile normal matrix, plus Rwp and the reduced chi-squared; the CLI report
   includes them.
