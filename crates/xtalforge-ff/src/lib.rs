@@ -88,6 +88,9 @@ pub enum Error {
     /// A calculator name is not registered.
     #[error("unknown calculator {0}")]
     UnknownCalculator(String),
+    /// An in-process quantum backend failed.
+    #[error("quantum: {0}")]
+    Quantum(String),
     /// Serialization or deserialization of a record failed.
     #[error("JSON: {0}")]
     Json(String),
@@ -110,6 +113,7 @@ impl Error {
             Self::Topology(_) => "topology",
             Self::Data(_) => "data",
             Self::UnknownCalculator(_) => "unknown_calculator",
+            Self::Quantum(_) => "quantum",
             Self::Json(_) => "json",
             Self::Core(error) => error.code(),
         }
