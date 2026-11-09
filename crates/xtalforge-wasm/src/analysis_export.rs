@@ -89,7 +89,7 @@ pub fn zeo_parse_info(text: &str) -> Result<JsValue, JsValue> {
 #[wasm_bindgen]
 pub fn net_invariants_info(text: &str, tolerance: f64) -> Result<js_sys::Array, JsValue> {
     let file = xtalforge::io::read_cgd(text);
-    let index = xtalforge::analysis::RcsrIndex::from_subset();
+    let index = xtalforge::analysis::RcsrIndex::from_embedded().map_err(to_js_error)?;
     let array = js_sys::Array::new();
     for entry in &file.entries {
         let graph = xtalforge::analysis::quotient_graph(entry, tolerance).map_err(to_js_error)?;
@@ -113,13 +113,30 @@ pub fn net_invariants_info(text: &str, tolerance: f64) -> Result<js_sys::Array, 
             "components",
             JsValue::from_f64(graph.components().len() as f64),
         );
+        let found = index.identify(&graph).map_err(to_js_error)?;
+        let identified = js_sys::Object::new();
+        set(&identified, "verdict", JsValue::from_str(found.verdict()));
+        let names = js_sys::Array::new();
+        for name in &found.names {
+            names.push(&JsValue::from_str(name));
+        }
+        set(&identified, "names", names.into());
+        let nearest = js_sys::Array::new();
+        for name in &found.nearest {
+            nearest.push(&JsValue::from_str(name));
+        }
+        set(&identified, "nearest", nearest.into());
         set(
-            &object,
-            "identified",
-            index
-                .identify(&graph)
-                .map_or(JsValue::NULL, JsValue::from_str),
+            &identified,
+            "nearest_by",
+            JsValue::from_str(&found.nearest_by),
         );
+        set(
+            &identified,
+            "periodicity",
+            JsValue::from_f64(found.fingerprint.periodicity as f64),
+        );
+        set(&object, "identified", identified.into());
         array.push(&object.into());
     }
     Ok(array)
