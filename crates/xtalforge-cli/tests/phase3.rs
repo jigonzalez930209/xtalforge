@@ -154,6 +154,25 @@ fn trajectory_reads_xdatcar() {
 }
 
 #[test]
+fn trajectory_reads_lammps_dump() {
+    let directory = temp_dir("lammps-dump");
+    let path = directory.join("dump.lammpstrj");
+    std::fs::write(
+        &path,
+        "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n2\n\
+         ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n\
+         ITEM: ATOMS id type element x y z\n1 1 C 0 0 0\n2 1 C 1 0 0\n",
+    )
+    .unwrap();
+    let output = run(&["--json", "trajectory", &path.to_string_lossy()]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(value["frames"], 1);
+    assert_eq!(value["elements"], serde_json::json!(["C", "C"]));
+    std::fs::remove_dir_all(&directory).unwrap();
+}
+
+#[test]
 fn script_applies_commands_with_undo_semantics() {
     let directory = temp_dir("script");
     let path = directory.join("script.json");
