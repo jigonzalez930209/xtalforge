@@ -15,6 +15,9 @@ essential release, then `0.x.y`).
   vector. Unmatched records annotate nothing instead of inventing an edge.
 - Phase 1 Task 1.15.4: warn when a CIF operation loop's count disagrees with
   the named space group.
+- Phase 3 Task 3.6.3: add LAMMPS text dump (element column or type map,
+  orthogonal/triclinic, Cartesian/scaled coordinates) and DFTB+ `geo_end`
+  readers to the trajectory dispatcher.
 
 ## [0.0.3] - 2026-11-09
 
