@@ -18,6 +18,9 @@ essential release, then `0.x.y`).
 - Phase 3 Task 3.6.3: add LAMMPS text dump (element column or type map,
   orthogonal/triclinic, Cartesian/scaled coordinates) and DFTB+ `geo_end`
   readers to the trajectory dispatcher.
+- Phase 4 Task 4.9.1: add the scratch-folder process runner with wall-clock
+  timeout, cancellation, capped stdout/stderr logs, relative input files and
+  simulated-executable tests.
 - Phase 4 Task 4.7: add duplicate merging, disorder-component choice, solvent
   removal, charge-balance reporting and the prepared-sample golden sanity
   pass; `PrepareReport` now returns the prepared structure.
