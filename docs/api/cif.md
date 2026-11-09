@@ -17,11 +17,14 @@ functions are the typed shortcut.
 
 The parser handles data blocks, tags, loops, single and double quoted values,
 semicolon-delimited text, comments, standard uncertainties (`1.234(5)`), `?`
-and `.` values, atom sites, occupancy, Uiso/Uij, charge, and symmetry
-operation loops (`_symmetry_equiv_pos_as_xyz` or
-`_space_group_symop_operation_xyz`). The symmetry priority is Hall symbol,
-then the operation loop, then the H-M symbol/number; the current reader stores
-the string but does not warn about inconsistent statements yet.
+and `.` values, atom sites, occupancy, Uiso/Uij, formal charges (including the
+`_atom_type_oxidation_number` fallback), disorder group and assembly, and
+symmetry operation loops (`_symmetry_equiv_pos_as_xyz` or
+`_space_group_symop_operation_xyz`). The operation loop is the setting when
+present; without one, the Hall or H-M symbol is resolved through the symmetry
+catalogue. Only an unknown symbol records a `symmetry_warning`. The
+anisotropic loop is matched by `_atom_site_aniso_label`, so a subset of atoms
+is read correctly.
 
 `decode_text(bytes)` strips a UTF-8 BOM, reads UTF-8 and falls back to Latin-1
 byte by byte. `read_text(path)` is the file wrapper.
@@ -29,8 +32,10 @@ byte by byte. `read_text(path)` is the file wrapper.
 ## Status
 
 The reader covers the corpus CIFs and malformed input returns a typed error.
-The writer emits cell, Hall symbol, operation loop, occupancy, Uiso and charge;
-it does not write Uij loops or explicit bond loops yet, so those parts are not
-round-tripped. The fuzz target lives in `crates/xtalforge-io/fuzz`; the exact
-Crystal-Builder inconsistency warnings beyond the missing-operation warning are
-not implemented.
+The writer emits the cell, Hall symbol, operation loop, occupancy, Uiso, Uij,
+disorder group/assembly, charge and the explicit-bond loop. Explicit bonds are
+written with the program's `_xtal_bond_kind`/`_geom_bond_*` tags and read back
+for P1 structures; a non-P1 structure keeps its explicit bonds in memory but
+does not round-trip them through CIF. The fuzz target lives in
+`crates/xtalforge-io/fuzz`; inconsistency warnings beyond the unknown-symbol
+warning are not implemented.
