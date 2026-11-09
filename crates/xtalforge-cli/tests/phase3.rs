@@ -122,6 +122,38 @@ fn trajectory_info_and_frame() {
 }
 
 #[test]
+fn trajectory_reads_xdatcar() {
+    let directory = temp_dir("xdatcar");
+    let path = directory.join("XDATCAR");
+    std::fs::write(
+        &path,
+        "Si C\n1.0\n4 0 0\n0 4 0\n0 0 4\nSi C\n1 1\n\
+         Direct configuration= 1\n0 0 0\n0.5 0.5 0.5\n\
+         Direct configuration= 2\n0.1 0 0\n0.6 0.5 0.5\n",
+    )
+    .unwrap();
+    let output = run(&["--json", "trajectory", &path.to_string_lossy()]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(value["frames"], 2);
+    assert_eq!(value["elements"], serde_json::json!(["Si", "C"]));
+    let output = run(&[
+        "--json",
+        "trajectory",
+        &path.to_string_lossy(),
+        "--frame",
+        "1",
+    ]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(
+        value["structure"]["sites"].as_array().expect("sites").len(),
+        2
+    );
+    std::fs::remove_dir_all(&directory).unwrap();
+}
+
+#[test]
 fn script_applies_commands_with_undo_semantics() {
     let directory = temp_dir("script");
     let path = directory.join("script.json");
