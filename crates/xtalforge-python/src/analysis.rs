@@ -5,6 +5,8 @@ use pyo3::types::{PyDict, PyList};
 
 use crate::structures::load_structure;
 
+type RingPath = Vec<Vec<(usize, (i32, i32, i32))>>;
+
 /// Perceives distance-based bonds on the P1 cell.
 ///
 /// Each dictionary has ``i``, ``j``, ``image``, ``distance``, ``order`` and
@@ -52,6 +54,34 @@ pub(crate) fn rings(
         .map_err(crate::map_error)?
         .into_iter()
         .map(|ring| ring.atoms)
+        .collect())
+}
+
+/// Ring paths with the lattice image of every atom, in ring order.
+///
+/// Each path is a list of ``(atom, (i, j, k))`` pairs; add the image to the
+/// atom's fractional position to lay the ring out in Cartesian space.
+#[pyfunction]
+#[pyo3(signature = (text, max_size, format_hint = None))]
+pub(crate) fn ring_paths(
+    text: &str,
+    max_size: i64,
+    format_hint: Option<&str>,
+) -> PyResult<RingPath> {
+    let structure = load_structure(text, format_hint)?;
+    let size = usize::try_from(max_size).map_err(|_| {
+        crate::invalid_input(format!(
+            "ring size limit must be a non-negative integer, got {max_size}"
+        ))
+    })?;
+    Ok(xtalforge::core::ring_paths(&structure, size)
+        .map_err(crate::map_error)?
+        .into_iter()
+        .map(|path| {
+            path.into_iter()
+                .map(|step| (step.atom, (step.image[0], step.image[1], step.image[2])))
+                .collect()
+        })
         .collect())
 }
 

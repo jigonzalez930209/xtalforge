@@ -23,7 +23,7 @@ mod symmetry;
 mod symmetry_analysis;
 mod view;
 
-use analysis::{angle, bonds, distance, groups, neighbors, pxrd, rings, torsion};
+use analysis::{angle, bonds, distance, groups, neighbors, pxrd, ring_paths, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
 use phase3::{
     Document, param_schema, project_pack, project_read, workspace_archive, workspace_open,
@@ -258,6 +258,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(read_cif, module)?)?;
     module.add_function(wrap_pyfunction!(read_structure, module)?)?;
     module.add_function(wrap_pyfunction!(rings, module)?)?;
+    module.add_function(wrap_pyfunction!(ring_paths, module)?)?;
     module.add_function(wrap_pyfunction!(slab, module)?)?;
     module.add_function(wrap_pyfunction!(supercell, module)?)?;
     module.add_function(wrap_pyfunction!(torsion, module)?)?;

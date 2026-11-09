@@ -1,5 +1,7 @@
 //! Python classes for the core model (Task 1.17.2).
 
+type RingPath = Vec<Vec<(usize, (i32, i32, i32))>>;
+
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
@@ -361,6 +363,18 @@ impl Structure {
             .map_err(crate::map_error)?
             .into_iter()
             .map(|ring| ring.atoms)
+            .collect())
+    }
+
+    fn ring_paths(&self, max_size: usize) -> PyResult<RingPath> {
+        Ok(xtalforge::core::ring_paths(&self.inner, max_size)
+            .map_err(crate::map_error)?
+            .into_iter()
+            .map(|path| {
+                path.into_iter()
+                    .map(|step| (step.atom, (step.image[0], step.image[1], step.image[2])))
+                    .collect()
+            })
             .collect())
     }
 
