@@ -400,6 +400,14 @@ def powder_automatic(
     pattern_text: str,
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
+def powder_index(
+    pattern_text: str,
+    wavelength: float = 1.54184,
+    max_index: int = 3,
+    tolerance: float = 0.05,
+    background: bool = False,
+    refine: bool = False,
+) -> dict[str, object]: ...
 def powder_refine(
     text: str,
     pattern_text: str,
