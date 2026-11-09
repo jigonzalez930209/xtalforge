@@ -160,17 +160,19 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   occupancy and mixed sites, remove or keep solvent and counter-ions, add
   missing hydrogens (Task 4.6), check charge balance, assign types and
   charges, check close contacts, produce a P1 or symmetric result as asked.
-  Note: `prepare` merges duplicate sites, chooses one component per disorder
-  group, sets survivors to full occupancy, removes known solvent molecules,
-  runs relaxation/charges/Ewald/vibrations and checks charge balance. The
-  prepared structure is returned in the report. Close-contact checks and the
-  full Crystal-Builder graph planner remain a documented subset.
+  Note: `prepare` merges duplicate sites, groups disorder by the bond-graph
+  component or `_atom_site_disorder_group`, chooses the highest-occupancy
+  component, removes known solvents, optionally adds hydrogens, lists close
+  contacts and checks charge balance. The prepared structure is returned in
+  the report and applies through `ReplaceStructure` as one undoable edit. The
+  formula/charge-driven component choice remains the documented subset.
 - [x] 4.7.2 Report
   `PrepareReport`: every decision, with the atoms involved and the reason, so
   the result is explainable and reproducible; the `Prepare` command applies it
   as one undoable step.
-  Note: the report is exposed by CLI/Python/WASM, but the undoable command
-  wrapper is still the command-layer subset.
+  Note: the report is exposed by CLI/Python/WASM, and
+  `xtalforge_commands::ReplaceStructure` applies the prepared result as one
+  undoable edit.
 - [x] 4.7.3 Validation
   Use `Crystal-Builder/resources/samples/prepared/` (inputs and their
   prepared outputs) as golden data.

@@ -49,10 +49,10 @@ and exposed on the surfaces. The following reference behaviours are subsets or
 simplified ports rather than complete reproductions; they are the first
 candidates for Phase 8 or a follow-up and are not silent approximations:
 
-- 4.7: cleanup covers duplicate sites, a deterministic disorder grouping,
-  known solvent molecules and the charge balance; the full Crystal-Builder
-  graph planner, close-contact checks, automatic hydrogens and the undoable
-  command layer remain simplified.
+- 4.7: cleanup covers duplicate sites, bond-graph disorder grouping, known
+  solvent molecules, optional hydrogens, close-contact listing and charge
+  balance; the formula/charge-driven choice between overlapping graph
+  components remains the documented subset.
 - 4.9: the DFTB+ and xTB calculators launch their binaries through the
   scratch runner; the tests use simulated executables, so a real installation
   is not exercised in CI. ORCA remains input-only by design.
