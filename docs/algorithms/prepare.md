@@ -11,8 +11,11 @@ it is disabled, with the atoms or molecules it changed.
    position; the keeper's occupancy is the sum, clamped to one.
 2. **disorder** — group partial sites by `_atom_site_disorder_group`, or by
    their connected bond-graph component when no group is given. Overlapping
-   components are reduced to the one with the highest total occupancy (lowest
-   group number on a tie), and survivors are set to full occupancy.
+   groups are reduced to the compatible subset that best matches the declared
+   `_chemical_formula_sum` (per metal when the formula has metals) and a
+   neutral cell, with higher occupancy as the tie-break; survivors are set to
+   full occupancy. The formula is kept in structure metadata by the CIF
+   reader.
 3. **solvent** — remove isolated molecules whose heavy-atom formula is a known
    solvent (water, methanol, DMF, DMSO, THF, dichloromethane, ...). A component
    containing a metal is framework and stays; anything unrecognised is left in
@@ -41,7 +44,7 @@ undo/redo.
 two-component disorder, solvent removal and a charged cell. The prepared
 samples in `tests/corpus/prepared/` are read back and checked to be fully
 occupied with a reported charge balance; this is the golden sanity pass for
-the cleanup steps. The remaining difference from Crystal-Builder is the
-formula/charge-driven choice between overlapping graph components and the full
-disorder-across-symmetry handling; that is documented rather than silently
-approximated.
+the cleanup steps. The disorder choice now consults the declared formula and
+the cell charge. The remaining difference from Crystal-Builder is its full
+special-position/clash graph and shared-oxygen bookkeeping, which are
+documented rather than silently approximated.
