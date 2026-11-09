@@ -211,8 +211,11 @@ Crate: `xtalforge-powder`.
   cell in every leading space group, and a table ranked by fit quality (TOPAS
   `b_indy` into `c_paw` without a person copying the cell).
   Note: `run_automatic` fits the first `AutomaticOptions::leading_cells`
-  candidates and sorts the table by Pawley Rwp; space groups are not assigned
-  from systematic absences, so each row keeps its metric family.
+  candidates and sorts the table by Pawley Rwp. Each row also carries the
+  space groups whose general-position systematic absences every indexed
+  reflection obeys, ranked by group order. The screen is a reflection-condition
+  test, not a Le Bail/ Pawley fit per extinction class, and the leading-cell
+  order itself still comes from the indexing figures of merit.
 - [x] 7.10.2 Module steps
   Port `modules/powder.py` (1893 lines; split by step): each step (peaks,
   index, pawley, rietveld, energy, pareto, auto) as a module action reading the

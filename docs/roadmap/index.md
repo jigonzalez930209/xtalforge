@@ -56,11 +56,13 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   linked in this build.
 - 5.6: a curated 17-net RCSR subset with count/rank/coordination matching; the
   full RCSR catalogue and canonical keys are not bundled.
-- 7.10: the automatic leading-cell table is ranked by Pawley fit but does not
-  assign space groups from systematic absences. Peak picking (7.3), general
+- 7.10: the leading-cell table now screens space groups from systematic
+  absences, but the candidates are ranked by group order rather than by a
+  Le Bail/Pawley fit of every extinction class, and the leading-cell order
+  still comes from the indexing figures of merit. Peak picking (7.3), general
   metric indexing (7.5), Le Bail with intensity esds (7.6.3), the Pawley fit
-  (7.6.2), the McCusker-order structural refinement (7.8) and the leading-cell
-  table (7.10.1) are implemented.
+  (7.6.2), the McCusker-order structural refinement (7.8), the leading-cell
+  table and its space-group screen (7.10.1) are implemented.
 
 ## Release milestones
 
