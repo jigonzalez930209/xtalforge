@@ -16,8 +16,13 @@ const BUDGET_PER_ATOM: usize = 500;
 
 pub(super) fn find(structure: &Structure, max_size: usize) -> Result<Vec<Ring>, Error> {
     let graph = structure.bond_graph()?;
-    let adjacency = adjacency(&graph);
+    find_graph(&graph, max_size)
+}
+
+pub(super) fn find_graph(graph: &BondGraph, max_size: usize) -> Result<Vec<Ring>, Error> {
+    let adjacency = adjacency(graph);
     let n_atoms = graph.n_atoms();
+    let _ = graph;
     let budget = BUDGET_FLOOR.saturating_add(BUDGET_PER_ATOM.saturating_mul(n_atoms));
     let mut left = budget;
     let mut seen: BTreeSet<BTreeSet<RingStep>> = BTreeSet::new();
