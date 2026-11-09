@@ -2,7 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 
-use crate::common::{parse_any, set, to_js_error};
+use crate::common::{array_i32, parse_any, set, to_js_error};
 
 fn pattern(text: &str) -> Result<Vec<xtalforge::io::PatternPoint>, JsValue> {
     xtalforge::io::read_xy(text).map_err(to_js_error)
@@ -39,7 +39,7 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
         "cell",
         result
             .index
-            .map_or(JsValue::NULL, |index| JsValue::from_f64(index.a)),
+            .map_or(JsValue::NULL, |index| JsValue::from_f64(index.cell.a)),
     );
     set(
         &object,
@@ -47,6 +47,13 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
         result
             .phase
             .map_or(JsValue::NULL, |phase| JsValue::from_f64(phase.rwp)),
+    );
+    set(
+        &object,
+        "pawley_rwp",
+        result
+            .pawley
+            .map_or(JsValue::NULL, |pawley| JsValue::from_f64(pawley.rwp)),
     );
     Ok(object.into())
 }
@@ -180,5 +187,70 @@ pub fn powder_index_info(
     let object = js_sys::Object::new();
     set(&object, "peaks", peak_array.into());
     set(&object, "candidates", candidate_array.into());
+    Ok(object.into())
+}
+
+/// Fits a Pawley model: free intensities, cell, zero shift and width model.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a failed fit.
+#[wasm_bindgen]
+pub fn powder_pawley_info(
+    text: &str,
+    pattern_text: &str,
+    profile: &str,
+) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let observed = pattern(pattern_text)?;
+    let kind = match profile.to_ascii_lowercase().as_str() {
+        "gaussian" => xtalforge::analysis::ProfileKind::Gaussian,
+        "lorentzian" => xtalforge::analysis::ProfileKind::Lorentzian,
+        "pseudo_voigt" | "pseudovoigt" | "pseudo-voigt" => {
+            xtalforge::analysis::ProfileKind::PseudoVoigt
+        }
+        other => {
+            return Err(JsValue::from_str(&format!(
+                "unknown profile {other:?}; use gaussian, lorentzian or pseudo_voigt"
+            )));
+        }
+    };
+    let result = xtalforge::analysis::pawley_refine(
+        &structure,
+        &observed,
+        &xtalforge::analysis::PawleyOptions {
+            kind,
+            ..xtalforge::analysis::PawleyOptions::default()
+        },
+    )
+    .map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    let reflections = js_sys::Array::new();
+    for reflection in &result.reflections {
+        let item = js_sys::Object::new();
+        set(&item, "hkl", array_i32(reflection.hkl).into());
+        set(&item, "d", JsValue::from_f64(reflection.d));
+        set(&item, "two_theta", JsValue::from_f64(reflection.two_theta));
+        set(&item, "intensity", JsValue::from_f64(reflection.intensity));
+        set(&item, "esd", JsValue::from_f64(reflection.esd));
+        reflections.push(&item.into());
+    }
+    set(&object, "reflections", reflections.into());
+    let cell = js_sys::Array::new();
+    for value in result.cell {
+        cell.push(&JsValue::from_f64(value));
+    }
+    set(&object, "cell", cell.into());
+    for (key, value) in [
+        ("zero_shift", result.zero_shift),
+        ("zero_shift_esd", result.zero_shift_esd),
+        ("rp", result.rp),
+        ("rwp", result.rwp),
+        ("rexp", result.rexp),
+        ("chi_squared", result.chi_squared),
+    ] {
+        set(&object, key, JsValue::from_f64(value));
+    }
+    set(&object, "converged", JsValue::from_bool(result.converged));
     Ok(object.into())
 }
