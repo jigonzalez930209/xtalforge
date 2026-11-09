@@ -54,7 +54,7 @@ compares this table with the symbols each surface actually exports.
 | `prepare` | 4 | done | done | done | done | Preparation pipeline (Task 4.7); Python `ff_prepare`, WASM `ff_prepare_info` |
 | `add_hydrogens` | 4 | done | done | done | done | Hydrogen placement (Task 4.6) |
 | `porosity` | 5 | done | done | done | done | Distance grid (Task 5.2/5.3); Rust `distance_grid` |
-| `net_invariants` | 5 | done | done | done | done | Quotient graphs (Task 5.6/5.7); Rust `quotient_graph` |
+| `net_invariants` | 5 | done | done | done | done | Quotient graphs and the full RCSR fingerprint identification (Task 5.6/5.7); Rust `quotient_graph` and `RcsrIndex` |
 | `zeo_parse` | 5 | done | done | done | done | Zeo++ output parser (Task 5.5); Rust `parse_zeo_channels` |
 | `build_graphene` | 6 | done | done | done | done | Carbon builders (Task 6.5); Rust `graphene`, WASM `build_graphene_info` |
 | `build_nanotube` | 6 | done | done | done | done | Carbon builders (Task 6.6); Rust `nanotube`, WASM `build_nanotube_info` |
@@ -82,6 +82,6 @@ compares this table with the symbols each surface actually exports.
 | In-process GFN0/GFN1/GFN2 (`sci-form` feature) | CLI, Python, WASM | Optional build-time feature whose methods are molecular only; the Rust `Calculator` and the registry listing are the supported surface, and no binding negotiation for the feature exists yet | Rust `quantum::adapter`; CLI `ff engines` lists the registry entries |
 | Multi-threading | WASM | Threads need cross-origin isolation | Optional threaded build |
 | MCP server over stdio | Python, WASM | It is a process, served by the CLI | `xtalforge mcp` |
-| Embedded MOF and RCSR bundles | WASM | Package size | The curated MOF/RCSR subsets are embedded; the full bundles are fetched on demand |
+| Full MOF topology bundle | WASM | Package size | The builder carries the curated six-topology/eight-block subset (Tasks 6.11-6.16); the RCSR fingerprint index (47 KB) is embedded on every surface |
 | lattice_minimum_image, limits_bounds, limits_check | CLI | The CLI exposes geometry through `cell` and the global `--limits` flag | Use `cell` and `--limits` |
 | workspace_archive | CLI | The CLI reads and writes `runs/<id>/run.json` directly | Use `project` or the on-disk workspace |
