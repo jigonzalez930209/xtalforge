@@ -24,7 +24,8 @@ must record the reason in the algorithm page.
 | POSCAR/XYZ round trip | absolute | 1e-9 Angstrom | 1 |
 | Neighbor distance | absolute | 1e-9 Angstrom | 1 |
 | Slab atoms per layer | exact | 0 | 1 |
-| Ring paths | atom indices and images | exact after atom mapping | 1 |
+| Ring paths | atom indices and images | exact after atom mapping, translation home and direction | 1 |
+| Ring budget | too-dense refusal | exact parity with the golden error | 1 |
 | Functional groups | atom sets | exact after atom mapping | 1 |
 | Space group number / Hall number | exact | exact | 2 |
 | Wyckoff letters | exact | exact | 2 |
