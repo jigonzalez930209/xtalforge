@@ -87,5 +87,8 @@ offsets, elements, lattice and header energies without materialising the
 frames; `frame(i)` and `structure(i)` parse one frame on demand.
 
 `read_xdatcar` handles the fixed-cell VASP XDATCAR in `Direct` and `Cartesian`
-form, and `read_trajectory` detects XYZ or XDATCAR from the first line. LAMMPS
-dump and DFTB+ `geo_end` remain deferred.
+form. `read_lammps_dump` reads a text dump with an `element` column (and
+`read_lammps_dump_with_types` maps numeric types), including triclinic boxes
+and `x/y/z`, `xu/yu/zu` or `xs/ys/zs` coordinates. `read_geo_end` reads a
+DFTB+ `geo_end.xyz` (plain XYZ frames are boxed with 5 A of vacuum) or a final
+`geo_end.gen`. `read_trajectory` detects LAMMPS, XYZ, `geo_end` and XDATCAR.
