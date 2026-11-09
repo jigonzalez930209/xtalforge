@@ -62,3 +62,26 @@ fn size_limit_is_validated() {
     let structure = hexagon();
     assert!(rings(&structure, 2).is_err());
 }
+
+#[test]
+fn graphene_two_atom_cell_has_a_periodic_hexagon() {
+    let lattice = xtalforge_core::Lattice::new([
+        [2.46, 0.0, 0.0],
+        [-1.23, 2.130_422_493_309_719, 0.0],
+        [0.0, 0.0, 20.0],
+    ])
+    .unwrap();
+    let structure = StructureBuilder::new("graphene", lattice)
+        .site(Site::new("C1", "C", [0.33333, 0.66667, 0.0]).unwrap())
+        .site(Site::new("C2", "C", [0.66666, 0.33333, 0.0]).unwrap())
+        .build()
+        .unwrap();
+    let found = rings(&structure, 6).unwrap();
+    assert_eq!(found.len(), 1);
+    assert_eq!(found[0].size(), 6);
+    assert_eq!(found[0].atoms, vec![0, 1]);
+    assert_eq!(found[0].path.len(), 6);
+    assert!(found[0].path.iter().any(|step| step.image != [0, 0, 0]));
+    let paths = xtalforge_core::ring_paths(&structure, 6).unwrap();
+    assert_eq!(paths, vec![found[0].path.clone()]);
+}
