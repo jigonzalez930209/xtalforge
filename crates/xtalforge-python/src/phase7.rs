@@ -58,6 +58,18 @@ pub(crate) fn powder_automatic<'py>(
             "pawley_cell_esds",
             row.pawley_cell_esds.map(|esds| esds.to_vec()),
         )?;
+        let groups = PyList::empty(py);
+        for group in &row.space_groups {
+            let entry = PyDict::new(py);
+            entry.set_item("number", group.number)?;
+            entry.set_item("symbol", &group.symbol)?;
+            entry.set_item("centering", group.centering.to_string())?;
+            entry.set_item("point_group", &group.point_group)?;
+            entry.set_item("order", group.order)?;
+            entry.set_item("unexplained_peaks", group.unexplained_peaks)?;
+            groups.append(entry)?;
+        }
+        item.set_item("space_groups", groups)?;
         leading.append(item)?;
     }
     dict.set_item("leading_cells", leading)?;
