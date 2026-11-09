@@ -38,6 +38,7 @@ Pages are added with the feature that introduces them:
 - [Validation and tolerances](./validation) (Task 0.9.4)
 - [Golden data](./golden-data) (Task 0.9.3)
 - [sci-form reuse](./sci-form-reuse) (Task 0.4)
+- [Disordered carbons](./carbon) (Task 6.8)
 - [Dependency replacement map](./dependency-map) (Task 0.10)
 
 The neighbor-search page records the linked-cell index and the scaling
