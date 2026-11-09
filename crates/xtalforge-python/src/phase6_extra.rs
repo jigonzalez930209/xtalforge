@@ -4,9 +4,9 @@ use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
 use xtalforge::build::{
-    PolymerOptions, ZtcOptions, build_polymer as polymer_build,
-    build_schwarzite as schwarzite_build, build_ztc as ztc_build, commensurate_twist, face_spiral,
-    nanoribbon,
+    CarbonRecipe, PolymerOptions, ZtcOptions, build_carbon as carbon_build,
+    build_polymer as polymer_build, build_schwarzite as schwarzite_build, build_ztc as ztc_build,
+    commensurate_twist, face_spiral, nanoribbon,
 };
 
 use crate::structures::structure_payload;
@@ -93,5 +93,49 @@ pub(crate) fn build_polymer<'py>(
         polymer_build(smiles, monomers, &PolymerOptions { density }).map_err(crate::map_error)?;
     let dict = structure_payload(py, &build.structure)?;
     dict.set_item("steps", build.steps)?;
+    Ok(dict)
+}
+
+/// Builds a disordered carbon from a recipe.
+///
+/// Returns the structure summary plus the density, mean C-C bond, edge
+/// ratios, ring census and the builder notes.
+#[pyfunction]
+#[allow(clippy::too_many_arguments)] // one keyword per recipe field
+#[pyo3(signature = (net = "dia", repeat = (1, 1, 1), density = 0.42, radius_ratio = 0.25, coverage = 0.38, seed = 0, hydrogen = 0.07, fluorine = 0.29, oxygen = 0.044))]
+pub(crate) fn build_carbon<'py>(
+    py: Python<'py>,
+    net: &str,
+    repeat: (usize, usize, usize),
+    density: f64,
+    radius_ratio: f64,
+    coverage: f64,
+    seed: u64,
+    hydrogen: f64,
+    fluorine: f64,
+    oxygen: f64,
+) -> PyResult<Bound<'py, PyDict>> {
+    let recipe = CarbonRecipe {
+        net: net.to_owned(),
+        repeat: [repeat.0, repeat.1, repeat.2],
+        density,
+        radius_ratio,
+        coverage,
+        seed,
+        hydrogen,
+        fluorine,
+        oxygen,
+        ..CarbonRecipe::default()
+    };
+    let build = carbon_build(&recipe).map_err(crate::map_error)?;
+    let dict = structure_payload(py, &build.structure)?;
+    dict.set_item("density", build.density)?;
+    dict.set_item("mean_bond", build.mean_bond)?;
+    dict.set_item("edge_fraction", build.edge_fraction)?;
+    dict.set_item("pieces", build.pieces)?;
+    dict.set_item("periodicity", build.periodicity)?;
+    dict.set_item("ratios", build.ratios.to_vec())?;
+    dict.set_item("census", build.census)?;
+    dict.set_item("notes", build.notes)?;
     Ok(dict)
 }
