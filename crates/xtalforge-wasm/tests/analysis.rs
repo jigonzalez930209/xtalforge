@@ -26,6 +26,8 @@ fn analysis_exports() {
         "CRYSTAL\nNAME pcu\nGROUP P1\nNODE A 6 0 0 0\nNODE B 6 0.5 0 0\nEDGE 0 0 0 0.5 0 0\nEND\n";
     let nets = net_invariants_info(cgd, 0.01).expect("nets");
     assert_eq!(nets.length(), 1);
+    let identified = property(&nets.get(0), "identified");
+    assert!(property(&identified, "names").is_object());
     let methane = "1\nmethane\nC 0 0 0\n";
     let filled = hydrogens_info(methane, 1.09).expect("hydrogens");
     assert_eq!(property(&filled, "n_sites").as_f64(), Some(5.0));
