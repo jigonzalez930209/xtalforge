@@ -59,9 +59,15 @@ pub(crate) enum PowderAction {
         structure: String,
         /// Measured XY pattern.
         pattern: String,
-        /// Refine positions, ADPs and occupancies.
+        /// Refine positions, ADPs, zero shift, cell and width.
         #[arg(long)]
         refine: bool,
+        /// Also refine one occupancy per asymmetric site.
+        #[arg(long, requires = "refine")]
+        occupancies: bool,
+        /// Also refine the March-Dollase texture about the c axis.
+        #[arg(long, requires = "refine")]
+        texture: bool,
     },
     /// Automatic peaks, indexing, Le Bail and Rietveld run.
     Automatic {
@@ -114,7 +120,9 @@ pub(crate) fn run(cli: &Cli, action: &PowderAction) -> Result<(), CliError> {
             structure,
             pattern,
             refine,
-        } => rietveld(cli, structure, pattern, *refine),
+            occupancies,
+            texture,
+        } => rietveld(cli, structure, pattern, *refine, *occupancies, *texture),
         PowderAction::Automatic { structure, pattern } => automatic(cli, structure, pattern),
         PowderAction::Cells { number } => cells(cli, *number),
         PowderAction::Rietx => {
@@ -290,6 +298,8 @@ fn rietveld(
     structure_path: &str,
     pattern_path: &str,
     refine: bool,
+    occupancies: bool,
+    texture: bool,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(structure_path).map_err(CliError::core)?;
     let points = pattern(pattern_path)?;
@@ -300,8 +310,15 @@ fn rietveld(
             &points,
             &options,
             &RefineOptions {
-                max_iterations: 20,
+                max_iterations: 30,
                 refine_positions: true,
+                refine_adps: true,
+                refine_occupancies: occupancies,
+                refine_zero: true,
+                refine_cell: true,
+                refine_width: true,
+                refine_texture: texture,
+                doublet: true,
                 ..RefineOptions::default()
             },
         )
@@ -313,16 +330,26 @@ fn rietveld(
                     "rwp": result.rwp,
                     "converged": result.converged,
                     "iterations": result.iterations,
+                    "stages": result.stages,
                     "parameters": result.parameters,
+                    "parameter_esds": result.parameter_esds,
                 })
             );
         } else {
             println!(
-                "Rwp {:.4}, converged {}, {} iterations",
-                result.rwp, result.converged, result.iterations
+                "Rwp {:.4}, converged {}, {} iterations, stages {}",
+                result.rwp,
+                result.converged,
+                result.iterations,
+                result.stages.join(" -> ")
             );
             for (name, value) in &result.parameters {
-                println!("  {name} = {value:.6}");
+                let esd = result
+                    .parameter_esds
+                    .iter()
+                    .find(|(key, _)| key == name)
+                    .map_or(f64::NAN, |(_, value)| *value);
+                println!("  {name} = {value:.6} (esd {esd:.6})");
             }
         }
     } else {
