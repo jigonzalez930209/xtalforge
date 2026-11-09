@@ -54,7 +54,8 @@ pub use phase3::{
 };
 #[cfg(target_arch = "wasm32")]
 pub use phase6_export::{
-    build_c20_info, polymer_info, ribbon_info, schwarzite_info, twist_info, ztc_info,
+    build_c20_info, build_carbon_recipe_info, polymer_info, ribbon_info, schwarzite_info,
+    twist_info, ztc_info,
 };
 #[cfg(target_arch = "wasm32")]
 pub use powder_export::{
