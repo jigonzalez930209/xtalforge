@@ -19,9 +19,10 @@ resolves the Hall symbol (or H-M symbol) through
 `symmetry_source = "Hall symbol"`. Only an unrecognised symbol falls back to
 the identity and records a `symmetry_warning`. This closes the common CIF case
 where the space group is named but the operation loop is omitted (graphene is
-the corpus example). When both an operation loop and a symbol are present, a
-loop whose operation count disagrees with the named group records a
-`symmetry_warning`; comparing the individual operations is not implemented.
+the corpus example). When both an operation loop and a symbol are present, the
+reader compares the full operation set (rotation and translation modulo one)
+with the named group. A count or set disagreement records a
+`symmetry_warning`.
 
 ## Numbers
 
@@ -52,8 +53,13 @@ The duplicate images of a special-position pair are collapsed by their
 minimum-image contact vector. MIL53 maps its two records to the 36 golden
 contacts. An unmatched mapped record does not invent a graph edge: only a
 contact perception already found is annotated, because the P1 representative
-is the one the graph is drawn with. The writer still writes explicit bonds
-only for P1, so a non-P1 mapping is not round-tripped.
+is the one the graph is drawn with.
+
+The writer round-trips a non-P1 explicit set with
+`_xtal_bond_p1_count` and the `_xtal_bond_atom_1`/`_xtal_bond_atom_2` index
+loop (plus image, order and kind). The reader validates the declared P1 count
+against its own expansion before accepting the indices. The label/operation
+loop remains the readable form for P1; both are understood on input.
 
 ## Writer
 
