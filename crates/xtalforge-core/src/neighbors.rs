@@ -1,4 +1,12 @@
 //! Periodic neighbor search (Task 1.10).
+//!
+//! The index is a linked-cell grid in fractional coordinates. Its bin count
+//! per axis comes from the perpendicular width of the cell, so any pair
+//! within the cutoff lies in the same or an adjacent bin, also in triclinic
+//! cells. Candidate pairs then enumerate the integer images that can reach the
+//! cutoff and are filtered by the exact Cartesian distance.
+
+use std::collections::HashMap;
 
 use crate::{Error, Structure};
 
@@ -17,9 +25,10 @@ pub struct Neighbor {
 
 /// All periodic neighbors within `cutoff` Angstrom.
 ///
-/// The search is direct and periodic: every pair is checked over the integer
-/// images that can reach the cutoff, with the range derived from the smallest
-/// interplanar spacing. Results are sorted deterministically by `(i, j, image)`.
+/// The search uses a linked-cell index in fractional space and is exact for
+/// triclinic cells: bins are sized from the perpendicular widths of the cell,
+/// and every candidate pair is checked against the cutoff with its Cartesian
+/// distance. Results are sorted deterministically by `(i, j, image)`.
 ///
 /// # Errors
 ///
@@ -35,39 +44,62 @@ pub fn neighbors(structure: &Structure, cutoff: f64) -> Result<Vec<Neighbor>, Er
         return Ok(Vec::new());
     }
     let reciprocal = p1.lattice.reciprocal(false)?;
-    let minimum_spacing = reciprocal
+    let spacing = reciprocal
         .matrix()
-        .iter()
-        .map(|row| 1.0 / row.iter().map(|value| value * value).sum::<f64>().sqrt())
-        .fold(f64::INFINITY, f64::min);
-    let range = (cutoff / minimum_spacing).ceil() as i32 + 1;
+        .map(|row| 1.0 / row.iter().map(|value| value * value).sum::<f64>().sqrt());
+    let counts = spacing.map(|width| {
+        let bins = (width / cutoff).floor();
+        if bins >= 1.0 { bins as usize } else { 1 }
+    });
     let matrix = p1.lattice.matrix();
+
+    let mut bins: HashMap<[usize; 3], Vec<usize>> = HashMap::new();
+    let mut atom_bins: Vec<[usize; 3]> = Vec::with_capacity(p1.atoms.len());
+    let mut fracs: Vec<[f64; 3]> = Vec::with_capacity(p1.atoms.len());
+    let [count_x, count_y, count_z] = counts;
+    for (index, atom) in p1.atoms.iter().enumerate() {
+        let [x, y, z] = atom.frac;
+        let frac = [x.rem_euclid(1.0), y.rem_euclid(1.0), z.rem_euclid(1.0)];
+        let [frac_x, frac_y, frac_z] = frac;
+        let bin = [
+            bin_index(frac_x, count_x),
+            bin_index(frac_y, count_y),
+            bin_index(frac_z, count_z),
+        ];
+        bins.entry(bin).or_default().push(index);
+        atom_bins.push(bin);
+        fracs.push(atom.frac);
+    }
+
+    let search = Search {
+        cutoff,
+        spacing,
+        matrix,
+        fracs: &fracs,
+    };
     let mut found = Vec::new();
-    for (i, atom_i) in p1.atoms.iter().enumerate() {
-        for (j, atom_j) in p1.atoms.iter().enumerate().skip(i) {
-            for x in -range..=range {
-                for y in -range..=range {
-                    for z in -range..=range {
-                        let image = [x, y, z];
-                        if i == j && image == [0, 0, 0] {
+    let offsets_x = offsets(count_x);
+    let offsets_y = offsets(count_y);
+    let offsets_z = offsets(count_z);
+    for i in 0..p1.atoms.len() {
+        let Some(base) = atom_bins.get(i) else {
+            continue;
+        };
+        let [base_x, base_y, base_z] = *base;
+        for &offset_x in offsets_x {
+            let bin_x = wrap(base_x, offset_x, count_x);
+            for &offset_y in offsets_y {
+                let bin_y = wrap(base_y, offset_y, count_y);
+                for &offset_z in offsets_z {
+                    let bin_z = wrap(base_z, offset_z, count_z);
+                    let Some(bucket) = bins.get(&[bin_x, bin_y, bin_z]) else {
+                        continue;
+                    };
+                    for &j in bucket {
+                        if j < i {
                             continue;
                         }
-                        let frac_i = atom_i.frac;
-                        let frac_j = atom_j.frac;
-                        let delta = [
-                            frac_j[0] + f64::from(x) - frac_i[0],
-                            frac_j[1] + f64::from(y) - frac_i[1],
-                            frac_j[2] + f64::from(z) - frac_i[2],
-                        ];
-                        let distance = norm(multiply_row(delta, matrix));
-                        if distance <= cutoff + 1e-12 {
-                            found.push(Neighbor {
-                                i,
-                                j,
-                                image,
-                                distance,
-                            });
-                        }
+                        search.pair(i, j, &mut found);
                     }
                 }
             }
@@ -98,6 +130,82 @@ pub fn neighbors_of(
         .into_iter()
         .filter(|neighbor| neighbor.i == index || neighbor.j == index)
         .collect())
+}
+
+struct Search<'a> {
+    cutoff: f64,
+    spacing: [f64; 3],
+    matrix: [[f64; 3]; 3],
+    fracs: &'a [[f64; 3]],
+}
+
+impl Search<'_> {
+    fn pair(&self, i: usize, j: usize, found: &mut Vec<Neighbor>) {
+        let Some((first, second)) = self.fracs.get(i).zip(self.fracs.get(j)) else {
+            return;
+        };
+        let [x_i, y_i, z_i] = *first;
+        let [x_j, y_j, z_j] = *second;
+        let delta = [x_j - x_i, y_j - y_i, z_j - z_i];
+        let reach = self.spacing.map(|width| self.cutoff / width + 1e-9);
+        let [delta_x, delta_y, delta_z] = delta;
+        let [reach_x, reach_y, reach_z] = reach;
+        let low_x = (-delta_x - reach_x).ceil() as i64;
+        let high_x = (-delta_x + reach_x).floor() as i64;
+        let low_y = (-delta_y - reach_y).ceil() as i64;
+        let high_y = (-delta_y + reach_y).floor() as i64;
+        let low_z = (-delta_z - reach_z).ceil() as i64;
+        let high_z = (-delta_z + reach_z).floor() as i64;
+        for image_x in low_x..=high_x {
+            for image_y in low_y..=high_y {
+                for image_z in low_z..=high_z {
+                    if i == j && image_x == 0 && image_y == 0 && image_z == 0 {
+                        continue;
+                    }
+                    let shift = [
+                        delta_x + image_x as f64,
+                        delta_y + image_y as f64,
+                        delta_z + image_z as f64,
+                    ];
+                    let distance = norm(multiply_row(shift, self.matrix));
+                    if distance > self.cutoff + 1e-12 {
+                        continue;
+                    }
+                    if let (Ok(ix), Ok(iy), Ok(iz)) = (
+                        i32::try_from(image_x),
+                        i32::try_from(image_y),
+                        i32::try_from(image_z),
+                    ) {
+                        found.push(Neighbor {
+                            i,
+                            j,
+                            image: [ix, iy, iz],
+                            distance,
+                        });
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn bin_index(value: f64, count: usize) -> usize {
+    let scaled = value.rem_euclid(1.0) * count as f64;
+    let index = scaled.floor() as usize;
+    index.min(count.saturating_sub(1))
+}
+
+fn offsets(count: usize) -> &'static [isize] {
+    match count {
+        0 | 1 => &[0],
+        2 => &[-1, 0],
+        _ => &[-1, 0, 1],
+    }
+}
+
+fn wrap(index: usize, offset: isize, count: usize) -> usize {
+    let count = count as isize;
+    (index as isize + offset).rem_euclid(count) as usize
 }
 
 fn multiply_row(vector: [f64; 3], matrix: [[f64; 3]; 3]) -> [f64; 3] {
