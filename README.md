@@ -60,7 +60,6 @@ npm install xtalforge-wasm@0.0.1
 
 ```bash
 scripts/check-rules.sh                 # 500-line limit and warning-suppression checks
-cargo test --workspace
 cargo clippy --workspace --all-targets -- -D warnings
 cd docs && npm install && npm run docs:dev
 ```
