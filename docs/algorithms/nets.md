@@ -31,7 +31,7 @@ is validated.
 
 ## RCSR catalogue
 
-`crates/xtalforge-analysis/data/rcsr_index.bin` holds a 47 KB FNV-1a hash per
+`crates/xtalforge-analysis/data/rcsr_index.bin` holds a 35 KB FNV-1a hash per
 catalogue entry: the periodicity, the distinct coordination numbers and the
 fingerprint hash, for all 2,931 nets of the 2019-06-01 snapshot. The full snapshots and their checksums live in
 `data/rcsr/` at the repository root.

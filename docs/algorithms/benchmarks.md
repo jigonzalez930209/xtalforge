@@ -28,7 +28,7 @@ Notes:
   want every atom of the crystal expand to P1 first (the Python and WASM
   bindings do).
 - Release WebAssembly (`wasm-opt -Oz`) is about 2905 KiB after the Phase 3-7
-  surfaces, inside the 3584 KiB budget enforced by `scripts/check-wasm-size.sh`.
+  surfaces, inside the 3648 KiB budget enforced by `scripts/check-wasm-size.sh`.
 - The workspace test suite (Rust, 38 WASM node tests and 41 pytest cases) runs
   in seconds; see the phase status page for the exact list.
 
@@ -49,4 +49,4 @@ The larger MOF structures in the corpus take seconds to minutes at very small
 tolerances; the corpus sweep is an ignored test and the release gate uses the
 small-corpus set. The full release package, including the symmetry search, the
 force fields, analysis, builders and powder surfaces, is about 2905 KiB inside
-the 3584 KiB budget.
+the 3648 KiB budget.

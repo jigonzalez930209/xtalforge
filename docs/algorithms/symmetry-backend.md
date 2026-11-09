@@ -100,7 +100,7 @@ by default to match Crystal-Builder's spglib behaviour.
   45 seconds; the incremental check is much faster.
 - WASM package: the full release is about 2905 KiB, including the symmetry
   tables, force fields, analysis, builders and powder surfaces, inside the
-  3584 KiB budget checked by `scripts/check-wasm-size.sh`.
+  3648 KiB budget checked by `scripts/check-wasm-size.sh`.
 
 ## Isolation
 
