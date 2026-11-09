@@ -62,3 +62,37 @@ fn cgd_reports_broken_blocks() {
         .is_err()
     );
 }
+
+#[test]
+fn both_edge_dialects_and_bare_keywords_are_read() {
+    let text = "CRYSTAL\nNAME pair\nGROUP P1\nNODE 1 2 0 0 0\nNODE 2 2 0.5 0 0\nEDGE 0 0 0 0.5 0 0\nEDGE 0.5 0 0 0 0 1\nEND\nCRYSTAL\nNAME neighbour\nGROUP P1\nNODE 1 2 0 0 0\nEDGE 1 0.5 0 0\nEND\n";
+    let file = read_cgd(text);
+    assert!(file.problems.is_empty(), "{:?}", file.problems);
+    assert_eq!(file.entries.len(), 2);
+    assert_eq!(
+        file.entries[0].edges[1],
+        (vec![0.5, 0.0, 0.0], vec![0.0, 0.0, 1.0])
+    );
+    assert_eq!(
+        file.entries[1].edges[0],
+        (vec![0.0, 0.0, 0.0], vec![0.5, 0.0, 0.0])
+    );
+}
+
+#[test]
+fn the_bundled_rcsr_snapshot_reads() {
+    use std::io::Read;
+
+    let path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../data/rcsr/RCSRnets-2019-06-01.cgd.gz"
+    );
+    let mut text = String::new();
+    flate2::read::GzDecoder::new(std::fs::File::open(path).unwrap())
+        .read_to_string(&mut text)
+        .unwrap();
+    let file = read_cgd(&text);
+    assert_eq!(file.entries.len(), 2_931);
+    assert_eq!(file.problems.len(), 1);
+    assert!(file.problems[0].contains("moo-a"));
+}
