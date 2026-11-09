@@ -46,7 +46,14 @@ fn automatic_run_records_steps_in_order() {
     let result = run_automatic(&silicon(), &observed, &AutomaticOptions::default()).unwrap();
     assert_eq!(
         result.steps,
-        vec!["peaks", "index", "le_bail", "pawley", "rietveld"]
+        vec![
+            "peaks",
+            "index",
+            "leading_cells",
+            "le_bail",
+            "pawley",
+            "rietveld"
+        ]
     );
     assert!(!result.peaks.is_empty());
     assert!(result.lebail.is_some());
@@ -66,6 +73,17 @@ fn automatic_run_records_steps_in_order() {
     assert!(pawley.rwp.is_finite() && pawley.rwp >= 0.0);
     assert!(!pawley.reflections.is_empty());
     assert!(pawley.cell[0].is_finite());
+    assert!(!result.leading_cells.is_empty());
+    let table = &result.leading_cells;
+    assert!(
+        table
+            .iter()
+            .any(|row| row.index.system == xtalforge_analysis::LatticeSystem::Cubic)
+    );
+    assert!(table.iter().any(|row| row.pawley_rwp.is_some()));
+    assert!(table.iter().any(|row| row.pawley_cell_esds.is_some()));
+    let rwps: Vec<f64> = table.iter().filter_map(|row| row.pawley_rwp).collect();
+    assert!(rwps.windows(2).all(|pair| pair[0] <= pair[1]));
 }
 
 #[test]
@@ -126,4 +144,10 @@ fn automatic_run_indexes_a_tetragonal_cell() {
     assert_eq!(index.system, xtalforge_analysis::LatticeSystem::Tetragonal);
     assert!((index.cell.a - 4.5937).abs() < 0.05);
     assert!((index.cell.c - 2.9587).abs() < 0.05);
+    assert!(
+        result
+            .leading_cells
+            .iter()
+            .any(|row| row.index.system == xtalforge_analysis::LatticeSystem::Tetragonal)
+    );
 }
