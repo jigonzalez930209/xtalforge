@@ -41,9 +41,17 @@ this program writes. Published `_geom_bond` loops are usually distance tables
 from a refinement, not a bond graph, and reading them silently would override
 perception. The row names sites by label, carries the lattice image and order,
 and `suppressed` removes a perceived bond. The writer emits the loop for P1
-structures; a non-P1 structure keeps the bonds in memory but does not write
-them, because a site label plus image cannot name a P1 atom without its
-operation.
+structures.
+
+For a non-P1 structure the row's `_geom_bond_site_symmetry_2` code is the
+operation number plus a three-digit translation offset, and the reader maps
+label + operation + image through every symmetry operation to P1 contacts.
+The duplicate images of a special-position pair are collapsed by their
+minimum-image contact vector. MIL53 maps its two records to the 36 golden
+contacts. An unmatched mapped record does not invent a graph edge: only a
+contact perception already found is annotated, because the P1 representative
+is the one the graph is drawn with. The writer still writes explicit bonds
+only for P1, so a non-P1 mapping is not round-tripped.
 
 ## Writer
 
