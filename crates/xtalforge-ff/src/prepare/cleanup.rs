@@ -4,10 +4,14 @@
 //! field sees them: merging sites written twice, choosing one disorder
 //! component, removing known solvent molecules and checking the cell charge.
 
-use std::collections::{BTreeMap, BTreeSet, VecDeque};
+mod disorder;
+
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::{Deserialize, Serialize};
 use xtalforge_core::{Error, P1Cell, Site, Structure, StructureBuilder, element_info, neighbors};
+
+pub(crate) use disorder::order_disorder;
 
 /// One pair of atoms closer than the reference clash threshold.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -90,155 +94,6 @@ pub(crate) fn merge_duplicates(structure: &Structure) -> Result<(Structure, usiz
     Ok((rebuild(structure, sites)?, drop.len()))
 }
 
-/// Chooses one component for every disordered group.
-///
-/// Sites with `_atom_site_disorder_group` are kept together as one component.
-/// Ungrouped partial sites form their own component unless their periodic
-/// positions are within 2 A, where they are alternatives. Overlapping
-/// components are reduced to the one with the highest total occupancy (lowest
-/// group number on a tie), and every survivor is set to full occupancy.
-///
-/// # Errors
-///
-/// Returns the errors of the P1 expansion or the rebuilt structure.
-pub(crate) fn order_disorder(structure: &Structure) -> Result<(Structure, usize), Error> {
-    let p1 = structure.p1()?;
-    let partial = structure
-        .sites()
-        .iter()
-        .enumerate()
-        .filter(|(_, site)| site.occupancy() < 1.0 - 1e-6)
-        .map(|(index, _)| index)
-        .collect::<Vec<_>>();
-    if partial.is_empty() {
-        return Ok((structure.clone(), 0));
-    }
-    let graph = structure.bond_graph()?;
-    let mut component_by_atom = vec![0_usize; p1.atoms.len()];
-    for (component, atoms) in graph.components().iter().enumerate() {
-        for atom in atoms {
-            if let Some(slot) = component_by_atom.get_mut(*atom) {
-                *slot = component;
-            }
-        }
-    }
-    let mut first_atom = vec![None; structure.sites().len()];
-    for (atom, index) in p1.atoms.iter().enumerate() {
-        if let Some(slot) = first_atom.get_mut(index.site_idx)
-            && slot.is_none()
-        {
-            *slot = Some(atom);
-        }
-    }
-    let mut partials_in_component: BTreeMap<usize, usize> = BTreeMap::new();
-    for index in &partial {
-        let component = first_atom
-            .get(*index)
-            .and_then(|atom| *atom)
-            .and_then(|atom| component_by_atom.get(atom).copied())
-            .unwrap_or(*index);
-        *partials_in_component.entry(component).or_default() += 1;
-    }
-    let mut groups: BTreeMap<u32, Vec<usize>> = BTreeMap::new();
-    for (offset, index) in partial.iter().enumerate() {
-        let explicit = structure.sites().get(*index).and_then(Site::disorder_group);
-        let key = if let Some(group) = explicit {
-            group
-        } else {
-            let component = first_atom
-                .get(*index)
-                .and_then(|atom| *atom)
-                .and_then(|atom| component_by_atom.get(atom).copied())
-                .unwrap_or(*index);
-            if partials_in_component.get(&component).copied().unwrap_or(0) > 1 {
-                1_000_000 + component as u32
-            } else {
-                2_000_000 + offset as u32
-            }
-        };
-        groups.entry(key).or_default().push(*index);
-    }
-    let keys = groups.keys().copied().collect::<Vec<_>>();
-    let mut adjacent: Vec<Vec<usize>> = vec![Vec::new(); keys.len()];
-    for (a, first) in keys.iter().enumerate() {
-        for (b, second) in keys.iter().enumerate().skip(a + 1) {
-            if overlaps(&groups, *first, *second, &p1) {
-                if let Some(row) = adjacent.get_mut(a) {
-                    row.push(b);
-                }
-                if let Some(row) = adjacent.get_mut(b) {
-                    row.push(a);
-                }
-            }
-        }
-    }
-    let mut visited = vec![false; keys.len()];
-    let mut drop = BTreeSet::new();
-    for start in 0..keys.len() {
-        if visited.get(start).copied().unwrap_or(true) {
-            continue;
-        }
-        let mut component = Vec::new();
-        let mut queue = VecDeque::from([start]);
-        while let Some(index) = queue.pop_front() {
-            if visited.get(index).copied().unwrap_or(true) {
-                continue;
-            }
-            if let Some(slot) = visited.get_mut(index) {
-                *slot = true;
-            }
-            component.push(index);
-            for next in adjacent.get(index).into_iter().flatten() {
-                queue.push_back(*next);
-            }
-        }
-        let best = component
-            .iter()
-            .max_by(|first, second| {
-                let a = group_occupancy(&groups, &keys, **first, structure);
-                let b = group_occupancy(&groups, &keys, **second, structure);
-                a.partial_cmp(&b)
-                    .unwrap_or(std::cmp::Ordering::Equal)
-                    .then_with(|| keys.get(**second).cmp(&keys.get(**first)))
-            })
-            .copied()
-            .unwrap_or(start);
-        for index in component {
-            if index != best
-                && let Some(group) = keys.get(index).and_then(|key| groups.get(key))
-            {
-                drop.extend(group.iter().copied());
-            }
-        }
-    }
-    let mut sites = Vec::with_capacity(structure.sites().len() - drop.len());
-    for (index, site) in structure.sites().iter().enumerate() {
-        if drop.contains(&index) {
-            continue;
-        }
-        let occupancy = if site.occupancy() < 1.0 - 1e-6 {
-            1.0
-        } else {
-            site.occupancy()
-        };
-        sites.push(
-            site.clone()
-                .with_occupancy(occupancy)?
-                .without_disorder_group(),
-        );
-    }
-    Ok((rebuild(structure, sites)?, drop.len()))
-}
-
-/// Removes isolated molecules whose heavy-atom formula is a known solvent.
-///
-/// A component with a metal is framework and stays. Anything else that is not
-/// recognised is left in place and counted in the returned message. Returns
-/// the new structure and the number of solvent molecules removed.
-///
-/// # Errors
-///
-/// Returns the errors of the P1 expansion, bond perception or rebuild.
 pub(crate) fn remove_solvent(structure: &Structure) -> Result<(Structure, usize), Error> {
     let p1 = structure.p1()?;
     let graph = structure.bond_graph()?;
@@ -340,42 +195,6 @@ fn is_clash(first: &str, second: &str, distance: f64) -> bool {
     distance < covalent
 }
 
-fn overlaps(groups: &BTreeMap<u32, Vec<usize>>, first: u32, second: u32, p1: &P1Cell) -> bool {
-    let (Some(a), Some(b)) = (groups.get(&first), groups.get(&second)) else {
-        return false;
-    };
-    for site_a in a {
-        for site_b in b {
-            for atom_a in p1.images_of(*site_a) {
-                for atom_b in p1.images_of(*site_b) {
-                    if p1.lattice.distance(atom_a.frac, atom_b.frac) < 2.0 {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    false
-}
-
-fn group_occupancy(
-    groups: &BTreeMap<u32, Vec<usize>>,
-    keys: &[u32],
-    index: usize,
-    structure: &Structure,
-) -> f64 {
-    keys.get(index)
-        .and_then(|key| groups.get(key))
-        .map(|sites| {
-            sites
-                .iter()
-                .filter_map(|site| structure.sites().get(*site))
-                .map(Site::occupancy)
-                .sum()
-        })
-        .unwrap_or(0.0)
-}
-
 fn without_p1_atoms(
     structure: &Structure,
     p1: &P1Cell,
@@ -419,7 +238,7 @@ fn without_p1_atoms(
     }
 }
 
-fn rebuild(structure: &Structure, sites: Vec<Site>) -> Result<Structure, Error> {
+pub(super) fn rebuild(structure: &Structure, sites: Vec<Site>) -> Result<Structure, Error> {
     let mut builder = StructureBuilder::new(structure.name().to_owned(), *structure.lattice())
         .hall(structure.hall().to_owned());
     for operation in structure.operations() {
@@ -445,7 +264,7 @@ fn rebuild_p1(structure: &Structure, sites: Vec<Site>) -> Result<Structure, Erro
     builder.build()
 }
 
-fn is_metal(element: &str) -> bool {
+pub(super) fn is_metal(element: &str) -> bool {
     element_info(element).is_ok_and(|info| info.is_metal)
 }
 
