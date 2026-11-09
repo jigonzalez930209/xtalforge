@@ -33,6 +33,7 @@ Pages are added with the feature that introduces them:
 - [Pawley fit](./pawley) (Task 7.6)
 - [Le Bail extraction](./lebail) (Task 7.6)
 - [Rietveld refinement](./rietveld) (Task 7.8)
+- [Extinction screening](./extinction) (Task 7.10)
 - [Machine-learning backend](./ml-backend) (Task 4.11)
 - [Symmetry backend: moyo](./symmetry-backend) (Task 0.3.5)
 - [Validation and tolerances](./validation) (Task 0.9.4)

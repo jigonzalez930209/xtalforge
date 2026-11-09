@@ -49,6 +49,8 @@ must record the reason in the algorithm page.
 | Rietveld cell | absolute | 2e-3 Angstrom (rutile golden) | 7 |
 | Rietveld zero shift | absolute | 0.02 degree (rutile golden) | 7 |
 | Rietveld Rwp | absolute | 0.25 (rutile golden, single-Gaussian model) | 7 |
+| Space-group screen | exact | rutile P4_2/mnm among the candidates; 001 removes it | 7 |
+| Space-group screen | exact | diamond Fd-3m among the candidates; 200 removes it | 7 |
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |
