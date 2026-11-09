@@ -39,6 +39,9 @@ pub use poscar::{read_poscar, write_poscar};
 pub use project::{FORMAT_VERSION, ProjectParts, read_project, write_project};
 pub use shelx::{read_shelx, write_shelx};
 pub use text::{decode_text, read_text};
-pub use trajectory::{Frame, Trajectory, read_trajectory_xyz, write_trajectory_xyz};
+pub use trajectory::{
+    Frame, Trajectory, XyzIndex, read_trajectory, read_trajectory_xyz, read_xdatcar,
+    write_trajectory_xyz,
+};
 pub use xy::{PatternPoint, read_xy, write_xy};
 pub use xyz::{read_xyz, write_xyz};

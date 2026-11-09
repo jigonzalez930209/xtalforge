@@ -181,7 +181,7 @@ pub fn write_trajectory_xyz(trajectory: &Trajectory) -> Result<String, Error> {
     Ok(out)
 }
 
-fn parse_info(comment: &str) -> BTreeMap<String, String> {
+pub(super) fn parse_info(comment: &str) -> BTreeMap<String, String> {
     let mut info = BTreeMap::new();
     let mut tokens = Vec::new();
     let mut current = String::new();
@@ -211,7 +211,7 @@ fn parse_info(comment: &str) -> BTreeMap<String, String> {
     info
 }
 
-fn parse_lattice(text: &str) -> Option<[[f64; 3]; 3]> {
+pub(super) fn parse_lattice(text: &str) -> Option<[[f64; 3]; 3]> {
     let values: Vec<f64> = text
         .split_whitespace()
         .filter_map(|value| value.parse().ok())
@@ -225,3 +225,7 @@ fn parse_lattice(text: &str) -> Option<[[f64; 3]; 3]> {
         [values[6], values[7], values[8]],
     ])
 }
+
+mod indexed;
+
+pub use indexed::{XyzIndex, read_trajectory, read_xdatcar};
