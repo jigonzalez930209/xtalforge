@@ -31,7 +31,15 @@ pub(crate) fn powder_automatic<'py>(
     let dict = PyDict::new(py);
     dict.set_item("peaks", result.peaks.len())?;
     dict.set_item("steps", result.steps)?;
-    dict.set_item("index", result.index.map(|index| index.a))?;
+    dict.set_item("index", result.index.as_ref().map(|index| index.cell.a))?;
+    dict.set_item(
+        "system",
+        result.index.as_ref().map(|index| index.system.name()),
+    )?;
+    dict.set_item(
+        "pawley_rwp",
+        result.pawley.as_ref().map(|pawley| pawley.rwp),
+    )?;
     dict.set_item("lebail", result.lebail.map(|lebail| lebail.r_factor))?;
     dict.set_item("rwp", result.phase.map(|phase| phase.rwp))?;
     Ok(dict)
@@ -166,5 +174,77 @@ pub(crate) fn powder_index<'py>(
         candidates.append(item)?;
     }
     dict.set_item("candidates", candidates)?;
+    Ok(dict)
+}
+
+/// Fits a Pawley model: free intensities, cell, zero shift and width model.
+///
+/// Returns the reflections with their esds and the refined cell/instrument
+/// parameters.
+#[pyfunction]
+#[allow(clippy::too_many_arguments)] // one keyword per documented fit switch
+#[pyo3(signature = (text, pattern_text, format_hint = None, refine_cell = true, refine_zero = true, refine_size = false, refine_strain = false, profile = "pseudo_voigt"))]
+pub(crate) fn powder_pawley<'py>(
+    py: Python<'py>,
+    text: &str,
+    pattern_text: &str,
+    format_hint: Option<&str>,
+    refine_cell: bool,
+    refine_zero: bool,
+    refine_size: bool,
+    refine_strain: bool,
+    profile: &str,
+) -> PyResult<Bound<'py, PyDict>> {
+    let structure = load_structure(text, format_hint)?;
+    let observed = pattern(pattern_text)?;
+    let kind = match profile.to_ascii_lowercase().as_str() {
+        "gaussian" => xtalforge::analysis::ProfileKind::Gaussian,
+        "lorentzian" => xtalforge::analysis::ProfileKind::Lorentzian,
+        "pseudo_voigt" | "pseudovoigt" | "pseudo-voigt" => {
+            xtalforge::analysis::ProfileKind::PseudoVoigt
+        }
+        other => {
+            return Err(crate::invalid_input(format!(
+                "unknown profile {other:?}; use gaussian, lorentzian or pseudo_voigt"
+            )));
+        }
+    };
+    let result = xtalforge::analysis::pawley_refine(
+        &structure,
+        &observed,
+        &xtalforge::analysis::PawleyOptions {
+            kind,
+            refine_cell,
+            refine_zero,
+            refine_size,
+            refine_strain,
+            ..xtalforge::analysis::PawleyOptions::default()
+        },
+    )
+    .map_err(crate::map_error)?;
+    let dict = PyDict::new(py);
+    let reflections = PyList::empty(py);
+    for reflection in &result.reflections {
+        let item = PyDict::new(py);
+        item.set_item("hkl", reflection.hkl.to_vec())?;
+        item.set_item("d", reflection.d)?;
+        item.set_item("two_theta", reflection.two_theta)?;
+        item.set_item("intensity", reflection.intensity)?;
+        item.set_item("esd", reflection.esd)?;
+        reflections.append(item)?;
+    }
+    dict.set_item("reflections", reflections)?;
+    dict.set_item("cell", result.cell.to_vec())?;
+    dict.set_item("cell_esds", result.cell_esds.to_vec())?;
+    dict.set_item("zero_shift", result.zero_shift)?;
+    dict.set_item("zero_shift_esd", result.zero_shift_esd)?;
+    dict.set_item("size", result.size)?;
+    dict.set_item("strain", result.strain)?;
+    dict.set_item("rp", result.rp)?;
+    dict.set_item("rwp", result.rwp)?;
+    dict.set_item("rexp", result.rexp)?;
+    dict.set_item("chi_squared", result.chi_squared)?;
+    dict.set_item("converged", result.converged)?;
+    dict.set_item("iterations", result.iterations)?;
     Ok(dict)
 }

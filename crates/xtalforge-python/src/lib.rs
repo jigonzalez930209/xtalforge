@@ -38,7 +38,8 @@ use phase5::{
 use phase6::{build_mof, mof_blocks, mof_topologies};
 use phase6_extra::{build_c20, build_polymer, build_schwarzite, build_ztc, ribbon, twist};
 use phase7::{
-    powder_automatic, powder_cells, powder_index, powder_refine, powder_supported_groups, rietx,
+    powder_automatic, powder_cells, powder_index, powder_pawley, powder_refine,
+    powder_supported_groups, rietx,
 };
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
@@ -325,6 +326,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(build_polymer, module)?)?;
     module.add_function(wrap_pyfunction!(powder_automatic, module)?)?;
     module.add_function(wrap_pyfunction!(powder_index, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_pawley, module)?)?;
     module.add_function(wrap_pyfunction!(powder_refine, module)?)?;
     module.add_function(wrap_pyfunction!(powder_cells, module)?)?;
     module.add_function(wrap_pyfunction!(powder_supported_groups, module)?)?;
