@@ -89,6 +89,13 @@ fn powder_automatic_returns_the_leading_cell_table() {
     let rows = as_array(&property(&result, "leading_cells"));
     assert!(rows.length() > 0);
     let first = rows.get(0);
+    assert!(
+        !property(&first, "class_symbol")
+            .as_string()
+            .unwrap()
+            .is_empty()
+    );
+    assert!(property(&first, "class_rank").as_f64().unwrap() >= 1.0);
     let groups = as_array(&property(&first, "space_groups"));
     assert!(groups.length() > 0);
     let group = groups.get(0);
