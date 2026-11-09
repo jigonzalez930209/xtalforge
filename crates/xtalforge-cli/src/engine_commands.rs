@@ -66,6 +66,7 @@ pub(crate) fn prepare(
                 "structure": report.structure,
                 "removed_sites": report.removed_sites,
                 "charge_balance": report.charge_balance,
+                "close_contacts": report.close_contacts,
                 "steps": report.steps.iter().map(|step| json!({
                     "name": step.name,
                     "done": step.done,

@@ -111,6 +111,12 @@ pub(crate) enum FfAction {
         /// Remove known solvent molecules from the pores.
         #[arg(long)]
         remove_solvent: bool,
+        /// Add missing hydrogens from the perceived valence.
+        #[arg(long)]
+        hydrogens: bool,
+        /// List close contacts below the clash thresholds.
+        #[arg(long)]
+        check_close_contacts: bool,
         /// Check that the prepared cell is neutral.
         #[arg(long)]
         check_charge_balance: bool,
@@ -172,6 +178,8 @@ pub(crate) fn run(cli: &Cli, action: &FfAction) -> Result<(), CliError> {
             merge_duplicates,
             order_disorder,
             remove_solvent,
+            hydrogens,
+            check_close_contacts,
             check_charge_balance,
         } => {
             let options = xtalforge::ff::PrepareOptions {
@@ -182,6 +190,8 @@ pub(crate) fn run(cli: &Cli, action: &FfAction) -> Result<(), CliError> {
                 merge_duplicates: *merge_duplicates,
                 order_disorder: *order_disorder,
                 remove_solvent: *remove_solvent,
+                hydrogens: *hydrogens,
+                check_close_contacts: *check_close_contacts,
                 check_charge_balance: *check_charge_balance,
                 ..xtalforge::ff::PrepareOptions::default()
             };
