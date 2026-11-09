@@ -318,6 +318,18 @@ fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
             }
         }
     }
+    let mut source = "operation loop";
+    if operations.is_empty() && hall != "P 1" && hall != "P1" {
+        match xtalforge_symmetry::SpaceGroup::parse(&hall) {
+            Ok(group) => {
+                operations = group.operations;
+                source = "Hall symbol";
+            }
+            Err(_) => {
+                source = "identity";
+            }
+        }
+    }
     let has_operations = !operations.is_empty();
     let mut builder = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
     for operation in operations {
@@ -327,13 +339,13 @@ fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
         builder = builder.metadata(
             "symmetry_warning",
             serde_json::Value::String(
-                "no symmetry operation loop; P1 expansion uses the identity".to_owned(),
+                "no symmetry operation loop and the Hall symbol was not recognised; P1 expansion uses the identity".to_owned(),
             ),
         );
     } else if has_operations {
         builder = builder.metadata(
             "symmetry_source",
-            serde_json::Value::String("operation loop".to_owned()),
+            serde_json::Value::String(source.to_owned()),
         );
     }
     for site in sites {
