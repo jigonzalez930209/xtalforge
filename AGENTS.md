@@ -267,19 +267,19 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `0.0.1` (published 2026-11-09 on crates.io, PyPI, npm, the GitHub
-  release and GitHub Pages; the tag is `v0.0.1`).
+- Version: `0.0.2` (published 2026-11-09 on crates.io, PyPI, npm, the GitHub
+  release and GitHub Pages; `v0.0.1` was the first release on the same day).
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
 - Current phase: Phase 8 — Agent and distribution
   (`docs/roadmap/phase-08-distribution.md`); no Phase 8 subtask is implemented
-  yet. Phases 1-7 are complete and released at `0.0.1`; the remaining
+  yet. Phases 1-7 are complete and released at `0.0.2`; the remaining
   reference gaps (phonon q-mesh, preparation steps, general indexing, profile
   simplifications and others) are listed in `docs/roadmap/index.md` under
-  "Known subsets". Post-release performance work on `main` adds the linked-cell
-  neighbor search, grid-based P1/supercell deduplication and the 10^3-10^5 atom
-  benchmark, so the next PATCH carries them.
+  "Known subsets". `0.0.2` carries the linked-cell neighbor search, grid-based
+  P1/supercell deduplication, the 10^3-10^5 atom benchmark and the Linux
+  desktop/AppStream identifier fix.
   Phase 2 covers moyo integration, the space-group catalogue, the
   detect/asymmetrize/P1/set workflow, Wyckoff assignments, standardized and
   primitive cells, lattice reduction, subgroup enumeration and lowering,

@@ -7,6 +7,8 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+## [0.0.2] - 2026-11-09
+
 ### Changed
 
 - Phase 1 Task 1.10.1/1.10.2: replace the direct periodic pair scan with a
