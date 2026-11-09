@@ -27,7 +27,7 @@ pub mod rietveld;
 pub mod rietx;
 pub mod zeo;
 
-pub use automatic::{AutomaticOptions, AutomaticResult, run_automatic};
+pub use automatic::{AutomaticOptions, AutomaticResult, LeadingCell, run_automatic};
 pub use cells::{
     CELL_PARAMETER_NAMES, TrigonalSetting, extinction_symbol, free_cell_parameters,
     free_cell_parameters_with_setting,

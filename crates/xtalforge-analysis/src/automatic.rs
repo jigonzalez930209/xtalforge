@@ -1,10 +1,11 @@
 //! Automatic peak search, indexing, Le Bail and Rietveld run (Task 7.10).
 //!
 //! The pipeline copies the order of `powder/auto.py`: find the lines, index the
-//! metric families, extract Le Bail intensities, fit a Pawley model of the
-//! indexed cell, then fit the phase. Every completed step is recorded in
-//! [`AutomaticResult::steps`] in execution order, so a CLI or a run folder can
-//! replay the decision without guessing what happened.
+//! metric families, build the leading-cell table with a Pawley fit of every
+//! leading candidate, extract Le Bail intensities, then fit the phase. Every
+//! completed step is recorded in [`AutomaticResult::steps`] in execution
+//! order, so a CLI or a run folder can replay the decision without guessing
+//! what happened.
 //!
 //! # Approximations
 //!
@@ -12,9 +13,12 @@
 //!   entry point has no radiation argument; callers with another source should
 //!   use [`crate::indexing::index_cubic`] and [`crate::lebail::le_bail`]
 //!   directly.
-//! * The indexed cell is the ranked best of the five metric families. The
-//!   Pawley step rebuilds the structure in that cell before fitting, so the
-//!   intensities and cell esds describe the indexed lattice.
+//! * The indexed cells are the ranked candidates of the five metric families.
+//!   The leading-cell table fits a Pawley model of each of the first
+//!   [`AutomaticOptions::leading_cells`] candidates and ranks the table by
+//!   the Pawley Rwp, which is the reference `b_indy -> c_paw` order. Space
+//!   groups are not assigned from systematic absences; each row keeps its
+//!   metric family.
 //! * The Rietveld step uses [`crate::rietveld::fit_phase`], which refines the
 //!   scale and a constant background, not the structural parameters; the
 //!   structural refinement lives in [`crate::refine`] and is a separate step.
@@ -39,6 +43,8 @@ pub struct AutomaticOptions {
     pub index_tolerance: f64,
     /// Minimum fraction of peaks that must index for a cell to be kept.
     pub min_completeness: f64,
+    /// Leading cells that receive a Pawley fit in the ranking table.
+    pub leading_cells: usize,
 }
 
 impl Default for AutomaticOptions {
@@ -47,8 +53,20 @@ impl Default for AutomaticOptions {
             max_peaks: 30,
             index_tolerance: 0.1,
             min_completeness: 0.3,
+            leading_cells: 3,
         }
     }
+}
+
+/// One row of the automatic leading-cell table.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct LeadingCell {
+    /// Indexing candidate: metric family, cell, peaks and figures of merit.
+    pub index: IndexedCell,
+    /// Pawley Rwp of this cell, when the fit ran.
+    pub pawley_rwp: Option<f64>,
+    /// Pawley cell esds, when the fit ran.
+    pub pawley_cell_esds: Option<[f64; 6]>,
 }
 
 /// Result of one automatic run.
@@ -60,15 +78,18 @@ pub struct AutomaticResult {
     pub index: Option<IndexedCell>,
     /// Le Bail extraction.
     pub lebail: Option<LebailResult>,
-    /// Pawley fit of the indexed cell.
+    /// Pawley fit of the best indexed cell.
     pub pawley: Option<PawleyResult>,
+    /// Leading cells ranked by Pawley fit quality.
+    pub leading_cells: Vec<LeadingCell>,
     /// Rietveld scale/background phase fit.
     pub phase: Option<RietveldPhase>,
     /// Completed steps, in execution order.
     pub steps: Vec<String>,
 }
 
-/// Runs peaks, cubic indexing, Le Bail and a phase fit on one pattern.
+/// Runs peaks, general indexing, the leading-cell table, Le Bail and a phase
+/// fit on one pattern.
 ///
 /// # Errors
 ///
@@ -96,6 +117,11 @@ pub fn run_automatic(
             "automatic minimum completeness must be in [0, 1], got {}",
             options.min_completeness
         )));
+    }
+    if options.leading_cells == 0 {
+        return Err(Error::InvalidInput(
+            "automatic run needs at least one leading cell".to_owned(),
+        ));
     }
     let maximum = observed
         .iter()
@@ -128,7 +154,7 @@ pub fn run_automatic(
 
     let mut steps = vec!["peaks".to_owned()];
     let wavelength = Radiation::CuKa.wavelength()?;
-    let index = index_pattern(
+    let indexing = index_pattern(
         &peaks,
         wavelength,
         &IndexingOptions {
@@ -137,42 +163,75 @@ pub fn run_automatic(
             min_completeness: options.min_completeness,
             ..IndexingOptions::default()
         },
-    )?
-    .best()
-    .cloned();
+    )?;
+    let index = indexing.best().cloned();
     steps.push("index".to_owned());
-    let lebail = le_bail(structure, observed, &LebailOptions::default())?;
-    steps.push("le_bail".to_owned());
-    let pawley_structure = match &index {
-        Some(candidate) => structure.clone().with_lattice(Lattice::from_parameters(
+    let mut leading_cells = Vec::new();
+    let mut pawley = None;
+    let mut pawley_error = None;
+    for (position, candidate) in indexing
+        .candidates
+        .iter()
+        .take(options.leading_cells)
+        .enumerate()
+    {
+        let cell = Lattice::from_parameters(
             candidate.cell.a,
             candidate.cell.b,
             candidate.cell.c,
             candidate.cell.alpha,
             candidate.cell.beta,
             candidate.cell.gamma,
-        )?),
-        None => structure.clone(),
-    };
-    let pawley = match pawley_refine(
-        &pawley_structure,
-        observed,
-        &PawleyOptions {
-            background_order: 2,
-            ..PawleyOptions::default()
+        )?;
+        let pawley_structure = structure.clone().with_lattice(cell);
+        match pawley_refine(
+            &pawley_structure,
+            observed,
+            &PawleyOptions {
+                background_order: 2,
+                ..PawleyOptions::default()
+            },
+        ) {
+            Ok(fit) => {
+                if position == 0 {
+                    pawley = Some(fit.clone());
+                }
+                leading_cells.push(LeadingCell {
+                    index: candidate.clone(),
+                    pawley_rwp: Some(fit.rwp),
+                    pawley_cell_esds: Some(fit.cell_esds),
+                });
+            }
+            Err(error) => {
+                if pawley_error.is_none() {
+                    pawley_error = Some(error.message());
+                }
+                leading_cells.push(LeadingCell {
+                    index: candidate.clone(),
+                    pawley_rwp: None,
+                    pawley_cell_esds: None,
+                });
+            }
+        }
+    }
+    leading_cells.sort_by(
+        |first, second| match (first.pawley_rwp, second.pawley_rwp) {
+            (Some(left), Some(right)) => left.total_cmp(&right),
+            (Some(_), None) => std::cmp::Ordering::Less,
+            (None, Some(_)) => std::cmp::Ordering::Greater,
+            (None, None) => second.index.m20.total_cmp(&first.index.m20),
         },
-    ) {
-        Ok(pawley) => {
-            steps.push("pawley".to_owned());
-            Some(pawley)
-        }
-        Err(error) => {
-            // A cell that indexes the peaks but predicts too many reflections
-            // must not sink the rest of the run.
-            steps.push(format!("pawley_skipped: {}", error.message()));
-            None
-        }
-    };
+    );
+    steps.push("leading_cells".to_owned());
+    let lebail = le_bail(structure, observed, &LebailOptions::default())?;
+    steps.push("le_bail".to_owned());
+    if pawley.is_some() {
+        steps.push("pawley".to_owned());
+    } else if let Some(message) = pawley_error {
+        // A cell that indexes the peaks but predicts too many reflections
+        // must not sink the rest of the run.
+        steps.push(format!("pawley_skipped: {message}"));
+    }
     let first = observed.first().map_or(5.0, |point| point.two_theta);
     let last = observed.last().map_or(80.0, |point| point.two_theta);
     let phase = fit_phase(
@@ -190,6 +249,7 @@ pub fn run_automatic(
         index,
         lebail: Some(lebail),
         pawley,
+        leading_cells,
         phase: Some(phase),
         steps,
     })
