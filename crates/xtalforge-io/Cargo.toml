@@ -18,6 +18,7 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 zip = { workspace = true }
 xtalforge-core = { workspace = true }
+xtalforge-symmetry = { workspace = true }
 
 [features]
 parallel = ["dep:rayon"]
