@@ -41,7 +41,7 @@ use crate::charges::{ChargeOptions, Charges, EwaldOptions, ewald_energy, qeq_cha
 use crate::optimize::{OptimizationResult, OptimizeOptions, fire};
 use crate::vibrations::{HessianOptions, hessian, vibrational_modes};
 
-pub use cleanup::ChargeBalance;
+pub use cleanup::{ChargeBalance, CloseContact};
 
 /// Options for one preparation run.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -53,6 +53,10 @@ pub struct PrepareOptions {
     pub order_disorder: bool,
     /// Whether known solvent molecules are removed from the pores.
     pub remove_solvent: bool,
+    /// Whether missing hydrogens are added from the perceived valence.
+    pub hydrogens: bool,
+    /// Whether close contacts are listed.
+    pub check_close_contacts: bool,
     /// Whether the final cell charge is checked.
     pub check_charge_balance: bool,
     /// Whether the geometry is relaxed with FIRE.
@@ -77,6 +81,8 @@ impl Default for PrepareOptions {
             merge_duplicates: false,
             order_disorder: false,
             remove_solvent: false,
+            hydrogens: false,
+            check_close_contacts: false,
             check_charge_balance: false,
             minimize: true,
             charges: true,
@@ -155,6 +161,8 @@ pub struct PrepareReport {
     pub optimized: Option<OptimizationResult>,
     /// Sites removed by the duplicate, disorder or solvent steps.
     pub removed_sites: usize,
+    /// Close contacts, empty unless that step ran.
+    pub close_contacts: Vec<CloseContact>,
     /// Final charge balance, present only when that step ran.
     pub charge_balance: Option<ChargeBalance>,
 }
@@ -231,6 +239,24 @@ pub fn prepare(
             "solvent",
             false,
             "skipped: solvent left in the pores".to_owned(),
+        ));
+    }
+
+    if options.hydrogens {
+        let filled =
+            xtalforge_build::add_hydrogens(&working, &xtalforge_build::HydrogenOptions::default())?;
+        let added = filled.sites().len().saturating_sub(working.sites().len());
+        steps.push(PrepareStep::new(
+            "hydrogens",
+            true,
+            format!("added {added} hydrogen site(s)"),
+        ));
+        working = filled;
+    } else {
+        steps.push(PrepareStep::new(
+            "hydrogens",
+            false,
+            "skipped: hydrogen sites left as given".to_owned(),
         ));
     }
 
@@ -320,6 +346,22 @@ pub fn prepare(
     let total_charge = computed_charges
         .as_ref()
         .map_or_else(|| working.total_charge(), |charges| charges.total);
+    let mut close_contacts = Vec::new();
+    if options.check_close_contacts {
+        close_contacts = cleanup::close_contacts(&working)?;
+        steps.push(PrepareStep::new(
+            "close_contacts",
+            true,
+            format!("{} close contact(s)", close_contacts.len()),
+        ));
+    } else {
+        steps.push(PrepareStep::new(
+            "close_contacts",
+            false,
+            "skipped: close contacts not checked".to_owned(),
+        ));
+    }
+
     let mut charge_balance = None;
     if options.check_charge_balance {
         let balance = cleanup::charge_balance(&working)?;
@@ -350,6 +392,7 @@ pub fn prepare(
         frequencies,
         optimized,
         removed_sites,
+        close_contacts,
         charge_balance,
     })
 }
