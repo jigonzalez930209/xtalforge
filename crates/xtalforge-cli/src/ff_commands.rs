@@ -102,6 +102,18 @@ pub(crate) enum FfAction {
         /// Compute the Gamma-point frequencies.
         #[arg(long)]
         vibrations: bool,
+        /// Merge duplicate sites at the same position.
+        #[arg(long)]
+        merge_duplicates: bool,
+        /// Choose one component of every disorder group.
+        #[arg(long)]
+        order_disorder: bool,
+        /// Remove known solvent molecules from the pores.
+        #[arg(long)]
+        remove_solvent: bool,
+        /// Check that the prepared cell is neutral.
+        #[arg(long)]
+        check_charge_balance: bool,
     },
     /// Probe or write inputs for an external engine.
     External {
@@ -157,7 +169,24 @@ pub(crate) fn run(cli: &Cli, action: &FfAction) -> Result<(), CliError> {
             no_charges,
             ewald,
             vibrations,
-        } => engine_commands::prepare(cli, path, !*no_minimize, !*no_charges, *ewald, *vibrations),
+            merge_duplicates,
+            order_disorder,
+            remove_solvent,
+            check_charge_balance,
+        } => {
+            let options = xtalforge::ff::PrepareOptions {
+                minimize: !*no_minimize,
+                charges: !*no_charges,
+                ewald: *ewald,
+                vibrations: *vibrations,
+                merge_duplicates: *merge_duplicates,
+                order_disorder: *order_disorder,
+                remove_solvent: *remove_solvent,
+                check_charge_balance: *check_charge_balance,
+                ..xtalforge::ff::PrepareOptions::default()
+            };
+            engine_commands::prepare(cli, path, &options)
+        }
         FfAction::External { action } => engine_commands::external(cli, action),
         FfAction::Engines => engines(cli),
     }

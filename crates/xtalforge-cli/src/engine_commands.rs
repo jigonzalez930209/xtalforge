@@ -50,21 +50,11 @@ pub(crate) enum ExternalAction {
 pub(crate) fn prepare(
     cli: &Cli,
     path: &str,
-    minimize: bool,
-    charges: bool,
-    ewald: bool,
-    vibrations: bool,
+    options: &xtalforge::ff::PrepareOptions,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
-    let options = xtalforge::ff::PrepareOptions {
-        minimize,
-        charges,
-        ewald,
-        vibrations,
-        ..xtalforge::ff::PrepareOptions::default()
-    };
     let report =
-        xtalforge::ff::prepare(&calculator()?, &structure, &options).map_err(CliError::ff)?;
+        xtalforge::ff::prepare(&calculator()?, &structure, options).map_err(CliError::ff)?;
     if cli.json {
         println!(
             "{}",
@@ -73,6 +63,9 @@ pub(crate) fn prepare(
                 "total_charge": report.total_charge,
                 "ewald_energy": report.ewald_energy,
                 "frequencies": report.frequencies,
+                "structure": report.structure,
+                "removed_sites": report.removed_sites,
+                "charge_balance": report.charge_balance,
                 "steps": report.steps.iter().map(|step| json!({
                     "name": step.name,
                     "done": step.done,
