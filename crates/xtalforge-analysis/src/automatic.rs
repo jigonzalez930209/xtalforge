@@ -16,9 +16,11 @@
 //! * The indexed cells are the ranked candidates of the five metric families.
 //!   The leading-cell table fits a Pawley model of each of the first
 //!   [`AutomaticOptions::leading_cells`] candidates and ranks the table by
-//!   the Pawley Rwp, which is the reference `b_indy -> c_paw` order. Space
-//!   groups are not assigned from systematic absences; each row keeps its
-//!   metric family.
+//!   the Pawley Rwp, which is the reference `b_indy -> c_paw` order. Every
+//!   row also carries the space groups whose systematic absences are
+//!   compatible with its indexed reflections (see
+//!   [`crate::extinction`]); they are ranked by group order, not by a Le Bail
+//!   class fit.
 //! * The Rietveld step uses [`crate::rietveld::fit_phase`], which refines the
 //!   scale and a constant background, not the structural parameters; the
 //!   structural refinement lives in [`crate::refine`] and is a separate step.
@@ -27,6 +29,7 @@ use serde::{Deserialize, Serialize};
 use xtalforge_core::{Error, Lattice, Structure};
 use xtalforge_io::xy::PatternPoint;
 
+use crate::extinction::{SpaceGroupMatch, space_group_candidates};
 use crate::indexing::{IndexedCell, IndexingOptions, index_pattern};
 use crate::lebail::{LebailOptions, LebailResult, le_bail};
 use crate::pawley::{PawleyOptions, PawleyResult, pawley_refine};
@@ -67,6 +70,17 @@ pub struct LeadingCell {
     pub pawley_rwp: Option<f64>,
     /// Pawley cell esds, when the fit ran.
     pub pawley_cell_esds: Option<[f64; 6]>,
+    /// Space groups whose systematic absences the indexed reflections obey.
+    pub space_groups: Vec<SpaceGroupMatch>,
+}
+
+/// Screens the indexed reflections of one candidate cell.
+fn screen(
+    peaks: &[crate::indexing::IndexedPeak],
+    system: crate::indexing::LatticeSystem,
+) -> Result<Vec<SpaceGroupMatch>, Error> {
+    let hkl: Vec<[i32; 3]> = peaks.iter().map(|peak| peak.hkl).collect();
+    space_group_candidates(system, &hkl)
 }
 
 /// Result of one automatic run.
@@ -200,6 +214,7 @@ pub fn run_automatic(
                     index: candidate.clone(),
                     pawley_rwp: Some(fit.rwp),
                     pawley_cell_esds: Some(fit.cell_esds),
+                    space_groups: screen(&candidate.peaks, candidate.system)?,
                 });
             }
             Err(error) => {
@@ -210,6 +225,7 @@ pub fn run_automatic(
                     index: candidate.clone(),
                     pawley_rwp: None,
                     pawley_cell_esds: None,
+                    space_groups: screen(&candidate.peaks, candidate.system)?,
                 });
             }
         }

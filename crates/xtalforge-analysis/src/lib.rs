@@ -7,6 +7,7 @@
 
 pub mod automatic;
 pub mod cells;
+pub mod extinction;
 pub mod fit;
 pub mod grid;
 pub mod indexing;
@@ -31,6 +32,10 @@ pub use automatic::{AutomaticOptions, AutomaticResult, LeadingCell, run_automati
 pub use cells::{
     CELL_PARAMETER_NAMES, TrigonalSetting, extinction_symbol, free_cell_parameters,
     free_cell_parameters_with_setting,
+};
+pub use extinction::{
+    MAX_CANDIDATES as MAX_SPACE_GROUP_CANDIDATES, SpaceGroupMatch, is_systematically_absent,
+    space_group_candidates,
 };
 pub use fit::{FitOptions, FitResult, least_squares};
 pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
