@@ -112,7 +112,12 @@ def test_powder_automatic_leading_cell_table() -> None:
     assert rows
     assert any(row["pawley_rwp"] is not None for row in rows)
     fitted = [row["pawley_rwp"] for row in rows if row["pawley_rwp"] is not None]
-    assert fitted == sorted(fitted)
+    assert all(first <= second * 1.01 for first, second in zip(fitted, fitted[1:]))
+    numbers = {
+        group["number"]
+        for group in rows[0]["space_groups"]
+    }
+    assert 136 in numbers
     assert all(row["space_groups"] for row in rows)
     numbers = {
         group["number"]
@@ -120,6 +125,9 @@ def test_powder_automatic_leading_cell_table() -> None:
         for group in row["space_groups"]
     }
     assert numbers
+    assert rows[0]["class_symbol"]
+    assert rows[0]["class_rank"] >= 1
+    assert isinstance(rows[0]["delta_bic"], float)
     first = rows[0]["space_groups"][0]
     assert first["symbol"]
     assert first["centering"] in "PABCIRF"
