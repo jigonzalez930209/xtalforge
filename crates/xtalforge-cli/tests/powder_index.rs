@@ -70,3 +70,63 @@ fn powder_index_reports_general_candidates() {
     assert!(best["m20"].as_f64().unwrap() > 0.0);
     std::fs::remove_dir_all(&directory).unwrap();
 }
+
+#[test]
+fn powder_pawley_recovers_the_golden_pattern() {
+    let golden: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../tests/golden/phase-7/pawley/one-atom-cubic.json"
+    ))
+    .unwrap();
+    let cell = golden["cell"].as_array().unwrap();
+    let value = |index: usize| cell[index].as_f64().unwrap();
+    let directory =
+        std::env::temp_dir().join(format!("xtalforge-pawley-{}-{}", std::process::id(), 2));
+    std::fs::create_dir_all(&directory).unwrap();
+    let structure_path = directory.join("one.cif");
+    std::fs::write(
+        &structure_path,
+        format!(
+            "data_one\n_cell_length_a {}\n_cell_length_b {}\n_cell_length_c {}\n\
+             _cell_angle_alpha {}\n_cell_angle_beta {}\n_cell_angle_gamma {}\n\
+             loop_\n_atom_site_label\n_atom_site_type_symbol\n_atom_site_fract_x\n\
+             _atom_site_fract_y\n_atom_site_fract_z\n_atom_site_occupancy\nC1 C 0 0 0 1\n",
+            value(0),
+            value(1),
+            value(2),
+            value(3),
+            value(4),
+            value(5)
+        ),
+    )
+    .unwrap();
+    let pattern_path = directory.join("one.xy");
+    let mut pattern = String::new();
+    for peak in golden["peaks"].as_array().unwrap() {
+        pattern.push_str(&format!(
+            "{} {}\n",
+            peak[0].as_f64().unwrap(),
+            peak[1].as_f64().unwrap()
+        ));
+    }
+    std::fs::write(&pattern_path, pattern).unwrap();
+    let output = run(&[
+        "--json",
+        "powder",
+        "pawley",
+        &structure_path.to_string_lossy(),
+        &pattern_path.to_string_lossy(),
+        "--profile",
+        "gaussian",
+    ]);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
+    assert_eq!(value["reflections"].as_array().unwrap().len(), 80);
+    assert!((value["cell"][0].as_f64().unwrap() - 4.0).abs() < 5e-3);
+    assert!((value["zero_shift"].as_f64().unwrap() - 0.02).abs() < 5e-3);
+    assert!(value["rwp"].as_f64().unwrap() < 0.02);
+    std::fs::remove_dir_all(&directory).unwrap();
+}
