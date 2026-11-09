@@ -12,7 +12,7 @@
       powder refinement.
     </p>
   </description>
-  <launchable type="desktop-id">xtalforge.desktop</launchable>
+  <launchable type="desktop-id">io.github.jigonzalez930209.xtalforge.desktop</launchable>
   <provides>
     <binary>xtalforge</binary>
   </provides>
