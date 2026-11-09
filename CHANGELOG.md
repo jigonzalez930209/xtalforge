@@ -16,6 +16,9 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.6/1.15: expand each site on its own duplicate grid, so
   disorder components at the same position both survive, and resolve a CIF
   Hall/H-M symbol into operations when the file omits the operation loop.
+- Phase 1 Task 1.12: replace the chordless-cycle scan with the periodic
+  Franzblau walk, expose `Ring::path`/`ring_paths` with lattice images on all
+  four surfaces, and validate counts and paths against the golden corpus.
 
 ## [0.0.2] - 2026-11-09
 
