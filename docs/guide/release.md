@@ -51,11 +51,11 @@ will trigger the usual Gatekeeper/SmartScreen warnings.
 
 ## 3. What the workflow publishes
 
-- **crates.io**: `xtalforge-core`, `xtalforge-io`, `xtalforge-symmetry`,
+- **crates.io**: `xtalforge-core`, `xtalforge-symmetry`, `xtalforge-io`,
   `xtalforge-view`, `xtalforge-commands`, `xtalforge-ff`,
   `xtalforge-analysis`, `xtalforge-build`, `xtalforge-mof`,
   `xtalforge-modules`, the `xtalforge` facade and `xtalforge-cli`, in dependency
-  order. Existing versions are skipped so a rerun is idempotent.
+  order (the CIF reader resolves Hall symbols through the symmetry crate). Existing versions are skipped so a rerun is idempotent.
 - **PyPI**: an abi3 manylinux wheel and an sdist built on `ubuntu-24.04`,
   uploaded with `twine`.
 - **npm**: `xtalforge-wasm`, built for the bundler target on `ubuntu-24.04`
