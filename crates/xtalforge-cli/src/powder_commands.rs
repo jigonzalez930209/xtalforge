@@ -3,9 +3,9 @@
 use clap::Subcommand;
 use serde_json::json;
 use xtalforge::analysis::{
-    AutomaticOptions, LebailOptions, PeakOptions, RefineOptions, RietveldOptions,
-    extinction_symbol, find_peaks, free_cell_parameters, index_cubic, le_bail, pawley,
-    refine_phase, rietx_inventory, run_automatic,
+    AutomaticOptions, IndexingOptions, LebailOptions, PeakOptions, RefineOptions, RietveldOptions,
+    extinction_symbol, find_peaks, free_cell_parameters, index_cubic, index_pattern, le_bail,
+    pawley, refine_phase, rietx_inventory, run_automatic,
 };
 
 use crate::{Cli, CliError, input};
@@ -13,7 +13,7 @@ use crate::{Cli, CliError, input};
 /// Subcommands of `xtalforge powder`.
 #[derive(Debug, Subcommand)]
 pub(crate) enum PowderAction {
-    /// Find peaks and index a cubic cell.
+    /// Find peaks and index the pattern.
     Index {
         /// Measured XY pattern.
         pattern: String,
@@ -26,6 +26,15 @@ pub(crate) enum PowderAction {
         /// Position tolerance in degrees.
         #[arg(long, default_value_t = 0.1)]
         tolerance: f64,
+        /// Run the general metric-family search and rank its candidates.
+        #[arg(long)]
+        general: bool,
+        /// Subtract a SNIP background before finding peaks.
+        #[arg(long)]
+        background: bool,
+        /// Fit every detected line in its own window.
+        #[arg(long)]
+        refine_peaks: bool,
     },
     /// Le Bail intensity extraction.
     Lebail {
@@ -79,7 +88,19 @@ pub(crate) fn run(cli: &Cli, action: &PowderAction) -> Result<(), CliError> {
             wavelength,
             max_index,
             tolerance,
-        } => index(cli, pattern, *wavelength, *max_index, *tolerance),
+            general,
+            background,
+            refine_peaks,
+        } => index(
+            cli,
+            pattern,
+            *wavelength,
+            *max_index,
+            *tolerance,
+            *general,
+            *background,
+            *refine_peaks,
+        ),
         PowderAction::Lebail { structure, pattern } => lebail(cli, structure, pattern, false),
         PowderAction::Pawley { structure, pattern } => lebail(cli, structure, pattern, true),
         PowderAction::Rietveld {
@@ -118,29 +139,73 @@ fn pattern(path: &str) -> Result<Vec<xtalforge::io::PatternPoint>, CliError> {
     xtalforge::io::read_xy(&text).map_err(CliError::core)
 }
 
+#[allow(clippy::too_many_arguments)] // one flag per documented search switch
 fn index(
     cli: &Cli,
     path: &str,
     wavelength: f64,
     max_index: i32,
     tolerance: f64,
+    general: bool,
+    background: bool,
+    refine_peaks: bool,
 ) -> Result<(), CliError> {
     let points = pattern(path)?;
-    let peaks = find_peaks(&points, &PeakOptions::default()).map_err(CliError::analysis)?;
-    let index =
+    let peak_options = PeakOptions {
+        background,
+        refine: refine_peaks,
+        ..PeakOptions::default()
+    };
+    let peaks = find_peaks(&points, &peak_options).map_err(CliError::analysis)?;
+    let cubic =
         index_cubic(&peaks, wavelength, max_index, tolerance).map_err(CliError::analysis)?;
-    if cli.json {
-        println!("{}", json!({"peaks": peaks, "index": index}));
+    let candidates = if general {
+        Some(
+            index_pattern(
+                &peaks,
+                wavelength,
+                &IndexingOptions {
+                    max_index,
+                    tolerance,
+                    ..IndexingOptions::default()
+                },
+            )
+            .map_err(CliError::analysis)?,
+        )
     } else {
-        println!("{} peaks", peaks.len());
-        match index {
-            Some(index) => {
-                println!(
-                    "a = {:.6} A, completeness {:.2}, mean error {:.4} deg",
-                    index.a, index.completeness, index.mean_error
-                );
-            }
-            None => println!("no cubic candidate"),
+        None
+    };
+    if cli.json {
+        println!(
+            "{}",
+            json!({"peaks": peaks, "index": cubic, "candidates": candidates})
+        );
+        return Ok(());
+    }
+    println!("{} peaks", peaks.len());
+    match cubic {
+        Some(index) => {
+            println!(
+                "a = {:.6} A, completeness {:.2}, mean error {:.4} deg",
+                index.a, index.completeness, index.mean_error
+            );
+        }
+        None => println!("no cubic candidate"),
+    }
+    if let Some(candidates) = candidates {
+        for (rank, candidate) in candidates.candidates.iter().take(5).enumerate() {
+            println!(
+                "{}. {} a={:.4} b={:.4} c={:.4} beta={:.2} M20={:.1} F_N={:.1} coverage={:.2}",
+                rank + 1,
+                candidate.system.name(),
+                candidate.cell.a,
+                candidate.cell.b,
+                candidate.cell.c,
+                candidate.cell.beta,
+                candidate.m20,
+                candidate.f_n,
+                candidate.completeness
+            );
         }
     }
     Ok(())
