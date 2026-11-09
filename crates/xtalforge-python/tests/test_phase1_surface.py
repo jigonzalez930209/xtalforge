@@ -454,7 +454,9 @@ def test_prepare_surface() -> None:
     )
     assert report["energy"] is not None
     assert abs(report["total_charge"]) < 1e-6
-    assert report["steps"][0]["name"]
+    assert isinstance(report["structure"], str)
+    assert report["charge_balance"] is None
+    assert report["steps"][0]["name"] == "duplicates"
 
 
 def test_mof_surface() -> None:
