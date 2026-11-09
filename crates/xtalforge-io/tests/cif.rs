@@ -73,7 +73,7 @@ fn parser_handles_comments_quotes_and_uncertainties() {
 }
 
 #[test]
-fn symmetry_priority_and_missing_operations_warn() {
+fn symmetry_priority_uses_the_hall_symbol_when_operations_are_missing() {
     let text = "data_warn\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
                 _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
                 _symmetry_space_group_name_H-M 'P 21/c'\n\
@@ -82,6 +82,26 @@ fn symmetry_priority_and_missing_operations_warn() {
                 C1 C 0 0 0\n";
     let structure = read_cif(text).unwrap();
     assert_eq!(structure.hall(), "P 21/c");
+    assert_eq!(structure.operations().len(), 4);
+    assert_eq!(
+        structure
+            .metadata()
+            .get("symmetry_source")
+            .and_then(|value| value.as_str()),
+        Some("Hall symbol")
+    );
+    assert!(!structure.metadata().contains_key("symmetry_warning"));
+}
+
+#[test]
+fn an_unknown_hall_symbol_still_warns() {
+    let text = "data_warn\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                _symmetry_space_group_name_Hall 'not-a-space-group'\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                C1 C 0 0 0\n";
+    let structure = read_cif(text).unwrap();
     assert!(structure.metadata().contains_key("symmetry_warning"));
 }
 
