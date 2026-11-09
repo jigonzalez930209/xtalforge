@@ -76,11 +76,13 @@ volume.
 ## Preparation pipeline
 
 `prepare(&calculator, &structure, &PrepareOptions)` runs the optional cleanup
-and force-field stages in order: duplicate merging, disorder choice, solvent
-removal, FIRE relaxation, QEq charges, periodic Ewald, Gamma frequencies and
-the charge-balance check. `PrepareReport` records every step, including skipped
-ones, the prepared `structure`, removed-site count, energy, total charge,
-Ewald energy, frequencies and the optional `ChargeBalance`.
+and force-field stages in order: duplicate merging, graph-aware disorder
+choice, solvent removal, optional hydrogens, FIRE relaxation, QEq charges,
+periodic Ewald, Gamma frequencies, close-contact listing and the charge-balance
+check. `PrepareReport` records every step, including skipped ones, the prepared
+`structure`, removed-site count, close contacts, energy, total charge, Ewald
+energy, frequencies and the optional `ChargeBalance`. Apply the prepared
+structure as one undoable edit with `xtalforge_commands::ReplaceStructure`.
 
 ## External engines
 
