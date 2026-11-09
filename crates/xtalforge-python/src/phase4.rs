@@ -218,7 +218,7 @@ pub(crate) fn ff_types<'py>(
 
 /// Runs the preparation pipeline and returns its report.
 #[pyfunction]
-#[pyo3(signature = (text, minimize = true, charges = true, ewald = false, vibrations = false, format_hint = None, merge_duplicates = false, order_disorder = false, remove_solvent = false, check_charge_balance = false))]
+#[pyo3(signature = (text, minimize = true, charges = true, ewald = false, vibrations = false, format_hint = None, merge_duplicates = false, order_disorder = false, remove_solvent = false, check_charge_balance = false, hydrogens = false, check_close_contacts = false))]
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn ff_prepare<'py>(
     py: Python<'py>,
@@ -232,6 +232,8 @@ pub(crate) fn ff_prepare<'py>(
     order_disorder: bool,
     remove_solvent: bool,
     check_charge_balance: bool,
+    hydrogens: bool,
+    check_close_contacts: bool,
 ) -> PyResult<Bound<'py, PyDict>> {
     let structure = load_structure(text, format_hint)?;
     let options = xtalforge::ff::PrepareOptions {
@@ -243,6 +245,8 @@ pub(crate) fn ff_prepare<'py>(
         order_disorder,
         remove_solvent,
         check_charge_balance,
+        hydrogens,
+        check_close_contacts,
         ..Default::default()
     };
     let report = xtalforge::ff::prepare(&calculator()?, &structure, &options)
@@ -253,6 +257,16 @@ pub(crate) fn ff_prepare<'py>(
     dict.set_item("ewald_energy", report.ewald_energy)?;
     dict.set_item("frequencies", report.frequencies)?;
     dict.set_item("removed_sites", report.removed_sites)?;
+    let contacts = PyList::empty(py);
+    for contact in &report.close_contacts {
+        let item = PyDict::new(py);
+        item.set_item("i", contact.i)?;
+        item.set_item("j", contact.j)?;
+        item.set_item("distance", contact.distance)?;
+        item.set_item("elements", contact.elements.to_vec())?;
+        contacts.append(item)?;
+    }
+    dict.set_item("close_contacts", contacts)?;
     if let Some(balance) = &report.charge_balance {
         let item = PyDict::new(py);
         item.set_item("total_charge", balance.total_charge)?;
