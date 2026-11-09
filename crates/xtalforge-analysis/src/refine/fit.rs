@@ -1,5 +1,7 @@
 //! Linear algebra and analytic scale/background fit for [`super::refine_phase`].
 
+#![allow(clippy::indexing_slicing)] // bounded local systems
+
 use xtalforge_core::Error;
 use xtalforge_io::xy::PatternPoint;
 
@@ -21,13 +23,16 @@ pub(super) fn fit_scale_background(
     let mut rhs = vec![0.0; columns];
     for (unit, point) in curve.iter().zip(observed.iter()) {
         let t = (point.two_theta - center) / span;
+        // The same weight as the Rwp: a bright peak must not set the scale
+        // alone, or a small position error turns the fit upside down.
+        let weight = 1.0 / point.intensity.abs().max(1.0);
         for row in 0..columns {
-            let value = basis(*unit, t, row);
+            let value = weight.sqrt() * basis(*unit, t, row);
             if let Some(slot) = rhs.get_mut(row) {
-                *slot += value * point.intensity;
+                *slot += value * weight.sqrt() * point.intensity;
             }
             for column in 0..columns {
-                let other = basis(*unit, t, column);
+                let other = weight.sqrt() * basis(*unit, t, column);
                 if let Some(slot) = normal.get_mut(row).and_then(|line| line.get_mut(column)) {
                     *slot += value * other;
                 }
@@ -129,22 +134,6 @@ pub(super) fn normal_matrix(jacobian: &[Vec<f64>]) -> Vec<Vec<f64>> {
     normal
 }
 
-pub(super) fn gradient(jacobian: &[Vec<f64>], residual: &[f64]) -> Vec<f64> {
-    let count = jacobian.first().map_or(0, Vec::len);
-    let mut gradient = vec![0.0; count];
-    for (row, value) in jacobian.iter().zip(residual.iter()) {
-        for column in 0..count {
-            let Some(entry) = row.get(column).copied() else {
-                continue;
-            };
-            if let Some(slot) = gradient.get_mut(column) {
-                *slot += entry * value;
-            }
-        }
-    }
-    gradient
-}
-
 pub(super) fn solve_linear(matrix: &[Vec<f64>], rhs: &[f64]) -> Option<Vec<f64>> {
     let n = matrix.len();
     if n == 0 || rhs.len() != n {
@@ -199,5 +188,54 @@ pub(super) fn solve_linear(matrix: &[Vec<f64>], rhs: &[f64]) -> Option<Vec<f64>>
             .iter()
             .map(|row| row.get(n).copied().unwrap_or(0.0))
             .collect(),
+    )
+}
+
+/// Inverts a square matrix, or returns `None` when it is singular.
+pub(super) fn invert(matrix: &[Vec<f64>]) -> Option<Vec<Vec<f64>>> {
+    let n = matrix.len();
+    if n == 0 || matrix.iter().any(|row| row.len() != n) {
+        return None;
+    }
+    let mut augmented: Vec<Vec<f64>> = matrix
+        .iter()
+        .enumerate()
+        .map(|(row, values)| {
+            let mut line = values.clone();
+            line.extend((0..n).map(|column| if column == row { 1.0 } else { 0.0 }));
+            line
+        })
+        .collect();
+    for column in 0..n {
+        let pivot = (column..n).max_by(|a, b| {
+            augmented[*a][column]
+                .abs()
+                .partial_cmp(&augmented[*b][column].abs())
+                .unwrap_or(std::cmp::Ordering::Equal)
+        })?;
+        if augmented[pivot][column].abs() < 1e-14 {
+            return None;
+        }
+        augmented.swap(column, pivot);
+        let divisor = augmented[column][column];
+        for value in augmented[column].iter_mut() {
+            *value /= divisor;
+        }
+        let pivot_row = augmented[column].clone();
+        for (row, line) in augmented.iter_mut().enumerate() {
+            if row == column {
+                continue;
+            }
+            let factor = line[column];
+            for (slot, value) in line.iter_mut().zip(pivot_row.iter()) {
+                *slot -= factor * value;
+            }
+        }
+    }
+    Some(
+        augmented
+            .iter()
+            .map(|row| row[n..].to_vec())
+            .collect::<Vec<_>>(),
     )
 }
