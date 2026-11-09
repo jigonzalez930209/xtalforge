@@ -127,31 +127,56 @@ pub fn write_cif(structure: &Structure) -> Result<String, Error> {
         }
     }
 
-    if structure.is_p1() && !structure.explicit_bonds().is_empty() {
-        out.push_str("loop_\n_xtal_bond_kind\n_geom_bond_atom_site_label_1\n");
-        out.push_str("_geom_bond_atom_site_label_2\n_xtal_bond_image\n");
-        out.push_str("_xtal_bond_order\n");
-        for bond in structure.explicit_bonds() {
-            let first = structure
-                .sites()
-                .get(bond.i)
-                .map_or("?", |site| site.label());
-            let second = structure
-                .sites()
-                .get(bond.j)
-                .map_or("?", |site| site.label());
-            let kind = if bond.remove {
-                "suppressed"
-            } else {
-                "explicit"
-            };
+    if !structure.explicit_bonds().is_empty() {
+        if structure.is_p1() {
+            out.push_str("loop_\n_xtal_bond_kind\n_geom_bond_atom_site_label_1\n");
+            out.push_str("_geom_bond_atom_site_label_2\n_xtal_bond_image\n");
+            out.push_str("_xtal_bond_order\n");
+            for bond in structure.explicit_bonds() {
+                let first = structure
+                    .sites()
+                    .get(bond.i)
+                    .map_or("?", |site| site.label());
+                let second = structure
+                    .sites()
+                    .get(bond.j)
+                    .map_or("?", |site| site.label());
+                let kind = if bond.remove {
+                    "suppressed"
+                } else {
+                    "explicit"
+                };
+                out.push_str(&format!(
+                    "{kind} {first} {second} {},{},{} {}\n",
+                    bond.image[0],
+                    bond.image[1],
+                    bond.image[2],
+                    format_number(bond.order)
+                ));
+            }
+        } else {
             out.push_str(&format!(
-                "{kind} {first} {second} {},{},{} {}\n",
-                bond.image[0],
-                bond.image[1],
-                bond.image[2],
-                format_number(bond.order)
+                "_xtal_bond_p1_count {}\n",
+                structure.p1()?.n_atoms()
             ));
+            out.push_str("loop_\n_xtal_bond_kind\n_xtal_bond_atom_1\n");
+            out.push_str("_xtal_bond_atom_2\n_xtal_bond_image\n_xtal_bond_order\n");
+            for bond in structure.explicit_bonds() {
+                let kind = if bond.remove {
+                    "suppressed"
+                } else {
+                    "explicit"
+                };
+                out.push_str(&format!(
+                    "{kind} {} {} {},{},{} {}\n",
+                    bond.i,
+                    bond.j,
+                    bond.image[0],
+                    bond.image[1],
+                    bond.image[2],
+                    format_number(bond.order)
+                ));
+            }
         }
     }
     Ok(out)

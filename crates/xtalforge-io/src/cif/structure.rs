@@ -1,6 +1,6 @@
 //! CIF structure extraction (Task 1.15.4).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use xtalforge_core::{
     Error, ExplicitBond, Lattice, P1Cell, Site, Structure, StructureBuilder, SymOp,
@@ -161,6 +161,31 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
             raw_bonds.push((i, j, operation, image, order, remove));
         }
     }
+    let indexed_count = block
+        .item("_xtal_bond_p1_count")
+        .and_then(|value| value.trim().parse::<usize>().ok());
+    let mut raw_indices = Vec::new();
+    if let Some(bonds) = block.loop_with("_xtal_bond_atom_1") {
+        for row in 0..bonds.rows.len() {
+            let (Some(i), Some(j)) = (
+                bonds
+                    .value(row, "_xtal_bond_atom_1")
+                    .and_then(|value| value.parse::<usize>().ok()),
+                bonds
+                    .value(row, "_xtal_bond_atom_2")
+                    .and_then(|value| value.parse::<usize>().ok()),
+            ) else {
+                continue;
+            };
+            let image = bonds
+                .value(row, "_xtal_bond_image")
+                .and_then(parse_image)
+                .unwrap_or([0, 0, 0]);
+            let order = number(bonds.value(row, "_xtal_bond_order")).unwrap_or(1.0);
+            let remove = bonds.value(row, "_xtal_bond_kind") == Some("suppressed");
+            raw_indices.push((i, j, image, order, remove));
+        }
+    }
     let mut source = "operation loop";
     if operations.is_empty() && hall != "P 1" && hall != "P1" {
         match xtalforge_symmetry::SpaceGroup::parse(&hall) {
@@ -175,7 +200,59 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
     }
     let has_operations = !operations.is_empty();
     let operations_count = operations.len();
-    let explicit = if raw_bonds.is_empty() {
+    let operation_warning = if has_operations && hall != "P 1" && hall != "P1" {
+        match xtalforge_symmetry::SpaceGroup::parse(&hall) {
+            Ok(group) if group.order() != operations_count => Some(format!(
+                "operation loop has {operations_count} operations but {hall:?} (Hall {}) has {}",
+                group.hall_symbol,
+                group.order()
+            )),
+            Ok(group) if !same_operations(&group.operations, &operations) => Some(format!(
+                "operation loop does not match {hall:?} (Hall {})",
+                group.hall_symbol
+            )),
+            Ok(_) => None,
+            Err(_) => Some(format!(
+                "operation loop is present but the space-group symbol {hall:?} was not recognised"
+            )),
+        }
+    } else {
+        None
+    };
+    let needs_p1 = indexed_count.is_some() || !raw_bonds.is_empty();
+    let base_p1 = if needs_p1 {
+        let mut base = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
+        for operation in &operations {
+            base = base.operation(*operation);
+        }
+        for site in &sites {
+            base = base.site(site.clone());
+        }
+        Some(base.build()?.p1()?)
+    } else {
+        None
+    };
+    let explicit = if let Some(count) = indexed_count {
+        let p1 = base_p1.as_ref().ok_or_else(|| {
+            Error::InvalidInput("CIF has no P1 cell for explicit bonds".to_owned())
+        })?;
+        if p1.n_atoms() != count {
+            return Err(Error::InvalidInput(format!(
+                "CIF explicit bonds declare {count} P1 atoms but the expansion has {}",
+                p1.n_atoms()
+            )));
+        }
+        raw_indices
+            .into_iter()
+            .map(|(i, j, image, order, remove)| ExplicitBond {
+                i,
+                j,
+                image,
+                order,
+                remove,
+            })
+            .collect()
+    } else if raw_bonds.is_empty() {
         Vec::new()
     } else if operations.is_empty() {
         raw_bonds
@@ -189,16 +266,10 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
             })
             .collect()
     } else {
-        let mut base = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
-        for operation in &operations {
-            base = base.operation(*operation);
-        }
-        for site in &sites {
-            base = base.site(site.clone());
-        }
-        let base = base.build()?;
-        let p1 = base.p1()?;
-        map_explicit(&raw_bonds, &sites, &operations, &p1)
+        let p1 = base_p1.as_ref().ok_or_else(|| {
+            Error::InvalidInput("CIF has no P1 cell for explicit bonds".to_owned())
+        })?;
+        map_explicit(&raw_bonds, &sites, &operations, p1)
     };
     let mut builder = StructureBuilder::new(block.name.clone(), lattice).hall(hall.clone());
     for operation in operations {
@@ -216,28 +287,8 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
             "symmetry_source",
             serde_json::Value::String(source.to_owned()),
         );
-        if hall != "P 1" && hall != "P1" {
-            match xtalforge_symmetry::SpaceGroup::parse(&hall) {
-                Ok(group) if group.order() != operations_count => {
-                    builder = builder.metadata(
-                        "symmetry_warning",
-                        serde_json::Value::String(format!(
-                            "operation loop has {operations_count} operations but {hall:?} (Hall {}) has {}",
-                            group.hall_symbol,
-                            group.order()
-                        )),
-                    );
-                }
-                Err(_) => {
-                    builder = builder.metadata(
-                        "symmetry_warning",
-                        serde_json::Value::String(format!(
-                            "operation loop is present but the space-group symbol {hall:?} was not recognised"
-                        )),
-                    );
-                }
-                Ok(_) => {}
-            }
+        if let Some(warning) = operation_warning {
+            builder = builder.metadata("symmetry_warning", serde_json::Value::String(warning));
         }
     }
     for bond in explicit {
@@ -420,4 +471,21 @@ fn canonical(i: usize, j: usize, image: [i32; 3]) -> (usize, usize, [i32; 3]) {
     } else {
         (i, j, image)
     }
+}
+
+fn same_operations(first: &[SymOp], second: &[SymOp]) -> bool {
+    fn keys(operations: &[SymOp]) -> BTreeSet<([[i32; 3]; 3], [i64; 3])> {
+        operations
+            .iter()
+            .map(|operation| {
+                (
+                    operation.rotation(),
+                    operation
+                        .translation()
+                        .map(|value| (value.rem_euclid(1.0) * 1e8).round() as i64),
+                )
+            })
+            .collect()
+    }
+    keys(first) == keys(second)
 }
