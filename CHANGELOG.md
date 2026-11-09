@@ -7,6 +7,16 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+### Changed
+
+- Phase 1 Task 1.11.1/1.11.5: perceive bonds with the reference defaults
+  (`scale = 1.15`, metal-metal pairs forbidden) and validate the full golden
+  corpus: every available bond set and coordination number matches
+  Crystal-Builder after P1 atom mapping.
+- Phase 1 Task 1.6/1.15: expand each site on its own duplicate grid, so
+  disorder components at the same position both survive, and resolve a CIF
+  Hall/H-M symbol into operations when the file omits the operation loop.
+
 ## [0.0.2] - 2026-11-09
 
 ### Changed

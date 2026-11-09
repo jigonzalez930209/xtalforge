@@ -1178,6 +1178,7 @@ dependencies = [
  "serde",
  "serde_json",
  "xtalforge-core",
+ "xtalforge-symmetry",
  "zip",
 ]
 
