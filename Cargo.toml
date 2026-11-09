@@ -28,7 +28,7 @@ homepage = "https://jigonzalez930209.github.io/xtalforge/"
 documentation = "https://docs.rs/xtalforge"
 authors = ["Jose Ivan Gonzalez <jigonzalez930209@gmail.com>"]
 keywords = ["crystal", "chemistry", "symmetry", "materials", "science"]
-categories = ["science", "science::chemistry", "simulation"]
+categories = ["science", "simulation"]
 
 [workspace.dependencies]
 # Internal crates. `scripts/sync-version.sh` rewrites the pinned versions.
