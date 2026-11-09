@@ -115,6 +115,11 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   the RCSR terms of use and record them in `THIRD_PARTY.md` before copying
   them into `data/`. If redistribution is not allowed, download on first use
   with a checksum.
+  Note: the full 2019-06-01 snapshots are bundled in `data/rcsr/` with the
+  maintainer's authorisation (2026-11-09), their SHA-256 checksums and the
+  citation. `crates/xtalforge-analysis/data/rcsr_index.bin` is the derived
+  47 KB fingerprint index; `examples/build_rcsr_index.rs` regenerates it and
+  fails on any fingerprint mismatch.
 - [x] 5.6.2 Quotient graph
   Port `analysis/topology.py` (1484 lines; split): a net is a finite quotient
   graph whose edges carry lattice translations, up to relabelling of vertices
@@ -126,6 +131,11 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   Coordination sequences, vertex symbols, point symbols, periodicity
   dimension, and a canonical key (canonical labelling of the quotient graph
   with a normalized translation basis) so equal nets give equal keys.
+  Note: coordination sequences, point symbols and the periodicity rank are
+  computed in `xtalforge-analysis/src/topology.rs`. The catalogue's canonical
+  keys are consumed from the RCSR JSON when the index is built, but an input
+  graph's key is not recomputed; nets that share both invariants are reported
+  as an ambiguous set instead of being separated silently.
 - [x] 5.6.4 RCSR identification
   Port `analysis/rcsr.py` (1249 lines): name a net against the RCSR (2665 of
   the 2679 3-periodic nets are distinguished uniquely by the Crystal-Builder
@@ -133,11 +143,19 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   with the nearest candidates). Build step that precomputes the keys of the
   database into a data file (`python -m xtal.analysis.rcsr build` in the
   original).
+  Note: the embedded index holds all 2,931 entries; every keyed entry was
+  rebuilt from its canonical key and its fingerprint compared with the
+  reference row during generation (2,909 keyed, 22 unkeyed, 35 shared
+  fingerprint hashes).
 - [x] 5.6.5 Validation
   Known frameworks from the corpus identified correctly (HKUST-1 `tbo`, MOF-5
   `pcu`, UiO-66 `fcu`, ZIF-8 `sod`, MOF-74 `msf`; expected names taken from
   the Crystal-Builder golden data, not from memory);
   Systre test data in `Crystal-Builder/tests/data/systre` and `rcsr`.
+  Note: `tests/rcsr.rs` identifies `tbo`, `pcu`, `fcu`, `sod`, `msf`, `srs`,
+  `dia` and `sql` from their canonical keys; `tests/cgd.rs` reads the bundled
+  snapshot (2,931 entries, one known problem, `moo-a`) and both edge
+  dialects.
 
 ## Task 5.7 — Net search and merged nets
 
