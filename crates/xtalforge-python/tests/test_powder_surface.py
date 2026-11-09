@@ -94,3 +94,22 @@ def test_powder_refine_surface() -> None:
     assert result["parameter_esds"]
     assert any(name == "zero" for name, _ in result["parameter_esds"])
     assert all(esd >= 0.0 for _, esd in result["parameter_esds"])
+
+
+def test_powder_automatic_leading_cell_table() -> None:
+    from pathlib import Path
+
+    root = Path(__file__).parents[3]
+    cif = (root / "tests" / "corpus" / "simple" / "TiO2.cif").read_text(
+        encoding="utf-8"
+    )
+    pattern = (
+        root / "tests" / "golden" / "phase-7" / "rietveld" / "rutile.xy"
+    ).read_text(encoding="utf-8")
+    result = xtalforge.powder_automatic(cif, pattern)
+    assert result["steps"][:3] == ["peaks", "index", "leading_cells"]
+    rows = result["leading_cells"]
+    assert rows
+    assert any(row["pawley_rwp"] is not None for row in rows)
+    fitted = [row["pawley_rwp"] for row in rows if row["pawley_rwp"] is not None]
+    assert fitted == sorted(fitted)
