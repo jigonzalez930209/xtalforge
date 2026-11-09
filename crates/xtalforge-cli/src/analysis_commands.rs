@@ -119,27 +119,39 @@ fn porosity(cli: &Cli, path: &str, spacing: f64, probe: f64) -> Result<(), CliEr
 fn nets(cli: &Cli, path: &str, tolerance: f64) -> Result<(), CliError> {
     let text = input::read_source(path).map_err(CliError::core)?;
     let file = xtalforge::io::read_cgd(&text);
-    let index = RcsrIndex::from_subset();
+    let index = RcsrIndex::from_embedded().map_err(CliError::analysis)?;
     let mut entries = Vec::new();
+    let mut display = Vec::new();
     for entry in &file.entries {
         let graph = quotient_graph(entry, tolerance).map_err(CliError::analysis)?;
         let invariants = graph.invariants();
+        let identified = index.identify(&graph).map_err(CliError::analysis)?;
+        let label = if identified.names.is_empty() {
+            if identified.nearest.is_empty() {
+                "not in the RCSR".to_owned()
+            } else {
+                format!("nearest: {}", identified.nearest.join(", "))
+            }
+        } else {
+            identified.names.join(" or ")
+        };
+        display.push((entry.name.clone(), invariants.clone(), label));
         entries.push(json!({
             "name": entry.name,
             "nodes": invariants.nodes,
             "edges": invariants.edges,
             "cycle_rank": invariants.cycle_rank,
             "coordination": invariants.coordination,
-            "identified": index.identify(&graph),
+            "identified": identified,
         }));
     }
     if cli.json {
         println!("{}", json!({"entries": entries, "problems": file.problems}));
     } else {
-        for item in &entries {
+        for (name, invariants, label) in &display {
             println!(
                 "{}: {} nodes, {} edges, rank {}, RCSR {}",
-                item["name"], item["nodes"], item["edges"], item["cycle_rank"], item["identified"]
+                name, invariants.nodes, invariants.edges, invariants.cycle_rank, label
             );
         }
         for problem in &file.problems {
