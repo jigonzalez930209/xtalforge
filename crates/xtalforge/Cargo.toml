@@ -24,6 +24,9 @@ xtalforge-ff = { workspace = true }
 xtalforge-mof = { workspace = true }
 xtalforge-modules = { workspace = true }
 
+[dev-dependencies]
+serde_json = { workspace = true }
+
 [features]
 default = ["parallel"]
 parallel = [
