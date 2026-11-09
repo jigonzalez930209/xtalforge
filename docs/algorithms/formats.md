@@ -48,6 +48,13 @@ VASP XDATCAR is read as a fixed-cell trajectory: the positive scale multiplies
 the three lattice rows, the species/count lines expand the element sequence,
 and each `Direct configuration=` block supplies fractional coordinates.
 `Cartesian configuration=` is converted through the cell. A negative VASP
-scale (target volume) is refused rather than guessed. LAMMPS dump and DFTB+
-`geo_end` are not implemented;
-the reader leaves them to a caller that needs their atom-style variants.
+scale (target volume) is refused rather than guessed.
+
+LAMMPS text dumps are read frame by frame: `ITEM: TIMESTEP`,
+`ITEM: NUMBER OF ATOMS`, an orthogonal or triclinic `ITEM: BOX BOUNDS` (the
+`xy/xz/yz` tilt and the bound corrections are applied) and an `ITEM: ATOMS`
+table. Coordinates may be Cartesian (`x/y/z`, `xu/yu/zu`) or fractional
+(`xs/ys/zs`, `xsu/ysu/zsu`). The element comes from an `element` column or
+from a caller-supplied type map. DFTB+ `geo_end.xyz` is plain extended XYZ
+without a cell, so it is placed in one shared cubic box with 5 A of vacuum;
+`geo_end.gen` is a one-frame final geometry.
