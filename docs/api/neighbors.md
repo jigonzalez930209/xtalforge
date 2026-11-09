@@ -12,14 +12,19 @@ for neighbor in &found {
 }
 ```
 
-The integer image range comes from the smallest interplanar spacing, so small
-cells and skewed cells include the repeated images inside the cutoff. Results
-are sorted by `(i, j, image)`, which makes them deterministic. Self-images
-(`i == j`, nonzero image) are included; the zero image is not.
+The search uses a linked-cell index in fractional space. Bins are sized from
+the perpendicular widths of the cell, so triclinic cells are exact; each
+candidate pair then enumerates the integer images that can reach the cutoff.
+Small cells and skewed cells include the repeated images inside the cutoff.
+Results are sorted by `(i, j, image)`, which makes them deterministic.
+Self-images (`i == j`, nonzero image) are included; the zero image is not.
 
-## Status
+The benchmark target covers 10^3, 10^4 and 10^5 atoms:
 
-The direct periodic search is complete and exact. The linked-cell
-acceleration and the criterion benchmarks from Task 1.10.2 are not implemented
-yet; a future implementation must preserve this output exactly. A rayon build
-would use a fixed reduction order.
+```bash
+cargo bench -p xtalforge-core --bench neighbors
+```
+
+See [Periodic neighbor search](../algorithms/neighbors.md) for the index
+construction, the complexity and the comparison with the Crystal-Builder
+implementation.
