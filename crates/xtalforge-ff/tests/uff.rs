@@ -310,11 +310,18 @@ fn benzene_is_resonant() {
 #[test]
 fn registry_and_run_record_round_trip() {
     let registry = CalculatorRegistry::builtin();
-    assert_eq!(registry.names(), vec!["uff"]);
+    assert_eq!(registry.names(), vec!["uff", "gfn0", "gfn1", "gfn2"]);
     let info = registry.info("uff").unwrap();
     assert!(info.available());
     assert!(info.capabilities.periodic && info.capabilities.forces);
     assert!(!info.description.is_empty());
+    let gfn2 = registry.info("gfn2").expect("a registry entry");
+    assert!(!gfn2.capabilities.periodic);
+    assert_eq!(
+        gfn2.available(),
+        cfg!(feature = "sci-form"),
+        "the GFN availability follows the feature"
+    );
 
     let calculator = registry.build("uff", &options(8.0)).unwrap();
     assert_eq!(calculator.name(), "uff");
