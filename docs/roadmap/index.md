@@ -47,8 +47,6 @@ and exposed on the surfaces. The following reference behaviours are subsets or
 simplified ports rather than complete reproductions; they are the first
 candidates for Phase 8 or a follow-up and are not silent approximations:
 
-- 1.10: direct periodic neighbour search only; linked-cell acceleration and
-  criterion benchmarks are missing.
 - 1.12: chordless rings and counts; full Franzblau weights, per-atom
   membership and aromaticity statistics are missing.
 - 1.15.4: CIF explicit-bond loops, disorder assembly and Uij writing are not

@@ -286,14 +286,19 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   space and sized from the perpendicular widths of the cell, so triclinic
   cells are handled exactly; non-periodic structures use the same code with a
   bounding box.
-  Note: direct periodic search with the smallest interplanar spacing; the
-  linked-cell acceleration is pending in 1.10.2.
+  Note: linked-cell index in fractional space with exact image enumeration;
+  validated against the direct search on random atoms in a triclinic cell.
 - [x] 1.10.2 Determinism and performance
   Output sorted deterministically; optional rayon parallelism with an
   identical result; criterion benchmarks on 10^3, 10^4 and 10^5 atoms
   compared with the Python implementation timings.
-  Note: output is sorted by (i, j, image) and deterministic; benchmarks and
-  the linked-cell build are pending.
+  Note: output is sorted by `(i, j, image)`; the benchmark target
+  `crates/xtalforge-core/benches/neighbors.rs` covers 10^3/10^4/10^5 atoms and
+  is compared with Crystal-Builder in `docs/algorithms/neighbors.md` (845 ms
+  vs 3.56 s for 10^5 atoms). It uses a native `harness = false` target instead
+  of criterion so the release gate does not compile a benchmark framework.
+  Rayon stays optional and unused; P1 duplicate detection now uses a
+  fractional grid instead of a quadratic scan.
 
 ## Task 1.11 — Bonding
 
