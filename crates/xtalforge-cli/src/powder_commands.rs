@@ -382,6 +382,7 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
                 "peaks": result.peaks.len(),
                 "index": result.index,
                 "pawley_rwp": result.pawley.as_ref().map(|pawley| pawley.rwp),
+                "leading_cells": result.leading_cells,
                 "lebail": result.lebail.as_ref().map(|lebail| lebail.r_factor),
                 "rwp": result.phase.as_ref().map(|phase| phase.rwp),
                 "steps": result.steps,
@@ -390,6 +391,21 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
     } else {
         for step in &result.steps {
             println!("{step}");
+        }
+        for (rank, row) in result.leading_cells.iter().enumerate() {
+            println!(
+                "{}. {} a={:.4} b={:.4} c={:.4} beta={:.2} M20={:.1} F_N={:.1} Rwp={}",
+                rank + 1,
+                row.index.system.name(),
+                row.index.cell.a,
+                row.index.cell.b,
+                row.index.cell.c,
+                row.index.cell.beta,
+                row.index.m20,
+                row.index.f_n,
+                row.pawley_rwp
+                    .map_or_else(|| "not fitted".to_owned(), |value| format!("{value:.4}"))
+            );
         }
     }
     Ok(())
