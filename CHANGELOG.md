@@ -7,6 +7,8 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+## [0.0.3] - 2026-11-09
+
 ### Changed
 
 - Phase 1 Task 1.11.1/1.11.5: perceive bonds with the reference defaults

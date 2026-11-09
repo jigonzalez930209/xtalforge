@@ -38,9 +38,9 @@ parity with the Rust API.
 Nothing is published yet. After the first release the commands will be:
 
 ```bash
-cargo add xtalforge@0.0.2
-pip install xtalforge==0.0.2
-npm install xtalforge-wasm@0.0.2
+cargo add xtalforge@0.0.3
+pip install xtalforge==0.0.3
+npm install xtalforge-wasm@0.0.3
 ```
 
 ## Goals
