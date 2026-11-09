@@ -4,7 +4,7 @@ The format registry (`xtalforge_io::registry`) reads and writes nine formats.
 
 | Format | Extensions | Read | Write | Notes |
 |---|---|---|---|---|
-| CIF | `.cif`, `.mcif` | yes | yes | blocks, loops, symmetry operations, sites, occupancy, Uiso/Uij, charge |
+| CIF | `.cif`, `.mcif` | yes | yes | blocks, loops, symmetry operations, sites, occupancy, Uiso/Uij, disorder, charge, explicit bonds |
 | POSCAR/CONTCAR | `.poscar`, `.vasp`, `.contcar` | yes | yes | positive scale or negative target volume, species/counts, selective dynamics |
 | XYZ | `.xyz`, `.extxyz` | yes | yes | plain and extended (`Lattice=`, `Properties=`); plain becomes a padded P1 box |
 | pymatgen JSON | `.json` | yes | yes | lattice matrix plus `species`/`abc` sites, partial occupancy |
@@ -24,7 +24,7 @@ xtalforge convert structure.cif --format poscar --out structure.vasp
 xtalforge --json info structure.xyz
 ```
 
-CIF symmetry priority is Hall symbol, operation loop, then H-M symbol/number.
-A file with an H-M symbol but no operation loop records a `symmetry_warning`
-and expands with the identity. Unknown or malformed input returns a typed
-error; it never panics.
+CIF symmetry priority is the operation loop, then the Hall symbol, then the
+H-M symbol/number resolved through the symmetry catalogue. Only an unknown
+symbol records a `symmetry_warning` and expands with the identity. Unknown or
+malformed input returns a typed error; it never panics.
