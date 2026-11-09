@@ -30,6 +30,8 @@
 //! balance decisions from `core/prepare.py` are not part of this core task and
 //! are neither guessed nor hidden.
 
+mod cleanup;
+
 use serde::{Deserialize, Serialize};
 use xtalforge_core::{P1Cell, Site, Structure, StructureBuilder};
 
@@ -39,10 +41,20 @@ use crate::charges::{ChargeOptions, Charges, EwaldOptions, ewald_energy, qeq_cha
 use crate::optimize::{OptimizationResult, OptimizeOptions, fire};
 use crate::vibrations::{HessianOptions, hessian, vibrational_modes};
 
+pub use cleanup::ChargeBalance;
+
 /// Options for one preparation run.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PrepareOptions {
+    /// Whether duplicate sites at the same position are merged.
+    pub merge_duplicates: bool,
+    /// Whether one component of every disorder group is chosen.
+    pub order_disorder: bool,
+    /// Whether known solvent molecules are removed from the pores.
+    pub remove_solvent: bool,
+    /// Whether the final cell charge is checked.
+    pub check_charge_balance: bool,
     /// Whether the geometry is relaxed with FIRE.
     pub minimize: bool,
     /// Whether QEq charges are computed and stored on the sites.
@@ -62,6 +74,10 @@ pub struct PrepareOptions {
 impl Default for PrepareOptions {
     fn default() -> Self {
         Self {
+            merge_duplicates: false,
+            order_disorder: false,
+            remove_solvent: false,
+            check_charge_balance: false,
             minimize: true,
             charges: true,
             ewald: false,
@@ -120,6 +136,8 @@ impl PrepareStep {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PrepareReport {
+    /// Prepared structure after every selected step.
+    pub structure: Structure,
     /// Every step in pipeline order, including skipped ones.
     pub steps: Vec<PrepareStep>,
     /// Final calculator energy in eV on the prepared geometry.
@@ -135,6 +153,10 @@ pub struct PrepareReport {
     pub frequencies: Vec<f64>,
     /// Full minimizer result, present only when the minimize step ran.
     pub optimized: Option<OptimizationResult>,
+    /// Sites removed by the duplicate, disorder or solvent steps.
+    pub removed_sites: usize,
+    /// Final charge balance, present only when that step ran.
+    pub charge_balance: Option<ChargeBalance>,
 }
 
 /// Runs the preparation pipeline on `structure`.
@@ -155,12 +177,62 @@ pub fn prepare(
 ) -> Result<PrepareReport, Error> {
     options.validate()?;
     let mut working = structure.clone();
-    let mut steps = Vec::with_capacity(4);
+    let mut steps = Vec::with_capacity(8);
     let mut optimized = None;
+    let mut removed_sites = 0;
     let mut computed_charges: Option<Charges> = None;
     let mut ewald_value = None;
     let mut frequencies = Vec::new();
     let energy;
+
+    if options.merge_duplicates {
+        let (next, removed) = cleanup::merge_duplicates(&working)?;
+        removed_sites += removed;
+        steps.push(PrepareStep::new(
+            "duplicates",
+            true,
+            format!("merged {removed} duplicate site(s)"),
+        ));
+        working = next;
+    } else {
+        steps.push(PrepareStep::new(
+            "duplicates",
+            false,
+            "skipped: duplicate sites left as given".to_owned(),
+        ));
+    }
+    if options.order_disorder {
+        let (next, removed) = cleanup::order_disorder(&working)?;
+        removed_sites += removed;
+        steps.push(PrepareStep::new(
+            "disorder",
+            true,
+            format!("chose the disorder components, removed {removed} site(s)"),
+        ));
+        working = next;
+    } else {
+        steps.push(PrepareStep::new(
+            "disorder",
+            false,
+            "skipped: partial occupancy left as given".to_owned(),
+        ));
+    }
+    if options.remove_solvent {
+        let (next, removed) = cleanup::remove_solvent(&working)?;
+        removed_sites += removed;
+        steps.push(PrepareStep::new(
+            "solvent",
+            true,
+            format!("removed {removed} solvent molecule(s)"),
+        ));
+        working = next;
+    } else {
+        steps.push(PrepareStep::new(
+            "solvent",
+            false,
+            "skipped: solvent left in the pores".to_owned(),
+        ));
+    }
 
     if options.minimize {
         let result = fire(calculator, &working, &options.optimize)?;
@@ -248,13 +320,37 @@ pub fn prepare(
     let total_charge = computed_charges
         .as_ref()
         .map_or_else(|| working.total_charge(), |charges| charges.total);
+    let mut charge_balance = None;
+    if options.check_charge_balance {
+        let balance = cleanup::charge_balance(&working)?;
+        steps.push(PrepareStep::new(
+            "charge_balance",
+            true,
+            if balance.neutral {
+                "cell is neutral".to_owned()
+            } else {
+                format!("cell is not neutral: total {:.6} e", balance.total_charge)
+            },
+        ));
+        charge_balance = Some(balance);
+    } else {
+        steps.push(PrepareStep::new(
+            "charge_balance",
+            false,
+            "skipped: charge balance not checked".to_owned(),
+        ));
+    }
+
     Ok(PrepareReport {
+        structure: working,
         steps,
         energy,
         total_charge,
         ewald_energy: ewald_value,
         frequencies,
         optimized,
+        removed_sites,
+        charge_balance,
     })
 }
 
