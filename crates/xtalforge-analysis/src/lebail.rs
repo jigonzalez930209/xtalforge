@@ -10,6 +10,10 @@ use crate::profiles::{Profile, ProfileKind};
 use crate::pxrd::{PxrdOptions, Radiation, calculate_pxrd};
 use xtalforge_core::Structure;
 
+mod esd;
+
+use self::esd::{intensity_esds, solve, statistics, weights};
+
 /// Options for the Le Bail iteration.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LebailOptions {
@@ -48,6 +52,12 @@ pub struct LebailResult {
     pub pattern: Vec<PatternPoint>,
     /// Profile R factor on the fitted points.
     pub r_factor: f64,
+    /// Weighted profile R factor.
+    pub rwp: f64,
+    /// Reduced chi-squared of the extracted intensities.
+    pub chi_squared: f64,
+    /// Standard uncertainty of every intensity, in reflection order.
+    pub intensity_esds: Vec<f64>,
 }
 
 /// Extracts reflection intensities from a measured pattern.
@@ -129,18 +139,14 @@ pub fn le_bail(
             uncertainty: None,
         })
         .collect();
-    let numerator: f64 = observed
-        .iter()
-        .zip(pattern.iter())
-        .map(|(point, fit)| (point.intensity - fit.intensity).abs())
-        .sum();
-    let denominator: f64 = observed.iter().map(|point| point.intensity.abs()).sum();
+    let weights = weights(observed);
+    let (r_factor, rwp, chi_squared) = statistics(observed, &pattern_values, &weights);
+    let intensity_esds = intensity_esds(&positions, observed, options, &weights, chi_squared);
     Ok(LebailResult {
-        r_factor: if denominator > 0.0 {
-            numerator / denominator
-        } else {
-            0.0
-        },
+        r_factor,
+        rwp,
+        chi_squared,
+        intensity_esds,
         intensities,
         positions,
         pattern,
@@ -216,9 +222,11 @@ pub fn pawley(
         ));
     }
     let count = positions.len();
+    let weights = weights(observed);
     let mut normal = vec![vec![0.0; count]; count];
     let mut rhs = vec![0.0; count];
-    for point in observed {
+    for (row_index, point) in observed.iter().enumerate() {
+        let weight = weights.get(row_index).copied().unwrap_or(1.0);
         let row: Vec<f64> = positions
             .iter()
             .map(|position| {
@@ -233,9 +241,9 @@ pub fn pawley(
             })
             .collect();
         for first in 0..count {
-            rhs[first] += row[first] * point.intensity;
+            rhs[first] += weight * row[first] * point.intensity;
             for second in 0..count {
-                normal[first][second] += row[first] * row[second];
+                normal[first][second] += weight * row[first] * row[second];
             }
         }
     }
@@ -264,60 +272,15 @@ pub fn pawley(
             uncertainty: None,
         })
         .collect();
-    let numerator: f64 = observed
-        .iter()
-        .zip(pattern.iter())
-        .map(|(point, fit)| (point.intensity - fit.intensity).abs())
-        .sum();
-    let denominator: f64 = observed.iter().map(|point| point.intensity.abs()).sum();
+    let (r_factor, rwp, chi_squared) = statistics(observed, &pattern_values, &weights);
+    let intensity_esds = intensity_esds(&positions, observed, options, &weights, chi_squared);
     Ok(LebailResult {
         intensities,
         positions,
         pattern,
-        r_factor: if denominator > 0.0 {
-            numerator / denominator
-        } else {
-            0.0
-        },
+        r_factor,
+        rwp,
+        chi_squared,
+        intensity_esds,
     })
-}
-
-fn solve(matrix: &[Vec<f64>], rhs: &[f64]) -> Option<Vec<f64>> {
-    let n = matrix.len();
-    let mut augmented: Vec<Vec<f64>> = matrix
-        .iter()
-        .zip(rhs.iter())
-        .map(|(row, value)| {
-            let mut line = row.clone();
-            line.push(*value);
-            line
-        })
-        .collect();
-    for column in 0..n {
-        let pivot = (column..n).max_by(|a, b| {
-            augmented[*a][column]
-                .abs()
-                .partial_cmp(&augmented[*b][column].abs())
-                .unwrap_or(std::cmp::Ordering::Equal)
-        })?;
-        if augmented[pivot][column].abs() < 1e-14 {
-            return None;
-        }
-        augmented.swap(column, pivot);
-        let divisor = augmented[column][column];
-        for value in augmented[column].iter_mut() {
-            *value /= divisor;
-        }
-        let pivot_row = augmented[column].clone();
-        for (row, line) in augmented.iter_mut().enumerate() {
-            if row == column {
-                continue;
-            }
-            let factor = line[column];
-            for (slot, pivot_value) in line.iter_mut().zip(pivot_row.iter()) {
-                *slot -= factor * pivot_value;
-            }
-        }
-    }
-    Some(augmented.iter().map(|row| row[n]).collect())
 }
