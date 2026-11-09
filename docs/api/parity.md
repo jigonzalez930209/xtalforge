@@ -21,6 +21,7 @@ compares this table with the symbols each surface actually exports.
 | `slab` | 1 | done | done | done | done | Slabs (Task 1.8); WASM `slab_info` |
 | `bonds` | 1 | done | done | done | done | Bond graph (Task 1.11) |
 | `rings` | 1 | done | done | done | done | Primitive rings (Task 1.12) |
+| `ring_paths` | 1 | done | done | done | done | Periodic ring paths with lattice images (Task 1.12) |
 | `groups` | 1 | done | done | done | done | Functional groups (Task 1.13) |
 | `neighbors` | 1 | done | done | done | done | Periodic neighbors (Task 1.10) |
 | `distance` | 1 | done | done | done | done | Measures (Task 1.14) |
