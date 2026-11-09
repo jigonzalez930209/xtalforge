@@ -14,6 +14,8 @@ essential release, then `0.x.y`).
   10^3/10^4/10^5-atom benchmark target and compare it with Crystal-Builder.
 - Phase 1 Task 1.10.2: P1 expansion now deduplicates through a fractional
   grid, removing the quadratic scan that dominated large structures.
+- Phase 1 Task 1.7.1: supercell boundary duplicates use the same fractional
+  grid, cutting the 2x2x2 MOF-5 build from 37.5 ms to 5.5 ms.
 
 ## [0.0.1] - 2026-11-08
 
