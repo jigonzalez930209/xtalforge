@@ -35,7 +35,9 @@ The reader covers the corpus CIFs and malformed input returns a typed error.
 The writer emits the cell, Hall symbol, operation loop, occupancy, Uiso, Uij,
 disorder group/assembly, charge and the explicit-bond loop. Explicit bonds are
 written with the program's `_xtal_bond_kind`/`_geom_bond_*` tags and read back
-for P1 structures; a non-P1 structure keeps its explicit bonds in memory but
-does not round-trip them through CIF. The fuzz target lives in
+for P1 structures. A non-P1 row is mapped through its operation and image to
+P1 contacts (MIL53 matches the 36 golden contacts); an unmatched contact is
+not added to the graph and the writer does not emit non-P1 explicit bonds
+back. The fuzz target lives in
 `crates/xtalforge-io/fuzz`; inconsistency warnings beyond the unknown-symbol
 warning are not implemented.
