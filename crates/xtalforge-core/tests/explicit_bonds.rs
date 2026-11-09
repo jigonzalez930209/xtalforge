@@ -60,3 +60,27 @@ fn topology_bonds_are_stored_separately() {
     assert_eq!(structure.topology_bonds().len(), 1);
     assert!(structure.bond_graph().unwrap().bonds.is_empty());
 }
+
+#[test]
+fn explicit_bond_uses_its_lattice_image_for_the_length() {
+    let structure = StructureBuilder::new("image", Lattice::cubic(10.0).unwrap())
+        .site(Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap())
+        .site(Site::new("C2", "C", [0.9, 0.0, 0.0]).unwrap())
+        .explicit_bond(ExplicitBond {
+            i: 0,
+            j: 1,
+            image: [-1, 0, 0],
+            order: 1.0,
+            remove: false,
+        })
+        .build()
+        .unwrap();
+    let graph = structure.bond_graph().unwrap();
+    let bond = graph
+        .bonds
+        .iter()
+        .find(|bond| bond.explicit)
+        .expect("explicit bond");
+    assert_eq!((bond.i, bond.j, bond.image), (0, 1, [-1, 0, 0]));
+    assert!((bond.distance - 1.0).abs() < 1e-12);
+}
