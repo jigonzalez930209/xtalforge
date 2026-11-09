@@ -22,9 +22,9 @@ and `.` values, atom sites, occupancy, Uiso/Uij, formal charges (including the
 symmetry operation loops (`_symmetry_equiv_pos_as_xyz` or
 `_space_group_symop_operation_xyz`). The operation loop is the setting when
 present; without one, the Hall or H-M symbol is resolved through the symmetry
-catalogue. Only an unknown symbol records a `symmetry_warning`. The
-anisotropic loop is matched by `_atom_site_aniso_label`, so a subset of atoms
-is read correctly.
+catalogue. Only an unknown symbol, or an operation loop whose count disagrees
+with the named symbol, records a `symmetry_warning`. The anisotropic loop is
+matched by `_atom_site_aniso_label`, so a subset of atoms is read correctly.
 
 `decode_text(bytes)` strips a UTF-8 BOM, reads UTF-8 and falls back to Latin-1
 byte by byte. `read_text(path)` is the file wrapper.
