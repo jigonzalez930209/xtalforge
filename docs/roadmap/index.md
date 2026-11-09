@@ -59,9 +59,9 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   known solvent molecules and the charge balance; the full Crystal-Builder
   graph planner, close-contact checks, automatic hydrogens and the undoable
   command layer remain simplified.
-- 4.9: engine probes, the scratch-folder runner and DFTB+/xTB/ORCA input
-  writers and output parsers are implemented; the calculators still do not
-  launch the external binaries.
+- 4.9: the DFTB+ and xTB calculators launch their binaries through the
+  scratch runner; the tests use simulated executables, so a real installation
+  is not exercised in CI. ORCA remains input-only by design.
 - 4.10: the sci-form quantum adapter is a typed contract; the backend is not
   linked in this build.
 - 5.6: a curated 17-net RCSR subset with count/rank/coordination matching; the

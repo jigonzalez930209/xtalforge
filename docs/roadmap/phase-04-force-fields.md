@@ -241,15 +241,15 @@ External programs are optional; nothing in the default build needs them.
   location, k-points, parsing `detailed.out` and `results.tag` for energy,
   forces and stress. Tests use the recorded outputs in
   `Crystal-Builder/tests/data/dftb` so CI needs no binary.
-  Note: `write_dftb_hsd` and `parse_dftb_output`; fabricated outputs are the
-  test fixtures and the real golden outputs are not copied; the calculator
-  does not launch DFTB+ yet.
+  Note: `write_dftb_hsd`, `parse_dftb_output` and `DftbCalculator`; the
+  calculator launches `dftb+` in a scratch folder and parses `detailed.out`.
+  Tests use a simulated executable; the real golden outputs are not copied.
 - [x] 4.9.3 xTB
   Port `ff/xtb/calculator.py` (484 lines): GFN1-xTB, GFN2-xTB and GFN-FF
   through the `xtb` binary, periodic where supported.
-  Note: `write_xtb_input`, `parse_xtb_output`, `XtbOptions`; running the
-  binary is covered by the probe and the typed missing-engine error; the
-  calculator does not launch xTB yet.
+  Note: `write_xtb_input`, `parse_xtb_output`, `XtbOptions` and
+  `XtbCalculator`; the calculator launches `xtb` through the scratch runner,
+  maps the GFN method and parses stdout. Tests use a simulated executable.
 - [x] 4.9.4 ORCA input writer
   Port `xtal/orca/` (input 439 lines, catalogue 375 lines plus data) and
   `modules/orca.py`: ORCA is molecular, so the structure is written as a
