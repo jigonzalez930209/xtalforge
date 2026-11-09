@@ -63,3 +63,20 @@ fn powder_pawley_recovers_the_golden_pattern() {
     assert!(property(&result, "rwp").as_f64().unwrap() < 0.02);
     assert_eq!(as_array(&property(&result, "reflections")).length(), 80);
 }
+
+#[wasm_bindgen_test]
+fn powder_refine_reports_the_mccusker_stages() {
+    let cif = include_str!("../../../tests/corpus/simple/TiO2.cif");
+    let pattern = include_str!("../../../tests/golden/phase-7/rietveld/rutile.xy");
+    let result = xtalforge_wasm::powder_refine_info(
+        cif, pattern, true, false, false, true, true, true, false, true,
+    )
+    .expect("Rietveld refinement");
+    let stages = as_array(&property(&result, "stages"));
+    assert_eq!(stages.length(), 4);
+    assert_eq!(stages.get(0).as_string().unwrap(), "background_scale");
+    let esds = property(&result, "parameter_esds");
+    assert!(!property(&esds, "zero").is_undefined());
+    let rwp = property(&result, "rwp").as_f64().unwrap();
+    assert!(rwp < 0.3, "Rwp {rwp}");
+}
