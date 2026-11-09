@@ -218,7 +218,7 @@ pub(crate) fn ff_types<'py>(
 
 /// Runs the preparation pipeline and returns its report.
 #[pyfunction]
-#[pyo3(signature = (text, minimize = true, charges = true, ewald = false, vibrations = false, format_hint = None))]
+#[pyo3(signature = (text, minimize = true, charges = true, ewald = false, vibrations = false, format_hint = None, merge_duplicates = false, order_disorder = false, remove_solvent = false, check_charge_balance = false))]
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn ff_prepare<'py>(
     py: Python<'py>,
@@ -228,6 +228,10 @@ pub(crate) fn ff_prepare<'py>(
     ewald: bool,
     vibrations: bool,
     format_hint: Option<&str>,
+    merge_duplicates: bool,
+    order_disorder: bool,
+    remove_solvent: bool,
+    check_charge_balance: bool,
 ) -> PyResult<Bound<'py, PyDict>> {
     let structure = load_structure(text, format_hint)?;
     let options = xtalforge::ff::PrepareOptions {
@@ -235,6 +239,10 @@ pub(crate) fn ff_prepare<'py>(
         charges,
         ewald,
         vibrations,
+        merge_duplicates,
+        order_disorder,
+        remove_solvent,
+        check_charge_balance,
         ..Default::default()
     };
     let report = xtalforge::ff::prepare(&calculator()?, &structure, &options)
@@ -244,6 +252,20 @@ pub(crate) fn ff_prepare<'py>(
     dict.set_item("total_charge", report.total_charge)?;
     dict.set_item("ewald_energy", report.ewald_energy)?;
     dict.set_item("frequencies", report.frequencies)?;
+    dict.set_item("removed_sites", report.removed_sites)?;
+    if let Some(balance) = &report.charge_balance {
+        let item = PyDict::new(py);
+        item.set_item("total_charge", balance.total_charge)?;
+        item.set_item("neutral", balance.neutral)?;
+        dict.set_item("charge_balance", item)?;
+    } else {
+        dict.set_item("charge_balance", py.None())?;
+    }
+    dict.set_item(
+        "structure",
+        serde_json::to_string(&report.structure)
+            .map_err(|error| crate::invalid_input(error.to_string()))?,
+    )?;
     let steps = PyList::empty(py);
     for step in &report.steps {
         let item = PyDict::new(py);
