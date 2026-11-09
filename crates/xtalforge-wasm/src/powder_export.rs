@@ -84,6 +84,26 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
             }
         }
         set(&item, "pawley_cell_esds", esds.into());
+        let groups = js_sys::Array::new();
+        for group in &row.space_groups {
+            let entry = js_sys::Object::new();
+            set(&entry, "number", JsValue::from_f64(f64::from(group.number)));
+            set(&entry, "symbol", JsValue::from_str(&group.symbol));
+            set(
+                &entry,
+                "centering",
+                JsValue::from_str(&group.centering.to_string()),
+            );
+            set(&entry, "point_group", JsValue::from_str(&group.point_group));
+            set(&entry, "order", JsValue::from_f64(group.order as f64));
+            set(
+                &entry,
+                "unexplained_peaks",
+                JsValue::from_f64(group.unexplained_peaks as f64),
+            );
+            groups.push(&entry.into());
+        }
+        set(&item, "space_groups", groups.into());
         leading.push(&item.into());
     }
     set(&object, "leading_cells", leading.into());
