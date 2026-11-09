@@ -422,6 +422,14 @@ def powder_refine(
     text: str,
     pattern_text: str,
     refine_positions: bool = True,
+    refine_adps: bool = False,
+    refine_occupancies: bool = False,
+    refine_zero: bool = False,
+    refine_cell: bool = False,
+    refine_width: bool = False,
+    refine_texture: bool = False,
+    texture_axis: tuple[float, float, float] = (0.0, 0.0, 1.0),
+    doublet: bool = False,
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
 def powder_cells(number: int) -> dict[str, object]: ...
