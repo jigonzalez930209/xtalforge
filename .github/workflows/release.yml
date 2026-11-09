@@ -200,14 +200,14 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
-          args: --release --out dist
+          args: --release --out dist-wheel
           working-directory: crates/xtalforge-python
           manylinux: auto
       - name: Build the Python sdist
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
-          args: --out dist
+          args: --out dist-sdist
           working-directory: crates/xtalforge-python
       - name: Publish to PyPI
         env:
@@ -218,7 +218,8 @@ jobs:
             --username __token__ \
             --password "${PYPI_API_TOKEN}" \
             --skip-existing \
-            crates/xtalforge-python/dist/*
+            crates/xtalforge-python/dist-wheel/* \
+            crates/xtalforge-python/dist-sdist/*
 
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
