@@ -162,6 +162,14 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   Atom counts, ring statistics (Task 1.12) and density against
   Crystal-Builder output for fixed seeds (the RNG must be identical or the
   comparison is statistical; decide and document).
+  Note: the port uses its own seeded RNG, so the golden test is statistical:
+  the diamond 1x1x1 recipe matches the reference density, atom count, edge
+  fractions and six-membered ring mode within the documented tolerances.
+  The remesh target is 3.55 A to yield 1.50 A dual bonds (the reference
+  averages 1.42 A); the ribbon paths follow the net through shared anchors
+  but are not the reference's noise-weighted spines, Stone-Wales pairs are
+  accepted but not placed, and multiple layers are refused. The ring census
+  reads the stored explicit bonds, not distance perception.
 
 ## Task 6.9 — Amorphous polymers
 

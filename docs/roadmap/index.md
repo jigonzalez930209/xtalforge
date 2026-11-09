@@ -56,8 +56,6 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   linked in this build.
 - 5.6: a curated 17-net RCSR subset with count/rank/coordination matching; the
   full RCSR catalogue and canonical keys are not bundled.
-- 6.8: the gyroid/Schwarz P structures are geometric level-set models, not
-  relaxed carbons.
 - 7.10: the automatic leading-cell table is ranked by Pawley fit but does not
   assign space groups from systematic absences. Peak picking (7.3), general
   metric indexing (7.5), Le Bail with intensity esds (7.6.3), the Pawley fit
