@@ -210,12 +210,13 @@ Crate: `xtalforge-powder`.
   Port `powder/auto.py`: peaks, indexing, then a Pawley fit of every leading
   cell in every leading space group, and a table ranked by fit quality (TOPAS
   `b_indy` into `c_paw` without a person copying the cell).
-  Note: `run_automatic` fits the first `AutomaticOptions::leading_cells`
-  candidates and sorts the table by Pawley Rwp. Each row also carries the
-  space groups whose general-position systematic absences every indexed
-  reflection obeys, ranked by group order. The screen is a reflection-condition
-  test, not a Le Bail/ Pawley fit per extinction class, and the leading-cell
-  order itself still comes from the indexing figures of merit.
+  Note: `run_automatic` enumerates the extinction classes of the first
+  `AutomaticOptions::leading_cells` cells, ranks the surviving classes by a
+  Le Bail BIC against the absence-free lattice class, and Pawley fits the
+  leading `AutomaticOptions::classes`. The table is ranked by Pawley Rwp with
+  the reference's 1 % tie rule. The BIC uses this port's Le Bail residual and a
+  fixed profile width, and the class symbol is the representative's
+  Hermann-Mauguin symbol; the golden rutile table selects `P 4_2/m n m` first.
 - [x] 7.10.2 Module steps
   Port `modules/powder.py` (1893 lines; split by step): each step (peaks,
   index, pawley, rietveld, energy, pareto, auto) as a module action reading the

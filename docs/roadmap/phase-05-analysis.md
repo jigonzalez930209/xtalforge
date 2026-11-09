@@ -118,7 +118,7 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   Note: the full 2019-06-01 snapshots are bundled in `data/rcsr/` with the
   maintainer's authorisation (2026-11-09), their SHA-256 checksums and the
   citation. `crates/xtalforge-analysis/data/rcsr_index.bin` is the derived
-  47 KB fingerprint index; `examples/build_rcsr_index.rs` regenerates it and
+  35 KB fingerprint index; `examples/build_rcsr_index.rs` regenerates it and
   fails on any fingerprint mismatch.
 - [x] 5.6.2 Quotient graph
   Port `analysis/topology.py` (1484 lines; split): a net is a finite quotient

@@ -49,17 +49,11 @@ and exposed on the surfaces. The following reference behaviours are subsets or
 simplified ports rather than complete reproductions; they are the first
 candidates for Phase 8 or a follow-up and are not silent approximations:
 
-- 4.9: the DFTB+ and xTB calculators launch their binaries through the
-  scratch runner; the tests use simulated executables, so a real installation
-  is not exercised in CI. ORCA remains input-only by design.
-- 7.10: the leading-cell table now screens space groups from systematic
-  absences, but the candidates are ranked by group order rather than by a
-  Le Bail/Pawley fit of every extinction class, and the leading-cell order
-  still comes from the indexing figures of merit. Peak picking (7.3), general
-  metric indexing (7.5), Le Bail with intensity esds (7.6.3), the Pawley fit
-  (7.6.2), the McCusker-order structural refinement (7.8), the leading-cell
-  table and its space-group screen (7.10.1) are implemented.
-
+- 4.9: the DFTB+ parser is validated against a recorded DFTB+ output
+  (`crates/xtalforge-ff/tests/fixtures/dftb/si_scc_detailed.out`), and the xTB
+  GFN0/GFN1/GFN2 methods are available in-process through the `sci-form`
+  feature. The external launchers still need a real binary, so a complete
+  DFTB+/xTB run is not executed in CI; ORCA remains input-only by design.
 ## Release milestones
 
 Version rules are defined in `AGENTS.md` section 5. In short:
