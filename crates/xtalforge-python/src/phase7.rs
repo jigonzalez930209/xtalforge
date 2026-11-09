@@ -40,6 +40,27 @@ pub(crate) fn powder_automatic<'py>(
         "pawley_rwp",
         result.pawley.as_ref().map(|pawley| pawley.rwp),
     )?;
+    let leading = PyList::empty(py);
+    for row in &result.leading_cells {
+        let item = PyDict::new(py);
+        item.set_item("system", row.index.system.name())?;
+        item.set_item("a", row.index.cell.a)?;
+        item.set_item("b", row.index.cell.b)?;
+        item.set_item("c", row.index.cell.c)?;
+        item.set_item("alpha", row.index.cell.alpha)?;
+        item.set_item("beta", row.index.cell.beta)?;
+        item.set_item("gamma", row.index.cell.gamma)?;
+        item.set_item("m20", row.index.m20)?;
+        item.set_item("f_n", row.index.f_n)?;
+        item.set_item("coverage", row.index.coverage)?;
+        item.set_item("pawley_rwp", row.pawley_rwp)?;
+        item.set_item(
+            "pawley_cell_esds",
+            row.pawley_cell_esds.map(|esds| esds.to_vec()),
+        )?;
+        leading.append(item)?;
+    }
+    dict.set_item("leading_cells", leading)?;
     dict.set_item("lebail", result.lebail.map(|lebail| lebail.r_factor))?;
     dict.set_item("rwp", result.phase.map(|phase| phase.rwp))?;
     Ok(dict)
