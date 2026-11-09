@@ -146,6 +146,10 @@ Crate: `xtalforge-powder`.
   `scripts/golden/pawley.py`.
 - [x] 7.6.3 Le Bail extraction
   Iterative intensity extraction as an alternative and a cross-check.
+  Note: the result carries `intensity_esds` from the profile normal matrix
+  scaled by the reduced chi-squared, plus `rwp` and `chi_squared`; above 128
+  reflections the covariance diagonal is used. The esds are conditional on the
+  fixed cell, positions and profile.
 
 ## Task 7.7 — Parameter sets
 
