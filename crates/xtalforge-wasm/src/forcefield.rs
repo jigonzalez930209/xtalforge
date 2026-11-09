@@ -250,6 +250,10 @@ pub fn ff_prepare_info(
     charges: bool,
     ewald: bool,
     vibrations: bool,
+    merge_duplicates: Option<bool>,
+    order_disorder: Option<bool>,
+    remove_solvent: Option<bool>,
+    check_charge_balance: Option<bool>,
 ) -> Result<JsValue, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
     let options = xtalforge::ff::PrepareOptions {
@@ -257,6 +261,10 @@ pub fn ff_prepare_info(
         charges,
         ewald,
         vibrations,
+        merge_duplicates: merge_duplicates.unwrap_or(false),
+        order_disorder: order_disorder.unwrap_or(false),
+        remove_solvent: remove_solvent.unwrap_or(false),
+        check_charge_balance: check_charge_balance.unwrap_or(false),
         ..Default::default()
     };
     let report = xtalforge::ff::prepare(&calculator()?, &structure, &options).map_err(ff_error)?;
@@ -277,6 +285,26 @@ pub fn ff_prepare_info(
         frequencies.push(&JsValue::from_f64(*frequency));
     }
     set(&object, "frequencies", frequencies.into());
+    set(
+        &object,
+        "removed_sites",
+        JsValue::from_f64(report.removed_sites as f64),
+    );
+    if let Some(balance) = &report.charge_balance {
+        let item = js_sys::Object::new();
+        set(
+            &item,
+            "total_charge",
+            JsValue::from_f64(balance.total_charge),
+        );
+        set(&item, "neutral", JsValue::from_bool(balance.neutral));
+        set(&object, "charge_balance", item.into());
+    } else {
+        set(&object, "charge_balance", JsValue::NULL);
+    }
+    let structure = serde_json::to_string(&report.structure)
+        .map_err(|error| to_js_error(xtalforge::ff::Error::InvalidInput(error.to_string())))?;
+    set(&object, "structure", JsValue::from_str(&structure));
     let steps = js_sys::Array::new();
     for step in &report.steps {
         let item = js_sys::Object::new();
