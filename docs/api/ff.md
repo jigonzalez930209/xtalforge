@@ -75,10 +75,12 @@ volume.
 
 ## Preparation pipeline
 
-`prepare(&calculator, &structure, &PrepareOptions)` runs the optional stages in
-order: FIRE relaxation, QEq charges, periodic Ewald and Gamma frequencies.
-`PrepareReport` records every step, including skipped ones, plus energy, total
-charge, Ewald energy and frequencies.
+`prepare(&calculator, &structure, &PrepareOptions)` runs the optional cleanup
+and force-field stages in order: duplicate merging, disorder choice, solvent
+removal, FIRE relaxation, QEq charges, periodic Ewald, Gamma frequencies and
+the charge-balance check. `PrepareReport` records every step, including skipped
+ones, the prepared `structure`, removed-site count, energy, total charge,
+Ewald energy, frequencies and the optional `ChargeBalance`.
 
 ## External engines
 
