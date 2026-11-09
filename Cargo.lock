@@ -1169,6 +1169,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "xtalforge-core",
+ "xtalforge-io",
 ]
 
 [[package]]
