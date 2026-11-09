@@ -319,6 +319,11 @@ fn rings_find_the_hexagon() {
     let ring = array.get(0);
     assert_eq!(property(&ring, "size").as_f64(), Some(6.0));
     assert_eq!(as_array(&property(&ring, "atoms")).length(), 6);
+    let path = as_array(&property(&ring, "path"));
+    assert_eq!(path.length(), 6);
+    let first = as_array(&path.get(0));
+    assert_eq!(first.length(), 2);
+    assert_eq!(as_array(&first.get(1)).length(), 3);
 }
 
 #[wasm_bindgen_test]
