@@ -225,6 +225,9 @@ fn rings_finds_the_six_membered_ring() {
             .len(),
         6
     );
+    let path = value["rings"][0]["path"].as_array().expect("path array");
+    assert_eq!(path.len(), 6);
+    assert_eq!(path[0].as_array().expect("step").len(), 2);
 }
 
 #[test]
