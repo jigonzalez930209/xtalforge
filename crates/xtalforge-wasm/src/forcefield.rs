@@ -303,7 +303,7 @@ pub fn ff_prepare_info(
         set(&object, "charge_balance", JsValue::NULL);
     }
     let structure = serde_json::to_string(&report.structure)
-        .map_err(|error| to_js_error(xtalforge::ff::Error::InvalidInput(error.to_string())))?;
+        .map_err(|error| ff_error(xtalforge::ff::Error::InvalidInput(error.to_string())))?;
     set(&object, "structure", JsValue::from_str(&structure));
     let steps = js_sys::Array::new();
     for step in &report.steps {
