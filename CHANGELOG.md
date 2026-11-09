@@ -23,6 +23,14 @@ essential release, then `0.x.y`).
 - Phase 1 Task 1.12: `rings_explicit` and `ring_counts_explicit` census a
   builder's stored bonds without distance perception.
 
+### Added
+
+- Phase 4 Task 4.10: link the published MIT crate `sci-form` 2.0.0 behind the
+  optional `sci-form` feature and implement `Calculator` for GFN0, GFN1 and
+  GFN2-xTB. The methods are molecular only (a space-group structure is
+  refused), GFN2 returns central-difference forces, and GFN0/GFN1 refuse
+  `energy_forces`. The registry lists `gfn0`, `gfn1` and `gfn2`.
+
 ### Fixed
 
 - Phase 5 Task 5.4: order the four crossings of a marching-tetrahedra 2-2 split around their quadrilateral. The fan taken in the generation order crossed itself, leaving non-manifold edges and a surface that was not watertight.

@@ -7,7 +7,7 @@ origin. Status: `verified` (license read in the source), `to verify`,
 
 | Source | License | What is used | Status |
 |---|---|---|---|
-| sci-form (https://github.com/jigonzalez930209/sci-form, same maintainer) | MIT | Crystal-related modules ported (roadmap Task 0.4); optional dependency for quantum methods | verified, planned; plan in `docs/algorithms/sci-form-reuse.md` |
+| sci-form 2.0.0 (https://github.com/jigonzalez930209/sci-form, same maintainer) | MIT | Crystal-related modules ported (roadmap Task 0.4); optional `sci-form` feature links the published crate for in-process GFN0/GFN1/GFN2 (Task 4.10) | verified, optional dependency; plan in `docs/algorithms/sci-form-reuse.md` |
 | Crystal-Builder (https://github.com/JulesOpp/Crystal-Builder) | MIT, "Copyright (c) 2026 Jules Oppenheim" | Behavioural reference, algorithms ported from `xtal/`, test corpus, golden data, fragment table | verified, redistributed; corpus copied with provenance |
 | gemmi (https://github.com/project-gemmi/gemmi) | MPL-2.0 | Golden-data generator only; no code ported | verified, not redistributed |
 | spglib (https://github.com/spglib/spglib) | BSD-3-Clause | Golden-data generator and moyo audit comparison only | verified, not redistributed |
