@@ -11,7 +11,7 @@
     clippy::indexing_slicing
 )]
 
-use xtalforge_core::Structure;
+use xtalforge_core::{Site, Structure};
 use xtalforge_ff::{OptimizeOptions, PrepareOptions, PrepareStep, UffCalculator, prepare};
 
 fn molecule(name: &str, atoms: &[(&str, [f64; 3])]) -> Structure {
@@ -58,10 +58,20 @@ fn prepare_relaxes_water_and_records_every_step() {
     let report = prepare(&calculator, &distorted_water(), &options()).unwrap();
     assert_eq!(
         names(&report.steps),
-        ["minimize", "charges", "ewald", "vibrations"]
+        [
+            "duplicates",
+            "disorder",
+            "solvent",
+            "minimize",
+            "charges",
+            "ewald",
+            "vibrations",
+            "charge_balance",
+        ]
     );
-    assert!(report.steps[0].done && report.steps[1].done);
-    assert!(!report.steps[2].done && !report.steps[3].done);
+    assert!(report.steps[3].done && report.steps[4].done);
+    assert!(!report.steps[5].done && !report.steps[6].done);
+    assert!(!report.steps[7].done);
     assert!(report.energy.is_finite(), "energy {}", report.energy);
     assert!(report.total_charge.abs() < 1e-8, "{}", report.total_charge);
     assert!(report.ewald_energy.is_none());
@@ -77,7 +87,7 @@ fn prepare_can_evaluate_ewald_on_the_assigned_charges() {
     settings.minimize = false;
     settings.ewald = true;
     let report = prepare(&calculator, &distorted_water(), &settings).unwrap();
-    assert!(report.steps[2].done);
+    assert!(report.steps[5].done);
     let energy = report.ewald_energy.expect("Ewald energy");
     assert!(energy.is_finite(), "Ewald energy {energy}");
     assert!(report.total_charge.abs() < 1e-8);
@@ -110,7 +120,7 @@ fn prepare_can_build_gamma_frequencies() {
         ..PrepareOptions::default()
     };
     let report = prepare(&calculator, &distorted_water(), &settings).unwrap();
-    assert!(report.steps[3].done);
+    assert!(report.steps[6].done);
     assert_eq!(report.frequencies.len(), 9);
     assert!(report.frequencies.iter().all(|value| value.is_finite()));
 }
@@ -134,4 +144,130 @@ fn prepare_rejects_invalid_options() {
         ..PrepareOptions::default()
     };
     assert!(prepare(&calculator, &distorted_water(), &invalid_charges).is_err());
+}
+
+fn cleanup_options() -> PrepareOptions {
+    PrepareOptions {
+        merge_duplicates: true,
+        order_disorder: true,
+        remove_solvent: true,
+        check_charge_balance: true,
+        minimize: false,
+        charges: false,
+        ..PrepareOptions::default()
+    }
+}
+
+fn cell_with(sites: Vec<Site>) -> Structure {
+    let mut builder = xtalforge_core::StructureBuilder::new(
+        "cleanup",
+        xtalforge_core::Lattice::cubic(10.0).unwrap(),
+    );
+    for site in sites {
+        builder = builder.site(site);
+    }
+    builder.build().unwrap()
+}
+
+#[test]
+fn cleanup_merges_duplicate_sites() {
+    let structure = cell_with(vec![
+        Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap(),
+        Site::new("C2", "C", [0.0, 0.0, 0.0]).unwrap(),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let report = prepare(&calculator, &structure, &cleanup_options()).unwrap();
+    assert_eq!(report.removed_sites, 1);
+    assert_eq!(report.charge_balance.expect("balance").total_charge, 0.0);
+}
+
+#[test]
+fn cleanup_chooses_one_disorder_component() {
+    let structure = cell_with(vec![
+        Site::new("O1", "O", [0.0, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.5)
+            .unwrap()
+            .with_disorder_group(1),
+        Site::new("O2", "O", [0.05, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.5)
+            .unwrap()
+            .with_disorder_group(2),
+        Site::new("C1", "C", [0.5, 0.5, 0.5]).unwrap(),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let mut options = cleanup_options();
+    options.remove_solvent = false;
+    let report = prepare(&calculator, &structure, &options).unwrap();
+    assert_eq!(report.removed_sites, 1);
+}
+
+#[test]
+fn cleanup_removes_a_solvent_molecule() {
+    let structure = cell_with(vec![
+        Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap(),
+        Site::new("O1", "O", [0.5, 0.5, 0.5]).unwrap(),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let report = prepare(&calculator, &structure, &cleanup_options()).unwrap();
+    assert_eq!(report.removed_sites, 1);
+    assert!(
+        report
+            .steps
+            .iter()
+            .any(|step| step.name == "solvent" && step.done)
+    );
+}
+
+#[test]
+fn cleanup_reports_a_non_neutral_cell() {
+    let structure = cell_with(vec![
+        Site::new("Na1", "Na", [0.0, 0.0, 0.0])
+            .unwrap()
+            .with_charge(1.0)
+            .unwrap(),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let report = prepare(&calculator, &structure, &cleanup_options()).unwrap();
+    let balance = report.charge_balance.expect("balance");
+    assert!(!balance.neutral);
+    assert!((balance.total_charge - 1.0).abs() < 1e-12);
+}
+
+#[test]
+fn prepared_golden_samples_are_ordered_and_neutral() {
+    use std::fs;
+    use std::path::Path;
+
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/prepared");
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let mut checked = 0;
+    for entry in fs::read_dir(root).unwrap() {
+        let path = entry.unwrap().path();
+        if path.extension().and_then(|value| value.to_str()) != Some("cif") {
+            continue;
+        }
+        let structure = xtalforge_io::read_cif(&fs::read_to_string(&path).unwrap()).unwrap();
+        if structure.p1().unwrap().n_atoms() > 600 {
+            continue;
+        }
+        let report = prepare(&calculator, &structure, &cleanup_options()).unwrap();
+        assert!(
+            report
+                .structure
+                .sites()
+                .iter()
+                .all(|site| (site.occupancy() - 1.0).abs() < 1e-6),
+            "{}: partial occupancy left",
+            path.display()
+        );
+        assert!(
+            report.charge_balance.is_some(),
+            "{}: no charge balance",
+            path.display()
+        );
+        checked += 1;
+    }
+    assert!(checked >= 5, "prepared golden samples checked: {checked}");
 }
