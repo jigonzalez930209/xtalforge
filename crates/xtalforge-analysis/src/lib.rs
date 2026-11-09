@@ -26,6 +26,7 @@ pub mod rcsr;
 pub mod refine;
 pub mod rietveld;
 pub mod rietx;
+pub mod topology;
 pub mod zeo;
 
 pub use automatic::{AutomaticOptions, AutomaticResult, LeadingCell, run_automatic};
@@ -62,6 +63,7 @@ pub use rietx::{
     ACCEPTANCE_MAX_POSITION_ERROR, ACCEPTANCE_MAX_RWP, AcceptanceMetrics, RIETX_LICENSE_NOTE,
     RietxBridge, check_acceptance, rietx_inventory,
 };
+pub use topology::{DEPTH, MAX_RING, NetFingerprint, fingerprint};
 pub use xtalforge_core::Error;
 #[cfg(not(target_arch = "wasm32"))]
 pub use zeo::run_zeo;
