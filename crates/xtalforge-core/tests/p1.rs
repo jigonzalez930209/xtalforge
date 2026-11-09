@@ -98,3 +98,17 @@ fn p1_tolerance_is_validated() {
     assert!(xtalforge_core::P1Cell::expand(&structure, -1.0).is_err());
     assert!(xtalforge_core::P1Cell::expand(&structure, f64::NAN).is_err());
 }
+
+#[test]
+fn disorder_sites_at_the_same_position_both_survive() {
+    let lattice = Lattice::cubic(10.0).unwrap();
+    let structure = StructureBuilder::new("disorder", lattice)
+        .site(Site::new("C1", "C", [0.1, 0.2, 0.3]).unwrap())
+        .site(Site::new("C2", "C", [0.1, 0.2, 0.3]).unwrap())
+        .build()
+        .unwrap();
+    let p1 = structure.p1().unwrap();
+    assert_eq!(p1.n_atoms(), 2);
+    assert_eq!(p1.atoms[0].site_idx, 0);
+    assert_eq!(p1.atoms[1].site_idx, 1);
+}

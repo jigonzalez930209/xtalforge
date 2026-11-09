@@ -107,3 +107,28 @@ fn rules_are_validated() {
         .is_err()
     );
 }
+
+#[test]
+fn metal_metal_pairs_are_not_bonds() {
+    let lattice = Lattice::cubic(10.0).unwrap();
+    let structure = StructureBuilder::new("cu2", lattice)
+        .site(Site::new("Cu1", "Cu", [0.0, 0.0, 0.0]).unwrap())
+        .site(Site::new("Cu2", "Cu", [0.2, 0.0, 0.0]).unwrap())
+        .build()
+        .unwrap();
+    assert!(structure.bond_graph().unwrap().bonds.is_empty());
+}
+
+#[test]
+fn carbon_hydrogen_uses_the_reference_scale() {
+    let lattice = Lattice::cubic(10.0).unwrap();
+    let structure = StructureBuilder::new("ch", lattice)
+        .site(Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap())
+        .site(Site::new("H1", "H", [0.119, 0.0, 0.0]).unwrap())
+        .site(Site::new("H2", "H", [0.121, 0.0, 0.0]).unwrap())
+        .build()
+        .unwrap();
+    let graph = structure.bond_graph().unwrap();
+    assert_eq!(graph.bonds.len(), 1);
+    assert_eq!((graph.bonds[0].i, graph.bonds[0].j), (0, 1));
+}
