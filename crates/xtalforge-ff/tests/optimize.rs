@@ -29,7 +29,7 @@ fn molecule(name: &str, atoms: &[(&str, [f64; 3])]) -> Structure {
 }
 
 fn distorted_methane() -> Structure {
-    let length = natural_bond_length("C_3", "H_", 1.0).unwrap() * 1.12;
+    let length = natural_bond_length("C_3", "H_", 1.0).unwrap() * 1.05;
     let a = length / 3.0_f64.sqrt();
     molecule(
         "distorted-methane",
