@@ -82,5 +82,10 @@ optional uncertainty column.
 `Trajectory { elements, lattice, frames }` holds many frames with fixed atom
 order. `read_trajectory_xyz` and `write_trajectory_xyz` handle multi-frame
 extended XYZ, including `Lattice="..."`, `energy` and `step`; `structure(frame)`
-converts one frame to a `Structure`. Reading is streaming over the frame list,
-not indexed random access yet.
+converts one frame to a `Structure`. `XyzIndex::new(text)` records the frame
+offsets, elements, lattice and header energies without materialising the
+frames; `frame(i)` and `structure(i)` parse one frame on demand.
+
+`read_xdatcar` handles the fixed-cell VASP XDATCAR in `Direct` and `Cartesian`
+form, and `read_trajectory` detects XYZ or XDATCAR from the first line. LAMMPS
+dump and DFTB+ `geo_end` remain deferred.
