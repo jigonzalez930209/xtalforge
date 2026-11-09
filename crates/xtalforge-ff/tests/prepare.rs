@@ -330,3 +330,79 @@ fn graph_planner_keeps_a_connected_disorder_unit() {
     assert_eq!(report.removed_sites, 1);
     assert_eq!(report.structure.sites().len(), 1);
 }
+
+#[test]
+fn disorder_choice_follows_the_declared_formula() {
+    let structure = xtalforge_core::StructureBuilder::new(
+        "formula",
+        xtalforge_core::Lattice::cubic(10.0).unwrap(),
+    )
+    .site(Site::new("C1", "C", [0.5, 0.5, 0.5]).unwrap())
+    .site(
+        Site::new("O1", "O", [0.0, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.6)
+            .unwrap()
+            .with_disorder_group(1),
+    )
+    .site(
+        Site::new("N1", "N", [0.18, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.4)
+            .unwrap()
+            .with_disorder_group(2),
+    )
+    .metadata("chemical_formula", serde_json::json!("C1 N1"))
+    .build()
+    .unwrap();
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let mut options = cleanup_options();
+    options.remove_solvent = false;
+    let report = prepare(&calculator, &structure, &options).unwrap();
+    assert_eq!(report.structure.sites().len(), 2);
+    assert!(
+        report
+            .structure
+            .sites()
+            .iter()
+            .any(|site| site.element() == "N")
+    );
+    assert!(
+        report
+            .structure
+            .sites()
+            .iter()
+            .all(|site| site.element() != "O")
+    );
+}
+
+#[test]
+fn disorder_choice_prefers_a_neutral_component() {
+    let structure = cell_with(vec![
+        Site::new("C1", "C", [0.5, 0.5, 0.5]).unwrap(),
+        Site::new("O1", "O", [0.0, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.6)
+            .unwrap()
+            .with_charge(1.0)
+            .unwrap()
+            .with_disorder_group(1),
+        Site::new("N1", "N", [0.18, 0.0, 0.0])
+            .unwrap()
+            .with_occupancy(0.4)
+            .unwrap()
+            .with_disorder_group(2),
+    ]);
+    let calculator = UffCalculator::with_defaults().unwrap();
+    let mut options = cleanup_options();
+    options.remove_solvent = false;
+    let report = prepare(&calculator, &structure, &options).unwrap();
+    assert_eq!(report.structure.sites().len(), 2);
+    assert!(
+        report
+            .structure
+            .sites()
+            .iter()
+            .any(|site| site.element() == "N")
+    );
+}
