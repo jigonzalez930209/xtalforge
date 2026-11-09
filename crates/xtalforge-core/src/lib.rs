@@ -40,7 +40,7 @@ pub use neighbors::{Neighbor, neighbors, neighbors_of};
 pub use p1::{P1Atom, P1Cell};
 pub use param_presets::{PRESET_NAMES, preset, presets};
 pub use params::{ParamSet, ParamSpec, ParamType};
-pub use rings::{Ring, is_aromatic, ring_counts, ring_membership, rings};
+pub use rings::{Ring, RingStep, is_aromatic, ring_counts, ring_membership, ring_paths, rings};
 pub use scalars::{atom_charges, atom_masses, bond_lengths, coordination_numbers};
 pub use selection::{AtomId, Selection, TrackingTable};
 pub use site::Site;
