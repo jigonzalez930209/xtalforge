@@ -47,6 +47,7 @@ check_rust() {
     net_invariants) name=quotient_graph ;;
     zeo_parse) name=parse_zeo_channels ;;
     groups) name=find_groups ;;
+    ring_paths) name=ring_paths ;;
     subgroups) name=translationengleiche_subgroups ;;
     slab) name=make_slab ;;
   esac
@@ -57,6 +58,7 @@ check_python() {
   local name=$1
   case "$name" in
     prepare) name=ff_prepare ;;
+    ring_paths) name=ring_paths ;;
     run_automatic) name=powder_automatic ;;
     refine_phase) name=powder_refine ;;
   esac
@@ -101,6 +103,7 @@ check_wasm() {
     project_pack) name=project_pack ;;
     workspace_archive) name=workspace_archive ;;
     prepare) name=ff_prepare_info ;;
+    ring_paths) name=rings ;;
     add_hydrogens) name=hydrogens_info ;;
     porosity) name=porosity_info ;;
     net_invariants) name=net_invariants_info ;;
@@ -140,7 +143,7 @@ check_cli() {
     project_pack) command=project ;;
     prepare) command=ff ;;
     add_hydrogens) command=hydrogens ;;
-    porosity|net_invariants|zeo_parse) command=analysis ;;
+    porosity|net_invariants|zeo_parse|ring_paths) command=analysis ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
