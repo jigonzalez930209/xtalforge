@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 use xtalforge_core::{Error, Lattice, Structure};
 
+use super::foreign::{read_geo_end, read_lammps_dump};
 use super::{Frame, Trajectory, parse_info, parse_lattice, read_trajectory_xyz};
 
 /// Lazily indexed multi-frame extended XYZ.
@@ -294,19 +295,29 @@ pub fn read_xdatcar(text: &str) -> Result<Trajectory, Error> {
     })
 }
 
-/// Detects extended XYZ or XDATCAR and reads the trajectory.
+/// Detects LAMMPS dump, extended XYZ, DFTB+ `geo_end` or XDATCAR.
 ///
 /// # Errors
 ///
-/// Returns the errors of [`read_trajectory_xyz`] or [`read_xdatcar`].
+/// Returns the error of the selected reader.
 pub fn read_trajectory(text: &str) -> Result<Trajectory, Error> {
     let first = text
         .lines()
         .find(|line| !line.trim().is_empty())
         .unwrap_or("");
-    if first.trim().parse::<usize>().is_ok() {
-        read_trajectory_xyz(text)
-    } else {
-        read_xdatcar(text)
+    if first.trim_start().starts_with("ITEM: TIMESTEP") {
+        return read_lammps_dump(text);
     }
+    let tokens: Vec<&str> = first.split_whitespace().collect();
+    if tokens
+        .first()
+        .is_some_and(|token| token.parse::<usize>().is_ok())
+    {
+        return if tokens.len() == 1 {
+            read_trajectory_xyz(text)
+        } else {
+            read_geo_end(text)
+        };
+    }
+    read_xdatcar(text)
 }
