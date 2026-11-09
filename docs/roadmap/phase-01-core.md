@@ -426,9 +426,11 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   (`_atom_type_oxidation_number`, `_atom_site_charge`), disorder assembly and
   group, explicit bonds (`_geom_bond`), and properties CIF has no tag for
   (kept in `props`).
-  Note: cell, sites, occupancy, Uiso/Uij, charge and Hall/H-M operation
-  resolution are read; explicit `_geom_bond` and disorder assembly remain
-  pending.
+  Note: cell, sites, occupancy, Uiso/Uij (matched by label), charge (with the
+  `_atom_type_oxidation_number` fallback), disorder group/assembly and the
+  program's explicit-bond loop are read and written; Hall/H-M symbols resolve
+  to operations when the loop is missing. Explicit bonds round-trip for P1
+  structures; a non-P1 structure keeps them in memory only.
 - [x] 1.15.5 Robustness
   Never panic: malformed numbers, missing loops, truncated files, duplicate
   labels all return typed errors or warnings with line numbers. Fuzz target
