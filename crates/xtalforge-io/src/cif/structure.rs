@@ -174,6 +174,7 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
         }
     }
     let has_operations = !operations.is_empty();
+    let operations_count = operations.len();
     let explicit = if raw_bonds.is_empty() {
         Vec::new()
     } else if operations.is_empty() {
@@ -215,6 +216,29 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
             "symmetry_source",
             serde_json::Value::String(source.to_owned()),
         );
+        if hall != "P 1" && hall != "P1" {
+            match xtalforge_symmetry::SpaceGroup::parse(&hall) {
+                Ok(group) if group.order() != operations_count => {
+                    builder = builder.metadata(
+                        "symmetry_warning",
+                        serde_json::Value::String(format!(
+                            "operation loop has {operations_count} operations but {hall:?} (Hall {}) has {}",
+                            group.hall_symbol,
+                            group.order()
+                        )),
+                    );
+                }
+                Err(_) => {
+                    builder = builder.metadata(
+                        "symmetry_warning",
+                        serde_json::Value::String(format!(
+                            "operation loop is present but the space-group symbol {hall:?} was not recognised"
+                        )),
+                    );
+                }
+                Ok(_) => {}
+            }
+        }
     }
     for bond in explicit {
         builder = builder.explicit_bond(bond);
