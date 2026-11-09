@@ -49,10 +49,18 @@ APPRUN
 chmod +x "$appdir/AppRun"
 
 if [ ! -x "$TOOL" ]; then
-  curl --fail --location --retry 5 --retry-all-errors --output "$TOOL" \
-    "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$ARCH.AppImage"
-  chmod +x "$TOOL"
+  for url in \
+    "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-$ARCH.AppImage" \
+    "https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-$ARCH.AppImage"; do
+    if curl --fail --location --retry 5 --retry-all-errors \
+      --output "$TOOL.tmp" "$url"; then
+      mv "$TOOL.tmp" "$TOOL"
+      chmod +x "$TOOL"
+      break
+    fi
+  done
 fi
+[ -x "$TOOL" ] || { echo "package-appimage: no appimagetool" >&2; exit 2; }
 if [ ! -x "$RUNTIME" ]; then
   for url in \
     "https://github.com/AppImage/type2-runtime/releases/latest/download/runtime-$ARCH" \
