@@ -7,6 +7,14 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+### Changed
+
+- Phase 1 Task 1.10.1/1.10.2: replace the direct periodic pair scan with a
+  linked-cell index in fractional space and exact image enumeration, add the
+  10^3/10^4/10^5-atom benchmark target and compare it with Crystal-Builder.
+- Phase 1 Task 1.10.2: P1 expansion now deduplicates through a fractional
+  grid, removing the quadratic scan that dominated large structures.
+
 ## [0.0.1] - 2026-11-08
 
 ### Changed
