@@ -271,3 +271,35 @@ fn an_operation_loop_count_disagreement_warns() {
     assert!(warning.contains("operation loop"));
     assert!(warning.contains("P 21/c"));
 }
+
+#[test]
+fn non_p1_explicit_bonds_round_trip_as_p1_indices() {
+    let structure = read_cif(include_str!("../../../tests/corpus/MIL53.cif")).unwrap();
+    assert_eq!(structure.explicit_bonds().len(), 36);
+    let written = write_cif(&structure).unwrap();
+    assert!(written.contains("_xtal_bond_p1_count 104"));
+    assert!(written.contains("_xtal_bond_atom_1"));
+    assert!(!written.contains("_geom_bond_atom_site_label_1"));
+    let back = read_cif(&written).unwrap();
+    assert_eq!(back.p1().unwrap().n_atoms(), 104);
+    assert_eq!(back.explicit_bonds().len(), 36);
+    assert_eq!(back.bond_graph().unwrap().bonds.len(), 126);
+}
+
+#[test]
+fn a_mismatched_operation_set_warns() {
+    let text = "data_warn\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                _symmetry_space_group_name_H-M 'P 21/c'\n\
+                loop_\n_symmetry_equiv_pos_as_xyz\nx,y,z\nx,y,z\nx,y,z\nx,y,z\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                C1 C 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    let warning = structure
+        .metadata()
+        .get("symmetry_warning")
+        .and_then(|value| value.as_str())
+        .expect("a mismatch warning");
+    assert!(warning.contains("does not match"));
+}
