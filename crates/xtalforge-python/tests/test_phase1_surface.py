@@ -425,6 +425,7 @@ def test_analysis_and_hydrogens_surface() -> None:
     assert metrics["surface_area"] >= 0.0
     names = xtalforge.rcsr_names()
     assert "pcu" in names
+    assert len(names) > 2_900
 
     cgd = """CRYSTAL
 NAME pcu
@@ -437,6 +438,9 @@ END
     invariants = xtalforge.net_invariants(cgd)
     assert invariants[0]["name"] == "pcu"
     assert invariants[0]["nodes"] == 2
+    identified = invariants[0]["identified"]
+    assert identified["verdict"] in ("named", "ambiguous", "unknown")
+    assert "names" in identified and "nearest" in identified
     overlay = xtalforge.net_overlay(cgd)
     assert len(overlay["sites"]) == 2
 
