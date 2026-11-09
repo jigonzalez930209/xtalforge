@@ -411,6 +411,20 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
                 row.pawley_rwp
                     .map_or_else(|| "not fitted".to_owned(), |value| format!("{value:.4}"))
             );
+            if !row.space_groups.is_empty() {
+                let groups = row
+                    .space_groups
+                    .iter()
+                    .map(|group| {
+                        format!(
+                            "{} {} ({}, order {})",
+                            group.number, group.symbol, group.centering, group.order
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("; ");
+                println!("   space groups: {groups}");
+            }
         }
     }
     Ok(())
