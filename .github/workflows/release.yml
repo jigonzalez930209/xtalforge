@@ -77,7 +77,7 @@ jobs:
           tar -czf "artifacts/xtalforge-${version}-linux-x86_64.tar.gz" -C package .
           scripts/package-appimage.sh artifacts
       - name: Validate AppStream metadata
-        run: appstreamcli validate assets/io.github.jigonzalez930209.xtalforge.appdata.xml
+        run: appstreamcli validate --no-net assets/io.github.jigonzalez930209.xtalforge.appdata.xml
       - uses: actions/upload-artifact@v7
         with:
           name: cli-linux
