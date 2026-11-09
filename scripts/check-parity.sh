@@ -100,6 +100,7 @@ check_wasm() {
     ribbon) name=ribbon_info ;;
     build_ztc) name=ztc_info ;;
     build_schwarzite) name=schwarzite_info ;;
+    build_carbon) name=build_carbon_recipe_info ;;
     build_polymer) name=polymer_info ;;
     run_automatic) name=powder_automatic_info ;;
     powder_index) name=powder_index_info ;;
@@ -142,7 +143,7 @@ check_cli() {
     detect_symmetry|asymmetrize|to_p1|set_space_group|subgroups|lower_to_subgroup|standardize|primitive_cell|reduce_structure|wyckoff_assignments|tolerance_ladder|diagnose|brillouin_zone|detect_layer_symmetry|detect_magnetic_symmetry|change_setting|band_path|molecular_point_group) command=symmetry ;;
     scene_summary|mesh_stl) command=mesh ;;
     pxrd) command=pxrd ;;
-    build_graphene|build_nanotube|build_c20|build_c60|twist|ribbon|build_ztc|build_schwarzite|build_polymer) command=build ;;
+    build_graphene|build_nanotube|build_c20|build_c60|twist|ribbon|build_ztc|build_schwarzite|build_carbon|build_polymer) command=build ;;
     build_mof) command=mof ;;
     run_automatic|refine_phase|powder_index|powder_pawley) command=powder ;;
     param_schema) command=params ;;
