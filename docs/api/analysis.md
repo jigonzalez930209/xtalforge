@@ -45,13 +45,24 @@ returns `RefinedPhase { structure, rwp, parameters, converged, iterations }`.
 intensity among overlapping reflections and iterates the profile sum, returning
 `LebailResult { intensities, positions, pattern, r_factor }`.
 
-## Cubic indexing
+## Indexing
 
-`index_cubic(peaks, wavelength, max_index, tolerance)` searches cubic `a`,
-indexes each peak and returns `CubicIndex { a, peaks, completeness,
-mean_error }`. This is the implemented indexing engine; non-cubic cells, the
-TREOR/ITO-style searches and the M20/F_N figures of merit of Task 7.5 are not
-implemented and are listed as remaining work in the roadmap.
+`index_pattern(peaks, wavelength, &IndexingOptions)` searches the cubic,
+tetragonal, hexagonal, orthorhombic and monoclinic metric families and returns
+`IndexingResult { candidates }`, best first. Each `IndexedCell` carries the
+family, the refined `CellMetric { a, b, c, alpha, beta, gamma }`, the indexed
+peaks, `completeness`, `mean_error`, the de Wolff `m20`, the Smith-Snyder
+`f_n` and the prediction `coverage`. The search is bounded by `max_index`,
+`max_volume`, `min_completeness` and `max_evaluations`.
+
+`figures_of_merit(&cell, peaks, wavelength, tolerance)` evaluates one cell and
+`predict_reflections(&cell, max_q)` / `match_peaks(...)` expose the prediction
+and the matching. `index_cubic(peaks, wavelength, max_index, tolerance)` is
+the original cubic-only search and keeps returning `CubicIndex`.
+
+Run `xtalforge powder index PATTERN --general` for the ranked table. See
+[Powder indexing](../algorithms/indexing.md) for the solve, the figures of
+merit and the ranking rules.
 
 ## Profiles and background
 
@@ -70,6 +81,11 @@ chi_squared, iterations, converged }` is the result.
 `xtalforge_io::read_xy` reads a measured pattern; `find_peaks(&points,
 &PeakOptions)` finds local maxima with optional smoothing, a height threshold
 and a minimum separation, returning `Peak { two_theta, intensity, fwhm }`.
+`PeakOptions` also turns on a SNIP background subtraction
+(`background`, `background_window`) and a per-line Gaussian plus linear
+background fit (`refine`, `fit_window`). `background_envelope(&points, window)`
+returns the SNIP envelope and `fit_peaks(&points, &positions, &options)` fits
+named positions, which is what an indexing run wants to refine.
 
 ## Nets
 

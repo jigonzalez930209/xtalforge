@@ -44,15 +44,26 @@ the Bravais extinction letter for the 14 Bravais types.
 
 ## Automatic run
 
-`run_automatic(structure, observed, &AutomaticOptions)` finds the peaks, indexes
-a cubic cell, extracts Le Bail intensities and fits the phase, recording every
-step in order in `AutomaticResult { peaks, index, lebail, phase, steps }`. It
-refuses fewer than three points or peaks and reports the cubic-only limitation
-in the module documentation. `IndexedPeak` is one indexed reflection.
+`run_automatic(structure, observed, &AutomaticOptions)` finds the peaks, runs
+the general metric-family indexing, extracts Le Bail intensities and fits the
+phase, recording every step in order in `AutomaticResult { peaks, index,
+lebail, phase, steps }`. It refuses fewer than three points or peaks.
+`IndexedPeak` is one indexed reflection.
+
+## Indexing
+
+`index_pattern(peaks, wavelength, &IndexingOptions)` solves the cubic,
+tetragonal, hexagonal, orthorhombic and monoclinic families, refines each
+candidate and ranks them by coverage, symmetry and M20, with F_N and the
+`coverage` fraction reported. `figures_of_merit`, `predict_reflections` and
+`match_peaks` expose the individual pieces. The definitions and the ranking
+rules are on the [indexing algorithm page](../algorithms/indexing.md).
 
 ## Surfaces
 
 `xtalforge powder {index,lebail,pawley,rietveld,automatic,cells,rietx}`;
-Python `powder_automatic`, `powder_refine`, `powder_cells`, `rietx`; WASM
-`powder_automatic_info`, `powder_refine_info`, `powder_cells_info`,
-`rietx_inventory_info`.
+`powder index --general` prints the ranked metric families and
+`--background`/`--refine-peaks` control peak detection. Python
+`powder_index`, `powder_automatic`, `powder_refine`, `powder_cells`, `rietx`;
+WASM `powder_index_info`, `powder_automatic_info`, `powder_refine_info`,
+`powder_cells_info`, `rietx_inventory_info`.
