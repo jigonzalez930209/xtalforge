@@ -383,6 +383,10 @@ def ff_prepare(
     ewald: bool = False,
     vibrations: bool = False,
     format_hint: str | None = None,
+    merge_duplicates: bool = False,
+    order_disorder: bool = False,
+    remove_solvent: bool = False,
+    check_charge_balance: bool = False,
 ) -> dict[str, object]: ...
 
 def mof_topologies() -> list[dict[str, object]]: ...
