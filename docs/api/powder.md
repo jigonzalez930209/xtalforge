@@ -22,6 +22,15 @@ sample_radius }` applies a zero shift and the sample-displacement correction,
 and `doublet` splits a reflection into the Kα1/Kα2 pair. `Geometry` is
 `BraggBrentano` or `DebyeScherrer`. `doublet_checked` validates the ratio.
 
+## Le Bail
+
+`le_bail(structure, observed, &LebailOptions)` iterates the observed-to-
+calculated ratio inside every reflection window and returns `LebailResult {
+intensities, intensity_esds, positions, pattern, r_factor, rwp, chi_squared }`.
+The intensity esds are the diagonal of `(A^T W A)^-1` scaled by the reduced
+chi-squared; above 128 reflections the covariance diagonal is used instead of
+the exact inverse. See [Le Bail extraction](../algorithms/lebail.md).
+
 ## Pawley
 
 `pawley_refine(structure, observed, &PawleyOptions)` fits the whole pattern

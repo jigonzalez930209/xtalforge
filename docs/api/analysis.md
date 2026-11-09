@@ -46,7 +46,10 @@ subspace helper.
 
 `le_bail(structure, observed, &LebailOptions)` partitions the observed
 intensity among overlapping reflections and iterates the profile sum, returning
-`LebailResult { intensities, positions, pattern, r_factor }`.
+`LebailResult { intensities, positions, pattern, r_factor, rwp, chi_squared,
+intensity_esds }`. The esds come from the inverse of the profile normal matrix
+scaled by the reduced chi-squared; above 128 reflections only the covariance
+diagonal is used. See [Le Bail extraction](../algorithms/lebail.md).
 
 ## Indexing
 
