@@ -71,10 +71,11 @@ cd docs && npm install && npm run docs:build
 ```
 
 There is no CI workflow: the maintainer removed the push/pull-request jobs to
-avoid the runner cost. Run the checks above locally before committing. The only
-workflow is `.github/workflows/release.yml`, which runs on a version tag and
-builds the CLI packages, publishes the registries and deploys the docs. It does
-not run tests.
+avoid the runner cost. Run the checks above locally before committing, and run
+the full local CI gate in `AGENTS.md` section 5.4 before every tag (mandatory
+before every tag). The only workflow is `.github/workflows/release.yml`, which
+runs on a version tag and builds the CLI packages, publishes the registries and
+deploys the docs. It does not run tests.
 
 ## Local Git hooks
 

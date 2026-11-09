@@ -79,7 +79,8 @@ release workflow.
 
 1. Set the version in `Cargo.toml` and run `scripts/sync-version.sh`.
 2. Move the `Unreleased` changelog entries under `## [X.Y.Z] - YYYY-MM-DD`.
-3. Run the local release checks from `AGENTS.md` section 5.4.
+3. Run the full local CI gate from `AGENTS.md` section 5.4 on the exact commit
+   to tag. There is no GitHub CI; this gate is mandatory.
 4. Commit, tag and push:
 
    ```bash
@@ -87,8 +88,8 @@ release workflow.
    git push origin vX.Y.Z
    ```
 
-5. Watch the `Release` workflow; the GitHub release and Pages deployment are
-   the last jobs.
+5. Watch the `Release` workflow; it does not run tests. The GitHub release
+   and Pages deployment are the last jobs.
 6. If a publish step fails after some registries accepted the version, fix the
    cause and re-run the workflow. crates.io and PyPI versions cannot be
    overwritten; the workflow skips crates whose exact version already exists.
