@@ -350,15 +350,17 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   hexagons). Periodic-aware: rings may cross cell boundaries. Size limit
   parameter. Compare with sci-form `rings/sssr.rs` (SSSR, molecular) and keep
   both: SSSR for molecules, primitive rings for frameworks.
-  Note: `rings`/`ring_counts` find chordless simple cycles on the P1 bond
-  graph; periodic ring shifts that need another copy of the start atom and the
-  full Franzblau shortest-path weights remain open.
+  Note: the cycle walk carries `(atom, image)` steps, translates each ring
+  home, and applies the Franzblau shortest-path filter with a
+  `1_000_000 + 500 * n_atoms` budget. Counts and complete paths match the
+  golden corpus at `max_size = 8` (`crates/xtalforge-io/tests/golden_rings.rs`),
+  including graphene's two-atom cell and the too-dense refusals.
 - [x] 1.12.2 Ring statistics
   Counts per size, per-atom ring membership, aromaticity flag for molecules
   (sci-form `rings/aromaticity.rs`).
-  Note: counts per size, `ring_membership` and the heuristic `is_aromatic`
-  flag are implemented and tested on a hexagon; bond-order Hückel perception
-  waits for stored bond orders.
+  Note: counts per size, `ring_membership`, `ring_paths` and the heuristic
+  `is_aromatic` flag are implemented and tested on the corpus; bond-order
+  Hückel perception waits for stored bond orders.
 
 ## Task 1.13 — Functional groups
 

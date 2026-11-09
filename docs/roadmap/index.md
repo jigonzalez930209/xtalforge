@@ -48,10 +48,6 @@ and exposed on the surfaces. The following reference behaviours are subsets or
 simplified ports rather than complete reproductions; they are the first
 candidates for Phase 8 or a follow-up and are not silent approximations:
 
-- 1.12: chordless primitive cycles on the P1 graph with counts, per-atom
-  membership and a heuristic aromaticity flag; periodic ring shifts that need
-  another copy of the start atom and the full Franzblau shortest-path weights
-  are missing.
 - 1.15.4: CIF explicit-bond loops, disorder assembly and Uij writing are not
   round-tripped; inconsistency warnings are limited.
 - 3.6.2/3.6.3: multi-frame extended XYZ with eager loading; lazy random access
