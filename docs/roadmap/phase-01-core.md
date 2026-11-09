@@ -433,7 +433,8 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   structures. A non-P1 record is mapped from its site labels, operation and
   image to the P1 contact (MIL53 matches the golden count), but it is only
   applied where perception already found that contact and is not written
-  back.
+  back. An operation-loop count that disagrees with the named group records
+  a `symmetry_warning`.
 - [x] 1.15.5 Robustness
   Never panic: malformed numbers, missing loops, truncated files, duplicate
   labels all return typed errors or warnings with line numbers. Fuzz target

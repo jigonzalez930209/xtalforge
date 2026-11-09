@@ -52,8 +52,9 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 1.15.4: explicit-bond loops round-trip for P1 structures. A non-P1 record
   maps label + `_geom_bond_site_symmetry_2` + image to the P1 contact (MIL53
   matches the golden count), but only annotates a contact perception already
-  found and is not written back. Inconsistency warnings beyond an unknown
-  Hall symbol are limited.
+  found and is not written back. Warnings cover an unknown Hall symbol and an
+  operation-count mismatch; comparing the individual operations is not
+  implemented.
 - 3.6.2/3.6.3: extended XYZ has lazy frame indexing and VASP XDATCAR is read;
   LAMMPS dump and DFTB+ `geo_end` remain deferred.
 - 4.7: the preparation pipeline covers relax, charges, Ewald and vibrations;
