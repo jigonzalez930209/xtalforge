@@ -1,8 +1,25 @@
-//! CGD periodic nets, the Systre and RCSR format (Task 3.4.1).
-
+//! CGD periodic nets, the Systre and RCSR format (Task 3.4.1 and 5.6.1).
+//!
+//! Ported from Crystal-Builder `xtal/io/cgd.py` (MIT). The reader accepts
+//! both dialects the RCSR file uses: an `EDGE` as a pair of points, or as a
+//! node label followed by one neighbour position. Keywords may stand alone
+//! with their rows underneath, and `# EDGE_CENTER` lines are comments.
 #![allow(clippy::indexing_slicing)] // fixed-format parser, lengths checked above
 use serde::{Deserialize, Serialize};
 use xtalforge_core::Error;
+
+/// Every keyword a `.cgd` file uses.
+const KEYWORDS: [&str; 9] = [
+    "crystal",
+    "end",
+    "name",
+    "group",
+    "cell",
+    "node",
+    "atom",
+    "edge",
+    "edge_center",
+];
 
 /// One vertex of a net.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -14,6 +31,9 @@ pub struct CgdNode {
     /// Fractional coordinates.
     pub frac: Vec<f64>,
 }
+
+/// One edge as its two endpoint points.
+type EdgePoints = (Vec<f64>, Vec<f64>);
 
 /// One `CRYSTAL ... END` block.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -30,6 +50,20 @@ pub struct CgdEntry {
     pub cell: Option<Vec<f64>>,
     /// Source line of the `CRYSTAL` keyword.
     pub line: usize,
+}
+
+impl CgdEntry {
+    /// Coordinate dimension of the entry (2 or 3).
+    #[must_use]
+    pub fn dimension(&self) -> usize {
+        if let Some(node) = self.nodes.first() {
+            node.frac.len()
+        } else if self.cell.as_ref().is_some_and(|cell| cell.len() == 3) {
+            2
+        } else {
+            3
+        }
+    }
 }
 
 /// A parsed CGD file and the blocks that failed.
@@ -53,8 +87,12 @@ pub fn read_cgd(text: &str) -> CgdFile {
         if line.is_empty() {
             continue;
         }
-        let upper = line.to_ascii_uppercase();
-        if upper.starts_with("CRYSTAL") {
+        let head = line
+            .split_whitespace()
+            .next()
+            .unwrap_or("")
+            .to_ascii_lowercase();
+        if head == "crystal" {
             if let Some((start, block)) = current.take() {
                 match parse_block(start + 1, &block) {
                     Ok(entry) => entries.push(entry),
@@ -64,7 +102,7 @@ pub fn read_cgd(text: &str) -> CgdFile {
             current = Some((index + 1, Vec::new()));
             continue;
         }
-        if upper == "END" {
+        if head == "end" {
             if let Some((start, block)) = current.take() {
                 match parse_block(start + 1, &block) {
                     Ok(entry) => entries.push(entry),
@@ -89,50 +127,32 @@ pub fn read_cgd(text: &str) -> CgdFile {
 fn parse_block(line: usize, rows: &[String]) -> Result<CgdEntry, Error> {
     let mut name = String::new();
     let mut group = "P1".to_owned();
-    let mut cell = None;
+    let mut cell: Option<Vec<f64>> = None;
     let mut nodes = Vec::new();
-    let mut edges = Vec::new();
-    let mut keyword = String::new();
+    let mut raw_edges: Vec<Vec<f64>> = Vec::new();
+    let mut pending = String::new();
     for row in rows {
-        let first = row
-            .split_whitespace()
-            .next()
-            .unwrap_or("")
-            .to_ascii_uppercase();
-        let rest = row
-            .split_once(char::is_whitespace)
-            .map_or("", |(_, rest)| rest);
-        match first.as_str() {
-            "NAME" => name = rest.trim().to_owned(),
-            "GROUP" => group = rest.trim().to_owned(),
-            "CELL" => {
-                cell = Some(
-                    rest.split_whitespace()
-                        .filter_map(|value| value.parse().ok())
-                        .collect(),
-                );
+        let tokens: Vec<&str> = row.split_whitespace().collect();
+        let head = tokens.first().copied().unwrap_or("").to_ascii_lowercase();
+        let rest = if KEYWORDS.contains(&head.as_str()) {
+            pending = head;
+            tokens.get(1..).unwrap_or_default()
+        } else {
+            tokens.as_slice()
+        };
+        if rest.is_empty() {
+            continue;
+        }
+        match pending.as_str() {
+            "name" => name = rest[0].to_owned(),
+            "group" => group = rest[0].to_owned(),
+            "cell" => {
+                cell = Some(rest.iter().filter_map(|value| value.parse().ok()).collect());
             }
-            "NODE" | "ATOM" | "EDGE" | "EDGE_CENTER" => {
-                keyword = first.clone();
-                if first == "EDGE" || first == "EDGE_CENTER" {
-                    if let Some(edge) = parse_edge(rest) {
-                        edges.push(edge);
-                    }
-                } else if let Some(node) = parse_node(rest) {
-                    nodes.push(node);
-                }
-            }
-            _ => {
-                if keyword == "EDGE" || keyword == "EDGE_CENTER" {
-                    if let Some(edge) = parse_edge(row) {
-                        edges.push(edge);
-                    }
-                } else if (keyword == "NODE" || keyword == "ATOM")
-                    && let Some(node) = parse_node(row)
-                {
-                    nodes.push(node);
-                }
-            }
+            "node" | "atom" => nodes.push(parse_node(rest, line)?),
+            "edge" => raw_edges.push(rest.iter().filter_map(|value| value.parse().ok()).collect()),
+            "edge_center" => {}
+            _ => {}
         }
     }
     if name.is_empty() {
@@ -140,9 +160,17 @@ fn parse_block(line: usize, rows: &[String]) -> Result<CgdEntry, Error> {
             "CGD block at line {line} has no NAME"
         )));
     }
-    if nodes.is_empty() && edges.is_empty() {
+    let dimension = if let Some(node) = nodes.first() {
+        node.frac.len()
+    } else if cell.as_ref().is_some_and(|value| value.len() == 3) {
+        2
+    } else {
+        3
+    };
+    let edges = resolve_edges(&raw_edges, &nodes, dimension, &name, line)?;
+    if edges.is_empty() {
         return Err(Error::InvalidInput(format!(
-            "CGD block {name} has no nodes or edges"
+            "CGD block {name} has no edges"
         )));
     }
     Ok(CgdEntry {
@@ -155,42 +183,62 @@ fn parse_block(line: usize, rows: &[String]) -> Result<CgdEntry, Error> {
     })
 }
 
-fn parse_node(rest: &str) -> Option<CgdNode> {
-    let parts: Vec<&str> = rest.split_whitespace().collect();
-    if parts.len() < 3 {
-        return None;
+fn parse_node(rest: &[&str], line: usize) -> Result<CgdNode, Error> {
+    if rest.len() < 3 {
+        return Err(Error::InvalidInput(format!(
+            "CGD node at line {line} is incomplete"
+        )));
     }
-    let (label, coordination, start) = if parts[0].chars().all(|c| c.is_ascii_digit()) {
-        (format!("N{}", parts[0]), parts[1].parse().ok()?, 2)
-    } else {
-        (parts[0].to_owned(), parts[1].parse().ok()?, 2)
-    };
-    let frac: Vec<f64> = parts[start..]
+    let label = rest[0].to_owned();
+    let coordination = rest[1]
+        .parse::<usize>()
+        .map_err(|_| Error::InvalidInput(format!("CGD node {label} has no coordination number")))?;
+    let frac: Vec<f64> = rest[2..]
         .iter()
         .filter_map(|value| value.parse().ok())
         .collect();
     if frac.len() < 2 {
-        return None;
+        return Err(Error::InvalidInput(format!(
+            "CGD node {label} has no coordinates"
+        )));
     }
-    Some(CgdNode {
+    Ok(CgdNode {
         label,
         coordination,
         frac,
     })
 }
 
-fn parse_edge(rest: &str) -> Option<(Vec<f64>, Vec<f64>)> {
-    let values: Vec<f64> = rest
-        .split_whitespace()
-        .filter_map(|value| value.parse().ok())
-        .collect();
-    if values.len() == 6 {
-        Some((values[..3].to_vec(), values[3..6].to_vec()))
-    } else if values.len() == 4 {
-        Some((values[..3].to_vec(), values[3..].to_vec()))
-    } else {
-        None
+fn resolve_edges(
+    raw: &[Vec<f64>],
+    nodes: &[CgdNode],
+    dimension: usize,
+    name: &str,
+    line: usize,
+) -> Result<Vec<EdgePoints>, Error> {
+    let mut edges = Vec::with_capacity(raw.len());
+    for values in raw {
+        if values.len() == 2 * dimension {
+            edges.push((values[..dimension].to_vec(), values[dimension..].to_vec()));
+        } else if values.len() == dimension + 1 {
+            let label = format!("{}", values[0] as i64);
+            let node = nodes
+                .iter()
+                .find(|node| node.label == label)
+                .ok_or_else(|| {
+                    Error::InvalidInput(format!(
+                        "CGD block {name} at line {line} has an edge at node {label}, which it never declares"
+                    ))
+                })?;
+            edges.push((node.frac.clone(), values[1..].to_vec()));
+        } else {
+            return Err(Error::InvalidInput(format!(
+                "CGD block {name} at line {line} has an edge of {} numbers, which is neither a pair of {dimension}D points nor a node and a neighbour",
+                values.len()
+            )));
+        }
     }
+    Ok(edges)
 }
 
 /// Writes one block in the common dialect, in `P1`.
