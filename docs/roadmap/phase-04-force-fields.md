@@ -196,8 +196,11 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   matrix, frequencies on a q-mesh (Monkhorst-Pack; study sci-form `kmesh.rs`)
   and along the k-path of Task 2.10, phonon DOS. Validate against phonopy
   results recorded in the golden data for simple solids.
-  Note: `phonons` computes the Gamma-point dynamical matrix from the Hessian;
-  the q-mesh and DOS are documented as pending.
+  Note: the Gamma path uses the primitive Hessian; a q-mesh builds the
+  supercell force constants, folds them with the shortest periodic image,
+  applies the acoustic sum rule, samples the Monkhorst-Pack grid and returns
+  an optional DOS. Validated against the analytic spring dispersion and a
+  phonopy golden file.
 - [x] 4.8.4 Thermochemistry
   Port `ff/thermo.py`: harmonic statistical mechanics over any frequency list
   (Gamma Hessian, q-mesh with weights, or an engine's own modes): zero-point

@@ -58,8 +58,6 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 4.7: the preparation pipeline covers relax, charges, Ewald and vibrations;
   disorder/partial-occupancy resolution, solvent removal, charge-balance
   checks and the prepared-sample golden comparison are not implemented.
-- 4.8.3: Gamma-point dynamical matrix only; the supercell force constants,
-  q-mesh and phonon DOS are not implemented.
 - 4.9: engine probes and DFTB+/xTB/ORCA input writers and output parsers are
   implemented; the scratch-folder runner with timeout/cancellation and actual
   DFTB+/xTB execution are not.
