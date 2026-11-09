@@ -220,7 +220,7 @@ fn gamma_phonons_expose_three_acoustic_modes() {
     )
     .unwrap_err();
     assert_eq!(error.code(), "invalid_input");
-    assert!(error.message().contains("not implemented"));
+    assert!(error.message().contains("supercell"));
 }
 
 #[test]
