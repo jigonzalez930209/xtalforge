@@ -36,9 +36,9 @@ pub use charges::{
     ewald_energy, ewald_energy_forces, qeq_charges,
 };
 pub use external::{
-    BOHR_TO_ANGSTROM, DftbOptions, EngineKind, EngineResult, EngineStatus,
+    BOHR_TO_ANGSTROM, DftbCalculator, DftbOptions, EngineKind, EngineResult, EngineStatus,
     HARTREE_PER_BOHR_TO_EV_PER_ANGSTROM, HARTREE_PER_BOHR3_TO_GPA, HARTREE_TO_EV, OrcaOptions,
-    RunOutcome, RunSpec, RunStatus, XtbOptions, orca_catalogue, parse_dftb_output,
+    RunOutcome, RunSpec, RunStatus, XtbCalculator, XtbOptions, orca_catalogue, parse_dftb_output,
     parse_xtb_output, probe, probe_binary, run_in_scratch, write_dftb_hsd, write_orca_input,
     write_xtb_input,
 };

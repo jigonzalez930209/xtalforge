@@ -34,6 +34,7 @@
 //! user's chosen parameter set must live there (or the `Prefix` in the written
 //! file must be edited).
 
+mod calculators;
 mod dftb;
 mod orca;
 mod probe;
@@ -43,6 +44,7 @@ mod xtb;
 
 use serde::{Deserialize, Serialize};
 
+pub use calculators::{DftbCalculator, XtbCalculator};
 pub use dftb::{DftbOptions, parse_dftb_output, write_dftb_hsd};
 pub use orca::{OrcaOptions, orca_catalogue, write_orca_input};
 pub use probe::{probe, probe_binary};
