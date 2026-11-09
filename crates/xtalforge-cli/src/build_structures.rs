@@ -1,6 +1,7 @@
 //! The `build` command family (graphene, nanotubes and fullerenes).
 
 use clap::Subcommand;
+use serde_json::json;
 
 use crate::format::StructureFormat;
 use crate::{Cli, CliError, output};
@@ -110,6 +111,46 @@ pub(crate) enum BuildAction {
         /// Level-set value.
         #[arg(long, default_value_t = 0.0)]
         isovalue: f64,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Output format; defaults to the output extension or CIF.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build a disordered carbon from a recipe (dia or pcu net).
+    Carbon {
+        /// Net name (`dia` or `pcu`).
+        #[arg(long, default_value = "dia")]
+        net: String,
+        /// Repeats along a, b and c.
+        #[arg(long, default_value_t = 1)]
+        repeat_x: usize,
+        #[arg(long, default_value_t = 1)]
+        repeat_y: usize,
+        #[arg(long, default_value_t = 1)]
+        repeat_z: usize,
+        /// Carbon density in g/cm3.
+        #[arg(long, default_value_t = 0.42)]
+        density: f64,
+        /// Strut radius over the mean net edge.
+        #[arg(long, default_value_t = 0.25)]
+        radius_ratio: f64,
+        /// Fraction of the closed sheet kept.
+        #[arg(long, default_value_t = 0.38)]
+        coverage: f64,
+        /// Deterministic seed.
+        #[arg(long, default_value_t = 0)]
+        seed: u64,
+        /// Hydrogen per carbon.
+        #[arg(long, default_value_t = 0.07)]
+        hydrogen: f64,
+        /// Fluorine per carbon.
+        #[arg(long, default_value_t = 0.29)]
+        fluorine: f64,
+        /// Oxygen per carbon.
+        #[arg(long, default_value_t = 0.044)]
+        oxygen: f64,
         /// Output path; defaults to standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
@@ -376,4 +417,55 @@ pub(crate) fn hydrogens(
     )
     .map_err(CliError::core)?;
     output::emit_structure(cli, &filled, out, format)
+}
+
+/// Builds a disordered carbon from a recipe.
+///
+/// # Errors
+///
+/// Returns [`CliError`] for a builder or output failure.
+#[allow(clippy::too_many_arguments)] // one flag per recipe field
+pub(crate) fn carbon(
+    cli: &Cli,
+    net: &str,
+    repeat: [usize; 3],
+    density: f64,
+    radius_ratio: f64,
+    coverage: f64,
+    seed: u64,
+    hydrogen: f64,
+    fluorine: f64,
+    oxygen: f64,
+    out: Option<&str>,
+    format: Option<StructureFormat>,
+) -> Result<(), CliError> {
+    let recipe = xtalforge::build::CarbonRecipe {
+        net: net.to_owned(),
+        repeat,
+        density,
+        radius_ratio,
+        coverage,
+        seed,
+        hydrogen,
+        fluorine,
+        oxygen,
+        ..xtalforge::build::CarbonRecipe::default()
+    };
+    let build = xtalforge::build::build_carbon(&recipe).map_err(CliError::core)?;
+    if cli.json {
+        println!("{}", json!(build));
+        return Ok(());
+    }
+    println!(
+        "{} atoms, {:.3} g/cm3, mean C-C {:.3} A, {} piece(s), periodicity {}",
+        build.structure.sites().len(),
+        build.density,
+        build.mean_bond,
+        build.pieces,
+        build.periodicity
+    );
+    for note in &build.notes {
+        println!("note: {note}");
+    }
+    output::emit_structure(cli, &build.structure, out, format)
 }
