@@ -15,6 +15,11 @@ essential release, then `0.x.y`).
   dual and H/F/O edge termination. `CarbonBuild` reports density, ratios,
   ring census, mean C-C, pieces and periodicity; CLI `build carbon`, Python
   `build_carbon`, WASM `build_carbon_recipe_info`.
+- Phase 7 Task 7.10.1: every leading-cell row now carries `space_groups`, the
+  candidates whose general-position systematic absences every indexed
+  reflection obeys. The screen enumerates the cell's crystal system, evaluates
+  the structure factor of two generic points per reflection and ranks by
+  group order; CLI, Python and WASM expose the candidates.
 - Phase 1 Task 1.12: `rings_explicit` and `ring_counts_explicit` census a
   builder's stored bonds without distance perception.
 
