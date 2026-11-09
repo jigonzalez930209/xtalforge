@@ -9,6 +9,13 @@ essential release, then `0.x.y`).
 
 ### Changed
 
+- Phase 7 Task 7.5.1/7.5.2: add general metric-family indexing (cubic,
+  tetragonal, hexagonal, orthorhombic, monoclinic) with cell refinement, de
+  Wolff M20, Smith-Snyder F_N and a coverage-ranked table; Python
+  `powder_index`, WASM `powder_index_info` and `powder index --general`.
+- Phase 7 Task 7.3.1: add the SNIP background envelope, per-line Gaussian plus
+  linear background fitting and `fit_peaks`, with `--background` and
+  `--refine-peaks` on the CLI.
 - Phase 1 Task 1.15.4: map a non-P1 `_geom_bond` row from its site labels,
   operation code and image to P1 contacts (MIL53 matches the 36 golden
   contacts), collapsing symmetry-equivalent images by their minimum-image
