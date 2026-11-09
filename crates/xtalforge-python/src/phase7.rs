@@ -45,14 +45,27 @@ pub(crate) fn powder_automatic<'py>(
     Ok(dict)
 }
 
-/// Refines positions with a whole-pattern least-squares step.
+/// Refines a phase with the McCusker stages.
+///
+/// Returns `rwp`, `converged`, `iterations`, `stages`, `parameters` and
+/// `parameter_esds`; the stage order is background/scale, zero/cell, width,
+/// then structure.
 #[pyfunction]
-#[pyo3(signature = (text, pattern_text, refine_positions = true, format_hint = None))]
+#[allow(clippy::too_many_arguments)] // one keyword per documented stage switch
+#[pyo3(signature = (text, pattern_text, refine_positions = true, refine_adps = false, refine_occupancies = false, refine_zero = false, refine_cell = false, refine_width = false, refine_texture = false, texture_axis = (0.0, 0.0, 1.0), doublet = false, format_hint = None))]
 pub(crate) fn powder_refine<'py>(
     py: Python<'py>,
     text: &str,
     pattern_text: &str,
     refine_positions: bool,
+    refine_adps: bool,
+    refine_occupancies: bool,
+    refine_zero: bool,
+    refine_cell: bool,
+    refine_width: bool,
+    refine_texture: bool,
+    texture_axis: (f64, f64, f64),
+    doublet: bool,
     format_hint: Option<&str>,
 ) -> PyResult<Bound<'py, PyDict>> {
     let structure = load_structure(text, format_hint)?;
@@ -63,6 +76,14 @@ pub(crate) fn powder_refine<'py>(
         &RietveldOptions::default(),
         &RefineOptions {
             refine_positions,
+            refine_adps,
+            refine_occupancies,
+            refine_zero,
+            refine_cell,
+            refine_width,
+            refine_texture,
+            texture_axis: [texture_axis.0, texture_axis.1, texture_axis.2],
+            doublet,
             ..RefineOptions::default()
         },
     )
@@ -71,7 +92,9 @@ pub(crate) fn powder_refine<'py>(
     dict.set_item("rwp", result.rwp)?;
     dict.set_item("converged", result.converged)?;
     dict.set_item("iterations", result.iterations)?;
+    dict.set_item("stages", result.stages)?;
     dict.set_item("parameters", result.parameters)?;
+    dict.set_item("parameter_esds", result.parameter_esds)?;
     Ok(dict)
 }
 
