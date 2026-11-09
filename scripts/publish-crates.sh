@@ -14,8 +14,8 @@ USER_AGENT="xtalforge-release/${VERSION} (https://github.com/jigonzalez930209/xt
 
 CRATES=(
   xtalforge-core
-  xtalforge-io
   xtalforge-symmetry
+  xtalforge-io
   xtalforge-view
   xtalforge-commands
   xtalforge-ff
