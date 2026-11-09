@@ -40,6 +40,10 @@ must record the reason in the algorithm page.
 | Indexing figures of merit | relative to the Python reference | 1e-4 | 7 |
 | Indexed lattice (golden) | Q-spectrum agreement | 5e-4 relative | 7 |
 | Peak fit centre | absolute | 2e-3 degree (synthetic Gaussian) | 7 |
+| Pawley cell | absolute | 2e-3 Angstrom (golden pattern) | 7 |
+| Pawley zero shift | absolute | 5e-3 degree (golden pattern) | 7 |
+| Pawley intensity | absolute | 3 esds | 7 |
+| Pawley Rwp / chi^2 | absolute | 0.02 (golden pattern) | 7 |
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |
