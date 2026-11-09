@@ -26,6 +26,13 @@ essential release, then `0.x.y`).
   reflection obeys. The screen enumerates the cell's crystal system, evaluates
   the structure factor of two generic points per reflection and ranks by
   group order; CLI, Python and WASM expose the candidates.
+- Phase 7 Task 7.10.1: the automatic table now ranks extinction classes by a
+  Le Bail BIC and Pawley-fits every leading (cell, class), as the reference
+  does. A row carries `cell_rank`, `class_rank`, `class_symbol`, `delta_bic`
+  and the groups that share the class; the 1 % Rwp tie rule orders the table.
+- Phase 4 Task 4.9: validate the DFTB+ energy, force, stress and population
+  parser against the recorded `si_scc_detailed.out` fixture. The xTB GFN
+  methods remain available in-process through `sci-form` (Task 4.10).
 - Phase 1 Task 1.12: `rings_explicit` and `ring_counts_explicit` census a
   builder's stored bonds without distance perception.
 
