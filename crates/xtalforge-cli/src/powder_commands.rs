@@ -279,15 +279,20 @@ fn lebail(
             "{}",
             json!({
                 "intensities": result.intensities,
+                "intensity_esds": result.intensity_esds,
                 "positions": result.positions,
                 "r_factor": result.r_factor,
+                "rwp": result.rwp,
+                "chi_squared": result.chi_squared,
             })
         );
     } else {
         println!(
-            "{} reflections, R = {:.4}",
+            "{} reflections, R = {:.4}, Rwp = {:.4}, chi2 = {:.4}",
             result.intensities.len(),
-            result.r_factor
+            result.r_factor,
+            result.rwp,
+            result.chi_squared
         );
     }
     Ok(())
