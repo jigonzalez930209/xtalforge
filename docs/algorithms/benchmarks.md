@@ -7,20 +7,24 @@ is shown to indicate noise. Wall-clock values are rounded to 0.1 ms.
 
 | Structure | Command | Median | Minimum |
 |---|---|---|---|
-| Si (8 P1 atoms) | `info` | 1.7 ms | 1.3 ms |
-| Si | `bonds` | 1.9 ms | 1.7 ms |
-| Si | `rings` | 1.9 ms | 1.7 ms |
-| MOF-5 (asymmetric unit) | `info` | 1.8 ms | 1.5 ms |
-| MOF-5 | `bonds` | 66.8 ms | 64.5 ms |
-| MOF-5 | `rings` | 66.7 ms | 63.9 ms |
-| MOF-5 | `supercell 2 2 2` | 2.1 ms | 1.6 ms |
+| Si (8 P1 atoms) | `info` | 2.6 ms | 2.2 ms |
+| Si | `bonds` | 2.5 ms | 2.1 ms |
+| Si | `rings` | 2.7 ms | 2.4 ms |
+| MOF-5 (asymmetric unit) | `info` | 2.7 ms | 2.2 ms |
+| MOF-5 | `bonds` | 3.5 ms | 2.7 ms |
+| MOF-5 | `rings` | 3.3 ms | 2.9 ms |
+| MOF-5 | `supercell 2 2 2` | 37.5 ms | 36.0 ms |
 
 Notes:
 
-- `bonds` and `rings` on MOF-5 are dominated by the direct periodic neighbor
-  search over the expanded P1 cell. The linked-cell acceleration of Task
-  1.10.2 must preserve the current output exactly; the benchmark table is the
-  regression reference.
+- `bonds` and `rings` on MOF-5 used to be dominated by the direct periodic
+  neighbor search (66.8 ms and 66.7 ms in the pre-linked-cell table). The
+  linked-cell index of Task 1.10.2 brings both to about 3.5 ms while keeping the
+  output identical; the scaling benchmark is on the
+  [neighbor-search page](./neighbors.md).
+- The `supercell` command is now dominated by its own candidate deduplication,
+  not by the neighbor search. That path is a candidate for the same kind of
+  index in a later performance pass.
 - The CLI `supercell` command replicates the asymmetric unit; callers that
   want every atom of the crystal expand to P1 first (the Python and WASM
   bindings do).
