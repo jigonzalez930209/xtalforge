@@ -408,6 +408,16 @@ def powder_index(
     background: bool = False,
     refine: bool = False,
 ) -> dict[str, object]: ...
+def powder_pawley(
+    text: str,
+    pattern_text: str,
+    format_hint: str | None = None,
+    refine_cell: bool = True,
+    refine_zero: bool = True,
+    refine_size: bool = False,
+    refine_strain: bool = False,
+    profile: str = "pseudo_voigt",
+) -> dict[str, object]: ...
 def powder_refine(
     text: str,
     pattern_text: str,
