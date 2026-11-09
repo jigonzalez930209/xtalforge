@@ -7,7 +7,21 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use serde::{Deserialize, Serialize};
-use xtalforge_core::{Error, P1Cell, Site, Structure, StructureBuilder, element_info};
+use xtalforge_core::{Error, P1Cell, Site, Structure, StructureBuilder, element_info, neighbors};
+
+/// One pair of atoms closer than the reference clash threshold.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CloseContact {
+    /// First P1 atom.
+    pub i: usize,
+    /// Second P1 atom.
+    pub j: usize,
+    /// Minimum-image distance in Angstrom.
+    pub distance: f64,
+    /// Element symbols of the two atoms.
+    pub elements: [String; 2],
+}
 
 /// Net charge of the prepared cell.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -99,13 +113,49 @@ pub(crate) fn order_disorder(structure: &Structure) -> Result<(Structure, usize)
     if partial.is_empty() {
         return Ok((structure.clone(), 0));
     }
+    let graph = structure.bond_graph()?;
+    let mut component_by_atom = vec![0_usize; p1.atoms.len()];
+    for (component, atoms) in graph.components().iter().enumerate() {
+        for atom in atoms {
+            if let Some(slot) = component_by_atom.get_mut(*atom) {
+                *slot = component;
+            }
+        }
+    }
+    let mut first_atom = vec![None; structure.sites().len()];
+    for (atom, index) in p1.atoms.iter().enumerate() {
+        if let Some(slot) = first_atom.get_mut(index.site_idx)
+            && slot.is_none()
+        {
+            *slot = Some(atom);
+        }
+    }
+    let mut partials_in_component: BTreeMap<usize, usize> = BTreeMap::new();
+    for index in &partial {
+        let component = first_atom
+            .get(*index)
+            .and_then(|atom| *atom)
+            .and_then(|atom| component_by_atom.get(atom).copied())
+            .unwrap_or(*index);
+        *partials_in_component.entry(component).or_default() += 1;
+    }
     let mut groups: BTreeMap<u32, Vec<usize>> = BTreeMap::new();
     for (offset, index) in partial.iter().enumerate() {
-        let key = structure
-            .sites()
-            .get(*index)
-            .and_then(Site::disorder_group)
-            .unwrap_or(1_000_000 + offset as u32);
+        let explicit = structure.sites().get(*index).and_then(Site::disorder_group);
+        let key = if let Some(group) = explicit {
+            group
+        } else {
+            let component = first_atom
+                .get(*index)
+                .and_then(|atom| *atom)
+                .and_then(|atom| component_by_atom.get(atom).copied())
+                .unwrap_or(*index);
+            if partials_in_component.get(&component).copied().unwrap_or(0) > 1 {
+                1_000_000 + component as u32
+            } else {
+                2_000_000 + offset as u32
+            }
+        };
         groups.entry(key).or_default().push(*index);
     }
     let keys = groups.keys().copied().collect::<Vec<_>>();
@@ -235,6 +285,59 @@ pub(crate) fn charge_balance(structure: &Structure) -> Result<ChargeBalance, Err
         total_charge: total,
         neutral: total.abs() <= 1e-6,
     })
+}
+
+/// Every P1 pair closer than the reference clash threshold.
+///
+/// H-H uses 1.4 A, O-O 2.0 A and halogen-halogen 1.9 A; other pairs use
+/// `0.8 * (r_i + r_j)` with the covalent radii. The list is sorted by atom
+/// indices and is empty for a clean structure.
+///
+/// # Errors
+///
+/// Returns the errors of the P1 expansion or the periodic neighbor search.
+pub(crate) fn close_contacts(structure: &Structure) -> Result<Vec<CloseContact>, Error> {
+    let p1 = structure.p1()?;
+    let found = neighbors(structure, 2.1)?;
+    let mut out = Vec::new();
+    for pair in found {
+        if pair.i >= pair.j {
+            continue;
+        }
+        let (Some(first), Some(second)) = (p1.atoms.get(pair.i), p1.atoms.get(pair.j)) else {
+            continue;
+        };
+        if !is_clash(&first.element, &second.element, pair.distance) {
+            continue;
+        }
+        out.push(CloseContact {
+            i: pair.i,
+            j: pair.j,
+            distance: pair.distance,
+            elements: [first.element.clone(), second.element.clone()],
+        });
+    }
+    out.sort_by_key(|contact| (contact.i, contact.j, contact.distance.to_bits()));
+    Ok(out)
+}
+
+fn is_clash(first: &str, second: &str, distance: f64) -> bool {
+    let both = |set: &[&str]| set.contains(&first) && set.contains(&second);
+    if both(&["H", "D"]) {
+        return distance < 1.4;
+    }
+    if first == "O" && second == "O" {
+        return distance < 2.0;
+    }
+    let halogens = ["F", "Cl", "Br", "I"];
+    let (Ok(a), Ok(b)) = (element_info(first), element_info(second)) else {
+        return false;
+    };
+    let covalent = 0.8 * (a.covalent_radius + b.covalent_radius);
+    if halogens.contains(&first) && halogens.contains(&second) {
+        return distance < covalent.max(1.9);
+    }
+    distance < covalent
 }
 
 fn overlaps(groups: &BTreeMap<u32, Vec<usize>>, first: u32, second: u32, p1: &P1Cell) -> bool {
