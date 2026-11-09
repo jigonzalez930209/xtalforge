@@ -66,13 +66,17 @@ the Bravais extinction letter for the 14 Bravais types.
 ## Automatic run
 
 `run_automatic(structure, observed, &AutomaticOptions)` finds the peaks, runs
-the general metric-family indexing, extracts Le Bail intensities, fits a Pawley
-model of the indexed cell and fits the phase, recording every step in order in
-`AutomaticResult { peaks, index, lebail, pawley, phase, steps }`. The indexed
-cell is the ranked best of the five families; a Pawley fit that the cell makes
-impossible is recorded as a skipped step instead of aborting the run. It
-refuses fewer than three points or peaks. `IndexedPeak` is one indexed
-reflection.
+the general metric-family indexing, builds a leading-cell table, extracts Le
+Bail intensities, fits a Pawley model of the best indexed cell and fits the
+phase, recording every step in order in `AutomaticResult { peaks, index,
+leading_cells, lebail, pawley, phase, steps }`. `leading_cells` holds the first
+`AutomaticOptions::leading_cells` indexing candidates (default 3), each with its
+`IndexedCell`, Pawley `pawley_rwp` and `pawley_cell_esds`; the table is sorted
+by Pawley Rwp, so the best fit is first even when the indexing ranking differs.
+The `steps` list contains `peaks`, `index`, `leading_cells`, `le_bail`,
+`pawley` and `rietveld` (a Pawley fit the cell makes impossible is recorded as
+`pawley_skipped`). It refuses fewer than three points or peaks and a zero
+`leading_cells`. `IndexedPeak` is one indexed reflection.
 
 ## Indexing
 
