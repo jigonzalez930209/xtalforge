@@ -31,14 +31,18 @@ external engine binary is needed.
 `Geometry = GenFormat`, the `Hamiltonian = DFTB` block, the Slater-Koster
 folder naming and the k-point mesh. `parse_dftb_output` reads `detailed.out`
 (or `results.tag`) for the total energy, forces and the stress tensor.
-Tests use recorded outputs, so CI needs no binary.
+`DftbCalculator::new(options)` writes the input into a scratch folder, launches
+`dftb+` through `run_in_scratch`, reads `detailed.out`, checks the force count
+and exposes the result through `Calculator`. `with_program`, `with_timeout`,
+`keep_scratch` and `cancel_handle` configure the run.
 
 ## xTB
 
 `write_xtb_input` writes the XYZ block plus `$chrg`/`$uhf`; `parse_xtb_output`
-reads `TOTAL ENERGY`, the charge and the forces when present. GFN1-xTB,
-GFN2-xTB and GFN-FF are selected by method name and `xtb` is run through the
-same process runner.
+reads `TOTAL ENERGY`, the charge and the forces when present.
+`XtbCalculator` maps GFN1-xTB, GFN2-xTB and GFN-FF to the corresponding `xtb`
+arguments, runs it through the same scratch runner and parses stdout; an
+unsupported method is refused before launch.
 
 ## ORCA
 
