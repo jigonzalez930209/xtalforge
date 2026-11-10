@@ -84,9 +84,10 @@ builders.
 
 ## Nets
 
-`quotient_graph` contracts a structure to its net: metal clusters and
-connection points become vertices, linkers become edges, and the periodic
-images become edge offsets. `fingerprint` computes the coordination sequence
+`quotient_graph` reads a net from a CGD entry: nodes are fractional vertices,
+edges carry the lattice shift of their second endpoint. Contracting a crystal
+structure (metal clusters and linkers) into its net is **not** implemented, so
+identifying a framework needs its net as a CGD entry. `fingerprint` computes the coordination sequence
 and point symbol; `RcsrIndex` matches them against the embedded RCSR 2019-06-01
 snapshot (2,931 entries). `merge_nets` unions two quotient graphs;
 `overlay_net` writes a display overlay; `pareto_front` keeps the non-dominated
