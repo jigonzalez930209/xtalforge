@@ -24,6 +24,8 @@ pub mod scan;
 pub mod uff;
 pub mod vibrations;
 
+pub mod models;
+
 mod math;
 mod structure_util;
 
@@ -42,6 +44,7 @@ pub use external::{
     parse_xtb_output, probe, probe_binary, run_in_scratch, write_dftb_hsd, write_orca_input,
     write_xtb_input,
 };
+pub use models::{CATALOGUE as MODEL_CATALOGUE, ModelRecord, ModelSpec, ModelStatus};
 pub use optimize::{
     EosFit, EosForm, Minimizer, OptimizationResult, OptimizeOptions, RelaxMode,
     apply_optimized_geometry, birch_murnaghan, fire, fit_eos, lbfgs, minimize, murnaghan,
