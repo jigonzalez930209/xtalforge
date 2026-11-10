@@ -100,5 +100,6 @@ scripts/e2e.sh --skip-build     # reuse the current dist
 scripts/e2e.sh --update-goldens # review and accept new screenshots
 ```
 
-Diffs and the captured PNGs are written to `tests/e2e/test-results/`, which is
-ignored by git. The committed goldens live in `tests/e2e/golden/`.
+Captured PNGs and the assertion output are written to
+`tests/e2e/test-results/`, which is ignored by git. The committed goldens live
+in `tests/e2e/golden/`.
