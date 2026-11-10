@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "Module registry, run records and on-disk workspace for xtalforge."
+include = ["src/**"]
 
 [dependencies]
 xtalforge-core = { workspace = true }
@@ -20,3 +21,6 @@ zip = { workspace = true }
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
