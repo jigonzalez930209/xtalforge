@@ -52,6 +52,11 @@ pub(crate) fn fill_summary(object: &js_sys::Object, structure: &Structure) -> Re
     set(object, "formula", JsValue::from_str(&summary.formula));
     set(object, "hall", JsValue::from_str(&summary.hall));
     set(object, "n_sites", JsValue::from_f64(summary.n_sites as f64));
+    set(
+        object,
+        "n_atoms",
+        JsValue::from_f64(structure.p1().map_err(to_js_error)?.n_atoms() as f64),
+    );
     set(object, "volume", JsValue::from_f64(summary.volume));
     set(object, "density", JsValue::from_f64(summary.density));
     set(

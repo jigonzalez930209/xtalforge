@@ -27,6 +27,10 @@ mod phase6_export;
 #[cfg(target_arch = "wasm32")]
 mod powder_export;
 #[cfg(target_arch = "wasm32")]
+mod scene_export;
+#[cfg(target_arch = "wasm32")]
+mod structure_text;
+#[cfg(target_arch = "wasm32")]
 mod symmetry;
 #[cfg(target_arch = "wasm32")]
 mod symmetry_analysis;
@@ -65,6 +69,14 @@ pub use phase6_export::{
 pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
     powder_refine_info, rietx_inventory_info,
+};
+#[cfg(target_arch = "wasm32")]
+pub use scene_export::scene_data;
+#[cfg(target_arch = "wasm32")]
+pub use structure_text::{
+    asymmetrize_text, build_c20_text, build_c60_text, build_graphene_text, build_mof_text,
+    build_nanotube_text, change_setting_text, lower_to_subgroup_text, primitive_text, reduce_text,
+    set_space_group_text, standardize_text, to_p1_text,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{
@@ -228,6 +240,7 @@ pub fn limits_check(profile: &str, budget: &str, estimate: f64) -> Result<JsValu
 #[wasm_bindgen]
 pub fn structure_info(text: &str) -> Result<JsValue, JsValue> {
     let summary = xtalforge::core::structure_info(text).map_err(to_js_error)?;
+    let structure = json_structure(text).map_err(to_js_error)?;
     let object = js_sys::Object::new();
     set(&object, "name", JsValue::from_str(&summary.name));
     set(&object, "formula", JsValue::from_str(&summary.formula));
@@ -236,6 +249,11 @@ pub fn structure_info(text: &str) -> Result<JsValue, JsValue> {
         &object,
         "n_sites",
         JsValue::from_f64(summary.n_sites as f64),
+    );
+    set(
+        &object,
+        "n_atoms",
+        JsValue::from_f64(structure.p1().map_err(to_js_error)?.n_atoms() as f64),
     );
     set(&object, "volume", JsValue::from_f64(summary.volume));
     set(&object, "density", JsValue::from_f64(summary.density));
@@ -246,6 +264,18 @@ pub fn structure_info(text: &str) -> Result<JsValue, JsValue> {
     );
     set(&object, "is_p1", JsValue::from_bool(summary.is_p1));
     Ok(object.into())
+}
+
+/// Parses the bare or versioned structure JSON that `structure_info` accepts.
+#[cfg(target_arch = "wasm32")]
+fn json_structure(text: &str) -> Result<xtalforge::core::Structure, xtalforge::core::Error> {
+    if text.contains("\"schema_version\"") {
+        Ok(xtalforge::core::StructureDocument::from_json(text)?.structure)
+    } else {
+        serde_json::from_str(text).map_err(|error| {
+            xtalforge::core::Error::InvalidInput(format!("invalid structure JSON: {error}"))
+        })
+    }
 }
 
 /// Reference data for an element by symbol or atomic number.
