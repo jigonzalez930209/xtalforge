@@ -178,10 +178,15 @@ fn index(
     refine_peaks: bool,
 ) -> Result<(), CliError> {
     let points = pattern(path)?;
+    // `--background` also applies the noise threshold, so a noisy pattern on a
+    // raised baseline is not indexed on its noise maxima.
     let peak_options = PeakOptions {
-        background,
         refine: refine_peaks,
-        ..PeakOptions::default()
+        ..if background {
+            PeakOptions::noise_limited(&points)
+        } else {
+            PeakOptions::default()
+        }
     };
     let peaks = find_peaks(&points, &peak_options).map_err(CliError::analysis)?;
     let cubic =
