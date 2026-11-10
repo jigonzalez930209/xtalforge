@@ -7,7 +7,19 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
-Nothing yet.
+### Documentation
+
+- Added 15 diagrams with one shared style under `docs/public/diagrams/`
+  (animated SVG; lattice, neighbour search, supercell, slab, bonding, rings,
+  P1 expansion, UFF terms, optimisation, Ewald split, Bragg/PXRD, powder
+  pipeline, nets, MOF assembly, vibrations) and embedded them in the matching
+  algorithm pages.
+- Audited the algorithm and API pages against the code. Corrected the powder
+  instrument description (no wavelength or Caglioti terms), the distance-grid
+  sampling and surface area, the optimiser cell freedom, the ellipsoid scale
+  factors, the error mapping of the CLI and Python bindings, the quick-start
+  version pin and the MOF entry point; recorded the resulting known subsets in
+  the roadmap.
 
 ## [1.0.0-rc.1] - 2026-11-10
 
