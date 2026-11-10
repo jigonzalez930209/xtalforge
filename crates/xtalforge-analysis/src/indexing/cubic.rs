@@ -24,7 +24,9 @@ pub struct CubicIndex {
 ///
 /// Tries every hkl up to `max_index` for the first peak, derives `a`, and
 /// matches the remaining peaks within `tolerance` degrees. The best candidate
-/// is the one with the most matches and the smallest error.
+/// is the one with the most matches; among near-equal errors the smallest cell
+/// wins, so a face-centred pattern indexes on its own cubic cell and not on a
+/// larger multiple of it.
 ///
 /// # Errors
 ///
@@ -46,7 +48,7 @@ pub fn index_cubic(
             "wavelength must be positive".to_owned(),
         ));
     }
-    let mut best: Option<CubicIndex> = None;
+    let mut candidates: Vec<CubicIndex> = Vec::new();
     for h in 1..=max_index {
         for k in 0..=max_index {
             for l in 0..=max_index {
@@ -86,15 +88,30 @@ pub fn index_cubic(
                     completeness,
                     mean_error,
                 };
-                if best.as_ref().is_none_or(|current| {
-                    (candidate.completeness, -candidate.mean_error)
-                        > (current.completeness, -current.mean_error)
-                }) {
-                    best = Some(candidate);
-                }
+                candidates.push(candidate);
             }
         }
     }
+    // Several cells of the same family index the same lines (a, a sqrt 2,
+    // a sqrt 3, ... when the first line is assigned a larger h^2 + k^2 + l^2).
+    // Keep the best completeness, and among the candidates whose error is
+    // within a tenth of the tolerance of the smallest, the smallest cell.
+    let completeness = candidates
+        .iter()
+        .map(|candidate| candidate.completeness)
+        .fold(0.0, f64::max);
+    let least_error = candidates
+        .iter()
+        .filter(|candidate| candidate.completeness >= completeness)
+        .map(|candidate| candidate.mean_error)
+        .fold(f64::INFINITY, f64::min);
+    let best = candidates
+        .into_iter()
+        .filter(|candidate| {
+            candidate.completeness >= completeness
+                && candidate.mean_error <= least_error + 0.1 * tolerance
+        })
+        .min_by(|first, second| first.a.total_cmp(&second.a));
     Ok(best)
 }
 
