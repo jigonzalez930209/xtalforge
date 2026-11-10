@@ -20,6 +20,28 @@ use xtalforge_core::Error;
 /// rename fails.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn write_bytes(path: &Path, bytes: &[u8]) -> Result<(), Error> {
+    // A destination that exists and is not a regular file (a device such as
+    // /dev/null, a FIFO) cannot be replaced by a rename, and renaming over it
+    // would destroy the node; write into it directly instead.
+    if let Ok(metadata) = std::fs::metadata(path)
+        && !metadata.is_file()
+    {
+        if metadata.is_dir() {
+            return Err(Error::InvalidInput(format!(
+                "{} is a directory",
+                path.display()
+            )));
+        }
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .open(path)
+            .map_err(|error| {
+                Error::InvalidInput(format!("could not open {}: {error}", path.display()))
+            })?;
+        return file.write_all(bytes).map_err(|error| {
+            Error::InvalidInput(format!("could not write {}: {error}", path.display()))
+        });
+    }
     let temporary = temporary_path(path);
     let result = (|| {
         let mut file = std::fs::File::create(&temporary).map_err(|error| {
