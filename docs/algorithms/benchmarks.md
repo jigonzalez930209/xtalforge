@@ -27,8 +27,8 @@ Notes:
 - The CLI `supercell` command replicates the asymmetric unit; callers that
   want every atom of the crystal expand to P1 first (the Python and WASM
   bindings do).
-- Release WebAssembly (`wasm-opt -Oz`) is about 2905 KiB after the Phase 3-7
-  surfaces, inside the 3648 KiB budget enforced by `scripts/check-wasm-size.sh`.
+- Release WebAssembly (`wasm-opt -Oz`) is 3775 KiB after the Phase 8 agent
+  surface, inside the 3840 KiB budget enforced by `scripts/check-wasm-size.sh`.
 - The workspace test suite (Rust, 38 WASM node tests and 41 pytest cases) runs
   in seconds; see the phase status page for the exact list.
 
@@ -48,5 +48,43 @@ Release CLI, median of five whole-process runs at `--symprec 0.001`:
 The larger MOF structures in the corpus take seconds to minutes at very small
 tolerances; the corpus sweep is an ignored test and the release gate uses the
 small-corpus set. The full release package, including the symmetry search, the
-force fields, analysis, builders and powder surfaces, is about 2905 KiB inside
-the 3648 KiB budget.
+force fields, analysis, builders, powder and agent surfaces, is 3775 KiB inside
+the 3840 KiB budget.
+
+## Function-level benchmarks (Task 8.6.1)
+
+Three process-level benchmarks print the median of repeated runs. They run
+with `cargo bench` and `scripts/check-bench-budget.sh` fails on a large
+regression (the ceilings are deliberately loose: they catch a 10x change, not
+machine noise).
+
+| Benchmark | Command | Median |
+|---|---|---|
+| Symmetry, 8 atoms | `cargo bench -p xtalforge-symmetry --bench detection` | 0.75 ms |
+| Symmetry, 27 atoms | same | 0.72 ms |
+| Symmetry, 64 atoms | same | 1.17 ms |
+| UFF methane, build + energy | `cargo bench -p xtalforge-ff --bench uff` | 0.043 ms |
+| UFF MOF-5, 7 sites / 424 P1 atoms | same | 21.5 ms |
+| PXRD MOF-5 | `cargo bench -p xtalforge-analysis --bench pxrd` | 308 ms |
+| Porosity MOF-5, 0.8 A grid | same | 2.9 s |
+
+The porosity number is dominated by the `1/spacing^3` grid and is why the CLI
+default is 0.35 A only for small cells and the report value is chosen
+deliberately. The Python timings recorded for the MACE bridge are on the
+[machine-learning page](../api/ml#accuracy-and-speed); they are not comparable
+with UFF, which is classical.
+
+## Determinism and robustness (Tasks 8.6.2-8.6.4)
+
+- `crates/xtalforge-core/tests/determinism.rs` runs the same bond graph,
+  neighbor list and supercell repeatedly and in four threads and compares the
+  exact output.
+- `crates/xtalforge-io/tests/robustness.rs` mutates valid CIF, POSCAR, XYZ,
+  GEN, LAMMPS, SHELX and pmg-json inputs and a project archive with a
+  deterministic generator; a parser may accept or reject a mutation but must
+  not panic.
+- `crates/xtalforge-core/tests/limits_audit.rs` exercises every budget at and
+  beyond its soft and hard limits and the warn-only profile.
+- The WASM build is single-threaded by default. A threaded build needs
+  cross-origin isolation and is not part of the default package; the
+  `parallel` feature changes execution strategy only, never results.
