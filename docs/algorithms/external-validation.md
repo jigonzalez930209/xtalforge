@@ -20,11 +20,14 @@ under which licence, and what it can and cannot prove.
 | Analytic spring phonon model (`tests/golden/phase-4/phonons`) | project | q-mesh folding and dispersion | `phonons.rs` |
 | CoRE MOF 2019 subset (`tests/external/core_mof/`, 18 CIF) | CC BY 4.0 (Zenodo 14184621) | CIF parsing, P1 expansion, cell volume, formula, bonding, porosity and PXRD on charged and mixed-metal frameworks | `crates/xtalforge-io/tests/external_core_mof.rs`, `crates/xtalforge-analysis/tests/external_core_mof.rs` |
 | tmQM 2024 subset (`tests/external/tmqm/`, 18 XYZ) | MIT repository licence; citation in that directory's README | XYZ parsing and stoichiometry, perceived metal coordination, UFF/UFF4MOF types and forces for Sc-Ir | `crates/xtalforge-io/tests/external_tmqm.rs`, `crates/xtalforge-ff/tests/external_tmqm.rs` |
+| QMOF subset (`tests/external/qmof/`, 14 CIF) | CC BY 4.0 (Figshare 13147324 v18) | CIF parsing, cell volume, density, formula, round-trip and space-group recovery on DFT-relaxed MOFs | `crates/xtalforge-io/tests/external_qmof.rs` |
 
-The CoRE MOF and tmQM subsets are the **production data sets** in the table:
-the files are unmodified structures from the public archives, with the
-archives' own formula, volume and stoichiometry used as external checks. They
-are 256 KB and 76 KB; the full archives are not redistributed.
+The CoRE MOF, tmQM and QMOF subsets are the **production data sets** in the
+table: the files are unmodified structures from the public archives, with the
+archives' own formula, volume, density and stoichiometry used as external
+checks. They are 256 KB, 76 KB and 100 KB; the full archives are not
+redistributed. QMOF adds a space-group check: four P1 files recover their
+tabulated groups at `symprec = 0.01 A`.
 
 The EQeq and UFF comparisons are the two that use a **different program** on
 the same coordinates. The rutile tables use Crystal-Builder's powder bridge,
@@ -40,7 +43,7 @@ repository yet; the licence and the download size must be checked before it is.
 |---|---|---|
 | CoRE MOF 2019/2024 (full archive) | framework porosity, MOF assembly, topology | CC BY 4.0; the 81 MB archive is downloadable and the 18-CIF subset is bundled; the rest is not redistributed |
 | tmQM (full release) | transition-metal geometries | MIT repository licence; the 65 MB archive is downloadable and the 18-complex subset is bundled |
-| QMOF | quantum MOF geometries and properties | MIT repository licence, CC BY 4.0 data; the 392 MB archive is not bundled (the geometry checks are covered by CoRE MOF) |
+| QMOF (full archive) | quantum MOF geometries and properties | CC BY 4.0; the 374 MB archive is downloadable and the 14-CIF subset is bundled, including the space-group checks |
 | Materials Project | structures, phonons, elastic constants | terms page returned 403 and an API key is required; licence not verified, not bundled |
 | NIST SRM 640/660 | PXRD line positions and instrument profiles | certified reference material; redistribution terms not verified, not bundled |
 | RRUFF | mineral XRD/Raman references | non-commercial terms; not bundled |
