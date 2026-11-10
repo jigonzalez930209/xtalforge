@@ -45,6 +45,7 @@ export default defineConfig({
             { text: 'Concepts', link: '/guide/concepts' },
             { text: 'File formats', link: '/guide/formats' },
             { text: 'Automation guide', link: '/guide/automation' },
+            { text: 'FAQ', link: '/guide/faq' },
             { text: 'Contributing', link: '/guide/contributing' },
             { text: 'Cargo features', link: '/guide/features' },
             { text: 'Data bundles', link: '/guide/data' },
