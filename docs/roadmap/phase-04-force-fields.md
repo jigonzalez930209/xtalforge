@@ -119,6 +119,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   `variable_cell.rs`, `minimizer.rs`): convergence on fmax and energy
   change, maximum step, line search for L-BFGS, restarts, cancellation token,
   progress callback with per-step data, trajectory written as extended XYZ.
+  Note: FIRE and L-BFGS stop on force, energy or step limits; there is no
+  cancellation token, progress callback or trajectory output.
 - [x] 4.4.4 Applying the result
   `ApplyOptimizedGeometry` command: the optimized asymmetric unit and cell
   replace the old ones in one undoable step.
@@ -137,6 +139,9 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   between two planes, and the cell's own parameters and volume. An endpoint is
   a **group of atoms** (a group of one is an atom; a group of many is its
   centroid, recomputed each step), not a dummy atom.
+  Note: only distance, angle and torsion between single atoms are implemented;
+  atom groups, the angle between planes and the cell parameters or volume are
+  not.
 - [x] 4.5.2 Constraints
   Port `ff/constraints.py`: hold a coordinate while everything else relaxes
   by projecting out its gradient rather than freezing the atoms that define it
@@ -148,6 +153,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   write each point to disk before starting the next (`scan.csv`, per-point
   CIF), resume after interruption. Rigid scans as an option. Two-dimensional
   scans if Crystal-Builder supports them (verify).
+  Note: `relaxed_scan` returns the points in memory; it writes no `scan.csv` or
+  per-point CIF and cannot resume, and there is no rigid or two-dimensional scan.
 
 ## Task 4.6 — Hydrogens
 
