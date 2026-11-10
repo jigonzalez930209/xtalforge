@@ -293,7 +293,7 @@ zone with scipy's Voronoi. Both must be implemented here.
 - [x] 2.12.1 CLI
   `symmetry {detect,set,asymmetrize,p1,standardize,primitive,wyckoff,reduce,subgroups,lower,kpath}`
   and `spacegroup {list,show,search}`.
-  Note: every command except `kpath` is implemented; `scan`, `diagnose` and
+  Note: every command is implemented, including `kpath`; `scan`, `diagnose` and
   `brillouin` were added as well.
 - [x] 2.12.2 Python and WASM
   Matching functions and the `SpaceGroup`/`SymmetryDataset` types.
@@ -305,8 +305,8 @@ zone with scipy's Voronoi. Both must be implemented here.
   browsable space group table; a demo that shows the space group, Wyckoff
   labels and Brillouin zone of a pasted CIF.
   Note: the API and algorithm pages are updated; the CIF inspector shows the
-  group, Hall number, Wyckoff letters and zone counts. The k-path pages wait
-  for Task 2.10.2-2.10.4.
+  group, Hall number, Wyckoff letters and zone counts. The k-path commands and pages
+  shipped with Task 2.10 (`symmetry kpath`, `docs/algorithms/symmetry.md`).
 - [x] 2.12.4 Parity and release
   Parity matrix; changelog; PATCH release.
   Note: parity and changelog are updated; the PATCH release shipped with

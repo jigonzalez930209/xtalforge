@@ -312,7 +312,7 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   per-element-pair overrides, metal-specific rules, minimum distances,
   occupancy and disorder group awareness, periodic bonds with image shifts.
   Note: `perceive_bonds`/`Structure::bond_graph` use covalent-radius sums with
-  a 1.2 scale, a 0.4 A floor and no dummy bonds; metal overrides follow.
+  a 1.15 scale (1.2 in the first version), a 0.4 A floor and no dummy bonds; metal overrides follow.
 - [x] 1.11.2 Explicit bonds and symmetry propagation
   User bonds are stored against the asymmetric unit and propagated to every
   symmetry image of the atoms they join (as in VESTA: draw one Fe-O bond and

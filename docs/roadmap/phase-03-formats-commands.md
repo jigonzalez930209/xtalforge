@@ -230,7 +230,7 @@ Crystal-Builder classes.
   keep Cartesian positions), `Supercell`, `TransformCell`, `MakeSlab`,
   `ReduceCell`, `ShiftOrigin`, `WrapIntoCell`.
   Note: `cell::{SetLattice, Supercell, ShiftOrigin, WrapIntoCell}` and
-  `LatticePolicy`; `ReduceCell` is Phase 2 `reduce_structure`.
+  `PositionPolicy`; `ReduceCell` is Phase 2 `reduce_structure`.
 - [x] 3.10.4 Symmetry commands
   Port `commands/symmetry.py`: `ReduceToP1`, `FindSymmetry`,
   `SetSpaceGroup`, `Standardize`, `AssignWyckoff`, `Invert`,
@@ -257,8 +257,9 @@ Crystal-Builder classes.
   `commands/connections.py` (`MarkConnectionPoints`,
   `MarkOneConnectionPoint`; Phase 6).
   Note: `later::{SetCharges, Interpenetrate, MarkConnectionPoints}` are
-  implemented and undoable; `AddHydrogens` and `Prepare` are added with
-  Phase 4 (`xtalforge-build` and the FF workflow).
+  implemented and undoable; hydrogens and preparation are not command types:
+  they are `xtalforge-build::add_hydrogens` and `xtalforge-ff::prepare`,
+  applied as one edit with `ReplaceStructure`.
 
 ## Task 3.11 — Selection and tracking
 

@@ -229,6 +229,10 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   directions) and `pormake/scaler.py` (scale the net so every edge length
   matches the blocks), replacing the removed gradient and function call
   described in `PROVENANCE.md` with Rust equivalents.
+  Note: the scaler is implemented as a uniform fit of the topology cell to the
+  linker span (`xtalforge-mof/src/fit.rs`, `cell_scale` metadata); the locator
+  is a deterministic greedy fit, not an RMSD search over all rotations, and
+  the framework carries warnings instead of an RMSD report.
 - [x] 6.12.3 Builder and framework
   Port `pormake/builder.py` and `framework.py`: place nodes and edges, join
   connection points, remove dummies, produce the framework and its RMSD
