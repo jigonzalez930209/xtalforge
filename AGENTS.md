@@ -160,7 +160,7 @@ xtalforge/
 │  ├─ xtalforge-build/        molecules, substituents, fill, carbon, graphene, nanotubes,
 │  │                          fullerenes, polymers
 │  ├─ xtalforge-mof/          MOF builder (PORMAKE port) and its data
-│  ├─ xtalforge-powder/       pattern data, peaks, indexing, Pawley, Rietveld
+│  ├─ (xtalforge-powder)      planned; the powder code lives in xtalforge-analysis
 │  ├─ xtalforge-modules/      module registry, jobs, run records, reports
 │  ├─ xtalforge-agent/        session verbs, inspection, diagnostics, MCP server
 │  ├─ xtalforge/              facade crate re-exporting everything (published)
@@ -285,9 +285,10 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   crates.io, 7 platform wheels plus an sdist on PyPI, `xtalforge-wasm` on npm,
   the CLI/hosted assets on the GitHub release and the docs on Pages. The
   `1.0.0` tag follows the fixes-only stabilization period. Phases 1-7 are
-  complete and released at `0.0.3`; the remaining reference gaps (phonon
-  q-mesh, preparation steps, general indexing, profile simplifications and
-  others) are listed in `docs/roadmap/index.md` under "Known subsets". `0.0.2` carried the linked-cell neighbor search, grid-based
+  complete and released at `0.0.3`; the remaining reference gaps (held cell
+  quantities and pressure in the optimizer, the PXRD/Rietveld profile
+  simplifications, bond carrying in slabs, the curated MOF subset and others)
+  are listed in `docs/roadmap/index.md` under "Known subsets". `0.0.2` carried the linked-cell neighbor search, grid-based
   P1/supercell deduplication and the Linux desktop/AppStream fix; `0.0.3`
   adds the full-corpus bond validation, periodic Franzblau rings, the CIF
   round-trip fields and lazy XYZ/XDATCAR trajectories.
