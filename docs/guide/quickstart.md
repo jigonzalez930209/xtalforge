@@ -17,7 +17,7 @@ Add the facade crate to `Cargo.toml`:
 
 ```toml
 [dependencies]
-xtalforge = "0.0.1"
+xtalforge = "1.0.0-rc.1"
 ```
 
 ## CLI
