@@ -47,11 +47,22 @@ explicit bonds; the density, monomer count and SMILES are recorded in metadata.
 ## Carbon allotropes
 
 - `graphene(nx, ny, layers, interlayer, vacuum)` is an AA-stacked honeycomb
-  sheet.
-- `nanotube(n, m, length)` rolls the honeycomb along the chiral vector.
+  sheet. The cell is `nx a1` and `ny a2` with `a1 = (a, 0)`,
+  `a2 = (a/2, a sqrt(3)/2)` and `a = 1.42 sqrt(3)`; the two atoms of primitive
+  cell `(i, j)` sit at fractional `((i + u)/nx, (j + v)/ny)` with
+  `(u, v) = (0, 0)` and `(1/3, 1/3)`. Every bond is 1.42 Angstrom.
+- `nanotube(n, m, length, vacuum)` rolls the honeycomb along the chiral vector
+  `C = n a1 + m a2`. The strip is `|C|` wide and `length` translation vectors
+  `T = ((2m + n) a1 - (2n + m) a2) / d_R` long, with `d_R = gcd(2n + m, 2m + n)`,
+  and holds `4 (n^2 + n m + m^2) / d_R` atoms per `T`. Each atom goes to
+  `(R sin t, y, R cos t)` with `R = |C| / 2 pi` and `t = 2 pi (r . C) / |C|^2`,
+  in a cell `2R + vacuum` wide on x and z with the axis along y; the bonds are
+  chords, about 1 % shorter than 1.42 Angstrom for a narrow tube.
 - `fullerene(60)` uses the built-in C60 coordinates; `face_spiral(20)` gives
   C20 by a documented face traversal.
-- `nanoribbon(width, length, vacuum)` is a honeycomb strip periodic along `a`.
+- `nanoribbon(width, length, vacuum)` is a honeycomb strip periodic along `a`;
+  the `b` vector grows by `vacuum` while the atoms keep their Cartesian
+  positions.
 - `build_ztc`/`build_schwarzite` sample a periodic trigonometric level set and
   extract the isosurface with the analysis crate.
 - `build_carbon` is the disordered recipe documented in [carbon](./carbon).
