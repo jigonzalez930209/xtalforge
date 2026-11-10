@@ -9,6 +9,8 @@
 use wasm_bindgen::prelude::*;
 
 #[cfg(target_arch = "wasm32")]
+mod agent_export;
+#[cfg(target_arch = "wasm32")]
 mod analysis_export;
 #[cfg(target_arch = "wasm32")]
 mod common;
@@ -32,6 +34,8 @@ mod symmetry_analysis;
 #[cfg(target_arch = "wasm32")]
 use common::{array3, array6, set, to_js_error};
 
+#[cfg(target_arch = "wasm32")]
+pub use agent_export::{AgentSession, agent_capabilities, agent_run, agent_verbs};
 #[cfg(target_arch = "wasm32")]
 pub use analysis_export::{hydrogens_info, net_invariants_info, porosity_info, zeo_parse_info};
 #[cfg(target_arch = "wasm32")]
