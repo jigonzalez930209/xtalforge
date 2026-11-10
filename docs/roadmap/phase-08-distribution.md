@@ -18,32 +18,32 @@ Crate: `xtalforge-agent` (plus work across all crates).
 
 ## Task 8.1 — Session, verbs and answers
 
-- [ ] 8.1.1 Verb catalogue
+- [x] 8.1.1 Verb catalogue
   Port `agent/capabilities.py`: the list of verbs (`VERBS`) an assistant can
   call, each with name, parameters (Task 3.8), result type and examples,
   generated from the same definitions as the CLI, Python and WASM surfaces so
   there is no second list to drift. `capabilities` also reports what **this**
   installation can do (engines available, features compiled, data bundles
   present), asked at runtime rather than remembered.
-- [ ] 8.1.2 Session
+- [x] 8.1.2 Session
   Port `agent/session.py` (1834 lines; split by verb group): a stateful
   session owning documents (Phase 3), running verbs by name with JSON
   arguments and returning typed answers; every mutation goes through commands
   with `Origin::Agent`.
-- [ ] 8.1.3 Inspection and diagnostics
+- [x] 8.1.3 Inspection and diagnostics
   Port `agent/inspect.py` and `agent/diagnostics.py`: one call that says what
   a structure is and what is wrong with it (the Info panel, the site table and
   the warnings in one answer): overlapping atoms, missing hydrogens, unusual
   coordination, partial occupancy, charge imbalance, symmetry problems
   (Task 2.9.2), with severity, atoms involved and a suggested verb.
-- [ ] 8.1.4 Change tracking
+- [x] 8.1.4 Change tracking
   Port `agent/changes.py`: which steps of a document's history an assistant
   made, grouped in bursts, using the `Origin` on each command (Task 3.9.2), so
   a user can review or undo the assistant's work as a unit.
-- [ ] 8.1.5 Answers
+- [x] 8.1.5 Answers
   Port `agent/answers.py`: typed, printable answers that serialize to JSON in
   one call.
-- [ ] 8.1.6 Pictures for the agent
+- [x] 8.1.6 Pictures for the agent
   Port the intent of `agent/render.py` (a picture of a structure for an agent
   to look at; Crystal-Builder renders with VTK). Implement a small pure-Rust
   orthographic renderer of the scene data (Task 3.14.4) to SVG and PNG
