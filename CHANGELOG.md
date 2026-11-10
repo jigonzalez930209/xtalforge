@@ -9,6 +9,16 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Task 0.9: bundle an 18-complex subset of tmQM 2024 (MIT, one complex per
+  metal from Sc to Ir) and validate the XYZ reader against the header
+  stoichiometry, the perceived metal coordination and an XYZ round-trip. UFF
+  builds, types and evaluates every metal with finite forces.
+- Task 0.9: bundle an 18-structure subset of the CoRE MOF 2019 public archive
+  (CC BY 4.0, Zenodo 14184621) and validate against it. Every file parses,
+  expands to P1 and bonds; four frameworks are checked against their own
+  `_chemical_formula_sum`, every declared `_cell_volume` is reproduced within
+  0.05 A^3, CIF round-trips preserve sites and volume, and HKUST-1 and ZIF-8
+  give bounded PXRD and porosity numbers.
 - Phase 8 Task 8.2: `xtalforge mcp` serves the verb catalogue as MCP tools
   over stdio (JSON-RPC 2.0, protocol `2024-11-05`, no external MCP crate),
   with generated input schemas and an `instructions` payload for chat
