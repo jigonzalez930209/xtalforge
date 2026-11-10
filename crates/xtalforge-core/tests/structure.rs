@@ -143,6 +143,28 @@ fn shared_structure_vector_summary() {
 }
 
 #[test]
+fn structure_info_accepts_the_versioned_envelope() {
+    let lattice = Lattice::cubic(4.0).unwrap();
+    let structure = StructureBuilder::new("C", lattice)
+        .site(Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap())
+        .build()
+        .unwrap();
+    let bare = serde_json::to_string(&structure).unwrap();
+    let wrapped = structure.to_document().to_json().unwrap();
+    let from_bare = xtalforge_core::structure_info(&bare).unwrap();
+    let from_wrapped = xtalforge_core::structure_info(&wrapped).unwrap();
+    assert_eq!(from_bare, from_wrapped);
+    assert_eq!(from_wrapped.formula, "C");
+    let wrong_version = wrapped.replace("\"schema_version\":1", "\"schema_version\":99");
+    assert_eq!(
+        xtalforge_core::structure_info(&wrong_version)
+            .unwrap_err()
+            .code(),
+        "invalid_input"
+    );
+}
+
+#[test]
 fn structure_round_trips_through_json() {
     let lattice = Lattice::cubic(4.0).unwrap();
     let structure = StructureBuilder::new("C", lattice)
