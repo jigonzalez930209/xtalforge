@@ -183,3 +183,36 @@ fn fit_peaks_validates_its_input() {
         .is_err()
     );
 }
+
+#[test]
+fn noise_limited_options_ignore_noise_on_a_raised_baseline() {
+    // Five Gaussian lines on a sloping baseline of about 150 counts with
+    // deterministic noise: only the five lines may survive.
+    let centres = [28.0, 33.0, 47.0, 56.0, 69.0];
+    let mut state: u64 = 99;
+    let points: Vec<PatternPoint> = (0..1500)
+        .map(|index| {
+            let two_theta = 20.0 + 0.04 * f64::from(index);
+            state = state
+                .wrapping_mul(6_364_136_223_846_793_005)
+                .wrapping_add(1_442_695_040_888_963_407);
+            let noise = ((state >> 33) as f64 / f64::from(1_u32 << 31) - 0.5) * 40.0;
+            let lines: f64 = centres
+                .iter()
+                .map(|centre| 6000.0 * (-((two_theta - centre) / 0.1).powi(2) * 2.77).exp())
+                .sum();
+            PatternPoint {
+                two_theta,
+                intensity: 150.0 + 0.5 * (80.0 - two_theta) + noise + lines,
+                uncertainty: None,
+            }
+        })
+        .collect();
+    let naive = find_peaks(&points, &PeakOptions::default()).unwrap();
+    let limited = find_peaks(&points, &PeakOptions::noise_limited(&points)).unwrap();
+    assert!(naive.len() > 100, "{} naive peaks", naive.len());
+    assert_eq!(limited.len(), centres.len(), "{limited:?}");
+    for (peak, centre) in limited.iter().zip(centres.iter()) {
+        assert!((peak.two_theta - centre).abs() < 0.1);
+    }
+}
