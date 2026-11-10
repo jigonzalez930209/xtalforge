@@ -9,6 +9,13 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 8 Task 8.3: open extension registries and a Python plugin surface.
+  `FormatRegistry`, `ScalarRegistry` and `StyleRegistry` join the existing
+  calculator and module registries; `examples/plugin` is a buildable crate
+  that registers a format, a calculator, a module, a scalar and a style.
+  Python `Plugins` registers callables as modules, calculators and formats,
+  with JSON in/out and typed errors. The draw-style enum stays closed; the
+  open part is the settings preset, recorded in `docs/api/plugins.md`.
 - Task 0.9: bundle an 18-complex subset of tmQM 2024 (MIT, one complex per
   metal from Sc to Ir) and validate the XYZ reader against the header
   stoichiometry, the perceived metal coordination and an XYZ round-trip. UFF
