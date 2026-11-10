@@ -20,6 +20,10 @@ essential release, then `0.x.y`).
 - `nanoribbon`: the vacuum stretched the strip instead of adding empty space;
   the bonds are 1.42 Angstrom again.
 
+- `powder index` (cubic search): a face-centred pattern indexed on a larger
+  multiple of the true cell (NaCl returned 7.94 Angstrom); the smallest cell
+  among equally good candidates is now chosen.
+
 ### Documentation
 
 - Added 15 diagrams with one shared style under `docs/public/diagrams/`
@@ -33,6 +37,9 @@ essential release, then `0.x.y`).
   factors, the error mapping of the CLI and Python bindings, the quick-start
   version pin and the MOF entry point; recorded the resulting known subsets in
   the roadmap.
+- Corrected the QEq kernel description (hardness only, truncated 12 Angstrom
+  sum), the duplicated external-validation bullet and the tutorial commands
+  (`powder lebail/pawley`, `build graphene/nanotube` take positional arguments).
 
 ## [1.0.0-rc.1] - 2026-11-10
 
