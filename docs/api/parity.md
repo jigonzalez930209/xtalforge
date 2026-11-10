@@ -74,6 +74,8 @@ compares this table with the symbols each surface actually exports.
 | `agent_capabilities` | 8 | done | done | done | done | Runtime feature, engine, bundle and verb report (Task 8.1.1); Rust `capability_report`, CLI `capabilities` |
 | `agent_verbs` | 8 | done | done | done | done | The shared verb catalogue (Task 8.1.1); Rust `catalogue`, CLI `capabilities` |
 | `agent_run` | 8 | done | done | done | done | Batch session over a JSON script (Task 8.1.2); Rust `run_verbs`, CLI `agent` |
+| `ml_backends` | 8 | n/a | done | done | n/a | The ML bridge is Python-only by the Task 4.11 decision; the CLI `models` command lists the catalogue (Task 8.4) |
+| `models` | 8 | done | done | n/a | n/a | Model cache with SHA-256 and license (Task 8.4.2); Rust `fetch`, CLI `models` |
 
 ## Recorded exceptions
 
