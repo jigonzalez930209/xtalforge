@@ -1,0 +1,41 @@
+[package]
+name = "xtalforge-agent"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Agent session, verbs, diagnostics and MCP server for xtalforge."
+
+[dependencies]
+xtalforge-analysis = { workspace = true }
+xtalforge-build = { workspace = true }
+xtalforge-commands = { workspace = true }
+xtalforge-core = { workspace = true }
+xtalforge-ff = { workspace = true }
+xtalforge-io = { workspace = true }
+xtalforge-symmetry = { workspace = true }
+xtalforge-view = { workspace = true }
+flate2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []
+# Forwards to the optional Rayon paths of the domain crates.
+parallel = ["xtalforge-core/parallel"]
+# Forwards to the optional in-process GFN0/GFN1/GFN2 methods of `xtalforge-ff`.
+sci-form = ["xtalforge-ff/sci-form"]
+# Mirrors the reserved `ml` feature of the facade (Task 8.4).
+ml = []
+# Mirrors the reserved `external` engine feature of the facade (Task 4.9).
+external = []
+
+[lints]
+workspace = true
