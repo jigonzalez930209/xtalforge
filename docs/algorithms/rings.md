@@ -9,6 +9,9 @@ face, and in a two-atom cell it can contain several copies of the same atom.
 
 ## Formulation
 
+![Primitive ring chord test](/diagrams/rings.svg)
+
+
 Build the periodic bond graph on the P1 cell, with both directions of every
 bond carrying its lattice image. For each start atom, walk simple paths of
 `(atom, image)` steps up to `max_size`; a step that returns to the start with

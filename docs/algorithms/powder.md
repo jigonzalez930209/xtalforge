@@ -7,17 +7,29 @@ them.
 
 ## Instrument and profile
 
-`Instrument` describes geometry (Bragg-Brentano or Debye-Scherrer), wavelength,
-zero shift, sample displacement and the Caglioti half-widths `U, V, W`:
+`Instrument` holds the geometry (`BraggBrentano` or `DebyeScherrer`), the zero
+shift, the specimen displacement `s` (mm), the goniometer radius `R` (mm, default
+240), the `K alpha2 / K alpha1` intensity ratio (default 0.5) and a polarisation
+fraction. Two aberrations move a line from its Bragg position:
 
 ```
-FWHM^2(2 theta) = U tan^2(theta) + V tan(theta) + W
+2 theta_reported = 2 theta_nominal + zero_shift
+delta(2 theta)   = -2 s cos(theta) / R          (Bragg-Brentano only)
 ```
 
-A doublet (`doublet`, `doublet_checked`) adds the `K alpha1/K alpha2` split at
-the intensity ratio. `Profile` selects Gaussian, Lorentzian or pseudo-Voigt
-with a mixing parameter. The model is explicit: no axial divergence, no
-surface roughness and no sample broadening beyond these terms.
+A positive displacement moves the line to a lower angle; the capillary geometry
+has no displacement term. A doublet (`doublet`, `doublet_checked`) places the
+`K alpha2` line by Bragg's law from the `K alpha1` position at the intensity
+ratio. The polarisation field is stored and validated but the PXRD profile
+applies its own Lorentz-polarisation factor and does not read it yet.
+
+`ProfileKind` selects Gaussian, Lorentzian or pseudo-Voigt
+(`eta L + (1 - eta) G`, `eta` clamped to `[0, 1]`). The calculated PXRD pattern
+uses one Gaussian of the requested FWHM for every reflection; a Caglioti
+width (`U, V, W`) is **not** implemented. Le Bail and Pawley default to
+pseudo-Voigt. The model is explicit: no axial divergence, specimen
+transparency or receiving-slit correction, and no size/strain broadening beyond
+the width parameters of the fits.
 
 ## Cells and extinction
 
@@ -29,6 +41,9 @@ page uses a Le Bail BIC and a Pawley fit per leading class; the 1 % Rwp tie rule
 orders the table.
 
 ## Automatic run
+
+![Automatic powder run](/diagrams/powder-pipeline.svg)
+
 
 `run_automatic` is the orchestrator:
 

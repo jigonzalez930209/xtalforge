@@ -10,6 +10,9 @@ because it has no force-field parameters.
 
 ## Modes
 
+![Hessian to modes](/diagrams/vibrations-pipeline.svg)
+
+
 `vibrational_modes(&hessian, structure, options)` mass-weights the Hessian with
 the element masses, projects out the rigid translations (and the molecular
 rotations when `DisplacementMode::Molecule` is selected) and diagonalises the

@@ -22,6 +22,9 @@ why an atom got a type. `UffModel` exposes the prepared topology.
 
 ## Energy terms
 
+![UFF energy terms](/diagrams/uff-terms.svg)
+
+
 - Bond: `0.5 k (r - r0)^2`, `k = 664.12 z1 z2 / r0^3`.
 - Angle: the reference cosine expansion whose curvature at `theta0` is the UFF
   `K_IJK`.

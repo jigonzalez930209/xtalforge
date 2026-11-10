@@ -13,6 +13,9 @@ space-group expansion is a separate step not performed by `quotient_graph`.
 
 ## Fingerprint
 
+![Net fingerprint](/diagrams/nets-quotient.svg)
+
+
 `NetFingerprint` is:
 
 - the periodicity: the integer rank of the lattice the net's own cycles

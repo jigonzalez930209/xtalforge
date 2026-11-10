@@ -16,6 +16,9 @@ full PORMAKE database.
 
 ## Node orientation
 
+![MOF assembly](/diagrams/mof-assembly.svg)
+
+
 PORMAKE fits the connection directions to a slot by RMSD over all rotations.
 This port uses a deterministic subset:
 
@@ -43,7 +46,7 @@ documented range. A scale outside the range is reported, not silently applied.
 
 ## Assembly
 
-`build_framework` returns a P1 structure with the node and linker atoms,
+`build_mof` returns a P1 structure with the node and linker atoms,
 explicit topology bonds and metadata naming the topology and blocks. It does
 not relax the geometry. Interpenetration, if requested, is a separate operation
 over the assembled document.

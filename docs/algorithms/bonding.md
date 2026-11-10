@@ -8,6 +8,9 @@ dummy markers or disorder components.
 
 ## Formulation
 
+![Bond perception](/diagrams/bonding.svg)
+
+
 For atoms `i` and `j` at distance `d`:
 
 ```

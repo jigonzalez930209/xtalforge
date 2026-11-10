@@ -6,6 +6,9 @@ self-images of a small cell.
 
 ## Linked-cell index
 
+![Linked-cell neighbour search](/diagrams/neighbors-linked-cell.svg)
+
+
 1. The structure is expanded to P1.
 2. The perpendicular width of each axis comes from the reciprocal cell:
    `d_k = 1 / |k*|`. Edge lengths are not enough for a skewed cell.

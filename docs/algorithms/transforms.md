@@ -11,6 +11,8 @@ test (not periodic distance, which would merge 0 and 1).
 
 Displacement ellipsoids diagonalize the symmetric Uij tensor with Jacobi
 rotations, sort the eigenvalues, take square roots for the semi-axis lengths
-and scale by the chi-square quantile for three degrees of freedom (0.5, 0.9,
-0.95, 0.99 with linear interpolation). A non-positive-semidefinite tensor is
+and scale by `sqrt(chi2_3(p))`, the square root of the chi-square quantile for
+three degrees of freedom: 1.538, 2.500, 2.796 and 3.368 at `p` = 0.5, 0.9, 0.95
+and 0.99, linearly interpolated between them and clamped to the end values
+outside `[0.5, 0.99]`. A non-positive-semidefinite tensor is
 rejected.

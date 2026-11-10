@@ -9,6 +9,9 @@ neighbours and force fields.
 
 ## Conventions
 
+![Rows of M, fractional and Cartesian coordinates](/diagrams/lattice-cell.svg)
+
+
 - The matrix rows are the vectors a, b, c in Angstrom.
 - Fractional to Cartesian is `x_cart = x_frac M`; the inverse is
   `x_frac = x_cart M^-1`.

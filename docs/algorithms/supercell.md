@@ -1,5 +1,7 @@
 # Supercells
 
+![Supercell enumeration](/diagrams/supercell.svg)
+
 The new lattice is `P M` for a positive integer matrix `P`. A fractional point
 `x` of the old cell appears in the new cell at `(x + n) P^-1`; the code
 enumerates the integer shifts in a box bounded by `4 ||P^-1||_max + 2`, keeps

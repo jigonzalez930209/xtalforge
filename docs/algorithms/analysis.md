@@ -8,6 +8,9 @@ own pages ([indexing](./indexing), [Pawley](./pawley), [Le Bail](./lebail),
 
 ## Calculated PXRD
 
+![Bragg's law and the calculated pattern](/diagrams/bragg-pxrd.svg)
+
+
 For every allowed reflection `(hkl)` with d-spacing `d`:
 
 ```
@@ -24,8 +27,12 @@ are kept in `Pattern::reflections`.
 
 Validation: the rutile pattern from Crystal-Builder/rietx and the NaCl
 calculated pattern (`tests/golden/phase-7`, corpus tests). The profile is a
-model, not an instrument: the FWHM is an input and no axial divergence or
-sample broadening is applied.
+model, not an instrument: the FWHM is an input (one Gaussian of unit area, no
+Caglioti width) and no axial divergence or sample broadening is applied. An
+isotropic `U_iso` enters as `exp(-8 pi^2 U s^2)`; anisotropic parameters and
+anomalous scattering are ignored, and the scattering-factor fit has no core
+tail, so absolute intensities and the high-angle falloff are approximate while
+positions, multiplicities and absences are exact.
 
 ## Peaks
 
@@ -36,21 +43,30 @@ The algorithms are deterministic and do not use a random initialisation.
 
 ## Distance grid
 
-The cell is sampled at approximately the requested spacing. For each sample the
-distance to the nearest atom surface is stored (van der Waals radius subtracted,
-minimum image over the periodic images). From the grid:
+The cell is sampled with `max(1, round(L_i / spacing))` points along each axis,
+so anisotropic cells get a similar resolution. For each sample the signed
+distance to the surface of the nearest atom is stored
+(`centre distance - van der Waals radius`, minimum image over the periodic
+images): negative inside an atom, zero on its surface. From the grid:
 
-- accessible volume: count of samples whose distance is at least the probe
-  radius, times the sample volume;
-- surface area: area of the boundary between accessible and inaccessible
-  samples;
+- accessible volume: count of samples whose stored distance is at least the
+  probe radius, times the volume of one sample (converges from below, with a
+  boundary-layer error of about one spacing);
+- surface area: grid faces whose two ends have opposite sign (outside versus
+  inside a van der Waals atom) times the face area. It is the voxelised area of
+  the van der Waals surface, not of the probe-accessible boundary, and
+  overestimates a smooth surface at coarse spacing;
 - largest included diameter: twice the largest stored distance;
-- pore-size bins: histogram of the distance values with a bin width.
+- pore-size bins: histogram of `2 * distance` at every free sample with a
+  caller-supplied bin width (a geometric distribution, not a Zeo++ result).
 
-Cost is `prod(ceil(L_i / spacing)) * N_atoms`; the limits check refuses a grid
-above the budget before allocation. Validation: the CoRE MOF subset (HKUST-1
-and ZIF-8) checks a bounded accessible fraction and a positive surface area;
-the reference values are in `tests/external/core_mof/README.md`.
+Cost is `prod(round(L_i / spacing)) * N_atoms`: every sample is compared with
+every atom, which is exact but meant for small and medium cells. The grid
+refuses a size above the budget before allocation; the generic
+`check_grid` estimate uses the same rounding with a minimum of 8 points per
+axis. Validation: the CoRE MOF subset (HKUST-1 and ZIF-8) checks a bounded
+accessible fraction and a positive surface area; the reference values are in
+`tests/external/core_mof/README.md`.
 
 ## Isosurfaces
 

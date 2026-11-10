@@ -8,12 +8,17 @@ the forces are projected back onto the symmetry-allowed displacements. The
 space group is preserved on every step. `RelaxMode::P1` is the ordinary
 Cartesian relaxation.
 
-`OptimizeOptions.cell` adds the six symmetric strain components as variables;
-holding selected lengths or the volume while the shape relaxes is the
-`CellFreedom` idea for flexible frameworks. External pressure enters through
-the stress term.
+`OptimizeOptions.cell` (a boolean) adds the strain components as variables (averaged over the point group: a
+cubic cell keeps one free strain, a triclinic cell six), so the cell relaxes with the atoms. Holding selected lengths or the
+volume while the shape relaxes (the `CellFreedom` idea of the reference) and an
+external pressure term are **not implemented** in this release; they are
+recorded as known subsets in the roadmap. `OptimizeOptions.fixed_atoms` freezes
+the listed atoms.
 
 ## Minimizers
+
+![FIRE and L-BFGS](/diagrams/optimization.svg)
+
 
 - **FIRE** (`Minimizer::Fire`): molecular dynamics with the velocity steered
   downhill, an adaptive time step and a force criterion.

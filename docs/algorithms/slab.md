@@ -1,5 +1,7 @@
 # Slab construction
 
+![Slab construction](/diagrams/slab.svg)
+
 `surface_basis(hkl)` performs Euclid's algorithm on the three Miller indices as
 column operations on the identity. The result is an integer, right-handed,
 unimodular basis whose first two rows lie in `(hkl)` and whose third row

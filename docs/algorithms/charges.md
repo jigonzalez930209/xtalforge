@@ -29,6 +29,9 @@ for EQeq, and the corpus comparison is the acceptance criterion.
 
 ## Ewald
 
+![Ewald splitting](/diagrams/ewald-split.svg)
+
+
 `ewald_energy_forces(structure, &charges, &EwaldOptions)` splits the Coulomb
 sum into a real-space part, a reciprocal-space part, a self term and a
 neutralising background. The splitting parameter and the cutoffs come from the
