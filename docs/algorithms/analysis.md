@@ -36,8 +36,11 @@ positions, multiplicities and absences are exact.
 
 ## Peaks
 
-`find_peaks` smooths the pattern, estimates a background envelope and reports
-local maxima above a prominence threshold; `fit_peaks` refines position,
+`find_peaks` reports local maxima above `min_height` and `min_distance`, with
+optional smoothing, SNIP background subtraction and a per-line fit; the defaults
+(`min_height = 0`, no smoothing, no background) report every maximum, so noisy
+data should use `PeakOptions::noise_limited` (background subtracted, lines above
+1 % of the strongest and five times the noise); `fit_peaks` refines position,
 height, width and a background term. The peak list is the input to indexing.
 The algorithms are deterministic and do not use a random initialisation.
 
