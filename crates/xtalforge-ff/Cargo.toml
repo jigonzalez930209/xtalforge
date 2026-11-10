@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "Force fields, charges, optimizers and thermochemistry for xtalforge."
+include = ["src/**", "data/**"]
 
 [dependencies]
 xtalforge-build = { workspace = true }
@@ -34,3 +35,10 @@ sci-form = ["dep:sci-form"]
 
 [lints]
 workspace = true
+
+[[bench]]
+name = "uff"
+harness = false
+
+[package.metadata.docs.rs]
+all-features = true
