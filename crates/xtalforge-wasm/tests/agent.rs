@@ -34,7 +34,7 @@ fn session_loads_text_and_answers() {
         .expect("info");
     let info: serde_json::Value = serde_json::from_str(&info).expect("info");
     assert_eq!(info["kind"], "info");
-    assert_eq!(info["inspection"]["summary"]["formula"], "Na Cl");
+    assert_eq!(info["inspection"]["summary"]["formula"], "Na4 Cl4");
     let structure = session.structure_json(None).expect("structure");
     let structure: serde_json::Value = serde_json::from_str(&structure).expect("structure json");
     assert!(structure["sites"].is_array());

@@ -43,7 +43,7 @@ fn cif_text_reads_bonds_and_rings_in_the_browser() {
     let summary = read_cif(NACL_CIF).unwrap();
     assert_eq!(
         property(&summary, "formula").as_string().as_deref(),
-        Some("Na Cl")
+        Some("Na4 Cl4")
     );
     let list = bonds(NACL_CIF).unwrap();
     assert_eq!(js_sys::Array::from(&list).length(), 24);

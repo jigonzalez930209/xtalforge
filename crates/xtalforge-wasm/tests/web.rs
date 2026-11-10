@@ -396,7 +396,7 @@ fn phase_one_writers_return_text() {
     let summary = read_cif(NACL_CIF).expect("read_cif");
     assert_eq!(
         property(&summary, "formula").as_string().as_deref(),
-        Some("Na Cl")
+        Some("Na4 Cl4")
     );
     let xyz = convert_structure(NACL_CIF, "cif", "xyz").expect("convert");
     assert!(xyz.contains("Lattice="));

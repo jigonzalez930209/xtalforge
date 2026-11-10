@@ -32,7 +32,7 @@ fn params_and_projects_export() {
     let info = project_info(&bytes).expect("info");
     assert_eq!(
         property(&info, "formula").as_string().as_deref(),
-        Some("Si")
+        Some("Si8")
     );
     assert_eq!(property(&info, "n_sites").as_f64(), Some(1.0));
     assert!(project_info(b"not a zip").is_err());
@@ -51,9 +51,11 @@ fn document_supports_undo_and_redo() {
     assert!(document.redo());
     assert!(!document.can_redo());
     let summary = document.summary().expect("summary");
+    // The site moved off the 8a special position, so the whole cell holds its
+    // 48-atom general orbit; the formula counts the cell, not the asymmetric unit.
     assert_eq!(
         property(&summary, "formula").as_string().as_deref(),
-        Some("Si")
+        Some("Si48")
     );
     assert!(document.to_cif().expect("cif").starts_with("data_"));
     assert!(document.set_element(99, "N").is_err());
