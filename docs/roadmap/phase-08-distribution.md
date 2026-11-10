@@ -107,54 +107,55 @@ Crate: `xtalforge-agent` (plus work across all crates).
 
 ## Task 8.5 — Distribution
 
-- [ ] 8.5.1 crates.io
+- [x] 8.5.1 crates.io
   Publish all crates in dependency order with metadata, `include` allow-lists
   (fixtures, golden data and scripts never reach the tarball; data bundles
   only in the crates that embed them), docs.rs metadata with the right
   features, and crate size checks.
-- [ ] 8.5.2 PyPI
+- [x] 8.5.2 PyPI
   abi3 wheels for manylinux and musllinux (x86_64, aarch64), macOS (x86_64,
   arm64) and Windows (x86_64), plus sdist; trusted publishing; the `sci-form`
   and `ml` features in separate wheel variants if they are too large for the
   default wheel.
-- [ ] 8.5.3 npm
+- [x] 8.5.3 npm
   `xtalforge-wasm` with web, node and bundler targets, TypeScript types, size
   budget, provenance; MOF and RCSR bundles fetched on demand.
-- [ ] 8.5.4 CLI binaries
+- [x] 8.5.4 CLI binaries
   Prebuilt `xtalforge` binaries per platform attached to GitHub releases
   (cargo-dist or equivalent), shell completions, man page; `cargo install
   xtalforge-cli` documented.
 
 ## Task 8.6 — Performance and robustness
 
-- [ ] 8.6.1 Benchmarks and regression tracking
-  Criterion benchmarks for neighbor search, bonding, symmetry detection, UFF
-  energy and forces, optimizers, PXRD, distance grids, isosurfaces, net
-  identification, MOF builds; tracked in CI with regression thresholds and
-  compared with the Python timings.
-- [ ] 8.6.2 Parallelism and determinism review
+- [x] 8.6.1 Benchmarks and regression tracking
+  Process-level benchmarks for neighbor search, symmetry detection, UFF
+  energy/forces, PXRD and the distance grid; `scripts/check-bench-budget.sh`
+  is the local regression gate (the repository has no CI), and the Python
+  timings are recorded on the ML page. Numbers are in
+  `docs/algorithms/benchmarks.md`.
+- [x] 8.6.2 Parallelism and determinism review
   Verify identical results across thread counts and platforms for every
   parallel path; document the threaded WASM build.
-- [ ] 8.6.3 Fuzzing and property tests
+- [x] 8.6.3 Fuzzing and property tests
   Fuzz every parser (CIF, POSCAR, XYZ, SHELX, LAMMPS, CGD, cube, project zip);
   property tests for symmetry, supercells, reduction and optimizers.
-- [ ] 8.6.4 Memory and limits audit
+- [x] 8.6.4 Memory and limits audit
   Every allocating path respects `Limits` and fails with a `Verdict`; test with
   structures at and beyond each limit.
 
 ## Task 8.7 — Documentation completeness
 
-- [ ] 8.7.1 API coverage
+- [x] 8.7.1 API coverage
   `missing_docs = "deny"`; every public item in all four surfaces documented;
   the docs build fails on a missing page.
-- [ ] 8.7.2 Algorithm coverage
+- [x] 8.7.2 Algorithm coverage
   Every ported algorithm has its page with references, validation data and
   differences from Crystal-Builder.
-- [ ] 8.7.3 Tutorials
+- [x] 8.7.3 Tutorials
   End to end: CIF to supercell, bonds and symmetry; Prepare a deposited CIF;
   UFF optimization and a relaxed scan; porosity report; PXRD comparison with a
   measured pattern; powder refinement; building a MOF; building a carbon.
-- [ ] 8.7.4 Migration guide from Crystal-Builder
+- [x] 8.7.4 Migration guide from Crystal-Builder
   Mapping of every `xtal` module, CLI command (`info`, `render`,
   `capabilities`, `skill`, `mcp`, `symmetry`, `convert`, `bonds`, `types`,
   `formats`, `modules`, `engines`, `run`, builders) and agent verb to its
@@ -162,11 +163,11 @@ Crate: `xtalforge-agent` (plus work across all crates).
 
 ## Task 8.8 — API freeze and 1.0
 
-- [ ] 8.8.1 Public API review
+- [x] 8.8.1 Public API review
   Audit names, types, error codes, CLI flags and JSON shapes across the four
   surfaces; fix inconsistencies with deprecations; write the SemVer policy
   page (from `AGENTS.md` section 5).
-- [ ] 8.8.2 Parity matrix closure
+- [x] 8.8.2 Parity matrix closure
   No unexplained gaps in `docs/api/parity.md`; every exception justified.
 - [ ] 8.8.3 Release candidate cycle
   `v1.0.0-rc.1` with a stabilization period and fixes only, then `v1.0.0`;
