@@ -3,11 +3,11 @@
 //! A separate crate can extend every open registry without editing the
 //! library:
 //!
-//! - a file format ([`FormatRegistry`]);
-//! - an energy calculator ([`CalculatorRegistry`]);
-//! - a module ([`ModuleRegistry`]);
-//! - a named scalar ([`ScalarRegistry`]);
-//! - a view-style preset ([`StyleRegistry`]).
+//! - a file format ([`xtalforge::io::registry::FormatRegistry`]);
+//! - an energy calculator ([`xtalforge::ff::CalculatorRegistry`]);
+//! - a module ([`xtalforge::modules::ModuleRegistry`]);
+//! - a named scalar ([`xtalforge::core::ScalarRegistry`]);
+//! - a view-style preset ([`xtalforge::view::StyleRegistry`]).
 //!
 //! The example is deliberately small: a two-line format, a zero-energy
 //! calculator, a site-count module, a scalar that returns the first fractional
