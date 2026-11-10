@@ -39,7 +39,7 @@ pub type Reader = fn(&str) -> Result<Structure, Error>;
 pub type Writer = fn(&Structure) -> Result<String, Error>;
 
 /// One registered format.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct FormatSpec {
     /// Stable format name.
     pub name: &'static str,
@@ -349,5 +349,148 @@ impl ExportPolicy {
             source = builder.build()?;
         }
         Ok(source)
+    }
+}
+
+/// A runtime format registry for plugins (Task 8.3.1).
+///
+/// [`FORMATS`] is the built-in list compiled into the crate. A front end or a
+/// plugin can copy it and add formats without editing the library:
+///
+/// ```
+/// use xtalforge_io::registry::{FormatRegistry, FormatSpec, Capabilities};
+///
+/// let mut registry = FormatRegistry::new();
+/// registry.register(FormatSpec {
+///     name: "twoline",
+///     extensions: &[".2l"],
+///     read: Some(|text| xtalforge_io::read_xyz(text)),
+///     write: None,
+///     capabilities: Capabilities::default(),
+/// })
+/// .unwrap();
+/// assert!(registry.find(".2l").is_some());
+/// ```
+#[derive(Debug, Clone)]
+pub struct FormatRegistry {
+    formats: Vec<FormatSpec>,
+}
+
+impl Default for FormatRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl FormatRegistry {
+    /// A registry with the built-in formats.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            formats: FORMATS.to_vec(),
+        }
+    }
+
+    /// An empty registry.
+    #[must_use]
+    pub fn empty() -> Self {
+        Self {
+            formats: Vec::new(),
+        }
+    }
+
+    /// Registers a format.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for an empty name, a duplicate name or
+    /// an extension already claimed by another format.
+    pub fn register(&mut self, spec: FormatSpec) -> Result<(), Error> {
+        if spec.name.trim().is_empty() {
+            return Err(Error::InvalidInput(
+                "a format needs a non-empty name".to_owned(),
+            ));
+        }
+        if spec.extensions.is_empty() {
+            return Err(Error::InvalidInput(format!(
+                "format {} needs at least one extension",
+                spec.name
+            )));
+        }
+        if self.formats.iter().any(|format| format.name == spec.name) {
+            return Err(Error::InvalidInput(format!(
+                "format {} is already registered",
+                spec.name
+            )));
+        }
+        for extension in spec.extensions {
+            if self
+                .formats
+                .iter()
+                .any(|format| format.extensions.contains(extension))
+            {
+                return Err(Error::InvalidInput(format!(
+                    "extension {extension} is already registered"
+                )));
+            }
+        }
+        self.formats.push(spec);
+        Ok(())
+    }
+
+    /// Finds a format by name or extension (case-insensitive).
+    #[must_use]
+    pub fn find(&self, name_or_extension: &str) -> Option<&FormatSpec> {
+        let wanted = name_or_extension.trim().to_ascii_lowercase();
+        let wanted = if wanted.starts_with('.') {
+            wanted
+        } else {
+            format!(".{wanted}")
+        };
+        self.formats.iter().find(|format| {
+            format.name == wanted.trim_start_matches('.')
+                || format
+                    .extensions
+                    .iter()
+                    .any(|extension| *extension == wanted)
+        })
+    }
+
+    /// Every registered format, built-ins first.
+    #[must_use]
+    pub fn formats(&self) -> &[FormatSpec] {
+        &self.formats
+    }
+
+    /// Reads text with an explicit format name or extension.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for an unknown or write-only format,
+    /// or the reader error.
+    pub fn read_with(&self, text: &str, hint: &str) -> Result<Structure, Error> {
+        let format = self
+            .find(hint)
+            .ok_or_else(|| Error::InvalidInput(format!("unknown structure format: {hint}")))?;
+        let reader = format
+            .read
+            .ok_or_else(|| Error::InvalidInput(format!("format {} is write-only", format.name)))?;
+        reader(text)
+    }
+
+    /// Writes a structure with an explicit format name or extension.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for an unknown or read-only format, or
+    /// the writer error.
+    pub fn write_with(&self, structure: &Structure, hint: &str) -> Result<String, Error> {
+        let format = self
+            .find(hint)
+            .ok_or_else(|| Error::InvalidInput(format!("unknown structure format: {hint}")))?;
+        let writer = format
+            .write
+            .ok_or_else(|| Error::InvalidInput(format!("format {} is read-only", format.name)))?;
+        writer(structure)
     }
 }
