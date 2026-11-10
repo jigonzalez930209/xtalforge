@@ -18,6 +18,8 @@ both kept even though their periodic distance is zero.
 values in between are interpolated.
 
 ```rust
+use xtalforge::core::transforms;
+
 let finite = structure.finite_cell(1e-6)?;
 let rotated = transforms::rotate(&points, [0.0, 0.0, 1.0], 90.0, [0.0; 3])?;
 let ellipsoid = transforms::displacement_ellipsoid([0.01, 0.02, 0.03, 0.0, 0.0, 0.0], 0.5)?;

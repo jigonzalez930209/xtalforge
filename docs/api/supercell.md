@@ -8,7 +8,7 @@ dropped and can be re-detected later.
 
 ```rust
 let cell = structure.supercell(2, 2, 2)?;
-let general = structure.supercell_matrix([[2, 1, 0], [0, 1, 0], [0, 0, 1]])?;
+let general = structure.supercell_matrix([[2.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])?;
 let shifted = structure.origin_shift([0.5, 0.0, 0.0])?;
 ```
 

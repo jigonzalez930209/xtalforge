@@ -2,7 +2,9 @@
 
 ## Availability, not existence
 
-An external engine is optional and lives behind the `external` feature. A
+An external engine is optional and found at run time. The `external` Cargo
+feature is reserved and a no-op (the probes and input writers are always
+compiled, see [Cargo features](../guide/features)); a
 probe checks that the binary actually runs (`--version` with a short read and
 a timeout) instead of only checking that a file exists. `EngineStatus` is
 `Available { path, version }` or `Missing { reason }`; `xtalforge engines`

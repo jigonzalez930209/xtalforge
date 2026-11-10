@@ -19,7 +19,8 @@ stack.push(
 
 ## Stack
 
-`CommandStack::push(command, &structure, origin)` applies and records;
+`CommandStack::push(&mut structure, command, origin)` applies, records and
+writes the new structure back; an invalid command leaves both untouched;
 `undo(&mut structure)` and `redo(&mut structure)` move through the history.
 `can_undo`, `can_redo`, `undo_depth`, `redo_depth`, `is_dirty`, `mark_clean`,
 `max_depth`/`set_max_depth` (default 200) and `log()` expose the state.

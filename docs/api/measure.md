@@ -6,6 +6,8 @@ and use minimum images, so a bond across a cell boundary measures the same as
 one inside it.
 
 ```rust
+use xtalforge::core::measure;
+
 let d = measure::distance(&structure, 0, 1)?;
 let a = measure::angle(&structure, 0, 1, 2)?;
 let t = measure::torsion(&structure, 0, 1, 2, 3)?;

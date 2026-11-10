@@ -7,6 +7,8 @@ carboxylate (C with two O neighbours), amine (N with one to three neighbours)
 and fluoride (C-F).
 
 ```rust
+use xtalforge::core::find_groups;
+
 for group in find_groups(&structure)? {
     println!("{}: {:?}", group.kind.name(), group.atoms);
 }

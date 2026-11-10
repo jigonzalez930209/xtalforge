@@ -44,6 +44,8 @@ initial core codes are:
 | `data_checksum` | a bundle failed its SHA-256 check |
 | `data_digest` | a bundle manifest digest is malformed |
 | `data_json` | a bundle payload is not valid JSON for its type |
+| `limit_exceeded` | a size check refused the operation |
+| `symmetry` | the symmetry backend failed |
 
 The Python module exposes `XtalforgeError` as the base class and
 `InputError` as the first domain subclass. The exception arguments are

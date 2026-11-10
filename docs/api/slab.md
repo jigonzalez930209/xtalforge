@@ -6,6 +6,8 @@ plane's own lattice: `surface_basis(hkl)` returns an integer, right-handed,
 unimodular basis with the first two rows in the plane and `h . v3 = 1`.
 
 ```rust
+use xtalforge::core::{make_slab, surface_basis};
+
 let basis = surface_basis([1, 1, 1])?;
 let slab = make_slab(&structure, [1, 1, 1], 2, 15.0, 0.0)?;
 assert!(slab.structure.is_p1());

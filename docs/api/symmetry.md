@@ -63,6 +63,8 @@ not equivalent to a pure one and dummy `X` has its own type.
   setting (origin choice, axis or cell choice) and preserves the geometry.
 
 ```rust
+use xtalforge::symmetry::{SetMode, SpaceGroup, SymmetryOptions, detect_and_symmetrize, set_space_group};
+
 let result = detect_and_symmetrize(&structure, SymmetryOptions::default())?;
 let report = set_space_group(&distorted, &SpaceGroup::from_number(225)?, SetMode::Impose)?;
 println!("max displacement {:.3} A", report.max_displacement);

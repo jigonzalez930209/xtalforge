@@ -5,7 +5,7 @@ forces for a structure; `UffCalculator` is the native Universal Force Field
 with UFF4MOF types.
 
 ```rust
-use xtalforge::ff::{CalculatorOptions, UffCalculator};
+use xtalforge::ff::{Calculator, CalculatorOptions, UffCalculator};
 
 let calculator = UffCalculator::new(CalculatorOptions::default())?;
 let energy = calculator.energy(&structure)?;

@@ -6,6 +6,8 @@ translation of atom `j` relative to atom `i`. `neighbors_of` filters the list
 for one atom. The structure is expanded to P1 first.
 
 ```rust
+use xtalforge::core::neighbors;
+
 let found = neighbors(&structure, 3.2)?;
 for neighbor in &found {
     println!("{} - {} at {:.3} A", neighbor.i, neighbor.j, neighbor.distance);

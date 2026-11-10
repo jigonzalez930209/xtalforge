@@ -10,6 +10,8 @@ explicit bonds, which is the census a builder states: distance perception is
 not allowed to add a close contact across a pore.
 
 ```rust
+use xtalforge::core::rings;
+
 for ring in rings(&structure, 8)? {
     println!("{} atoms:", ring.size());
     for step in &ring.path {

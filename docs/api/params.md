@@ -8,7 +8,7 @@ runs: name, `ParamType`, default, help text, required flag and optional group.
 use xtalforge::core::{ParamSet, ParamSpec, ParamType};
 use serde_json::json;
 
-let set = ParamSet::new().add(ParamSpec {
+let set = ParamSet::new().with_param(ParamSpec {
     name: "symprec".to_owned(),
     kind: ParamType::Float { min: Some(0.0), max: Some(1.0), unit: Some("Angstrom".to_owned()) },
     default: json!(0.001),

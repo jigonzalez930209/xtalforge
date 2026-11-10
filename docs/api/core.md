@@ -25,6 +25,8 @@ One enum for the crate. `code()` returns a stable `snake_case` string and
 | `DataChecksum` | `data_checksum` |
 | `DataDigest` | `data_digest` |
 | `DataJson` | `data_json` |
+| `LimitExceeded` | `limit_exceeded` |
+| `Symmetry` | `symmetry` |
 
 ## Data bundles
 

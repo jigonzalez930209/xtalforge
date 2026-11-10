@@ -17,6 +17,12 @@ A change to any of these is a breaking change:
 - `schema_version` of serialized structures and `format_version` of project
   files.
 
+A change that makes a function return what its documentation always promised
+(a wrong geometry, a rejected valid input) is a fix, not a breaking change, even
+when the output of the faulty version differed. The 1.0.0-rc.1 stabilization
+period used this rule for the graphene, nanotube and nanoribbon builders and
+for `structure_info` (see the changelog).
+
 Private modules, test fixtures, benchmark output, log text and the exact
 wording of a human-readable message are not public API.
 
