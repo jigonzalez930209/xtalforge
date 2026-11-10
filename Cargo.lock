@@ -1184,6 +1184,7 @@ name = "xtalforge"
 version = "0.0.3"
 dependencies = [
  "serde_json",
+ "xtalforge-agent",
  "xtalforge-analysis",
  "xtalforge-build",
  "xtalforge-commands",
@@ -1192,6 +1193,24 @@ dependencies = [
  "xtalforge-io",
  "xtalforge-modules",
  "xtalforge-mof",
+ "xtalforge-symmetry",
+ "xtalforge-view",
+]
+
+[[package]]
+name = "xtalforge-agent"
+version = "0.0.3"
+dependencies = [
+ "flate2",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "xtalforge-analysis",
+ "xtalforge-build",
+ "xtalforge-commands",
+ "xtalforge-core",
+ "xtalforge-ff",
+ "xtalforge-io",
  "xtalforge-symmetry",
  "xtalforge-view",
 ]

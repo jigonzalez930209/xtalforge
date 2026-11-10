@@ -9,6 +9,16 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 8 Task 8.1: the `xtalforge-agent` crate: one verb catalogue shared by
+  the Rust, CLI, Python and WASM surfaces (22 verbs), a stateful session whose
+  mutations use `Origin::Agent`, inspection and diagnostics (overlap,
+  occupancy, charge, dangling and under-coordinated atoms, unusual
+  coordination, symmetry), command-log change bursts, typed JSON answers and a
+  pure-Rust orthographic renderer to SVG and PNG. CLI `capabilities`, `render`
+  and `agent`; Python `AgentSession`, `agent_run`, `agent_capabilities`,
+  `agent_verbs`; WASM `AgentSession`, `agent_run`, `agent_capabilities`,
+  `agent_verbs`. The WASM size budget moves from 3648 to 3840 KiB to carry the
+  new exported surface (3775 KiB).
 - Phase 0 Task 0.9: external validation suite. EQeq is compared with the
   authors' program on the COD MOF-5 cell (424 charges within 1e-3 e), UFF with
   sci-form on methane and stretched water (within 1e-4 kcal/mol), and the

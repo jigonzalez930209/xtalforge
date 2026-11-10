@@ -2,6 +2,7 @@
 resolver = "3"
 members = [
   "crates/xtalforge",
+  "crates/xtalforge-agent",
   "crates/xtalforge-analysis",
   "crates/xtalforge-build",
   "crates/xtalforge-cli",
@@ -33,6 +34,7 @@ categories = ["science", "simulation"]
 [workspace.dependencies]
 # Internal crates. `scripts/sync-version.sh` rewrites the pinned versions.
 xtalforge = { version = "=0.0.3", path = "crates/xtalforge" }
+xtalforge-agent = { version = "=0.0.3", path = "crates/xtalforge-agent" }
 xtalforge-core = { version = "=0.0.3", path = "crates/xtalforge-core" }
 xtalforge-ff = { version = "=0.0.3", path = "crates/xtalforge-ff" }
 xtalforge-io = { version = "=0.0.3", path = "crates/xtalforge-io" }
