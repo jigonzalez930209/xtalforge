@@ -8,7 +8,7 @@
 )]
 
 use serde_json::json;
-use xtalforge_core::{Lattice, Site, StructureBuilder};
+use xtalforge_core::{Lattice, Site, StructureBuilder, SymOp};
 
 fn carbon() -> xtalforge_core::Structure {
     StructureBuilder::new("C", Lattice::cubic(4.0).unwrap())
@@ -16,6 +16,22 @@ fn carbon() -> xtalforge_core::Structure {
         .metadata("source", json!("test"))
         .build()
         .unwrap()
+}
+
+#[test]
+fn supercell_expands_the_whole_cell_before_repeating() {
+    let inversion = SymOp::new([[-1, 0, 0], [0, -1, 0], [0, 0, -1]], [0.0, 0.0, 0.0]).unwrap();
+    let asymmetric = StructureBuilder::new("Si", Lattice::cubic(5.430941).unwrap())
+        .operation(SymOp::identity())
+        .operation(inversion)
+        .site(Site::new("Si1", "Si", [0.1, 0.2, 0.3]).unwrap())
+        .build()
+        .unwrap();
+    assert_eq!(asymmetric.p1().unwrap().n_atoms(), 2);
+    let cell = asymmetric.supercell(2, 1, 1).unwrap();
+    assert_eq!(cell.sites().len(), 4);
+    assert!(cell.is_p1());
+    assert!(cell.operations().is_empty());
 }
 
 #[test]
