@@ -31,6 +31,7 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/' },
       { text: 'API', link: '/api/' },
       { text: 'Algorithms', link: '/algorithms/' },
+      { text: 'Playground', link: '/playground' },
       { text: 'Demos', link: '/demos/' },
       { text: 'Roadmap', link: '/roadmap/' },
       { text: 'Changelog', link: '/changelog' },
@@ -46,6 +47,7 @@ export default defineConfig({
             { text: 'File formats', link: '/guide/formats' },
             { text: 'Automation guide', link: '/guide/automation' },
             { text: 'FAQ', link: '/guide/faq' },
+            { text: 'End-to-end audit', link: '/guide/audit' },
             { text: 'Contributing', link: '/guide/contributing' },
             { text: 'Cargo features', link: '/guide/features' },
             { text: 'Data bundles', link: '/guide/data' },
@@ -142,6 +144,7 @@ export default defineConfig({
           text: 'Demos',
           items: [
             { text: 'Overview', link: '/demos/' },
+            { text: '3D playground', link: '/playground' },
             { text: 'Cell volume', link: '/demos/cell-volume' },
             { text: 'CIF inspector', link: '/demos/cif-inspector' },
             { text: 'Structure editor', link: '/demos/editor' },
