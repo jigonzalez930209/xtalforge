@@ -19,7 +19,7 @@ fn reads_silicon_and_expands_to_p1() {
     let structure = read_cif(SI).unwrap();
     assert_eq!(structure.name(), "9011998");
     assert!((structure.lattice().lengths()[0] - 5.430_941).abs() < 1e-6);
-    assert_eq!(structure.formula(), "Si");
+    assert_eq!(structure.formula(), "Si8");
     let p1 = structure.p1().unwrap();
     assert_eq!(p1.n_atoms(), 8);
     assert!(structure.operations().len() > 1);
