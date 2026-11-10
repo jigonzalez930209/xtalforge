@@ -22,6 +22,8 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             height,
         } => agent_commands::render(cli, path, out.as_deref(), *format, *width, *height),
         Command::Agent { path } => agent_commands::session(cli, path),
+        Command::Mcp => agent_commands::mcp(),
+        Command::Skill { action } => agent_commands::skill(cli, action),
         Command::Hydrogens {
             path,
             distance,

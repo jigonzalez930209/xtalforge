@@ -35,6 +35,25 @@ pub(crate) enum ProjectAction {
     },
 }
 
+/// Skill document actions.
+#[derive(Debug, Subcommand)]
+pub(crate) enum SkillAction {
+    /// Print the default install directory.
+    Path,
+    /// List the embedded documents.
+    List,
+    /// Print one document.
+    Show {
+        /// Path or base name, for example `SKILL` or `references/api.md`.
+        name: String,
+    },
+    /// Write every document into a directory.
+    Install {
+        /// Destination; defaults to the user data directory.
+        dir: Option<String>,
+    },
+}
+
 #[derive(Debug, Subcommand)]
 pub(crate) enum Command {
     /// Print the xtalforge version.
@@ -62,6 +81,13 @@ pub(crate) enum Command {
     Agent {
         /// Script path, or `-` for standard input.
         path: String,
+    },
+    /// Serve the Model Context Protocol over standard input and output.
+    Mcp,
+    /// Skill documents for an assistant: path, list, show or install.
+    Skill {
+        #[command(subcommand)]
+        action: SkillAction,
     },
     /// Add the hydrogens an X-ray structure is missing.
     Hydrogens {

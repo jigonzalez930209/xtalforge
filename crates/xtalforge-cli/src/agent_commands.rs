@@ -2,6 +2,7 @@
 
 use serde_json::{Value, json};
 
+use crate::args::SkillAction;
 use crate::format::PictureFormat;
 use crate::{Cli, CliError, input};
 
@@ -96,6 +97,84 @@ pub(crate) fn render(
         );
     }
     Ok(())
+}
+
+/// Serves the Model Context Protocol over stdio.
+pub(crate) fn mcp() -> Result<(), CliError> {
+    xtalforge::agent::serve_stdio().map_err(agent_error)
+}
+
+/// Prints, lists or installs the skill documents.
+pub(crate) fn skill(cli: &Cli, action: &SkillAction) -> Result<(), CliError> {
+    match action {
+        SkillAction::Path => {
+            let path = xtalforge::agent::default_directory();
+            if cli.json {
+                println!("{}", json!({"path": path.to_string_lossy()}));
+            } else {
+                println!("{}", path.display());
+            }
+            Ok(())
+        }
+        SkillAction::List => {
+            let entries: Vec<Value> = xtalforge::agent::skill::DOCUMENTS
+                .iter()
+                .map(|document| {
+                    json!({
+                        "name": document.name,
+                        "title": document.title,
+                    })
+                })
+                .collect();
+            if cli.json {
+                println!("{}", json!(entries));
+            } else {
+                for document in xtalforge::agent::skill::DOCUMENTS {
+                    println!("{:<32} {}", document.name, document.title);
+                }
+            }
+            Ok(())
+        }
+        SkillAction::Show { name } => {
+            let document = xtalforge::agent::skill::find(name).ok_or_else(|| {
+                CliError::input(format!(
+                    "unknown skill document {name:?}; try `xtalforge skill list`"
+                ))
+            })?;
+            if cli.json {
+                println!(
+                    "{}",
+                    json!({"name": document.name, "title": document.title, "body": document.body})
+                );
+            } else {
+                print!("{}", document.body);
+            }
+            Ok(())
+        }
+        SkillAction::Install { dir } => {
+            let directory = dir
+                .as_ref()
+                .map(std::path::PathBuf::from)
+                .unwrap_or_else(xtalforge::agent::default_directory);
+            let written = xtalforge::agent::skill::install(&directory).map_err(agent_error)?;
+            if cli.json {
+                println!(
+                    "{}",
+                    json!({
+                        "directory": directory.to_string_lossy(),
+                        "files": written.iter().map(|path| path.to_string_lossy()).collect::<Vec<_>>(),
+                    })
+                );
+            } else {
+                println!(
+                    "installed {} files in {}",
+                    written.len(),
+                    directory.display()
+                );
+            }
+            Ok(())
+        }
+    }
 }
 
 /// Runs a JSON list of verbs against one session.
