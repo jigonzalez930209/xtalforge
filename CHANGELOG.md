@@ -9,6 +9,19 @@ essential release, then `0.x.y`).
 
 ### Fixed
 
+- `Structure::formula`, `cell_contents`, `cell_mass`, `density`, `z` and
+  `total_charge` (and therefore `info`, `structure_info`, the agent `info` verb,
+  Python and WASM summaries) counted the asymmetric unit, so every structure
+  with symmetry operations reported the wrong formula, density and charge: NaCl
+  read from a CIF showed `Na Cl` and 0.55 g/cm3 instead of `Na4 Cl4` and
+  2.19 g/cm3. They now use the P1 expansion; `z` is the gcd of the element
+  counts.
+- The CIF reader records `coincident_atoms_warning` when atoms of different
+  sites coincide in the P1 cell with total occupancy above one (a file that
+  lists the whole cell under a non-P1 group), and the CLI `info` prints it and
+  `symmetry_warning` on standard error. Writing to a device such as
+  `/dev/null` works.
+
 - `graphene`: the atoms were stored with Cartesian coordinates as fractional
   ones and the `b` vector used `nx/2` instead of `ny/2`, so the sheet was
   distorted (bonds of 1.07 Angstrom) and not a supercell when `nx != ny`.
