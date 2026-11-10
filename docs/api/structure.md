@@ -65,8 +65,12 @@ returns the same summary.
 
 ## Conventions
 
-- Formula counts include occupancy and follow first appearance in the sites.
+- Formula, cell mass, density and total charge are counted on the whole cell:
+  the P1 expansion for a structure with symmetry operations (NaCl in `Fm-3m`
+  is `Na4 Cl4`, 2.19 g/cm3), the sites themselves for a P1 structure.
+  Counts include occupancy and follow first appearance.
 - Density uses the cell contents: `mass * 1.66053906660 / volume` g/cm3.
-- `z` is the number of formula units in the cell contents; a structure with
-  operations derives it from the P1 expansion.
+- `z` is the greatest common divisor of the integer element counts of the
+  whole cell (4 for rock salt, 8 for diamond silicon), or 1 when a count is not
+  an integer; `n_sites` stays the number of asymmetric sites.
 - `total_charge` is the occupancy-weighted sum of formal charges.
