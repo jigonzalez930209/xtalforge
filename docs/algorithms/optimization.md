@@ -32,16 +32,22 @@ back onto the original representation.
 
 ## Constraints and scans
 
-`ScanCoordinate` is a distance, angle or torsion between atom groups; an
-endpoint group of one is an atom and a larger group is its centroid, so a
-coordinate never needs a dummy atom. `Constraint` holds a coordinate while the
-rest relaxes by projecting its gradient out, rather than freezing the atoms
-that define it.
+`ScanCoordinate` is a distance, an angle or a torsion between **single atoms**
+(P1 site indices, minimum image through the lattice). Groups of atoms with a
+centroid endpoint, the angle between planes and the cell parameters or volume as
+coordinates are not implemented. `Constraint` holds a coordinate while the rest
+relaxes by projecting its gradient out, rather than freezing the atoms that
+define it; `OptimizeOptions.fixed_atoms` freezes whole atoms.
 
-`relaxed_scan` steps the coordinate, constrains it, relaxes everything else,
-and records `ScanPoint { value, energy, structure, converged }`. The driver
-writes each point before starting the next and reports a typed error if the
-scan axis is invalid.
+`relaxed_scan` steps the coordinate, constrains it, relaxes everything else
+starting from the previous point, and returns
+`ScanPoint { value, energy, structure, converged }` for every value in memory. It
+does not write `scan.csv` or per-point files and cannot resume an interrupted
+scan; a caller that wants that writes each returned point itself. An invalid axis
+(non-P1 structure, empty values, a degenerate angle) is a typed error.
+
+The optimizers take no cancellation token or progress callback and write no
+trajectory; they stop on `force_tolerance`, `energy_tolerance` or `max_steps`.
 
 ## Equation of state
 
