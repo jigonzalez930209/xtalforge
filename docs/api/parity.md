@@ -87,6 +87,9 @@ compares this table with the symbols each surface actually exports.
 | In-process GFN0/GFN1/GFN2 (`sci-form` feature) | CLI, Python, WASM | Optional build-time feature whose methods are molecular only; the Rust `Calculator` and the registry listing are the supported surface, and no binding negotiation for the feature exists yet | Rust `quantum::adapter`; CLI `ff engines` lists the registry entries |
 | Multi-threading | WASM | Threads need cross-origin isolation | Optional threaded build |
 | MCP server over stdio | Python, WASM | It is a process, served by the CLI | `xtalforge mcp` |
+| Machine-learning potentials (`MlCalculator`, `ml_backends`) | Rust, CLI, WASM | The Task 4.11 decision is the Python/ASE bridge; torch is not a WASM target and the Rust `ml` feature is a declared no-op | Python `MlCalculator`; the CLI `models` command manages weights |
+| Plugins (`Plugins`, runtime registries) | CLI, WASM | Python callables and Rust registries are host-side extension points; a browser has no dynamic library or Python runtime | Rust `FormatRegistry`, `ScalarRegistry`, `StyleRegistry`, `CalculatorRegistry`, `ModuleRegistry`; Python `Plugins` |
+| Model cache (`models`) | Python, WASM | It is a filesystem command with `curl`; the browser and Python package leave the download to the user | CLI `models`; `xtalforge_ff::models` |
 | Full MOF topology bundle | WASM | Package size | The builder carries the curated six-topology/eight-block subset (Tasks 6.11-6.16); the RCSR fingerprint index (35 KB) is embedded on every surface |
 | lattice_minimum_image, limits_bounds, limits_check | CLI | The CLI exposes geometry through `cell` and the global `--limits` flag | Use `cell` and `--limits` |
 | workspace_archive | CLI | The CLI reads and writes `runs/<id>/run.json` directly | Use `project` or the on-disk workspace |
