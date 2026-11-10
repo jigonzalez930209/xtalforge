@@ -110,11 +110,15 @@ right-handed input. Volume and atom count are preserved by construction.
 ## Brillouin zone
 
 The zone is the intersection of the half-spaces `G . x <= |G|^2 / 2` for the
-reciprocal vectors within four times the shortest vector. A large cube is
-clipped face by face; each cut contributes a cap polygon ordered around the
-plane normal. Vertices and edges are deduplicated by distance. The fcc
-primitive cell yields the truncated octahedron (14 faces, 24 vertices, 36
-edges).
+reciprocal vectors within the search box. A cube large enough for the most
+distant reciprocal vector is clipped face by face; each cut contributes a cap
+polygon ordered around the plane normal. The initial cube uses the longest
+vector, not the shortest, so anisotropic cells (a 20 Angstrom vacuum axis, for
+example) keep their hexagonal prism instead of collapsing to the c* box.
+Vertices and edges are deduplicated by distance. The fcc primitive cell yields
+the truncated octahedron (14 faces, 24 vertices, 36 edges). The structure
+entry point detects the primitive cell first, so conventional centred cells
+use the primitive Bravais lattice.
 
 ## Tolerance ladder and diagnostics
 
