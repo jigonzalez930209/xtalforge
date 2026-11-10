@@ -29,6 +29,9 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   Atomic form factors from Cromer-Mann/Waasmaier-Kirfel coefficients (port
   sci-form `scattering_factors.rs`, coefficients to `data/`), occupancies,
   isotropic and anisotropic Debye-Waller factors, |F|².
+  Note: only the isotropic `exp(-8 pi^2 U s^2)` is applied; anisotropic Uij and
+  anomalous scattering are ignored, and the scattering-factor fit has no core
+  tail (see `crates/xtalforge-analysis/src/pxrd.rs`).
 - [x] 5.1.3 Intensity corrections and profiles
   Port `analysis/pxrd.py`, whose science came from the same author's
   `DataPlotter` application: Lorentz-polarization factor (with the
@@ -36,9 +39,15 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   pseudo-Voigt profile with the Caglioti width relation (U, V, W) and mixing
   parameter; continuous pattern on a 2θ grid; tick marks list with (hkl), d,
   2θ, intensity.
+  Note: the profile is one unit-area Gaussian of the requested FWHM; the
+  pseudo-Voigt/Caglioti width and the monochromator option are not implemented
+  (the powder fits have their own profiles).
 - [x] 5.1.4 Radiation
   Cu Kα1, Cu Kα1+Kα2 doublet with ratio, Mo, Co, Cr, Fe, Ag and arbitrary
   wavelength; output in 2θ, d or Q.
+  Note: `Radiation` is the fixed set CuKa1, CuKa (average), MoKa, CoKa, FeKa,
+  CrKa and AgKa; an arbitrary wavelength and the d or Q axis are not exposed
+  (the reflection list carries `d`).
 - [x] 5.1.5 Module and outputs
   Port `modules/pxrd.py`: the calculation as a module run that leaves the
   pattern as `.xy` (Task 3.5.3) and a reflection table in the run folder, plus
@@ -71,11 +80,17 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   it can reach from outside, by periodic connected-component labelling of the
   grid region where the probe fits, and testing which components percolate
   through the cell (channel dimensionality 0D to 3D).
+  Note: not implemented. `accessible_volume(probe)` counts every grid sample
+  where the probe fits, reachable or not; channel percolation and
+  dimensionality come only from the optional Zeo++ bridge (Task 5.5).
 - [x] 5.3.2 Pore volume, surface area, pore sizes from the grid
   Port `modules/poregrid.py`: the faster grid-based twins of Zeo++ `-sa` and
   `-vol`/`-volpo` (accessible surface area per volume and per mass, accessible
   and probe-occupiable pore volume, void fraction), and the largest included
   sphere and largest free sphere from the distance grid.
+  Note: implemented are the van der Waals surface area, the accessible and
+  pore volumes, the largest included diameter and the pore-size histogram; the
+  per-mass area, probe-occupiable volume and largest free sphere are not.
 - [x] 5.3.3 Validation
   Compare with Zeo++ reference values in `Crystal-Builder/tests/data/zeopp_reference.json`
   with tolerances documented per quantity.
@@ -92,6 +107,8 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 - [x] 5.4.2 Mesh output
   Mesh type (vertices, indices, normals) with JSON, OBJ and binary buffer
   output, typed arrays in WASM.
+  Note: `TriangleMesh { vertices, triangles }` serialises to JSON and the view
+  crate writes ASCII STL; OBJ, binary buffers and normals are not implemented.
 
 ## Task 5.5 — Zeo++ bridge
 
@@ -127,10 +144,13 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   building units (metal clusters and organic linkers) into vertices, or from a
   CGD file. Only connectivity matters, so the net is unchanged by setting
   changes, supercells and relaxations.
+  Note: the quotient graph is built from a CGD entry (`quotient_graph`); the
+  contraction of a structure's building units into vertices is not implemented.
 - [x] 5.6.3 Invariants and canonical key
   Coordination sequences, vertex symbols, point symbols, periodicity
   dimension, and a canonical key (canonical labelling of the quotient graph
   with a normalized translation basis) so equal nets give equal keys.
+  Note: vertex symbols are not computed (point symbols are).
   Note: coordination sequences, point symbols and the periodicity rank are
   computed in `xtalforge-analysis/src/topology.rs`. The catalogue's canonical
   keys are consumed from the RCSR JSON when the index is built, but an input
@@ -165,6 +185,9 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   face, tile counts, from the RCSR data, unknown where the RCSR has none) and
   name. Shared by the MOF builder and the net builder so both lists answer the
   same query identically.
+  Note: `NetIndex::search` matches by invariants (node/edge counts, rank,
+  coordination); search by space group number, transitivity and name is not
+  implemented.
 - [x] 5.7.2 Merged-net components
   Port `analysis/components.py`: break a merged net (Eddaoudi and O'Keeffe;
   two or three edge-transitive nets sharing vertices) into the nets that each
@@ -177,6 +200,8 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   relations, and classify by Blatov's scheme: Class Ia (copies related by a
   translation; one net's lattice is an index-n sublattice of the array's),
   Class Ib, Class II (related by a non-translational symmetry operation).
+  Note: only `components` (connected components of a quotient graph) is
+  implemented; the Blatov classification is not.
 - [x] 5.8.2 Generation
   Port `analysis/interpenetrate.py` (612 lines): generate an n-fold
   interpenetrated framework by placing copies at coset representatives
@@ -203,7 +228,9 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
 - [x] 5.10.2 Jobs
   Port `modules/job.py`: a module's `run` gets one `Job` argument (structure,
   parameters, run folder, cancellation token, progress sink, log) and returns
-  a `JobResult` (sentence, optional new structure, report). A `Job` can grow
+  a `JobResult` (sentence, optional new structure, report).
+  Note: `xtalforge-modules` has `Module`, `ModuleRegistry`, `JobQueue` and
+  `RunRecord`; the CLI has no `modules` or `run` command. A `Job` can grow
   fields without breaking existing modules.
 - [x] 5.10.3 Run records
   Port `modules/record.py`: the module that runs writes its run folder
@@ -213,6 +240,8 @@ Crates: `xtalforge-analysis`, `xtalforge-modules`.
   results; every number in it was already written to the run folder. A few
   frozen block types (key values, table, histogram, curve) and renderers to
   Markdown, JSON and HTML.
+  Note: `Report { sections }` renders to Markdown only; the block types and the
+  JSON and HTML renderers are not implemented.
 - [x] 5.10.5 Test stub module
   Port `modules/stub.py`: a module that does nothing, so the registry, the
   parameter forms of front ends, cancellation and run folders can be tested.

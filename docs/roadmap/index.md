@@ -70,6 +70,16 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   `ApplyOptimizedGeometry`, `AddHydrogens`, `Prepare` and `SetAtomTypes` are
   not command types, and the Vinet equation of state is missing; the
   functions behind most of them exist and apply through `ReplaceStructure`.
+- 5.1-5.4: the PXRD has no anisotropic Debye-Waller factors, no
+  pseudo-Voigt/Caglioti width, no monochromator option and a fixed radiation
+  set; the porosity grid has no channel percolation, probe-occupiable volume or
+  per-mass area; meshes have no normals or OBJ output.
+- 5.6-5.10: no structure-to-net contraction, vertex symbols, search by space
+  group or transitivity, Blatov interpenetration classes, or HTML/JSON report
+  renderers; the module registry has no CLI command.
+- 6.1-6.4: SMILES parsing and embedding, sketches, the fragment library,
+  substitution and guest placement are Rust-only (no CLI, Python or WASM
+  surface), see the open gaps in `docs/api/parity.md`.
 - 1.8: `Slab.cut` is always zero; severed bonds are not carried through the
   cut.
 - 1.11: explicit bonds map to P1 indices and are not propagated to every
