@@ -90,12 +90,19 @@ fn unknown_verb_and_document_are_typed_errors() {
 #[test]
 fn supercell_undo_and_change_bursts() {
     let (mut session, _) = loaded();
-    let before = session
+    let before_sites = session
         .active()
         .expect("document")
         .structure()
         .sites()
         .len();
+    let before = session
+        .active()
+        .expect("document")
+        .structure()
+        .p1()
+        .expect("P1 expansion")
+        .n_atoms();
     let answer = session
         .run("supercell", &json!({"repeats": [2, 2, 2]}))
         .expect("supercell");
@@ -122,7 +129,7 @@ fn supercell_undo_and_change_bursts() {
             .structure()
             .sites()
             .len(),
-        before
+        before_sites
     );
     let answer = session.run("redo", &json!({})).expect("redo");
     let Answer::History { applied, .. } = answer else {
