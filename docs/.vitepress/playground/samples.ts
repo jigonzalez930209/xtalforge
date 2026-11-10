@@ -31,3 +31,13 @@ export async function loadSampleText(sample: Sample): Promise<string> {
   }
   return response.text()
 }
+
+export const TABS = [
+  ['structure', 'Structure'],
+  ['symmetry', 'Symmetry'],
+  ['analysis', 'Analysis'],
+  ['powder', 'Powder'],
+  ['forcefield', 'Force field'],
+  ['export', 'Export'],
+] as const
+

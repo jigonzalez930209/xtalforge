@@ -55,7 +55,7 @@ export function inspect(wasm: any, text: string): Inspection {
     error: '',
   }
   try {
-    const summary = wasm.read_cif(text)
+    const summary = wasm.read_structure(text, '')
     let bonds: any[] = []
     let rings: any[] = []
     try {

@@ -62,7 +62,10 @@ export class SceneRenderer {
   private readonly root = new THREE.Group()
   private readonly cellGroup = new THREE.Group()
   private readonly axesGroup = new THREE.Group()
+  private readonly selectionGroup = new THREE.Group()
+  private readonly brillouinGroup = new THREE.Group()
   private atoms: SceneAtom[] = []
+  private atomMesh: THREE.InstancedMesh | null = null
   private center = new THREE.Vector3()
   private baseDistance = 10
   private observer: ResizeObserver
@@ -91,6 +94,9 @@ export class SceneRenderer {
     this.scene.add(this.root)
     this.root.add(this.cellGroup)
     this.root.add(this.axesGroup)
+    this.root.add(this.selectionGroup)
+    this.scene.add(this.brillouinGroup)
+    this.brillouinGroup.visible = false
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x555555, 1.7))
     const key = new THREE.DirectionalLight(0xffffff, 1.6)
     key.position.set(4, -6, 8)
@@ -106,6 +112,7 @@ export class SceneRenderer {
   }
 
   setScene(data: SceneData) {
+    this.hideBrillouin()
     this.clear()
     this.atoms = data.atoms.filter((atom) => !atom.hidden)
     this.scene.background = new THREE.Color(
@@ -150,6 +157,7 @@ export class SceneRenderer {
     })
     mesh.instanceMatrix.needsUpdate = true
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+    this.atomMesh = mesh
     this.root.add(mesh)
   }
 
@@ -224,18 +232,11 @@ export class SceneRenderer {
   }
 
   private clear() {
+    this.atomMesh = null
+    this.clearGroup(this.selectionGroup)
     for (const child of [...this.root.children]) {
-      if (child === this.cellGroup || child === this.axesGroup) {
-        for (const item of [...child.children]) {
-          child.remove(item)
-          item.traverse((object) => {
-            if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
-              object.geometry.dispose()
-              const material = object.material
-              if (material instanceof THREE.Material) material.dispose()
-            }
-          })
-        }
+      if (child === this.cellGroup || child === this.axesGroup || child === this.selectionGroup) {
+        if (child !== this.selectionGroup) this.clearGroup(child)
         continue
       }
       this.root.remove(child)
@@ -248,6 +249,127 @@ export class SceneRenderer {
         }
       })
     }
+  }
+
+  private clearGroup(group: THREE.Group) {
+    for (const item of [...group.children]) {
+      group.remove(item)
+      item.traverse((object) => {
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
+          if (object.geometry !== SPHERE && object.geometry !== CYLINDER) {
+            object.geometry.dispose()
+          }
+          const material = object.material
+          if (material instanceof THREE.Material) material.dispose()
+        }
+      })
+    }
+  }
+
+  setSelection(indices: number[]) {
+    this.clearGroup(this.selectionGroup)
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xf5b301,
+      transparent: true,
+      opacity: 0.42,
+      depthWrite: false,
+    })
+    for (const index of indices) {
+      const atom = this.atoms[index]
+      if (!atom) continue
+      const mesh = new THREE.Mesh(SPHERE, material)
+      const radius = Math.max(atom.radius, 0.2) * 1.18
+      mesh.position.set(...atom.position)
+      mesh.scale.setScalar(radius)
+      this.selectionGroup.add(mesh)
+    }
+    this.renderOnce()
+  }
+
+  pick(clientX: number, clientY: number): number | null {
+    if (!this.atomMesh) return null
+    const rect = this.canvas.getBoundingClientRect()
+    const pointer = new THREE.Vector2(
+      ((clientX - rect.left) / rect.width) * 2 - 1,
+      -((clientY - rect.top) / rect.height) * 2 + 1,
+    )
+    const raycaster = new THREE.Raycaster()
+    raycaster.setFromCamera(pointer, this.camera)
+    const hits = raycaster.intersectObject(this.atomMesh, false)
+    return hits.length > 0 ? (hits[0].instanceId ?? null) : null
+  }
+
+  showBrillouin(vertices: number[][], faces: number[][]) {
+    this.hideBrillouin()
+    const positions: number[] = []
+    const edges = new Set<string>()
+    for (const face of faces) {
+      for (let index = 1; index < face.length - 1; index += 1) {
+        positions.push(...vertices[face[0]], ...vertices[face[index]], ...vertices[face[index + 1]])
+      }
+      for (let index = 0; index < face.length; index += 1) {
+        const first = face[index]
+        const second = face[(index + 1) % face.length]
+        edges.add(first < second ? `${first},${second}` : `${second},${first}`)
+      }
+    }
+    const geometry = new THREE.BufferGeometry()
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    geometry.computeVertexNormals()
+    this.brillouinGroup.add(
+      new THREE.Mesh(
+        geometry,
+        new THREE.MeshBasicMaterial({
+          color: 0x3b82f6,
+          transparent: true,
+          opacity: 0.2,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      ),
+    )
+    const linePoints: number[] = []
+    for (const key of edges) {
+      const [first, second] = key.split(',').map(Number)
+      if (vertices[first] && vertices[second]) {
+        linePoints.push(...vertices[first], ...vertices[second])
+      }
+    }
+    const lineGeometry = new THREE.BufferGeometry()
+    lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(linePoints, 3))
+    this.brillouinGroup.add(
+      new THREE.LineSegments(
+        lineGeometry,
+        new THREE.LineBasicMaterial({ color: 0x1d4ed8 }),
+      ),
+    )
+    this.brillouinGroup.visible = true
+    this.root.visible = false
+    const points = vertices
+      .filter((vertex) => vertex.length === 3)
+      .map((vertex) => new THREE.Vector3(...(vertex as [number, number, number])))
+    if (points.length > 0) this.focus(points)
+    this.renderOnce()
+  }
+
+  hideBrillouin() {
+    this.clearGroup(this.brillouinGroup)
+    this.brillouinGroup.visible = false
+    this.root.visible = true
+    if (this.atoms.length > 0) this.resetView()
+  }
+
+  get brillouinVisible(): boolean {
+    return this.brillouinGroup.visible
+  }
+
+  private focus(points: THREE.Vector3[]) {
+    const box = new THREE.Box3()
+    for (const point of points) box.expandByPoint(point)
+    box.getCenter(this.center)
+    const radius = Math.max(box.getSize(new THREE.Vector3()).length() / 2, 0.5)
+    this.baseDistance = (radius / Math.sin((this.camera.fov * Math.PI) / 360)) * 1.15
+    this.setView({ azimuth: 0.85, elevation: 0.42, zoom: 1 })
   }
 
   setCellVisible(visible: boolean) {
