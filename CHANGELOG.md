@@ -30,6 +30,8 @@ essential release, then `0.x.y`).
 
 ### Tests
 
+- Phonons of fcc argon with UFF (`phonon_argon.rs`) and the CLI `--no-doublet`
+  flag have regression tests.
 - `xtalforge-wasm` has a browser suite (`tests/browser.rs`) that runs with
   `wasm-pack test --headless --chrome`; the Node suites are unchanged.
 
@@ -39,6 +41,10 @@ essential release, then `0.x.y`).
   the wrong connection count, a linker with more than two arms, a linker scale
   outside 0.8-1.25 and atom pairs closer than 0.9 Angstrom are reported in
   `warnings`, and the CLI prints them on standard error.
+
+- `powder rietveld --refine` always modelled the Cu K alpha doublet, so a
+  single-wavelength pattern drove the ADP multiplier to its bound; the new
+  `--no-doublet` flag matches Python's `doublet=False`.
 
 ### Documentation
 
@@ -65,7 +71,7 @@ essential release, then `0.x.y`).
   (`limit_exceeded`, `symmetry`), the isosurface algorithm name (marching
   tetrahedra) and the `external` feature wording.
 - Corrected the QEq kernel description (hardness only, truncated 12 Angstrom
-  sum), the duplicated external-validation bullet and the tutorial commands
+  sum) and stated that EEQ equals QEq at the default dielectric, the duplicated external-validation bullet and the tutorial commands
   (`powder lebail/pawley`, `build graphene/nanotube` take positional arguments).
 
 ## [1.0.0-rc.1] - 2026-11-10
