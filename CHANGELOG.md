@@ -9,6 +9,13 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 8 Task 8.4: the machine-learning bridge and model cache. Python
+  `MlCalculator` wraps any ASE calculator (MACE, ORB-v3, MatterSim) and maps
+  energy, forces and stress to eV, eV/Angstrom and GPa; `ml_backends()` probes
+  the modules. The CLI `models list|fetch|verify|remove` and
+  `xtalforge_ff::models` record URL, license and SHA-256 in a user cache and
+  never bundle weights. MACE-MP-0 (small) golden data covers H2, water and
+  methane within 1e-6 eV, 1e-5 eV/Angstrom and 1e-6 GPa, with timings.
 - Phase 8 Task 8.3: open extension registries and a Python plugin surface.
   `FormatRegistry`, `ScalarRegistry` and `StyleRegistry` join the existing
   calculator and module registries; `examples/plugin` is a buildable crate
