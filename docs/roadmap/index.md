@@ -61,6 +61,15 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 5.1 and 7.2: the calculated PXRD uses one Gaussian per reflection and the
   `Instrument` has no wavelength or Caglioti `U, V, W`; Rietveld ignores
   `RietveldOptions::kind` (area-normalised Gaussian, K alpha doublet by ratio).
+- 5.x/7.x: the Pawley and Le Bail pseudo-Voigt mixing `eta` is a fixed option
+  (0.5 by default), not a refined parameter, so a Gaussian pattern fitted with
+  the default profile leaves a large Rwp (adding a refinable `eta` would change
+  the frozen `PawleyOptions` struct).
+- 3.10 and 4.4: `TransformCell`, `MakeSlab`, `AssignWyckoff`, `Invert`,
+  `DescendToSubgroup`, `MergeDuplicates`, `InsertMolecules`,
+  `ApplyOptimizedGeometry`, `AddHydrogens`, `Prepare` and `SetAtomTypes` are
+  not command types, and the Vinet equation of state is missing; the
+  functions behind most of them exist and apply through `ReplaceStructure`.
 - 1.8: `Slab.cut` is always zero; severed bonds are not carried through the
   cut.
 - 1.11: explicit bonds map to P1 indices and are not propagated to every

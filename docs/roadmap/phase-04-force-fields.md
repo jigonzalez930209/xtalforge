@@ -55,7 +55,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   reasons). Typing is where wrong answers come from, so every assignment
   carries a **reason** string (for example "C_R: in an aromatic ring of 6");
   missing hydrogens show up in the reasons. Metal and cluster types for
-  UFF4MOF (paddlewheels, Zn4O, Zr6 nodes). User overrides via `SetAtomTypes`.
+  UFF4MOF (paddlewheels, Zn4O, Zr6 nodes). User overrides via `SetAtomTypes` (not implemented: the typer takes no
+  override map and there is no `SetAtomTypes` command).
 - [x] 4.2.3 Energy terms and analytic gradients
   Port `ff/uff/terms.py` (783 lines): one type per term (bond, angle with its
   coordination-specific forms, torsion, inversion, van der Waals), each
@@ -110,6 +111,9 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   beta, gamma, or the volume). Nothing held is the ordinary variable cell
   whose projector is the space group's own; holding the volume while the
   shape relaxes is the scan used for flexible frameworks. External pressure.
+  Note: not implemented. `OptimizeOptions.cell` is a boolean that relaxes the
+  point-group-averaged strain; held cell quantities, the volume constraint and
+  pressure are listed under Known subsets in the roadmap index.
 - [x] 4.4.3 FIRE and L-BFGS
   Port `fire` and `lbfgs` (and compare with sci-form `geometry_opt.rs`,
   `variable_cell.rs`, `minimizer.rs`): convergence on fmax and energy
@@ -118,10 +122,13 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
 - [x] 4.4.4 Applying the result
   `ApplyOptimizedGeometry` command: the optimized asymmetric unit and cell
   replace the old ones in one undoable step.
+  Note: `apply_optimized_geometry` is a function; the undoable step is
+  `ReplaceStructure` (there is no `ApplyOptimizedGeometry` command type).
 - [x] 4.4.5 Equation of state
   Port `ff/eos.py`: fit Birch-Murnaghan (and Murnaghan, Vinet) to the points of
   a constant-volume scan (each point relaxed with shape and atoms free) to get
   the bulk modulus and its derivative, with fit quality.
+  Note: `EosForm` has Birch-Murnaghan and Murnaghan; Vinet is not implemented.
 
 ## Task 4.5 — Coordinates, constraints and relaxed scans
 

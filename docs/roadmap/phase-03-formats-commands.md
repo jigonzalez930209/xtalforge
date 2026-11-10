@@ -229,13 +229,18 @@ Crystal-Builder classes.
   Port `commands/cell.py`: `SetLattice` (with a policy: keep fractional or
   keep Cartesian positions), `Supercell`, `TransformCell`, `MakeSlab`,
   `ReduceCell`, `ShiftOrigin`, `WrapIntoCell`.
+  Note: `TransformCell` and `MakeSlab` are not command types (the functions
+  `Lattice::transform` and `make_slab` exist; wrap them in `ReplaceStructure`).
   Note: `cell::{SetLattice, Supercell, ShiftOrigin, WrapIntoCell}` and
   `PositionPolicy`; `ReduceCell` is Phase 2 `reduce_structure`.
 - [x] 3.10.4 Symmetry commands
   Port `commands/symmetry.py`: `ReduceToP1`, `FindSymmetry`,
   `SetSpaceGroup`, `Standardize`, `AssignWyckoff`, `Invert`,
   `DescendToSubgroup`, `MergeDuplicates`, built on Phase 2.
-  Note: `symmetry::{ReduceToP1, FindSymmetry, SetSpaceGroup, Standardize}`.
+  Note: `symmetry::{ReduceToP1, FindSymmetry, SetSpaceGroup, Standardize}`;
+  `AssignWyckoff`, `Invert`, `DescendToSubgroup` and `MergeDuplicates` are not
+  command types (`wyckoff_assignments`, `lower_to_subgroup` and `prepare` exist as
+  functions and apply through `ReplaceStructure`).
 - [x] 3.10.5 Atom group commands
   Port `core/atom_groups.py` and `commands/atom_groups.py`: named sets of
   atoms with their own colour or hidden (`AddAtomGroup`, `RemoveAtomGroup`,
@@ -248,6 +253,8 @@ Crystal-Builder classes.
   cell-free (atoms plus internal bonds), with extended XYZ as its text form so
   copy and paste work with other atomistic tools; `PasteFragment`,
   `InsertMolecules`.
+  Note: `InsertMolecules` is not implemented (guest placement is
+  `xtalforge-build` Task 6.4).
 - [x] 3.10.7 Commands defined by later phases
   Placeholders for commands that need later phases, listed here so the
   catalogue is complete: `commands/ff.py` (`ApplyOptimizedGeometry`,
