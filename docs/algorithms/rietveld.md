@@ -98,6 +98,17 @@ The synthetic tests in `tests/rietveld_stages.rs` add exact recoveries of a
 known zero shift, cell, width multiplier, March-Dollase ratio, ADP multiplier,
 occupancy ratio and the Wyckoff direction counts.
 
+## Checked on a second structure
+
+A noisy, backgrounded NaCl pattern (Poisson noise, 150 counts of background,
+single wavelength) refined from a starting cell of 5.64 Angstrom returns
+`a = 5.620`, `width_scale = 0.997` and a zero shift of 0.000 with Rwp 0.094 when
+the model uses one wavelength (`doublet = false`, CLI `--no-doublet`). With the
+doublet model on single-wavelength data the isotropic ADP multiplier runs to
+its bound to compensate (Rwp 0.26, `a = 5.615`), and on a noise-free pattern
+with zero background the `1 / y` weights drive Rwp towards 0.7: match the
+radiation and give the data a background or an uncertainty column.
+
 ## Documented deviations
 
 - The profile is the PXRD engine area-normalised Gaussian for every reflection;

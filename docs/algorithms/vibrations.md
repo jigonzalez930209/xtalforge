@@ -45,6 +45,11 @@ coordinates; an explicit `q_path` replaces the grid, which is how the Task 2.10
 band path is sampled. The optional DOS is a Gaussian-smeared histogram normalized to
 unit area.
 
+A fcc argon crystal with UFF (`crates/xtalforge-ff/tests/phonon_argon.rs`)
+checks the physics: three zero acoustic modes at Gamma, a degenerate
+transverse pair below the longitudinal mode at L (27.3, 27.3 and 60.0 cm^-1),
+LA/TA = 1.45 at X, and positive increasing branches for small q.
+
 The Gamma path remains the acoustic reference. The q-mesh path is validated
 against the analytic dispersion of a nearest-neighbour spring model and
 against a phonopy-generated golden file

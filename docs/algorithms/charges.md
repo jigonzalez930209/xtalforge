@@ -28,11 +28,15 @@ running away from the neutral-atom parabola.
 
 ## EEQ
 
-`eeq_charges` is the EEQ-style kernel (electronegativity, hardness and a
-Coulomb radius per element, Ohno-Klopman interaction, periodic cutoff). The
-exact sci-form parameterisation is not vendored; the module documents the local
-table and the approximation. It is a third method, not a drop-in replacement
-for EQeq, and the corpus comparison is the acceptance criterion.
+`eeq_charges` is the EEQ kernel `C / (eps sqrt(r^2 + R_i R_j))` with a Coulomb
+radius per element and a dielectric `eps`. The fitted EEQ2019 table of sci-form
+is **not** vendored: `chi` and `J` come from the QEq table and each radius is
+the Ohno radius implied by the hardness. With the default `dielectric = 1` this
+is the same linear system as QEq, and the two methods return identical charges
+(NaCl +-0.202, MOF-5 from -0.617 to +1.246). Only a dielectric above one
+(`ChargeOptions::eqeq`) gives screened charges that differ from QEq, so EEQ is
+not an independent third method yet; the corpus comparison against the fitted
+table is not done.
 
 ## Ewald
 
@@ -50,7 +54,6 @@ finite differences and the energy with a spherical direct sum.
 
 - QEq: fast, neutral organic molecules and a first guess.
 - EQeq: frameworks with metals, where measured ionisation energies matter.
-- EEQ: an alternative kernel for comparison and for callers coming from
-  sci-form.
+- EEQ: QEq with a dielectric screening; identical to QEq at `dielectric = 1`.
 - Ewald: the periodic electrostatic energy and forces on top of any charge
   model.
