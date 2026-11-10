@@ -7,6 +7,19 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+### Fixed
+
+- `graphene`: the atoms were stored with Cartesian coordinates as fractional
+  ones and the `b` vector used `nx/2` instead of `ny/2`, so the sheet was
+  distorted (bonds of 1.07 Angstrom) and not a supercell when `nx != ny`.
+- `nanotube`: the strip was not restricted to one circumference, the
+  translation vector used `gcd(n, m)` instead of `d_R = gcd(2n + m, 2m + n)`
+  and the atoms were not rolled onto a cylinder. (5,5) had 166 atoms and 537
+  bonds; it now has the 20 atoms and 30 bonds of the chirality formula. The
+  nanotube cell is now `2R + vacuum` on `a` and `c` with the axis along `b`.
+- `nanoribbon`: the vacuum stretched the strip instead of adding empty space;
+  the bonds are 1.42 Angstrom again.
+
 ### Documentation
 
 - Added 15 diagrams with one shared style under `docs/public/diagrams/`
