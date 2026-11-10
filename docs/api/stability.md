@@ -64,7 +64,8 @@ rustdoc and the parity matrix are the full inventory.
 
 ## Current status
 
-The workspace is at `1.0.0-rc.1`, the first release candidate for `1.0.0`.
-The public API is frozen and the parity matrix is closed. During the
-stabilization period only fixes land; the `1.0.0` tag follows after the
-candidate has been exercised. `0.0.3` was the last published pre-1.0 release.
+`1.0.0-rc.1` is published (2026-11-10) on crates.io, PyPI, npm, the GitHub
+release and GitHub Pages. The public API is frozen and the parity matrix is
+closed. During the stabilization period only fixes land; the `1.0.0` tag
+follows after the candidate has been exercised. `0.0.3` was the last published
+pre-1.0 release.
