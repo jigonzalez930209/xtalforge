@@ -36,18 +36,32 @@ rotations, while the greedy fit is cheaper and reproducible. For the curated
 symmetric topologies the two agree on the resulting connectivity; the geometry
 can differ by a rotation of a node.
 
-## Linker placement and scale
+## Cell scale and linker placement
 
-For an edge `i-j`, the node connection points `p_i` and `p_j` are known. The
-linker connection pair `(a, b)` with the largest separation is aligned to
-`p_j - p_i`; the linker is translated so `a` lands on `p_i`. The edge scale is
-the ratio of the node-to-node distance to the linker span, clamped to the
-documented range. A scale outside the range is reported, not silently applied.
+The catalogue cell of a topology fixes the node-to-node distances, but the
+linker decides how long an edge has to be. Before placing anything the builder
+therefore **scales the whole cell uniformly** by the factor `s` that minimises
+`sum_edges (gap_e(s) / span - 1)^2`, where `gap_e(s) = |s d_e + (R_j p_j - R_i p_i)|`
+is the distance the linker has to bridge between the two oriented node
+connection points (`d_e` is the unscaled node-to-node vector) and `span` is
+the largest distance between two connection points of the linker. The search
+is a golden-section on `[0.1, 20]` and is deterministic; the factor is stored
+in the structure metadata as `cell_scale`. A longer linker (stilbene instead of
+benzene in `pcu`) therefore gives a larger cell instead of a squashed linker.
+
+For each edge `i-j` the linker pair `(a, b)` with the largest separation is then
+aligned to `p_j - p_i`, translated so `a` lands on `p_i`, and scaled by
+`gap_e / span`. After the fit that residual scale is close to one when every
+edge of the topology has the same length. When it is not (for example `srs`
+with a paddlewheel), the builder records one warning if the scales fall outside
+`[0.8, 1.25]` (`LINKER_SCALE_MIN`, `LINKER_SCALE_MAX`); the scale is still
+applied, so the warning is the signal that the linker is distorted.
 
 ## Assembly
 
 `build_mof` returns a P1 structure with the node and linker atoms,
-explicit topology bonds and metadata naming the topology and blocks. It does
+explicit topology bonds and metadata naming the topology, the blocks and the
+`cell_scale`, plus the list of warnings. It does
 not relax the geometry. Interpenetration, if requested, is a separate operation
 over the assembled document.
 
@@ -72,5 +86,10 @@ claiming a topology assignment.
 - Curated topology and block subset, not the full database.
 - Greedy deterministic orientation instead of a global RMSD fit.
 - The result is P1 and unrelaxed; there is no automatic symmetry assignment.
-- The builder refuses a block with the wrong connection count instead of
-  repairing it.
+- A node whose connection count differs from the vertex degree is **not**
+  refused: the edges without a connection point are skipped and one warning
+  names the number of vertices affected. A linker with more than two
+  connection points spans each edge with its widest pair and is reported.
+- A final check lists atom pairs closer than 0.9 Angstrom (`CLOSE_CONTACT`) in
+  one warning; every combination of the curated blocks builds, and the
+  combinations that do not fit chemically carry at least one of these warnings.
