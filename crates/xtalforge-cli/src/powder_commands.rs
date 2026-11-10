@@ -68,6 +68,9 @@ pub(crate) enum PowderAction {
         /// Also refine the March-Dollase texture about the c axis.
         #[arg(long, requires = "refine")]
         texture: bool,
+        /// Model one wavelength instead of the Cu K alpha 1/K alpha 2 doublet.
+        #[arg(long, requires = "refine")]
+        no_doublet: bool,
     },
     /// Automatic peaks, indexing, Le Bail and Rietveld run.
     Automatic {
@@ -122,7 +125,16 @@ pub(crate) fn run(cli: &Cli, action: &PowderAction) -> Result<(), CliError> {
             refine,
             occupancies,
             texture,
-        } => rietveld(cli, structure, pattern, *refine, *occupancies, *texture),
+            no_doublet,
+        } => rietveld(
+            cli,
+            structure,
+            pattern,
+            *refine,
+            *occupancies,
+            *texture,
+            !*no_doublet,
+        ),
         PowderAction::Automatic { structure, pattern } => automatic(cli, structure, pattern),
         PowderAction::Cells { number } => cells(cli, *number),
         PowderAction::Rietx => {
@@ -305,6 +317,7 @@ fn rietveld(
     refine: bool,
     occupancies: bool,
     texture: bool,
+    doublet: bool,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(structure_path).map_err(CliError::core)?;
     let points = pattern(pattern_path)?;
@@ -323,7 +336,7 @@ fn rietveld(
                 refine_cell: true,
                 refine_width: true,
                 refine_texture: texture,
-                doublet: true,
+                doublet,
                 ..RefineOptions::default()
             },
         )
