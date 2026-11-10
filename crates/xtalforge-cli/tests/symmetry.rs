@@ -237,7 +237,8 @@ fn symmetry_analysis_commands() {
     let output = run(&["--json", "symmetry", "brillouin", &path]);
     assert!(output.status.success());
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
-    assert!(value["faces"].as_array().expect("faces").len() >= 6);
+    assert_eq!(value["faces"].as_array().expect("faces").len(), 14);
+    assert_eq!(value["vertices"].as_array().expect("vertices").len(), 24);
 
     let output = run(&["--json", "symmetry", "scan", &path]);
     assert!(output.status.success());
