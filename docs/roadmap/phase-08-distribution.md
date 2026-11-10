@@ -172,3 +172,10 @@ Crate: `xtalforge-agent` (plus work across all crates).
 - [ ] 8.8.3 Release candidate cycle
   `v1.0.0-rc.1` with a stabilization period and fixes only, then `v1.0.0`;
   update `AGENTS.md` section 6 and the changelog.
+
+  Note: the implementation, the stability policy, the freeze test and the
+  full local gate are complete. What remains is the release decision and the
+  external actions: bump the version, run `scripts/sync-version.sh`, tag
+  `v1.0.0-rc.1`, wait the stabilization period and publish with
+  `CARGO_REGISTRY_TOKEN`, `PYPI_API_TOKEN` and `NPM_TOKEN`. Those secrets and
+  the decision belong to the maintainer; no tag or publication was made.
