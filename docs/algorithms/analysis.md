@@ -70,10 +70,14 @@ accessible fraction and a positive surface area; the reference values are in
 
 ## Isosurfaces
 
-`isosurface` runs marching cubes over a periodic scalar grid. The mesh is a
-triangle list in Cartesian coordinates with normals; the periodic boundaries
-are closed by sampling with wraparound. Used by the gyroid/Schwarzite carbon
-builders and exposed as `TriangleMesh`.
+`isosurface` runs **marching tetrahedra** (six tetrahedra per grid cell) over a
+periodic scalar grid; there are no ambiguous marching-cube cases. The four
+crossings of a 2-2 sign pattern are ordered around their quadrilateral, so
+neighbouring tetrahedra share the same diagonal and the surface is watertight;
+vertices are welded by fractional position and the periodic boundaries close by
+wraparound. `TriangleMesh { vertices, triangles }` holds Cartesian vertices and
+index triples; it stores no normals. Used by the gyroid/Schwarzite carbon
+builders.
 
 ## Nets
 
