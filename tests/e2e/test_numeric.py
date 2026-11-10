@@ -154,6 +154,22 @@ def test_builders_match_reference(page, base_url):
     assert mof["summary"]["volume"] > 1000.0
 
 
+@pytest.mark.parametrize(
+    ("sample", "counts"),
+    [
+        ("Si", (24, 14, 36)),
+        ("NaCl", (24, 14, 36)),
+        ("Fe", (14, 12, 24)),
+        ("graphene", (12, 8, 18)),
+        ("MFI", (8, 6, 12)),
+    ],
+)
+def test_brillouin_zone_matches_the_bravais_lattice(page, base_url, sample, counts):
+    open_sample(page, base_url, sample)
+    zone = page.evaluate("window.__xf.brillouinZone()")
+    assert (len(zone["vertices"]), len(zone["faces"]), len(zone["edges"])) == counts
+
+
 @pytest.mark.parametrize("sample", ["Si", "NaCl", "TiO2", "Fe", "graphene"])
 def test_pxrd_positions_match_bragg_reference(page, base_url, sample):
     open_sample(page, base_url, sample)

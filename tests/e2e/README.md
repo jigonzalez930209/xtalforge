@@ -13,6 +13,9 @@ implementations and against deterministic 3D frames.
   and PXRD peak positions with that reference.
 - `test_visual.py` compares deterministic canvas screenshots with the PNGs in
   `golden/`.
+- `test_playground_ui.py` drives the playground tabs, Brillouin view, atom
+  selection, builders, powder plot, UFF energy, exports and fullscreen in a
+  real browser.
 - `test_demos.py` smoke-tests the older cell-volume, CIF-inspector and editor
   demos.
 
