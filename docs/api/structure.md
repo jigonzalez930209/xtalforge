@@ -59,9 +59,10 @@ Reads are `name`, `lattice`, `hall`, `sites`, `operations`, `metadata`, `is_p1`,
 in a padded P1 box.
 
 `StructureSummary` carries `name`, `formula`, `hall`, `n_sites`, `volume`,
-`density`, `total_charge` and `is_p1` to the four surfaces. `structure_info`
-accepts CIF, POSCAR, XYZ and pymatgen JSON through the format registry and
-returns the same summary.
+`density`, `total_charge` and `is_p1` to the four surfaces. The WASM summary
+also carries `n_atoms`, the P1 atom count used by the 3D playground.
+`structure_info` accepts CIF, POSCAR, XYZ and pymatgen JSON through the format
+registry and returns the same summary.
 
 ## Conventions
 

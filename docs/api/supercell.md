@@ -17,8 +17,9 @@ let shifted = structure.origin_shift([0.5, 0.0, 0.0])?;
 The new lattice is `P M`. Fractional coordinates in the new cell are
 `(x + n) P^-1` for integer `n`; the implementation enumerates the integer
 shifts in a box bounded by `4 ||P^-1||_max + 2`, keeps the images inside
-`[0, 1)` and drops boundary duplicates by periodic distance. The atom count is
-`n_sites |det P|` for an invertible integer matrix.
+`[0, 1)` and drops boundary duplicates by periodic distance. A structure with
+symmetry operations is expanded to P1 first, so the atom count is
+`n_atoms(P1) |det P|`, not `n_sites |det P|`.
 
 Before allocation, `Structure::supercell_matrix` runs the supercell size check
 from Task 1.3; a hard-limit result is returned as
