@@ -20,7 +20,7 @@ pub mod standardize;
 pub mod subgroups;
 pub mod workflow;
 
-pub use brillouin::{BrillouinZone, brillouin_zone};
+pub use brillouin::{BrillouinZone, brillouin_zone, brillouin_zone_for_structure};
 pub use convert::AtomType;
 pub use dataset::{SettingChoice, SymmetryDataset, SymmetryOptions, detect_symmetry};
 pub use diagnostics::{

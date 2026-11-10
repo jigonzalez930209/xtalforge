@@ -41,6 +41,11 @@ struct Face {
 
 /// Builds the Wigner-Seitz cell of the reciprocal lattice.
 ///
+/// This is the zone of the lattice exactly as passed. When the input is a
+/// conventional cell with a smaller primitive cell (silicon, rock salt, bcc
+/// iron), use [`brillouin_zone_for_structure`] so the zone is that of the
+/// primitive Bravais lattice.
+///
 /// # Errors
 ///
 /// Returns [`Error::InvalidInput`] when the reciprocal lattice is degenerate or
@@ -70,7 +75,16 @@ pub fn brillouin_zone(lattice: &Lattice) -> Result<BrillouinZone, Error> {
             "the reciprocal lattice has no nonzero vector".to_owned(),
         ));
     }
-    let radius = 2.0 * shortest;
+    // The starting cube must contain the zone in every direction. Using only
+    // the shortest reciprocal vector is not enough for anisotropic cells
+    // (graphene has a 20 Å vacuum axis, so its in-plane vectors are much
+    // longer than the c* vector and a shortest-only cube would clip the zone
+    // to a box).
+    let radius = 2.0
+        * vectors
+            .iter()
+            .map(|vector| norm(*vector))
+            .fold(shortest, f64::max);
     let mut faces = cube(radius);
     for vector in vectors {
         let length = norm(vector);
@@ -85,6 +99,30 @@ pub fn brillouin_zone(lattice: &Lattice) -> Result<BrillouinZone, Error> {
         }
     }
     assemble(faces)
+}
+
+/// Builds the Wigner-Seitz cell of the primitive Bravais lattice of a
+/// structure.
+///
+/// A conventional centred cell (for example the cubic cell of silicon or rock
+/// salt) has a smaller primitive cell; clipping its conventional reciprocal
+/// cell would give the wrong zone (a cube instead of the truncated octahedron
+/// of an fcc lattice). This entry point detects the primitive cell first and
+/// falls back to the structure lattice when the symmetry search cannot reduce
+/// it.
+///
+/// # Errors
+///
+/// Returns the errors of the primitive-cell search or of
+/// [`brillouin_zone`] when the fallback lattice is degenerate.
+pub fn brillouin_zone_for_structure(
+    structure: &xtalforge_core::Structure,
+) -> Result<BrillouinZone, Error> {
+    let options = crate::SymmetryOptions::default();
+    match crate::standardize::primitive_cell(structure, options) {
+        Ok(primitive) => brillouin_zone(primitive.structure.lattice()),
+        Err(_) => brillouin_zone(structure.lattice()),
+    }
 }
 
 fn cube(radius: f64) -> Vec<Face> {
@@ -181,7 +219,8 @@ fn order_cap(points: Vec<[f64; 3]>, normal: [f64; 3]) -> Option<Vec<[f64; 3]>> {
     }
     let count = unique.len() as f64;
     centroid = scale(centroid, 1.0 / count);
-    let reference = if normal[0].abs() < 0.9 {
+    let unit = normalize(normal)?;
+    let reference = if unit[0].abs() < 0.9 {
         [1.0, 0.0, 0.0]
     } else {
         [0.0, 1.0, 0.0]
