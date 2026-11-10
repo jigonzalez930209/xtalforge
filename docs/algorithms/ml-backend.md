@@ -34,3 +34,31 @@ available today.
 
 This keeps the default build pure Rust, keeps the feature honest, and avoids
 shipping a model that silently disagrees with the reference.
+
+## Implementation (Task 8.4)
+
+The decision above is implemented as a Python bridge, not as a native backend:
+
+- `xtalforge.MlCalculator` wraps any ASE calculator. It converts a structure
+  JSON document to an ASE `Atoms` (P1 cell, `pbc` from the constructor), runs
+  the calculator, and returns energy in eV, forces in eV/Angstrom and the
+  stress tensor in GPa. The ASE six-component Voigt order is mapped to a 3x3
+  tensor and multiplied by 160.21766208 (1 eV/Angstrom^3 in GPa).
+- `xtalforge.ml_backends()` probes `torch`, `ase`, `mace`, `orb_models` and
+  `mattersim` and reports their versions.
+- `xtalforge_ff::models` and the CLI `models` command manage the weights:
+  catalogue, license, URL, SHA-256, cache and removal. Weight files are never
+  bundled; the user chooses the artifact URL and the checksum is recorded.
+- The `ml` Cargo feature remains a declared no-op. A downstream Rust program
+  that enables it does not get a native potential; the documented path is the
+  Python package.
+
+Validation: `crates/xtalforge-python/tests/fixtures/ml/mace_mp0_small.json`
+records MACE-MP-0 (small, float64, CPU) energies, forces and stress for H2,
+water and methane. The test reproduces them through `MlCalculator` within
+1e-6 eV, 1e-5 eV/Angstrom and 1e-6 GPa. The model is 32,581,838 bytes with
+SHA-256 `2ddb079cee0e131eaaf6912ba581b394551ead283e95c99cfe78c605d10b5736`.
+
+ORB-v3 and MatterSim use the same ASE protocol, but neither was installed in
+the validation environment, so no golden comparison is claimed for them. This
+is the honest subset of Task 8.4.3.
