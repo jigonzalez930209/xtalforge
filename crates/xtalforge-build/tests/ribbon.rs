@@ -35,7 +35,12 @@ fn vacuum_increases_the_b_axis() {
     let wide = nanoribbon(2, 3, 12.0).unwrap();
     let growth = wide.lattice().lengths()[1] - tight.lattice().lengths()[1];
     assert!((growth - 12.0).abs() < 1e-9, "b grew by {growth}");
-    assert_eq!(tight.sites(), wide.sites());
+    // The atoms stay where they are in Cartesian space.
+    for (first, second) in tight.cart_sites().iter().zip(wide.cart_sites().iter()) {
+        for axis in 0..3 {
+            assert!((first[axis] - second[axis]).abs() < 1e-9);
+        }
+    }
 }
 
 #[test]
@@ -44,4 +49,14 @@ fn zero_size_and_bad_vacuum_error() {
     assert!(nanoribbon(2, 0, 12.0).is_err());
     assert!(nanoribbon(2, 3, -1.0).is_err());
     assert!(nanoribbon(2, 3, f64::NAN).is_err());
+}
+
+#[test]
+fn ribbon_keeps_the_honeycomb_bond_length() {
+    let ribbon = nanoribbon(3, 3, 12.0).unwrap();
+    let graph = ribbon.bond_graph().unwrap();
+    assert!(!graph.bonds.is_empty());
+    for bond in &graph.bonds {
+        assert!((bond.distance - 1.42).abs() < 1e-3, "{}", bond.distance);
+    }
 }
