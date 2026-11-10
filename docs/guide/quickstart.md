@@ -17,7 +17,7 @@ Add the facade crate to `Cargo.toml`:
 
 ```toml
 [dependencies]
-xtalforge = "1.0.0-rc.1"
+xtalforge = "1.0.0"
 ```
 
 ## CLI
@@ -44,8 +44,8 @@ info = xtalforge.element_info("Fe")
 volume = xtalforge.cell_volume(3, 4, 5, 60, 70, 80)
 ```
 
-Install the release candidate with `pip install xtalforge==1.0.0-rc.1`; the
-local development wheel is built with `maturin build --release`.
+Install the stable release with `pip install xtalforge==1.0.0`; the local
+development wheel is built with `maturin build --release`.
 
 ## WebAssembly
 
