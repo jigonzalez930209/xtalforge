@@ -5,6 +5,42 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [Unreleased]
+
+### Added
+
+- The [3D playground](/playground) in the docs: load, transform and build a
+  structure with the WASM package and inspect the same Rust scene in an
+  orbitable WebGL view.
+- `scene_data` on the WASM, Python and CLI (`mesh --scene`) surfaces, and
+  `n_atoms` in the WASM structure summary, so a viewer no longer reconstructs
+  geometry in JavaScript.
+- Text-returning WASM variants of the symmetry transforms and the carbon/MOF
+  builders (`to_p1_text`, `primitive_text`, `standardize_text`,
+  `asymmetrize_text`, `set_space_group_text`, `change_setting_text`,
+  `reduce_text`, `lower_to_subgroup_text`, `build_graphene_text`,
+  `build_nanotube_text`, `build_c60_text`, `build_c20_text`, `build_mof_text`).
+- The end-to-end audit battery (`tests/e2e/`): 38 Playwright checks against
+  gemmi, spglib, ASE and NumPy references, plus deterministic 3D screenshot
+  goldens, and `scripts/e2e.sh` to run it.
+
+### Fixed
+
+- `Structure::supercell` copied only the asymmetric sites, so a supercell of a
+  symmetric structure lost its symmetry expansion (a `2 x 2 x 2` silicon
+  supercell had 8 atoms instead of 64, in the CLI and WASM). It now expands
+  the P1 cell first through `Structure::as_p1`; the CLI size estimate and the
+  supercell tests use the full-cell count.
+- `Structure::is_p1` trusted only the Hall symbol, so a CIF with an explicit
+  operation loop and no space-group name was treated as P1 and reported the
+  wrong formula, density and charge. It now also requires every operation to
+  be the identity.
+- The CIF-inspector demo's inline silicon CIF lacked the centring translations
+  and reported one atom and 0.29 g/cm3; it now uses the Hall symbol and shows
+  `Si8` and 2.329 g/cm3.
+- The WASM structure summary now includes the P1 `n_atoms`, matching Python
+  and the whole-cell formula work released in `1.0.0`.
+
 ## [1.0.0] - 2026-11-10
 
 First stable release, published on 2026-11-10 on crates.io (13 crates), PyPI

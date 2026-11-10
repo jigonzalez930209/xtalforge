@@ -286,7 +286,12 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   closure). Task 8.8.3 published `v1.0.0-rc.1` and then the stable `v1.0.0`
   on 2026-11-10 after the fixes-only stabilization period: 13 crates on
   crates.io, 7 platform wheels plus an sdist on PyPI, `xtalforge-wasm` on npm,
-  the CLI/hosted assets on the GitHub release and the docs on Pages. Phases 1-7 are
+  the CLI/hosted assets on the GitHub release and the docs on Pages. Task 8.9
+  added the 3D playground and the end-to-end audit battery (`tests/e2e/`,
+  `scripts/e2e.sh`): 38 Playwright checks against gemmi, spglib, ASE and NumPy
+  references plus deterministic screenshot goldens; it also fixed the
+  supercell symmetry expansion and the Hall-only `is_p1` check. The remaining
+  coverage gaps are recorded in `docs/guide/audit.md` and Task 8.9.5. Phases 1-7 are
   complete and released at `0.0.3`; the remaining reference gaps (held cell
   quantities and pressure in the optimizer, the PXRD/Rietveld profile
   simplifications, bond carrying in slabs, the curated MOF subset and others)
