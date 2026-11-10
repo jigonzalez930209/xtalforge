@@ -41,8 +41,8 @@ scripts/e2e.sh
 ```
 
 The script builds the WASM package and the docs site, regenerates the
-reference data, runs the visual and numeric tests, and leaves the diffs in
-`tests/e2e/test-results/` when a check fails.
+reference data, runs the visual and numeric tests, and leaves the captured
+screenshots in `tests/e2e/test-results/` when a check fails.
 
 ## Direct links
 
