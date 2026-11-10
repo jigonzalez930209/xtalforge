@@ -1,6 +1,7 @@
 """Python bindings for xtalforge."""
 
 from ._xtalforge import (
+    AgentSession,
     Document,
     InputError,
     Lattice,
@@ -10,6 +11,9 @@ from ._xtalforge import (
     XtalforgeError,
     __version__,
     add_hydrogens,
+    agent_capabilities,
+    agent_run,
+    agent_verbs,
     angle,
     asymmetrize,
     band_path,
@@ -97,6 +101,7 @@ from ._xtalforge import (
 )
 
 __all__ = [
+    "AgentSession",
     "Document",
     "InputError",
     "Lattice",
@@ -106,6 +111,9 @@ __all__ = [
     "XtalforgeError",
     "__version__",
     "add_hydrogens",
+    "agent_capabilities",
+    "agent_run",
+    "agent_verbs",
     "angle",
     "asymmetrize",
     "band_path",
