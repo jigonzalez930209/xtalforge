@@ -19,10 +19,15 @@ essential release, then `0.x.y`).
   builders (`to_p1_text`, `primitive_text`, `standardize_text`,
   `asymmetrize_text`, `set_space_group_text`, `change_setting_text`,
   `reduce_text`, `lower_to_subgroup_text`, `build_graphene_text`,
-  `build_nanotube_text`, `build_c60_text`, `build_c20_text`, `build_mof_text`).
-- The end-to-end audit battery (`tests/e2e/`): 38 Playwright checks against
+  `build_nanotube_text`, `build_c60_text`, `build_c20_text`, `build_mof_text`,
+  `build_ribbon_text`, `build_twist_text`, `build_ztc_text`,
+  `build_schwarzite_text`, `build_polymer_text`, `hydrogens_text` and
+  `ff_optimize_text`).
+- The end-to-end audit battery (`tests/e2e/`): 49 Playwright checks against
   gemmi, spglib, ASE and NumPy references, plus deterministic 3D screenshot
-  goldens, and `scripts/e2e.sh` to run it.
+  goldens, and `scripts/e2e.sh` to run it. The playground UI checks cover the
+  tabbed panels, atom selection, the Brillouin zone, the powder plot, UFF
+  energy, exports and fullscreen.
 
 ### Fixed
 
@@ -40,6 +45,16 @@ essential release, then `0.x.y`).
   `Si8` and 2.329 g/cm3.
 - The WASM structure summary now includes the P1 `n_atoms`, matching Python
   and the whole-cell formula work released in `1.0.0`.
+- `brillouin_zone_for_structure` detects the primitive cell, so silicon and
+  rock salt (fcc), bcc iron and other centred cells no longer return the cube
+  of the conventional reciprocal cell. The clipping now starts from a cube
+  large enough for anisotropic cells, so graphene returns its hexagonal prism
+  instead of a box; the cap ordering also works for non-unit plane normals.
+
+### Changed
+
+- The WASM release budget moves from 3840 to 3904 KiB for `scene_data`,
+  `n_atoms` and the text-returning builders (3845 KiB measured).
 
 ## [1.0.0] - 2026-11-10
 
