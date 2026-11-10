@@ -203,9 +203,11 @@ Crate: `xtalforge-agent` (plus work across all crates).
   `n_atoms` summary field and text-returning transform/builder variants.
   Build `/playground` with three.js: samples, paste, supercell, slab, P1,
   asymmetric unit, primitive, standardize, Niggli, graphene, nanotube, C60,
-  C20, MOF, PXRD, four draw styles, cell/axes and PNG export.
+  C20, nanoribbon, twisted bilayer, ZTC, Schwarz P, polymer, MOF, PXRD,
+  Brillouin zone, atom-picked measures, UFF energy/minimization, four draw
+  styles, cell/axes, fullscreen and file exports.
 - [x] 8.9.3 Numeric and visual battery
-  Playwright suite in `tests/e2e/`: 38 checks against the reference JSON,
+  Playwright suite in `tests/e2e/`: 49 checks against the reference JSON,
   modulo-lattice P1 atom comparison, independent camera projection, PXRD
   positions and deterministic PNG goldens for eight samples, six operations
   and the space-fill style. `scripts/e2e.sh` rebuilds WASM, docs and the
@@ -213,7 +215,9 @@ Crate: `xtalforge-agent` (plus work across all crates).
 - [x] 8.9.4 Fix the findings
   Supercells now expand the P1 cell before repeating; `is_p1` checks the
   operations and not only the Hall symbol; the CIF-inspector demo uses a
-  complete silicon CIF; the WASM summary carries `n_atoms`.
+  complete silicon CIF; the WASM summary carries `n_atoms`; the Brillouin
+  zone is built from the primitive Bravais lattice and works for anisotropic
+  cells.
 - [ ] 8.9.5 Extend the battery
   Add force-field energies/forces, porosity, MOF chemistry and the
   Le Bail/Pawley/Rietveld stages to the same scenario runner, and run the
