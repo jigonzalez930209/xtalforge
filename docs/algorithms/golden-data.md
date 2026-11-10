@@ -10,7 +10,7 @@ the documented subset instead.
 |---|---|---|
 | `blocks/*.xyz` | MOF connection-point fragments (U4Ph, UOMe, UPh) | MOF builder, Task 6.12 |
 | `dftb/*` | DFTB+ outputs: Hessian, modes, DOS, band lines, MD, relaxation | External engine parsers, Task 4.9; the Si SCC output is also in `crates/xtalforge-ff/tests/fixtures/dftb/` |
-| `eqeq/mof5_cod_authors_program.json` | reference EQeq charges for MOF-5 | Charge methods, Task 4.4 |
+| `eqeq/mof5_cod_authors_program.json` | reference EQeq charges for MOF-5 | Charge methods, Task 4.4; copied to `crates/xtalforge-ff/tests/fixtures/eqeq/` |
 | `eqeq/nist_asd_ionization.csv.gz`, `pubchem_periodic_table.csv` | ionization data and periodic-table parameters | QEq/EQeq parameters, Task 4.4 |
 | `hkust1_wide_nodes.xyz` | wide-node MOF test fragment | MOF builder, Task 6.12 |
 | `pormake_upstream.json` | recorded PORMAKE output | MOF builder golden data, Task 6.12 |

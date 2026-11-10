@@ -33,6 +33,7 @@ Pages are added with the feature that introduces them:
 - [Pawley fit](./pawley) (Task 7.6)
 - [Le Bail extraction](./lebail) (Task 7.6)
 - [Rietveld refinement](./rietveld) (Task 7.8)
+- [External validation](./external-validation) (Task 0.9)
 - [Nets and RCSR identification](./nets) (Task 5.6)
 - [Extinction screening](./extinction) (Task 7.10)
 - [Machine-learning backend](./ml-backend) (Task 4.11)

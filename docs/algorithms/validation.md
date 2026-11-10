@@ -52,6 +52,8 @@ must record the reason in the algorithm page.
 | Space-group screen | exact | rutile P4_2/mnm among the candidates; 001 removes it | 7 |
 | Space-group screen | exact | diamond Fd-3m among the candidates; 200 removes it | 7 |
 | Extinction class | ranking | rutile P4_2/mnm is the first golden row | 7 |
+| EQeq charges | absolute | 1e-3 e against the authors' program on MOF-5 | 4 |
+| UFF energy | absolute | 1e-4 kcal/mol against sci-form on methane and water | 4 |
 | Charges | absolute | 1e-6 e | 4 |
 | Porosity | absolute | 0.01 Angstrom / 0.1 percent | 5 |
 | Topology | canonical graph | exact | 5 |
