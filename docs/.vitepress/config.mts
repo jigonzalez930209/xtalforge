@@ -44,6 +44,7 @@ export default defineConfig({
             { text: 'Quick start', link: '/guide/quickstart' },
             { text: 'Concepts', link: '/guide/concepts' },
             { text: 'File formats', link: '/guide/formats' },
+            { text: 'Automation guide', link: '/guide/automation' },
             { text: 'Contributing', link: '/guide/contributing' },
             { text: 'Cargo features', link: '/guide/features' },
             { text: 'Data bundles', link: '/guide/data' },
