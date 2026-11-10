@@ -28,6 +28,8 @@ pub struct Structure {
     metadata: BTreeMap<String, Value>,
 }
 
+mod properties;
+
 impl Structure {
     /// Structure name.
     #[must_use]
@@ -91,100 +93,6 @@ impl Structure {
             .iter()
             .map(|site| self.lattice.to_cart(site.frac()))
             .collect()
-    }
-
-    /// Cell contents as `(element, occupancy sum)` in first-appearance order.
-    #[must_use]
-    pub fn cell_contents(&self) -> Vec<(String, f64)> {
-        let mut contents: Vec<(String, f64)> = Vec::new();
-        for site in &self.sites {
-            if let Some(entry) = contents
-                .iter_mut()
-                .find(|(element, _)| element == site.element())
-            {
-                entry.1 += site.occupancy();
-            } else {
-                contents.push((site.element().to_owned(), site.occupancy()));
-            }
-        }
-        contents
-    }
-
-    /// Formula string, for example `Fe2 O3` or `C0.5`.
-    #[must_use]
-    pub fn formula(&self) -> String {
-        self.cell_contents()
-            .iter()
-            .map(|(element, count)| {
-                if (*count - count.round()).abs() < 1e-9 {
-                    let count = count.round() as u64;
-                    if count == 1 {
-                        element.clone()
-                    } else {
-                        format!("{element}{count}")
-                    }
-                } else {
-                    format!("{element}{count:.3}")
-                }
-            })
-            .collect::<Vec<_>>()
-            .join(" ")
-    }
-
-    /// Mass of the cell contents in unified atomic mass units.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if a site element is missing from the element table.
-    pub fn cell_mass(&self) -> Result<f64, Error> {
-        let mut mass = 0.0;
-        for site in &self.sites {
-            mass += site.occupancy() * element_by_symbol(site.element())?.mass;
-        }
-        Ok(mass)
-    }
-
-    /// Molar mass of the cell contents in g/mol.
-    ///
-    /// # Errors
-    ///
-    /// Returns the errors of [`Structure::cell_mass`].
-    pub fn molar_mass(&self) -> Result<f64, Error> {
-        self.cell_mass()
-    }
-
-    /// Density in g/cm3, assuming the sites are the whole cell (P1).
-    ///
-    /// # Errors
-    ///
-    /// Returns the errors of [`Structure::cell_mass`].
-    pub fn density(&self) -> Result<f64, Error> {
-        Ok(self.cell_mass()? * 1.660_539_066_60 / self.lattice.volume())
-    }
-
-    /// Number of formula units in the cell.
-    ///
-    /// The current model stores the cell contents in the asymmetric unit, so a
-    /// P1 structure has one formula unit. The P1 expansion in Task 1.6 refines
-    /// this when the asymmetric unit is not the cell.
-    #[must_use]
-    pub fn z(&self) -> u32 {
-        1
-    }
-
-    /// Sum of `occupancy * charge` over the sites.
-    #[must_use]
-    pub fn total_charge(&self) -> f64 {
-        self.sites
-            .iter()
-            .map(|site| site.occupancy() * site.charge().unwrap_or(0.0))
-            .sum()
-    }
-
-    /// Charge balance, the same as [`Structure::total_charge`].
-    #[must_use]
-    pub fn charge_balance(&self) -> f64 {
-        self.total_charge()
     }
 
     /// Summary used by the CLI, Python and WASM `info` surfaces.
