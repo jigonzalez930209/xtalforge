@@ -113,7 +113,9 @@ rules are on the [indexing algorithm page](../algorithms/indexing.md).
 
 `xtalforge powder {index,lebail,pawley,rietveld,automatic,cells,rietx}`;
 `powder index --general` prints the ranked metric families,
-`--background`/`--refine-peaks` control peak detection, `powder pawley`
+`--background` subtracts a SNIP background and keeps lines above 1 % of the
+strongest and five times the noise (`PeakOptions::noise_limited`, the same
+search `run_automatic` uses), `--refine-peaks` fits each line; `powder pawley`
 prints the full fit with Rwp and esds, and `powder rietveld --refine` runs the
 McCusker stages (`--occupancies` and `--texture` add those parameters;
 `--no-doublet` models one wavelength instead of the Cu K alpha 1/K alpha 2
