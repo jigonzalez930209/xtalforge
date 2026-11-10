@@ -22,9 +22,14 @@ same functions; no algorithm is reimplemented in a binding.
 | Success | `Result` | stdout / JSON | return value | return value |
 | Input error | `Error::InvalidInput` | exit 3 | `InputError` | `Error` with `code` |
 | Usage error | n/a | exit 2 (clap) | `TypeError` | `TypeError` |
-| Computation error | typed variant | exit 4 | domain exception | `Error` with `code` |
-| Limit error | typed variant | exit 5 | `LimitError` | `Error` with `code` |
-| Missing engine | typed variant | exit 6 | `EngineError` | `Error` with `code` |
+| Any other error (computation, limit, engine, data) | typed variant | exit 3 | `XtalforgeError` | `Error` with `code` |
+
+The CLI uses exit 3 for every library error and exit 2 for a clap usage error;
+the specific cause is the stable `code` string in the message or in the
+`--json` object. Python raises `InputError` for `InvalidInput` and the base
+`XtalforgeError` for every other variant, with `(code, message)` as arguments,
+so callers branch on `exc.args[0]`. Dedicated limit and engine exception
+classes and distinct exit codes are not part of the 1.0 surface.
 
 ## Error contract
 
