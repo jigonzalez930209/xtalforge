@@ -10,6 +10,7 @@ use pyo3::create_exception;
 use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 
+mod agent;
 mod analysis;
 mod classes;
 mod phase3;
@@ -87,6 +88,14 @@ fn map_mof_error(error: xtalforge::mof::Error) -> PyErr {
     let args = (error.code(), error.message());
     match error {
         xtalforge::mof::Error::InvalidInput(_) => InputError::new_err(args),
+        _ => XtalforgeError::new_err(args),
+    }
+}
+
+fn map_agent_error(error: xtalforge::agent::Error) -> PyErr {
+    let args = (error.code(), error.to_string());
+    match error {
+        xtalforge::agent::Error::Argument { .. } => InputError::new_err(args),
         _ => XtalforgeError::new_err(args),
     }
 }
@@ -334,5 +343,6 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(powder_cells, module)?)?;
     module.add_function(wrap_pyfunction!(powder_supported_groups, module)?)?;
     module.add_function(wrap_pyfunction!(rietx, module)?)?;
+    agent::register(module)?;
     Ok(())
 }
