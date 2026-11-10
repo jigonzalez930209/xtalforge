@@ -12,6 +12,10 @@ let general = structure.supercell_matrix([[2.0, 1.0, 0.0], [0.0, 1.0, 0.0], [0.0
 let shifted = structure.origin_shift([0.5, 0.0, 0.0])?;
 ```
 
+`Structure::as_p1` returns the explicit P1 cell (the operations are dropped and
+the site metadata is kept); `supercell` uses it internally when the input is
+not P1.
+
 ## Algorithm
 
 The new lattice is `P M`. Fractional coordinates in the new cell are
