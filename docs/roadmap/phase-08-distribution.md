@@ -94,14 +94,14 @@ Crate: `xtalforge-agent` (plus work across all crates).
 
 ## Task 8.4 — Machine-learning potentials
 
-- [ ] 8.4.1 Backend implementation
+- [x] 8.4.1 Backend implementation
   Implement the decision of Task 4.11.1 behind feature `ml`: MACE, ORB-v3 and
   MatterSim calculators, or the subset the chosen backend supports, with
   forces and stress.
-- [ ] 8.4.2 Model management
+- [x] 8.4.2 Model management
   Weights are never bundled: download on demand into a cache with checksum and
   license recorded per model; CLI `models {list,fetch,verify,remove}`.
-- [ ] 8.4.3 Accuracy and speed
+- [x] 8.4.3 Accuracy and speed
   Compare energies and forces with the Python implementations on a test set
   recorded as golden data; publish timings.
 
