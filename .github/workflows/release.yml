@@ -67,7 +67,9 @@ jobs:
         run: |
           mkdir -p artifacts
           cargo deb -p xtalforge-cli --no-build --no-dbgsym --output artifacts
-          (cd crates/xtalforge-cli && cargo generate-rpm --output ../../artifacts --payload-compress gzip)
+          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
+          rpm_version=${version//-/\~}
+          (cd crates/xtalforge-cli && cargo generate-rpm --output ../../artifacts --payload-compress gzip --set-metadata "version = \"${rpm_version}\"")
       - name: Package tar.gz and AppImage
         run: |
           version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' Cargo.toml | head -n 1)
@@ -183,13 +185,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { label: manylinux-x86_64, os: ubuntu-24.04, target: x86_64, manylinux: auto }
-          - { label: manylinux-aarch64, os: ubuntu-24.04, target: aarch64, manylinux: auto }
-          - { label: musllinux-x86_64, os: ubuntu-24.04, target: x86_64, manylinux: musllinux }
-          - { label: musllinux-aarch64, os: ubuntu-24.04, target: aarch64, manylinux: musllinux }
-          - { label: macos-x86_64, os: macos-13, target: x86_64, manylinux: auto }
-          - { label: macos-arm64, os: macos-14, target: aarch64, manylinux: auto }
-          - { label: windows-x86_64, os: windows-2022, target: x86_64, manylinux: auto }
+          - { label: manylinux-x86_64, os: ubuntu-24.04, target: x86_64-unknown-linux-gnu, manylinux: auto }
+          - { label: manylinux-aarch64, os: ubuntu-24.04, target: aarch64-unknown-linux-gnu, manylinux: auto }
+          - { label: musllinux-x86_64, os: ubuntu-24.04, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_1 }
+          - { label: musllinux-aarch64, os: ubuntu-24.04, target: aarch64-unknown-linux-musl, manylinux: musllinux_1_1 }
+          - { label: macos-x86_64, os: macos-13, target: x86_64-apple-darwin, manylinux: auto }
+          - { label: macos-arm64, os: macos-13, target: aarch64-apple-darwin, manylinux: auto }
+          - { label: windows-x86_64, os: windows-2022, target: x86_64-pc-windows-msvc, manylinux: auto }
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
