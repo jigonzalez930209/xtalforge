@@ -4,6 +4,8 @@ use std::path::Path;
 
 use serde_json::Value;
 use xtalforge_commands::{Origin, Supercell, WrapIntoCell};
+use xtalforge_core::Verdict;
+use xtalforge_core::limits::{check_grid, check_supercell};
 
 use crate::answers::{Answer, HistoryEntry};
 use crate::run::{document_argument, optional_string, required_string};
@@ -128,12 +130,45 @@ pub(crate) fn diagnostics(session: &mut Session, arguments: &Value) -> Result<An
 pub(crate) fn supercell(session: &mut Session, arguments: &Value) -> Result<Answer, Error> {
     let name = session.resolve(document_argument(arguments)?)?;
     let counts = crate::run::repeats(arguments)?;
+    let limits = session.options().limits;
+    {
+        let document = session.document(Some(&name))?;
+        let n_atoms = document.structure().p1()?.atoms.len() as u64;
+        let matrix = [
+            [f64::from(counts[0]), 0.0, 0.0],
+            [0.0, f64::from(counts[1]), 0.0],
+            [0.0, 0.0, f64::from(counts[2])],
+        ];
+        enforce(check_supercell(&limits, n_atoms, matrix)?)?;
+    }
     let document = session.document_mut(Some(&name))?;
     document.apply(
         Box::new(Supercell::new(counts[0], counts[1], counts[2])),
         Origin::Agent,
     )?;
     structure_answer(session, &name)
+}
+
+/// Refuses an operation whose size estimate is over the hard limit.
+pub(crate) fn enforce(verdict: Verdict) -> Result<(), Error> {
+    if verdict.refused() {
+        Err(Error::Core(xtalforge_core::Error::LimitExceeded(verdict)))
+    } else {
+        Ok(())
+    }
+}
+
+/// Grid budget check shared by the porosity verb.
+pub(crate) fn check_porosity(
+    session: &Session,
+    structure: &xtalforge_core::Structure,
+    spacing: f64,
+) -> Result<(), Error> {
+    enforce(check_grid(
+        &session.options().limits,
+        structure.lattice(),
+        spacing,
+    )?)
 }
 
 pub(crate) fn wrap(session: &mut Session, arguments: &Value) -> Result<Answer, Error> {

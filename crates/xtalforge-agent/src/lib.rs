@@ -29,8 +29,10 @@ pub mod answers;
 pub mod batch;
 pub mod capabilities;
 pub mod changes;
+pub mod context;
 pub mod diagnostics;
 pub mod inspect;
+pub mod mcp;
 mod ops;
 mod ops_analysis;
 mod ops_ff;
@@ -39,6 +41,7 @@ pub mod png;
 pub mod render;
 mod run;
 pub mod session;
+pub mod skill;
 pub mod verbs;
 
 pub use answers::Answer;
@@ -47,8 +50,10 @@ pub use capabilities::{Capabilities, capability_report};
 pub use changes::{ChangeBurst, changes_for};
 pub use diagnostics::{Diagnostic, DiagnosticReport, Severity, diagnose};
 pub use inspect::inspect_structure;
+pub use mcp::{McpServer, serve_stdio};
 pub use render::{RenderOptions, render_png, render_svg};
 pub use session::{Session, SessionOptions};
+pub use skill::{SkillDocument, default_directory};
 pub use verbs::{ParameterKind, VerbInfo, catalogue, lookup};
 
 /// Errors returned by the agent layer.

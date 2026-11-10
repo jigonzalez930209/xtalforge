@@ -30,6 +30,15 @@ pub(crate) fn render(session: &mut Session, arguments: &Value) -> Result<Answer,
         ..Default::default()
     };
     let document = session.document(Some(&name))?;
+    {
+        let n_atoms = document.structure().p1()?.atoms.len() as u64;
+        let verdict = xtalforge_core::limits::check_drawn(
+            &session.options().limits,
+            n_atoms,
+            [(0.0, 1.0), (0.0, 1.0), (0.0, 1.0)],
+        );
+        crate::ops::enforce(verdict)?;
+    }
     let bytes = match format.as_str() {
         "svg" => render_svg(document.structure(), &options)?.into_bytes(),
         "png" => render_png(document.structure(), &options)?,

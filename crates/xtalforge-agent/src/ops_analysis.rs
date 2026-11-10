@@ -158,6 +158,7 @@ pub(crate) fn porosity(session: &mut Session, arguments: &Value) -> Result<Answe
     let probe = number_or(arguments, "probe_radius", 1.2)?;
     let document = session.document(Some(&name))?;
     let structure = document.structure();
+    crate::ops::check_porosity(session, structure, spacing)?;
     let radii = default_radii(structure)?;
     let grid = distance_grid(structure, &radii, spacing)?;
     let accessible = grid.accessible_volume(probe)?;
