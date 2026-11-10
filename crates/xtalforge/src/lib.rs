@@ -7,8 +7,8 @@
 //!   point groups and Brillouin zones.
 //! - [`io`]: file-format readers and writers.
 //!
-//! Later phases add `ff`, `analysis`, `build`, `mof`, `powder`, `modules` and
-//! `agent` (see the roadmap in `docs/roadmap/`). The same operations are
+//! Later phases add `ff`, `analysis`, `build`, `mof`, `powder` and `modules`
+//! (see the roadmap in `docs/roadmap/`). The same operations are
 //! exposed by the CLI, the Python package and the WebAssembly package; the
 //! parity matrix in `docs/api/parity.md` tracks their status.
 //!
@@ -32,6 +32,7 @@
 //! assert_eq!(error.code(), "invalid_input");
 //! ```
 
+pub use xtalforge_agent as agent;
 pub use xtalforge_analysis as analysis;
 pub use xtalforge_build as build;
 pub use xtalforge_commands as commands;
