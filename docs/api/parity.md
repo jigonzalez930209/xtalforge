@@ -92,4 +92,19 @@ compares this table with the symbols each surface actually exports.
 | Model cache (`models`) | Python, WASM | It is a filesystem command with `curl`; the browser and Python package leave the download to the user | CLI `models`; `xtalforge_ff::models` |
 | Full MOF topology bundle | WASM | Package size | The builder carries the curated six-topology/eight-block subset (Tasks 6.11-6.16); the RCSR fingerprint index (35 KB) is embedded on every surface |
 | lattice_minimum_image, limits_bounds, limits_check | CLI | The CLI exposes geometry through `cell` and the global `--limits` flag | Use `cell` and `--limits` |
-| workspace_archive | CLI | The CLI reads and writes `runs/<id>/run.json` directly | Use `project` or the on-disk workspace |
+| workspace_archive | CLI | The CLI has no `modules`/`run` command; the workspace is a library API | Rust `Workspace` and Python `workspace_*`; `project` for archives |
+
+## Open gaps: Rust-only capabilities
+
+These capabilities exist in the Rust API but have **no** CLI, Python or WASM
+surface and no justification in the table above, so under rule 4 of
+`AGENTS.md` they are not finished. They are recorded here instead of being
+hidden; closing them is post-1.0 work.
+
+| Capability | Rust | CLI | Python | WASM |
+|---|---|---|---|---|
+| SMILES parser (`parse_smiles`) and 3D embedding (`embed_smiles`), Tasks 6.1.1-6.1.3 | done | open | open | open |
+| Sketch data model (`Sketch`, `from_smiles`, `to_smiles`), Task 6.1.6 | done | open | open | open |
+| Fragment library (`find_fragment`), Task 6.2 | done | open | open | open |
+| Substitution and clearance (`substitute`), Task 6.3 | done | open | open | open |
+| Guest placement (`guest` module), Task 6.4 | done | open | open | open |
