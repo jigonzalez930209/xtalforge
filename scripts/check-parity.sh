@@ -55,6 +55,7 @@ check_rust() {
     agent_capabilities) name=capability_report ;;
     agent_verbs) name=catalogue ;;
     agent_run) name=run_verbs ;;
+    models) name=fetch ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -156,6 +157,7 @@ check_cli() {
     porosity|net_invariants|zeo_parse|ring_paths) command=analysis ;;
     agent_capabilities|agent_verbs) command=capabilities ;;
     agent_run) command=agent ;;
+    ml_backends|models) command=models ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }
