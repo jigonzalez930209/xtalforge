@@ -4,10 +4,17 @@
 
 `qeq_charges(structure, &ChargeOptions)` solves the Rappé-Goddard charge
 equilibration. Each element contributes an electronegativity `chi` and a
-hardness `eta`; the Coulomb interaction uses the Ohno-Klopman kernel with the
-UFF bond radii. The total charge is enforced by a Lagrange multiplier.
+hardness `J`; the energy is `sum_i (chi_i Q_i + J_i Q_i^2 / 2) + sum_{i<j}
+J_ij Q_i Q_j` with the Ohno-Klopman kernel
+`J_ij = 14.4 / sqrt(r^2 + (14.4 / sqrt(J_i J_j))^2)` (eV, Angstrom). It uses the
+hardnesses only, not the UFF bond radii. The total charge is enforced by a
+Lagrange multiplier (one KKT system).
 
-The linear system is solved on the P1 cell with a real-space cutoff; the result
+The linear system is solved on the P1 cell with a real-space cutoff (default
+12 Angstrom, summed over every image inside it, with no Ewald correction). The
+truncated sum under-polarises ionic solids: NaCl comes out near +-0.20, not
++-1, so use QEq for molecules and frameworks, and EQeq or an explicit charge
+set for ionic crystals; the result
 is `Charges { per_atom, total }`. `apply_to` writes the per-site mean over the
 images back to the asymmetric unit.
 

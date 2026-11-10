@@ -62,8 +62,6 @@ repository yet; the licence and the download size must be checked before it is.
   (the reference program has no ionisation data for several of those
   environments); the parameter table's coverage beyond Zn/O/C/H is checked
   only for neutrality and sign.
-- EQeq is compared on one framework. The parameter table's elements beyond
-  Zn/O/C/H are only checked for neutrality and sign.
 - PXRD uses the reference's rutile pattern; a measured instrument profile
   (NIST or a laboratory scan) is not included.
 - Phonons use an analytic spring model and a phonopy golden file from Phase 4;

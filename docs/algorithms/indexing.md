@@ -70,6 +70,15 @@ when its `M20` is below one tenth of the best cell in its coverage class. The
 symmetry preference is what makes a cubic pattern come back cubic instead of
 one of the many monoclinic descriptions of the same lattice.
 
+## Single-parameter cubic search
+
+`index_cubic` (the default of `powder index` without `--general`) assigns the
+first line every `h^2+k^2+l^2` up to `max_index`, derives `a` and counts the
+lines it explains. A cell `a` and its multiples `a sqrt(2)`, `a sqrt(3)`, ...
+index the same lines, so among the candidates with the best completeness and
+an error within a tenth of the tolerance of the smallest, the smallest cell
+wins. A face-centred pattern (NaCl) therefore returns `a = 5.62`, not `7.95`.
+
 ## Validation
 
 `crates/xtalforge-analysis/tests/indexing_golden.rs` reads
