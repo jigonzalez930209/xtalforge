@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "Agent session, verbs, diagnostics and MCP server for xtalforge."
+include = ["src/**", "skill/**"]
 
 [dependencies]
 xtalforge-analysis = { workspace = true }
@@ -39,3 +40,6 @@ external = []
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
