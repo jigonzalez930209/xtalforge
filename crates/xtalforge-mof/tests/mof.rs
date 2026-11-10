@@ -151,7 +151,9 @@ fn pcu_zn4o_benzene_builds_finite_atoms() {
     assert_eq!(built.node, "Zn4O");
     assert_eq!(built.linker, "benzene");
     assert!(built.structure.is_p1());
-    assert!((built.structure.lattice().lengths()[0] - 36.0).abs() < 1e-9);
+    // The cell is scaled to fit the node and linker; for this block set the
+    // fit is within a tenth of a percent of the catalogue cell.
+    assert!((built.structure.lattice().lengths()[0] - 36.0).abs() < 0.05);
     assert_eq!(built.structure.topology_bonds().len(), 81);
     for site in built.structure.sites() {
         assert!(site.frac().iter().all(|value| value.is_finite()));
@@ -179,14 +181,31 @@ fn sql_cu2_benzene_builds_without_warnings() {
 }
 
 #[test]
-fn hcb_benzene_tri_triphenylene_builds() {
+fn hcb_benzene_tri_triphenylene_builds_and_reports_the_third_arm() {
     let built = build_mof(&MofRequest::new("hcb", "benzene_tri", "triphenylene")).unwrap();
     assert!(built.structure.sites().len() > 20);
     assert_eq!(built.structure.topology_bonds().len(), 12);
     assert!(
-        built.warnings.is_empty(),
-        "unexpected warnings: {:?}",
+        built
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("connection points but spans")),
+        "{:?}",
         built.warnings
+    );
+}
+
+#[test]
+fn the_cell_grows_to_fit_a_longer_linker() {
+    let short = build_mof(&MofRequest::new("pcu", "Zn4O", "benzene")).unwrap();
+    let long = build_mof(&MofRequest::new("pcu", "Zn4O", "stilbene")).unwrap();
+    let short_a = short.structure.lattice().lengths()[0];
+    let long_a = long.structure.lattice().lengths()[0];
+    assert!(long_a > 1.5 * short_a, "{short_a} vs {long_a}");
+    assert!(
+        long.warnings.is_empty(),
+        "a fitted linker must not be reported: {:?}",
+        long.warnings
     );
 }
 
@@ -292,4 +311,30 @@ fn unit(vector: [f64; 3]) -> [f64; 3] {
 fn apply(matrix: [[f64; 3]; 3], vector: [f64; 3]) -> [f64; 3] {
     let [x, y, z] = vector;
     matrix.map(|[a, b, c]| a * x + b * y + c * z)
+}
+
+#[test]
+fn a_node_with_the_wrong_connection_count_is_reported_once() {
+    // Cu2 has four connection points; pcu vertices have degree six.
+    let built = build_mof(&MofRequest::new("pcu", "Cu2", "benzene")).unwrap();
+    let degree: Vec<_> = built
+        .warnings
+        .iter()
+        .filter(|warning| warning.contains("degree"))
+        .collect();
+    assert_eq!(degree.len(), 1, "{:?}", built.warnings);
+}
+
+#[test]
+fn a_linker_that_does_not_fit_the_cell_is_reported() {
+    // srs edges are not all the same length once the nodes are fixed.
+    let built = build_mof(&MofRequest::new("srs", "Cu2", "benzene")).unwrap();
+    assert!(
+        built
+            .warnings
+            .iter()
+            .any(|warning| warning.contains("is scaled by")),
+        "{:?}",
+        built.warnings
+    );
 }
