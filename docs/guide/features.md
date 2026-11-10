@@ -40,3 +40,12 @@ cargo build -p xtalforge --all-features
    Phase 1 readers and builders brought it to about 438 KiB, symmetry to about
    813 KiB, and the Phase 3-7 surfaces (including the polymer/embedding code)
    took the release package to about 2905 KiB, inside the 3.5 MiB budget.
+
+## Threaded WebAssembly
+
+The default `xtalforge-wasm` package is single-threaded. A threaded build
+needs a shared `WebAssembly.Memory`, `SharedArrayBuffer` and cross-origin
+isolation headers from the host page; without them the module cannot start.
+The Rust `parallel` feature is not enabled in the published WASM build, and
+enabling it never changes a result: every parallel reduction uses a fixed
+order, so the single-threaded and threaded paths agree.

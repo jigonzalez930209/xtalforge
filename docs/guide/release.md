@@ -54,12 +54,19 @@ will trigger the usual Gatekeeper/SmartScreen warnings.
 - **crates.io**: `xtalforge-core`, `xtalforge-symmetry`, `xtalforge-io`,
   `xtalforge-view`, `xtalforge-commands`, `xtalforge-ff`,
   `xtalforge-analysis`, `xtalforge-build`, `xtalforge-mof`,
-  `xtalforge-modules`, the `xtalforge` facade and `xtalforge-cli`, in dependency
-  order (the CIF reader resolves Hall symbols through the symmetry crate). Existing versions are skipped so a rerun is idempotent.
-- **PyPI**: an abi3 manylinux wheel and an sdist built on `ubuntu-24.04`,
-  uploaded with `twine`.
+  `xtalforge-modules`, `xtalforge-agent`, the `xtalforge` facade and
+  `xtalforge-cli`, in dependency order (the CIF reader resolves Hall symbols
+  through the symmetry crate). Existing versions are skipped so a rerun is
+  idempotent. `scripts/check-package.sh` verifies the tarballs: only `src/`,
+  the owning crate's `data/` and the agent `skill/` are included; tests,
+  benches, fuzz targets, examples and fixtures are excluded, and each tarball
+  is under 12 MB.
+- **PyPI**: abi3 wheels for manylinux and musllinux (x86_64, aarch64), macOS
+  (x86_64, arm64) and Windows (x86_64), plus an sdist, uploaded with `twine`.
 - **npm**: `xtalforge-wasm`, built for the bundler target on `ubuntu-24.04`
-  with provenance.
+  with provenance. The web target is the docs artifact; the node target is
+  built with `wasm-pack build --target nodejs` for a Node consumer and is not
+  published as a second package name.
 - **GitHub release**:
   - Linux x86_64: `.deb`, `.rpm`, `.AppImage`, `.tar.gz`
   - Windows x86_64: `.zip`
@@ -83,7 +90,10 @@ release workflow.
 1. Set the version in `Cargo.toml` and run `scripts/sync-version.sh`.
 2. Move the `Unreleased` changelog entries under `## [X.Y.Z] - YYYY-MM-DD`.
 3. Run the full local CI gate from `AGENTS.md` section 5.4 on the exact commit
-   to tag. There is no GitHub CI; this gate is mandatory.
+   to tag. There is no GitHub CI; this gate is mandatory. Run
+   `scripts/check-package.sh` and `scripts/check-bench-budget.sh` as well.
+   Model weights are never bundled; the user fetches them with
+   `xtalforge models fetch`.
 4. Commit, tag and push:
 
    ```bash
