@@ -96,6 +96,33 @@ The browser has no filesystem: `load` works from `text`, `save` and the `path`
 form of `render` are not available, and every in-memory verb works. The
 exception is recorded in the parity matrix.
 
+## MCP server
+
+```bash
+xtalforge mcp
+```
+
+The server speaks JSON-RPC 2.0 over stdio (protocol `2024-11-05`), one tool
+per verb. `initialize` returns the protocol, the server name, the tool
+capability and an `instructions` string for clients that cannot read files
+from disk. `tools/list` builds each `inputSchema` from the same catalogue;
+`tools/call` returns the answer as text with `isError` set on failure. The full
+message set, error codes and lifecycle are in the
+[automation guide](../guide/automation#start-the-mcp-server).
+
+## Skill documents
+
+```bash
+xtalforge skill path       # default install directory
+xtalforge skill list       # every embedded document
+xtalforge skill show SKILL # one document
+xtalforge skill install    # write all of them
+```
+
+`xtalforge skill install <dir>` writes the main skill, the MCP setup, three
+worked prompts and nine reference pages. They are embedded in the binary; no
+download is needed.
+
 ## Verbs
 
 `xtalforge capabilities` lists the verbs. They are grouped as:
