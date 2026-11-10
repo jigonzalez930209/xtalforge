@@ -43,7 +43,7 @@ info = xtalforge.element_info("Fe")
 volume = xtalforge.cell_volume(3, 4, 5, 60, 70, 80)
 ```
 
-Install the wheel with `pip install xtalforge` after the first release; the
+Install the release candidate with `pip install xtalforge==1.0.0-rc.1`; the
 local development wheel is built with `maturin build --release`.
 
 ## WebAssembly
