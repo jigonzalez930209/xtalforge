@@ -145,7 +145,7 @@ fn supercell_json_is_a_schema_document() {
             .as_array()
             .expect("sites array")
             .len(),
-        2
+        16
     );
 }
 
@@ -166,7 +166,7 @@ fn supercell_out_infers_the_format_from_the_extension() {
     assert!(output.status.success());
     assert!(output.stdout.is_empty(), "quiet writes no confirmation");
     let text = std::fs::read_to_string(&out).expect("the supercell file must exist");
-    assert!(text.starts_with("2\n"), "got: {text}");
+    assert!(text.starts_with("16\n"), "got: {text}");
     std::fs::remove_file(out).expect("the temporary file must be removable");
 }
 
@@ -430,6 +430,28 @@ fn mesh_writes_ascii_stl() {
     assert!(text.starts_with("solid"));
     assert!(text.contains("facet normal"));
     assert!(text.contains("endsolid"));
+}
+
+#[test]
+fn mesh_scene_emits_full_geometry() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/corpus/simple/Si.cif");
+    let output = run(&["mesh", &path.to_string_lossy(), "--scene"]);
+    assert!(output.status.success());
+    let value: serde_json::Value =
+        serde_json::from_slice(&output.stdout).expect("scene JSON must parse");
+    assert_eq!(
+        value["atoms"].as_array().expect("atoms").len(),
+        8,
+        "Si has eight P1 atoms"
+    );
+    assert_eq!(
+        value["cell_edges"].as_array().expect("cell edges").len(),
+        12
+    );
+    let atom = &value["atoms"][0];
+    assert!(atom["element"].as_str().is_some());
+    assert_eq!(atom["position"].as_array().expect("position").len(), 3);
+    assert!(atom["radius"].as_f64().unwrap_or(0.0) > 0.0);
 }
 
 #[test]
