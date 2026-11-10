@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "Pure Rust library for building, manipulating, analysing and exporting crystal structures."
+include = ["src/**"]
 
 [dependencies]
 xtalforge-core = { workspace = true }
@@ -35,10 +36,13 @@ parallel = [
   "xtalforge-io/parallel",
   "xtalforge-symmetry/parallel",
 ]
-sci-form = []
+sci-form = ["xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
 ml = []
 external = []
 mof-data = []
 
 [lints]
 workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
