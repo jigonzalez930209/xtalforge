@@ -20,6 +20,10 @@ essential release, then `0.x.y`).
 - `nanoribbon`: the vacuum stretched the strip instead of adding empty space;
   the bonds are 1.42 Angstrom again.
 
+- `structure_info` (and the CLI `info`, Python and WASM equivalents) rejected the
+  versioned `{"schema_version", "structure"}` envelope that `--json` commands
+  write, so `xtalforge --json supercell ... | xtalforge info -` failed; both
+  forms are accepted now.
 - `powder index` (cubic search): a face-centred pattern indexed on a larger
   multiple of the true cell (NaCl returned 7.94 Angstrom); the smallest cell
   among equally good candidates is now chosen.
@@ -37,6 +41,11 @@ essential release, then `0.x.y`).
   factors, the error mapping of the CLI and Python bindings, the quick-start
   version pin and the MOF entry point; recorded the resulting known subsets in
   the roadmap.
+- Corrected the quick-start (`structure_info` takes structure JSON; use
+  `Structure.from_cif` / `read_cif` for CIF), the WASM size figures, the
+  migration table (no `modules` CLI command, no separate powder crate) and
+  the stale Phase 0 status and `AGENTS.md` gap list; documented the Pawley
+  profile-mismatch caveat.
 - Corrected the QEq kernel description (hardness only, truncated 12 Angstrom
   sum), the duplicated external-validation bullet and the tutorial commands
   (`powder lebail/pawley`, `build graphene/nanotube` take positional arguments).
