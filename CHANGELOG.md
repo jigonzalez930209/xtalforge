@@ -51,7 +51,8 @@ essential release, then `0.x.y`).
   was a peak, the indexing returned a wrong cell (16.5 Angstrom for NaCl) and
   the run did not finish in five minutes in a release build. It now subtracts a
   SNIP background and applies a noise-based threshold; the same pattern runs in
-  2.4 s and returns Fm-3m first.
+  2.4 s and returns Fm-3m first. `PeakOptions::noise_limited` exposes the same
+  search and `powder index --background` uses it (a = 5.614 instead of 16.5).
 
 ### Documentation
 
