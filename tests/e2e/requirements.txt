@@ -1,0 +1,8 @@
+ase==3.29.0
+gemmi==0.7.5
+numpy==2.5.4
+pillow==13.0.0
+playwright==1.59.0
+pytest==9.2.0
+scipy==1.18.1
+spglib==2.8.0
