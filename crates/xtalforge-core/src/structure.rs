@@ -79,11 +79,15 @@ impl Structure {
         &self.metadata
     }
 
-    /// Whether the structure is P1.
+    /// Whether the structure is P1: the Hall symbol is `P 1` (or empty) and
+    /// every operation is the identity. A CIF may carry an explicit operation
+    /// loop without a space-group symbol; such a file is not P1 even though
+    /// its Hall symbol defaults to `P 1`.
     #[must_use]
     pub fn is_p1(&self) -> bool {
         let hall = self.hall.trim();
-        hall.is_empty() || hall == "P 1" || hall == "P1"
+        (hall.is_empty() || hall == "P 1" || hall == "P1")
+            && self.operations.iter().all(SymOp::is_identity)
     }
 
     /// Cartesian coordinates of the asymmetric sites.

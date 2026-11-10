@@ -74,11 +74,17 @@ impl Structure {
                 ));
             }
         }
-        let verdict = check_supercell(limits, self.sites().len() as u64, p)?;
+        let expanded = if self.is_p1() {
+            None
+        } else {
+            Some(self.as_p1()?)
+        };
+        let source = expanded.as_ref().unwrap_or(self);
+        let verdict = check_supercell(limits, source.sites().len() as u64, p)?;
         if verdict.refused() {
             return Err(Error::LimitExceeded(verdict));
         }
-        let lattice = self.lattice().transform(p)?;
+        let lattice = source.lattice().transform(p)?;
         let inverse = Lattice::new(p)?.inverse();
         let max_inverse = inverse
             .iter()
@@ -89,7 +95,7 @@ impl Structure {
         let widths = perpendicular_widths(&lattice)?;
         let mut grid = FractionalGrid::new(widths, 1e-6);
         let mut sites: Vec<Site> = Vec::new();
-        for site in self.sites() {
+        for site in source.sites() {
             for i in -range..=range {
                 for j in -range..=range {
                     for k in -range..=range {
@@ -123,11 +129,11 @@ impl Structure {
                 }
             }
         }
-        let mut builder = StructureBuilder::new(self.name(), lattice);
+        let mut builder = StructureBuilder::new(source.name(), lattice);
         for site in sites {
             builder = builder.site(site);
         }
-        for (key, value) in self.metadata() {
+        for (key, value) in source.metadata() {
             builder = builder.metadata(key.clone(), value.clone());
         }
         builder.build()

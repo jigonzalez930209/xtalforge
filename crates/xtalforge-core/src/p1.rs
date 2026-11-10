@@ -137,6 +137,38 @@ impl P1Cell {
 }
 
 impl Structure {
+    /// Returns this structure as an explicit P1 structure.
+    ///
+    /// A structure that is already P1 is cloned. Otherwise the cell is
+    /// expanded with its operations, the operations are dropped and the
+    /// original site metadata (occupancy, displacement parameters, charge and
+    /// props) is kept. `Structure::supercell` uses this so a supercell of a
+    /// symmetric structure contains the whole cell, not only the asymmetric
+    /// unit.
+    ///
+    /// # Errors
+    ///
+    /// Returns the errors of the P1 expansion or of the rebuilt sites.
+    pub fn as_p1(&self) -> Result<Self, Error> {
+        if self.is_p1() {
+            return Ok(self.clone());
+        }
+        let expanded = self.p1()?;
+        let mut builder = crate::StructureBuilder::new(self.name(), *self.lattice()).hall("P 1");
+        for atom in &expanded.atoms {
+            let site = self.sites().get(atom.site_idx).ok_or_else(|| {
+                Error::InvalidInput("the P1 expansion references a missing site".to_owned())
+            })?;
+            builder = builder.site(site.clone().with_frac(atom.frac)?);
+        }
+        for (key, value) in self.metadata() {
+            builder = builder.metadata(key.clone(), value.clone());
+        }
+        builder.build()
+    }
+}
+
+impl Structure {
     /// Expands this structure to P1 with the default tolerance.
     ///
     /// # Errors
