@@ -63,7 +63,7 @@ fn load_info_and_diagnostics() {
         panic!("expected info");
     };
     assert_eq!(document, "nacl");
-    assert_eq!(inspection.summary.formula, "Na Cl");
+    assert_eq!(inspection.summary.formula, "Na4 Cl4");
     assert!(inspection.n_p1_atoms >= 2);
     assert_eq!(inspection.sites.len(), inspection.summary.n_sites);
     assert_eq!(

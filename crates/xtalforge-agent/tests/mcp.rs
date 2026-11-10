@@ -70,7 +70,7 @@ fn a_tool_call_runs_a_verb_and_returns_its_answer() {
         .expect("text");
     let answer: Value = serde_json::from_str(text).expect("answer");
     assert_eq!(answer["kind"], "loaded");
-    assert_eq!(answer["document"]["formula"], "Na Cl");
+    assert_eq!(answer["document"]["formula"], "Na4 Cl4");
 
     let response = call(
         &mut server,
