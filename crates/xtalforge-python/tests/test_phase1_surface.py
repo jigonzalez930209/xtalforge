@@ -289,7 +289,8 @@ def test_standardize_reduce_wyckoff_and_zone() -> None:
     assert assignments
     assert assignments[0]["letter"] == "b"
     zone = xtalforge.brillouin_zone(text)
-    assert len(zone["vertices"]) == 8
+    assert len(zone["vertices"]) == 24
+    assert len(zone["faces"]) == 14
     ladder = xtalforge.tolerance_ladder(text)
     assert ladder
     diagnostics = xtalforge.diagnose(text, "227")
