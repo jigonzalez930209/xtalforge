@@ -17,6 +17,7 @@ members = [
   "crates/xtalforge-view",
   "crates/xtalforge-testkit",
   "crates/xtalforge-wasm",
+  "examples/plugin",
 ]
 
 [workspace.package]
