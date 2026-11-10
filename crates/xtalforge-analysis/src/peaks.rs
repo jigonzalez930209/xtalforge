@@ -87,6 +87,59 @@ impl PeakOptions {
     }
 }
 
+impl PeakOptions {
+    /// Options for a pattern with a background and noise: a SNIP background is
+    /// subtracted first, then the lines kept are above 1 % of the strongest one
+    /// and above five times the noise (the median absolute deviation of the
+    /// background-free signal), after one smoothing pass. `run_automatic` and
+    /// `powder index --background` use these.
+    #[must_use]
+    pub fn noise_limited(points: &[PatternPoint]) -> Self {
+        let window = NOISE_LIMITED_BACKGROUND_WINDOW;
+        let envelope = background_envelope(points, window);
+        let mut signal: Vec<f64> = points
+            .iter()
+            .zip(envelope.iter())
+            .map(|(point, background)| (point.intensity - background).max(0.0))
+            .collect();
+        let maximum = signal.iter().copied().fold(0.0_f64, f64::max);
+        signal.sort_by(f64::total_cmp);
+        let median = signal.get(signal.len() / 2).copied().unwrap_or(0.0);
+        let mut deviations: Vec<f64> = signal.iter().map(|value| (value - median).abs()).collect();
+        deviations.sort_by(f64::total_cmp);
+        let noise = 1.4826 * deviations.get(deviations.len() / 2).copied().unwrap_or(0.0);
+        Self {
+            min_height: (0.01 * maximum).max(5.0 * noise),
+            min_distance: (2.0 * median_step(points)).max(0.01),
+            smoothing: 1,
+            background: true,
+            background_window: window,
+            ..Self::default()
+        }
+    }
+}
+
+/// SNIP window, in points, of [`PeakOptions::noise_limited`].
+const NOISE_LIMITED_BACKGROUND_WINDOW: usize = 40;
+
+fn median_step(points: &[PatternPoint]) -> f64 {
+    let mut steps: Vec<f64> = points
+        .windows(2)
+        .filter_map(|pair| match pair {
+            [first, second] if second.two_theta > first.two_theta => {
+                Some(second.two_theta - first.two_theta)
+            }
+            _ => None,
+        })
+        .collect();
+    steps.sort_by(f64::total_cmp);
+    steps
+        .get(steps.len() / 2)
+        .copied()
+        .unwrap_or(0.02)
+        .max(0.001)
+}
+
 /// Finds local maxima in a pattern.
 ///
 /// # Errors

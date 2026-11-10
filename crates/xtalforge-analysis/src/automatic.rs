@@ -34,10 +34,7 @@ use crate::extinction::{ExtinctionClass, SpaceGroupMatch, extinction_classes};
 use crate::indexing::{IndexedCell, IndexingOptions, index_pattern};
 use crate::lebail::{LebailOptions, LebailResult, le_bail};
 use crate::pawley::{PawleyOptions, PawleyResult, pawley_refine};
-use crate::peaks::{Peak, PeakOptions, background_envelope, find_peaks};
-
-/// SNIP window, in points, of the automatic peak search.
-const AUTOMATIC_BACKGROUND_WINDOW: usize = 40;
+use crate::peaks::{Peak, PeakOptions, find_peaks};
 use crate::pxrd::Radiation;
 use crate::rietveld::{RietveldOptions, RietveldPhase, fit_phase};
 
@@ -216,34 +213,7 @@ pub fn run_automatic(
             "automatic run needs at least one extinction class".to_owned(),
         ));
     }
-    let step = median_step(observed);
-    // Subtract a SNIP background first, then keep lines above 1 % of the
-    // strongest one and above five times the noise (median absolute deviation
-    // of the background-free signal), so noise maxima on a raised baseline are
-    // not taken for peaks.
-    let envelope = background_envelope(observed, AUTOMATIC_BACKGROUND_WINDOW);
-    let mut signal: Vec<f64> = observed
-        .iter()
-        .zip(envelope.iter())
-        .map(|(point, background)| (point.intensity - background).max(0.0))
-        .collect();
-    let maximum = signal.iter().copied().fold(0.0_f64, f64::max);
-    signal.sort_by(f64::total_cmp);
-    let median = signal.get(signal.len() / 2).copied().unwrap_or(0.0);
-    let mut deviations: Vec<f64> = signal.iter().map(|value| (value - median).abs()).collect();
-    deviations.sort_by(f64::total_cmp);
-    let noise = 1.4826 * deviations.get(deviations.len() / 2).copied().unwrap_or(0.0);
-    let mut peaks = find_peaks(
-        observed,
-        &PeakOptions {
-            min_height: (0.01 * maximum).max(5.0 * noise),
-            min_distance: (2.0 * step).max(0.01),
-            smoothing: 1,
-            background: true,
-            background_window: AUTOMATIC_BACKGROUND_WINDOW,
-            ..PeakOptions::default()
-        },
-    )?;
+    let mut peaks = find_peaks(observed, &PeakOptions::noise_limited(observed))?;
     if peaks.len() < 3 {
         return Err(Error::InvalidInput(format!(
             "automatic indexing needs at least three peaks, found {}",
@@ -434,21 +404,4 @@ fn validate_observed(observed: &[PatternPoint]) -> Result<(), Error> {
         }
     }
     Ok(())
-}
-
-fn median_step(observed: &[PatternPoint]) -> f64 {
-    let mut steps = Vec::new();
-    for pair in observed.windows(2) {
-        if let [first, second] = pair
-            && second.two_theta > first.two_theta
-        {
-            steps.push(second.two_theta - first.two_theta);
-        }
-    }
-    steps.sort_by(f64::total_cmp);
-    steps
-        .get(steps.len() / 2)
-        .copied()
-        .unwrap_or(0.02)
-        .max(0.001)
 }
