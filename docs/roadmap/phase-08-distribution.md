@@ -207,8 +207,9 @@ Crate: `xtalforge-agent` (plus work across all crates).
 - [x] 8.9.3 Numeric and visual battery
   Playwright suite in `tests/e2e/`: 38 checks against the reference JSON,
   modulo-lattice P1 atom comparison, independent camera projection, PXRD
-  positions and deterministic PNG goldens for eight samples and seven
-  operations. `scripts/e2e.sh` rebuilds WASM, docs and the references.
+  positions and deterministic PNG goldens for eight samples, six operations
+  and the space-fill style. `scripts/e2e.sh` rebuilds WASM, docs and the
+  references.
 - [x] 8.9.4 Fix the findings
   Supercells now expand the P1 cell before repeating; `is_p1` checks the
   operations and not only the Hall symbol; the CIF-inspector demo uses a
