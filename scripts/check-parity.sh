@@ -145,7 +145,7 @@ check_cli() {
     structure_info) command=info ;;
     read_cif|read_structure) command=info ;;
     detect_symmetry|asymmetrize|to_p1|set_space_group|subgroups|lower_to_subgroup|standardize|primitive_cell|reduce_structure|wyckoff_assignments|tolerance_ladder|diagnose|brillouin_zone|detect_layer_symmetry|detect_magnetic_symmetry|change_setting|band_path|molecular_point_group) command=symmetry ;;
-    scene_summary|mesh_stl) command=mesh ;;
+    scene_summary|mesh_stl|scene_data) command=mesh ;;
     pxrd) command=pxrd ;;
     build_graphene|build_nanotube|build_c20|build_c60|twist|ribbon|build_ztc|build_schwarzite|build_carbon|build_polymer) command=build ;;
     build_mof) command=mof ;;
