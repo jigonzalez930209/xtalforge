@@ -64,7 +64,7 @@ rustdoc and the parity matrix are the full inventory.
 
 ## Current status
 
-The workspace is at `0.0.3`, the last published release. Phase 8 is the
-release-candidate scope for `1.0.0`; the version is bumped, the gate is run and
-the tag is created only when the release is actually cut. Until then, treat
-the current `main` as the candidate surface described by the parity matrix.
+The workspace is at `1.0.0-rc.1`, the first release candidate for `1.0.0`.
+The public API is frozen and the parity matrix is closed. During the
+stabilization period only fixes land; the `1.0.0` tag follows after the
+candidate has been exercised. `0.0.3` was the last published pre-1.0 release.
