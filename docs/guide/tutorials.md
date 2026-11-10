@@ -78,8 +78,8 @@ a different instrument profile changes the latter.
 
 ```bash
 xtalforge powder index measured.xy --json
-xtalforge powder lebail measured.xy --cell 5.64 5.64 5.64 90 90 90 --json
-xtalforge powder pawley measured.xy --cell 5.64 5.64 5.64 90 90 90 --json
+xtalforge powder lebail nacl.cif measured.xy --json
+xtalforge powder pawley nacl.cif measured.xy --json
 xtalforge powder rietveld nacl.cif measured.xy --refine --json
 ```
 
@@ -106,8 +106,8 @@ alone: run net identification and report ambiguity.
 ## 8. Build a carbon
 
 ```bash
-xtalforge build graphene --nx 4 --ny 4 --out graphene.cif
-xtalforge build nanotube --n 10 --m 10 --length 4 --out tube.cif
+xtalforge build graphene 4 4 --out graphene.cif
+xtalforge build nanotube 10 10 --length 4 --out tube.cif
 xtalforge build c60 --out c60.cif
 xtalforge build carbon --net dia --repeat-x 2 --repeat-y 2 --repeat-z 2 --seed 7 --out carbon.cif
 xtalforge info carbon.cif
