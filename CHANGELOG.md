@@ -9,6 +9,14 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 8 Task 8.2: `xtalforge mcp` serves the verb catalogue as MCP tools
+  over stdio (JSON-RPC 2.0, protocol `2024-11-05`, no external MCP crate),
+  with generated input schemas and an `instructions` payload for chat
+  clients. Fourteen skill documents ship with the CLI (`xtalforge skill
+  path|list|show|install`) and are published as the automation guide. Calls
+  run under the standard size limits; cancellation is process-level and the
+  window proxy is out of scope, both recorded in
+  `docs/algorithms/agent.md` section 11.
 - Phase 8 Task 8.1: the `xtalforge-agent` crate: one verb catalogue shared by
   the Rust, CLI, Python and WASM surfaces (22 verbs), a stateful session whose
   mutations use `Origin::Agent`, inspection and diagnostics (overlap,
