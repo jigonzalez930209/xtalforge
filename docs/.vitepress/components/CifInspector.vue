@@ -8,16 +8,7 @@ _cell_length_c 5.430941
 _cell_angle_alpha 90
 _cell_angle_beta 90
 _cell_angle_gamma 90
-loop_
-_symmetry_equiv_pos_as_xyz
-'x,y,z'
-'-x,-y,z'
-'-x,y,-z'
-'x,-y,-z'
-'y,x,-z'
-'-y,-x,-z'
-'y,-x,z'
-'-y,x,z'
+_space_group_name_Hall 'F 4d 2 3 -1d'
 loop_
 _atom_site_label
 _atom_site_type_symbol
