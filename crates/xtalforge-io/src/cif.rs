@@ -10,7 +10,9 @@ use std::collections::BTreeMap;
 
 use xtalforge_core::{Error, Structure};
 
+mod coincident;
 mod structure;
+mod values;
 mod writer;
 
 use structure::structure_from_block;
