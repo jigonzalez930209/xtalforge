@@ -4,9 +4,9 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.0.0-rc.1` published on 2026-11-10. Phases 0-8 are implemented and
-> the public API is frozen; `v1.0.0` follows the fixes-only stabilization
-> period. The known reference gaps are
+> Status: `1.0.0` published on 2026-11-10. Phases 0-8 are complete and the
+> public API is frozen; later changes follow the SemVer policy in
+> `docs/api/stability.md`. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
@@ -39,9 +39,9 @@ parity with the Rust API.
 Install the release candidate:
 
 ```bash
-cargo add xtalforge@1.0.0-rc.1
-pip install xtalforge==1.0.0-rc.1
-npm install xtalforge-wasm@1.0.0-rc.1
+cargo add xtalforge@1.0.0
+pip install xtalforge==1.0.0
+npm install xtalforge-wasm@1.0.0
 ```
 
 ## Goals

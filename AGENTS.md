@@ -267,24 +267,26 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.0.0-rc.1` (published 2026-11-10 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages; `0.0.3` was the last pre-1.0 release, and
-  `v0.0.1` was the first on 2026-11-09).
+- Version: `1.0.0` (published 2026-11-10 on crates.io, PyPI, npm, the GitHub
+  release and GitHub Pages, after the `1.0.0-rc.1` stabilization period;
+  `0.0.3` was the last pre-1.0 release, and `v0.0.1` was the first on
+  2026-11-09).
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 8 — Agent and distribution
-  (`docs/roadmap/phase-08-distribution.md`). Tasks 8.1-8.7 are implemented:
+- Current phase: none; all phases are complete. Phase 8 — Agent and
+  distribution (`docs/roadmap/phase-08-distribution.md`) delivered tasks
+  8.1-8.7:
   the `xtalforge-agent` crate (verbs, session, diagnostics, change bursts,
   SVG/PNG renderer, MCP over stdio, skill documents), the open extension
   registries and `examples/plugin`, the Python ML bridge with the model cache,
   distribution metadata and package checks, benchmarks, robustness/limits
   tests, tutorials, the migration guide and the algorithm coverage page.
   Tasks 8.8.1 and 8.8.2 are done (stability policy, freeze test and parity
-  closure). Task 8.8.3 shipped `v1.0.0-rc.1` on 2026-11-10: 13 crates on
+  closure). Task 8.8.3 published `v1.0.0-rc.1` and then the stable `v1.0.0`
+  on 2026-11-10 after the fixes-only stabilization period: 13 crates on
   crates.io, 7 platform wheels plus an sdist on PyPI, `xtalforge-wasm` on npm,
-  the CLI/hosted assets on the GitHub release and the docs on Pages. The
-  `1.0.0` tag follows the fixes-only stabilization period. Phases 1-7 are
+  the CLI/hosted assets on the GitHub release and the docs on Pages. Phases 1-7 are
   complete and released at `0.0.3`; the remaining reference gaps (held cell
   quantities and pressure in the optimizer, the PXRD/Rietveld profile
   simplifications, bond carrying in slabs, the curated MOF subset and others)

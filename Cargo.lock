@@ -1206,7 +1206,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde_json",
  "xtalforge-agent",
@@ -1224,7 +1224,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-agent"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "flate2",
  "serde",
@@ -1242,7 +1242,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-analysis"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1253,7 +1253,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-build"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1264,7 +1264,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-cli"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "clap",
  "clap_complete",
@@ -1275,7 +1275,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-commands"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1285,7 +1285,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-core"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "flate2",
  "rayon",
@@ -1297,7 +1297,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-ff"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "sci-form",
  "serde",
@@ -1311,7 +1311,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-io"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "flate2",
  "rayon",
@@ -1324,7 +1324,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-modules"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1334,7 +1334,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-mof"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1346,7 +1346,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-plugin-example"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde_json",
  "xtalforge",
@@ -1354,7 +1354,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-python"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "pyo3",
  "serde_json",
@@ -1363,7 +1363,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-symmetry"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "moyo",
  "nalgebra",
@@ -1375,11 +1375,11 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-testkit"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 
 [[package]]
 name = "xtalforge-view"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "serde",
  "xtalforge-core",
@@ -1387,7 +1387,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-wasm"
-version = "1.0.0-rc.1"
+version = "1.0.0"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",

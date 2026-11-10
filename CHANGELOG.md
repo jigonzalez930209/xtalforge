@@ -5,7 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
-## Unreleased
+## [1.0.0] - 2026-11-10
+
+First stable release, published on 2026-11-10 on crates.io (13 crates), PyPI
+(7 platform wheels plus an sdist), npm, the GitHub release and GitHub Pages.
+The public API is frozen and changes follow the SemVer policy in
+`docs/api/stability.md`. This release incorporates the fixes accepted during
+the `1.0.0-rc.1` stabilization period.
 
 ### Fixed
 
@@ -19,9 +25,10 @@ essential release, then `0.x.y`).
 - The CIF reader records `coincident_atoms_warning` when atoms of different
   sites coincide in the P1 cell with total occupancy above one (a file that
   lists the whole cell under a non-P1 group), and the CLI `info` prints it and
-  `symmetry_warning` on standard error. Writing to a device such as
-  `/dev/null` works.
-
+  `symmetry_warning` on standard error.
+- Writing to a device such as `/dev/null` works: atomic writes rename the
+  temporary file only for regular files, so devices and FIFOs are written in
+  place.
 - `graphene`: the atoms were stored with Cartesian coordinates as fractional
   ones and the `b` vector used `nx/2` instead of `ny/2`, so the sheet was
   distorted (bonds of 1.07 Angstrom) and not a supercell when `nx != ny`.
@@ -32,49 +39,50 @@ essential release, then `0.x.y`).
   nanotube cell is now `2R + vacuum` on `a` and `c` with the axis along `b`.
 - `nanoribbon`: the vacuum stretched the strip instead of adding empty space;
   the bonds are 1.42 Angstrom again.
-
-- `structure_info` (and the CLI `info`, Python and WASM equivalents) rejected the
-  versioned `{"schema_version", "structure"}` envelope that `--json` commands
-  write, so `xtalforge --json supercell ... | xtalforge info -` failed; both
-  forms are accepted now.
+- `structure_info` (and the CLI `info`, Python and WASM equivalents) rejected
+  the versioned `{"schema_version", "structure"}` envelope that `--json`
+  commands write, so `xtalforge --json supercell ... | xtalforge info -`
+  failed; both forms are accepted now.
 - `powder index` (cubic search): a face-centred pattern indexed on a larger
   multiple of the true cell (NaCl returned 7.94 Angstrom); the smallest cell
   among equally good candidates is now chosen.
+- `mof build`: the topology cell was fixed, so a long linker was squashed
+  (0.45x for stilbene in `pcu`) and thousands of atoms overlapped; the builder
+  now fits a uniform cell scale to the linker (`cell_scale` metadata). A node
+  with the wrong connection count, a linker with more than two arms, a linker
+  scale outside 0.8-1.25 and atom pairs closer than 0.9 Angstrom are reported
+  in `warnings`, and the CLI prints them on standard error.
+- `powder rietveld --refine` always modelled the Cu K alpha doublet, so a
+  single-wavelength pattern drove the ADP multiplier to its bound; the new
+  `--no-doublet` flag matches Python's `doublet=False`.
+- `powder automatic` / `run_automatic`: the peak search did not subtract the
+  background, so on a noisy pattern with a raised baseline every noise maximum
+  was a peak, the indexing returned a wrong cell (16.5 Angstrom for NaCl) and
+  the run did not finish in five minutes in a release build. It now subtracts
+  a SNIP background and applies a noise-based threshold; the same pattern runs
+  in 2.4 s and returns Fm-3m first. `PeakOptions::noise_limited` exposes the
+  same search and `powder index --background` uses it (a = 5.614 instead of
+  16.5).
 
 ### Tests
 
 - Phonons of fcc argon with UFF (`phonon_argon.rs`) and the CLI `--no-doublet`
   flag have regression tests.
+- Regression tests cover the whole-cell properties and the coincident-atoms
+  warning, the versioned `structure_info` envelope, atomic writes to devices,
+  the graphene/nanotube/ribbon geometry, cubic indexing, the MOF cell fit,
+  background-subtracted peak search and the CLI warning output.
 - `xtalforge-wasm` has a browser suite (`tests/browser.rs`) that runs with
   `wasm-pack test --headless --chrome`; the Node suites are unchanged.
-
-- `mof build`: the topology cell was fixed, so a long linker was squashed (0.45x
-  for stilbene in `pcu`) and thousands of atoms overlapped; the builder now
-  fits a uniform cell scale to the linker (`cell_scale` metadata). A node with
-  the wrong connection count, a linker with more than two arms, a linker scale
-  outside 0.8-1.25 and atom pairs closer than 0.9 Angstrom are reported in
-  `warnings`, and the CLI prints them on standard error.
-
-- `powder rietveld --refine` always modelled the Cu K alpha doublet, so a
-  single-wavelength pattern drove the ADP multiplier to its bound; the new
-  `--no-doublet` flag matches Python's `doublet=False`.
-
-- `powder automatic` / `run_automatic`: the peak search did not subtract the
-  background, so on a noisy pattern with a raised baseline every noise maximum
-  was a peak, the indexing returned a wrong cell (16.5 Angstrom for NaCl) and
-  the run did not finish in five minutes in a release build. It now subtracts a
-  SNIP background and applies a noise-based threshold; the same pattern runs in
-  2.4 s and returns Fm-3m first. `PeakOptions::noise_limited` exposes the same
-  search and `powder index --background` uses it (a = 5.614 instead of 16.5).
 
 ### Documentation
 
 - Added 29 diagrams with one shared style under `docs/public/diagrams/`
   (animated SVG; every procedure page: lattice, neighbours, supercell, slab,
-  bonding, rings, P1, CIF, formats, prepare, UFF, optimisation, Ewald,
-  PXRD, indexing, Le Bail, Pawley, Rietveld, extinction, symmetry, nets, MOF,
-  carbon builders, vibrations, limits, validation, agent, measures) and embedded them in the matching
-  algorithm pages.
+  bonding, rings, P1, CIF, formats, prepare, UFF, optimisation, Ewald, PXRD,
+  indexing, Le Bail, Pawley, Rietveld, extinction, symmetry, nets, MOF, carbon
+  builders, vibrations, limits, validation, agent, measures) and embedded them
+  in the matching algorithm pages.
 - Audited the algorithm and API pages against the code. Corrected the powder
   instrument description (no wavelength or Caglioti terms), the distance-grid
   sampling and surface area, the optimiser cell freedom, the ellipsoid scale
@@ -83,8 +91,8 @@ essential release, then `0.x.y`).
   the roadmap.
 - Corrected the quick-start (`structure_info` takes structure JSON; use
   `Structure.from_cif` / `read_cif` for CIF), the WASM size figures, the
-  migration table (no `modules` CLI command, no separate powder crate) and
-  the stale Phase 0 status and `AGENTS.md` gap list; documented the Pawley
+  migration table (no `modules` CLI command, no separate powder crate) and the
+  stale Phase 0 status and `AGENTS.md` gap list; documented the Pawley
   profile-mismatch caveat.
 - Corrected the API examples so every Rust snippet compiles (missing `use`
   lines and the `Calculator` trait, `ParamSet::with_param`, `f64` supercell
@@ -92,8 +100,9 @@ essential release, then `0.x.y`).
   (`limit_exceeded`, `symmetry`), the isosurface algorithm name (marching
   tetrahedra) and the `external` feature wording.
 - Corrected the QEq kernel description (hardness only, truncated 12 Angstrom
-  sum) and stated that EEQ equals QEq at the default dielectric, the duplicated external-validation bullet and the tutorial commands
-  (`powder lebail/pawley`, `build graphene/nanotube` take positional arguments).
+  sum) and stated that EEQ equals QEq at the default dielectric, the duplicated
+  external-validation bullet and the tutorial commands (`powder lebail/pawley`,
+  `build graphene/nanotube` take positional arguments).
 
 ## [1.0.0-rc.1] - 2026-11-10
 
