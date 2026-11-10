@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "PXRD, grids, porosity and topology analysis for xtalforge."
+include = ["src/**", "data/**"]
 
 [dependencies]
 xtalforge-core = { workspace = true }
@@ -21,3 +22,10 @@ serde_json = { workspace = true }
 
 [lints]
 workspace = true
+
+[[bench]]
+name = "pxrd"
+harness = false
+
+[package.metadata.docs.rs]
+all-features = true
