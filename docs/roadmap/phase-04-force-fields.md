@@ -34,6 +34,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   `--engine`, the Python API and the agent tools. Availability probing returns
   a reason when an engine cannot run (binary missing, feature not compiled,
   model weights absent).
+  Note: the CLI lists engines with `ff engines`; `ff energy`, `optimize` and the
+  other commands are UFF-only and take no `--engine` flag.
 - [x] 4.1.3 Dummy atoms excluded from energies
   Port `ff/markers.py`: dummy atoms (connection points, markers) never enter
   an energy; calculators see a filtered view with index maps back.
@@ -42,6 +44,8 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   (engine, options, per-step energies and forces, timings, warnings, final
   result), serializable into the workspace run folder (Task 3.12) and the
   report system (Task 5.10).
+  Note: `RunRecord { calculator, energy, n_atoms, converged, steps, notes }` is
+  the whole record; per-step energies and forces and timings are not stored.
 
 ## Task 4.2 — UFF and UFF4MOF
 
@@ -97,6 +101,7 @@ Crate: `xtalforge-ff`. Completing this phase tags **v0.1.0**.
   Port `ff/ewald.py`: real-space plus reciprocal-space sums with the
   splitting parameter and cutoffs chosen from a target accuracy; energy,
   forces, stress; deterministic summation order.
+  Note: `EwaldResult` carries energy and forces; the stress is not implemented.
 
 ## Task 4.4 — Optimizers
 
