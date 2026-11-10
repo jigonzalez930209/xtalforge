@@ -131,7 +131,53 @@ enough to see a folded linker, a missing cluster or a wrong cell.
   session that loads CIF text and answers `info`, and the coded unknown-verb
   error.
 
-## 9. Differences from Crystal-Builder
+## 9. MCP transport
+
+The server is a minimal JSON-RPC 2.0 implementation: newline-delimited
+messages on stdio, methods `initialize`, `notifications/initialized`, `ping`,
+`tools/list`, `tools/call` and `notifications/cancelled`, protocol version
+`2024-11-05`. A full MCP crate was considered and rejected: the surface is one
+request/response pair per tool, the schema is generated from `VERBS`, and the
+message set fits in one file (Task 8.2.1 records the choice). Malformed JSON is
+`-32700`, an unknown method is `-32601`, a bad `tools/call` parameter is
+`-32602`, and a tool failure is a successful response with `isError: true` and
+the stable code in the text payload.
+
+`initialize` carries `instructions` (Task 8.2.2), so a client that cannot read
+the skill files still learns the workflow, the answer shape and the limit
+behaviour.
+
+## 10. Skill documents
+
+Fourteen markdown files are embedded with `include_str!`: the main skill, the
+MCP setup, three worked prompts (MOF build, porosity report, deposited CIF)
+and nine references (API, calculations, carbon, diagnostics, MOF, polymer,
+porosity, preparation, workspace). `xtalforge skill show` prints one,
+`install` writes the tree, and the published form is the automation guide. The
+files are not generated at runtime: a release ships the text that was
+reviewed.
+
+## 11. Safety
+
+Every call runs in the session's standard `Limits` profile. The supercell
+check runs before the command allocates, the porosity grid check before the
+distance grid, and the render check before the raster buffer. A refusal is
+`Error::LimitExceeded` with the verdict's sentence.
+
+Verbs are synchronous. `notifications/cancelled` is accepted but can only take
+effect between calls; the server cannot preempt a running verb without
+threads and a way to stop the native computation. A client that must interrupt
+a call terminates the `xtalforge mcp` process. This is a recorded deviation
+from the reference, which runs the same synchronous verbs in a Python process.
+Timeouts are therefore enforced by the size limits (bounded work) and by
+`optimize`'s step limit, not by a wall-clock timer that would report a result
+the computation already produced.
+
+The window proxy and discovery of Task 8.2.4 are out of scope: there is no
+window. The reference's `mcp.json` shape (`url`, `pid`) is documented in the
+automation guide for a future front end, but no code reads it.
+
+## 12. Differences from Crystal-Builder
 
 - The reference's window proxy and desktop discovery are out of scope; there
   is no window to proxy. The MCP transport is Task 8.2.
