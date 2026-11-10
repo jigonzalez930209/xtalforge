@@ -44,8 +44,8 @@ pub use agent_export::{AgentSession, agent_capabilities, agent_run, agent_verbs}
 pub use analysis_export::{hydrogens_info, net_invariants_info, porosity_info, zeo_parse_info};
 #[cfg(target_arch = "wasm32")]
 pub use forcefield::{
-    ff_charges_info, ff_energy, ff_ir_info, ff_optimize_info, ff_prepare_info, ff_thermo_info,
-    ff_types_info, ff_vibrations_info,
+    ff_charges_info, ff_energy, ff_ir_info, ff_optimize_info, ff_optimize_text, ff_prepare_info,
+    ff_thermo_info, ff_types_info, ff_vibrations_info,
 };
 #[cfg(target_arch = "wasm32")]
 pub use mof_export::{build_mof_info, mof_blocks_info, mof_topologies_info};
@@ -75,8 +75,9 @@ pub use scene_export::scene_data;
 #[cfg(target_arch = "wasm32")]
 pub use structure_text::{
     asymmetrize_text, build_c20_text, build_c60_text, build_graphene_text, build_mof_text,
-    build_nanotube_text, change_setting_text, lower_to_subgroup_text, primitive_text, reduce_text,
-    set_space_group_text, standardize_text, to_p1_text,
+    build_nanotube_text, build_polymer_text, build_ribbon_text, build_schwarzite_text,
+    build_twist_text, build_ztc_text, change_setting_text, hydrogens_text, lower_to_subgroup_text,
+    primitive_text, reduce_text, set_space_group_text, standardize_text, to_p1_text,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{

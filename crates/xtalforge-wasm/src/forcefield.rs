@@ -61,6 +61,40 @@ pub fn ff_optimize_info(
     Ok(object.into())
 }
 
+/// Relaxes a structure and returns the result as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or an unknown minimizer.
+#[wasm_bindgen]
+pub fn ff_optimize_text(
+    text: &str,
+    minimizer: &str,
+    max_steps: usize,
+    force_tolerance: f64,
+    cell: bool,
+) -> Result<String, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let minimizer = match minimizer {
+        "fire" => xtalforge::ff::Minimizer::Fire,
+        "lbfgs" => xtalforge::ff::Minimizer::Lbfgs,
+        other => {
+            return Err(JsValue::from_str(&format!(
+                "invalid_input: unknown minimizer {other:?}"
+            )));
+        }
+    };
+    let options = xtalforge::ff::OptimizeOptions {
+        max_steps,
+        force_tolerance,
+        cell,
+        ..Default::default()
+    };
+    let result = xtalforge::ff::minimize(&calculator()?, &structure, &options, minimizer)
+        .map_err(ff_error)?;
+    xtalforge::io::write_cif(&result.structure).map_err(to_js_error)
+}
+
 /// Returns QEq or EQeq charges.
 ///
 /// # Errors

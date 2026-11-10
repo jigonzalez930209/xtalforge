@@ -127,7 +127,8 @@ pub fn wyckoff_info(text: &str, symprec: f64) -> Result<js_sys::Array, JsValue> 
 #[wasm_bindgen]
 pub fn brillouin_zone(text: &str) -> Result<JsValue, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
-    let zone = xtalforge::symmetry::brillouin_zone(structure.lattice()).map_err(to_js_error)?;
+    let zone =
+        xtalforge::symmetry::brillouin_zone_for_structure(&structure).map_err(to_js_error)?;
     let object = js_sys::Object::new();
     let vertices = js_sys::Array::new();
     for vertex in &zone.vertices {

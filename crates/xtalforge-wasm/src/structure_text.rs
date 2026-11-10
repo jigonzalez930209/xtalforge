@@ -237,3 +237,90 @@ pub fn build_mof_text(topology: &str, node: &str, linker: &str) -> Result<String
     let built = xtalforge::mof::build_mof(&request).map_err(mof_error)?;
     cif(&built.structure)
 }
+
+/// Builds a honeycomb nanoribbon and returns it as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid dimensions.
+#[wasm_bindgen]
+pub fn build_ribbon_text(width: u32, length: u32, vacuum: f64) -> Result<String, JsValue> {
+    let structure = xtalforge::build::nanoribbon(width, length, vacuum).map_err(to_js_error)?;
+    cif(&structure)
+}
+
+/// Builds two twisted graphene layers and returns them as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid repeats or angle.
+#[wasm_bindgen]
+pub fn build_twist_text(n: u32, m: u32, theta: f64, layers: u32) -> Result<String, JsValue> {
+    let structure =
+        xtalforge::build::commensurate_twist(n, m, theta, layers).map_err(to_js_error)?;
+    cif(&structure)
+}
+
+/// Builds a gyroid ZTC carbon model and returns it as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid options.
+#[wasm_bindgen]
+pub fn build_ztc_text(samples: usize, cell: f64, isovalue: f64) -> Result<String, JsValue> {
+    let structure = xtalforge::build::build_ztc(&xtalforge::build::ZtcOptions {
+        samples,
+        cell,
+        isovalue,
+    })
+    .map_err(to_js_error)?;
+    cif(&structure)
+}
+
+/// Builds a Schwarz P carbon model and returns it as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid options.
+#[wasm_bindgen]
+pub fn build_schwarzite_text(samples: usize, cell: f64, isovalue: f64) -> Result<String, JsValue> {
+    let structure = xtalforge::build::build_schwarzite(&xtalforge::build::ZtcOptions {
+        samples,
+        cell,
+        isovalue,
+    })
+    .map_err(to_js_error)?;
+    cif(&structure)
+}
+
+/// Builds a polymer chain and returns it as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for an invalid SMILES or density.
+#[wasm_bindgen]
+pub fn build_polymer_text(smiles: &str, monomers: u32, density: f64) -> Result<String, JsValue> {
+    let build = xtalforge::build::build_polymer(
+        smiles,
+        monomers,
+        &xtalforge::build::PolymerOptions { density },
+    )
+    .map_err(to_js_error)?;
+    cif(&build.structure)
+}
+
+/// Adds hydrogens at the missing valences and returns the result as CIF.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a bad distance.
+#[wasm_bindgen]
+pub fn hydrogens_text(text: &str, distance: f64) -> Result<String, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let options = xtalforge::build::HydrogenOptions {
+        distance,
+        ..Default::default()
+    };
+    let filled = xtalforge::build::add_hydrogens(&structure, &options).map_err(to_js_error)?;
+    cif(&filled)
+}
