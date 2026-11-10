@@ -19,6 +19,10 @@ no license field, so verify it in the rietx repository.
 
 Crate: `xtalforge-powder`.
 
+Note: the powder code shipped inside `xtalforge-analysis` (modules `indexing`,
+`lebail`, `pawley`, `rietveld`, `automatic`, `instrument`, `profiles`); no
+separate `xtalforge-powder` crate was created.
+
 ---
 
 ## Task 7.1 — Study rietx and fix the scope

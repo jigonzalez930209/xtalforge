@@ -1,5 +1,13 @@
 # Phase 0 — Remaining work
 
+> **Update 2026-11-10.** Actions were enabled on 2026-11-08, only the tag-driven
+> `release.yml` is kept, and the workflow has published `v0.0.1`, `v0.0.2`,
+> `v0.0.3` and `v1.0.0-rc.1` (crates.io, PyPI, npm, GitHub release and Pages).
+> The names are published. Tasks 0.8.1-0.8.5 (CI matrix) stay open by
+> maintainer decision because the runner cost was not wanted; the checks run
+> locally (`AGENTS.md` section 5.4). The sections below are the original
+> 2026-11-08 plan, kept for the record.
+
 Status on 2026-11-08: every Phase 0 subtask is implemented locally except the
 items below. The full local check list passes; the open items are external
 settings or approvals, not missing code.
@@ -67,9 +75,9 @@ To close it:
 
 ## Closing checklist
 
-- [ ] Actions enabled by the maintainer (explicit instruction).
-- [ ] Release dry run green.
-- [ ] CI matrix green on Linux, macOS and Windows.
-- [ ] Docs deployment green.
-- [ ] Name placeholders approved and published.
-- [ ] `AGENTS.md` section 6 updated with the reservation dates.
+- [x] Actions enabled by the maintainer (2026-11-08).
+- [x] Release workflow green (superseded by four real tag releases).
+- [ ] CI matrix green on Linux, macOS and Windows (declined: no CI workflow).
+- [x] Docs deployment green (GitHub Pages, every tag).
+- [x] Name placeholders approved and published (2026-11-09).
+- [x] `AGENTS.md` section 6 updated with the reservation dates.
