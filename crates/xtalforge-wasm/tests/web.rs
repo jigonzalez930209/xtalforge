@@ -16,8 +16,8 @@ use xtalforge_wasm::{
     angle, bonds, build_c60_info, build_graphene_info, build_nanotube_info, cell_volume,
     convert_structure, distance, element_info, groups, lattice_info, lattice_minimum_image,
     limits_bounds, limits_check, mesh_stl, neighbors, powder_index_info, pxrd_info, read_cif,
-    read_structure, rings, scene_summary, slab_info, slab_text, structure_info, supercell_info,
-    supercell_text, torsion, version,
+    read_structure, rings, scene_data, scene_summary, slab_info, slab_text, structure_info,
+    supercell_info, supercell_text, torsion, version,
 };
 
 const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
@@ -178,6 +178,7 @@ fn structure_info_vector() {
         Some("Na Cl")
     );
     assert_eq!(property(&value, "n_sites").as_f64(), Some(2.0));
+    assert_eq!(property(&value, "n_atoms").as_f64(), Some(2.0));
     assert!(property(&value, "is_p1").as_bool().unwrap_or(false));
 }
 
@@ -258,7 +259,8 @@ fn supercell_info_matches_the_core_api() {
         property(&value, "n_sites").as_f64(),
         Some(expected.n_sites as f64)
     );
-    assert_eq!(property(&value, "n_sites").as_f64(), Some(4.0));
+    assert_eq!(property(&value, "n_sites").as_f64(), Some(16.0));
+    assert_eq!(property(&value, "n_atoms").as_f64(), Some(16.0));
     let volume = property(&value, "volume").as_f64().expect("volume");
     assert!((volume - expected.volume).abs() <= 1e-9);
     assert!(property(&value, "is_p1").as_bool().unwrap_or(false));
@@ -411,6 +413,19 @@ fn view_scene_and_stl_exports() {
     let scene = scene_summary(NACL_CIF, "space-fill", 1.0).expect("scene");
     assert_eq!(property(&scene, "atoms").as_f64(), Some(8.0));
     assert_eq!(property(&scene, "cell_edges").as_f64(), Some(12.0));
+    let geometry = scene_data(NACL_CIF, "space-fill", 1.0).expect("scene data");
+    assert_eq!(
+        js_sys::Array::from(&property(&geometry, "atoms")).length(),
+        8
+    );
+    assert_eq!(
+        js_sys::Array::from(&property(&geometry, "bonds")).length(),
+        24
+    );
+    assert_eq!(
+        js_sys::Array::from(&property(&geometry, "cell_edges")).length(),
+        12
+    );
     let stl = mesh_stl(NACL_CIF, "space-fill", 1.0).expect("stl");
     assert!(stl.starts_with("solid"));
     assert!(stl.contains("facet normal"));

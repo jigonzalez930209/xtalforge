@@ -14,8 +14,8 @@
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
-    bonds, build_graphene_info, build_nanotube_info, cell_volume, read_cif, rings, structure_info,
-    version,
+    bonds, build_graphene_info, build_nanotube_info, cell_volume, read_cif, rings, scene_data,
+    structure_info, version,
 };
 
 wasm_bindgen_test_configure!(run_in_browser);
@@ -48,6 +48,24 @@ fn cif_text_reads_bonds_and_rings_in_the_browser() {
     let list = bonds(NACL_CIF).unwrap();
     assert_eq!(js_sys::Array::from(&list).length(), 24);
     assert!(js_sys::Array::from(&rings(NACL_CIF, 8).unwrap()).length() > 0);
+}
+
+#[wasm_bindgen_test]
+fn scene_data_returns_the_full_geometry() {
+    let scene = scene_data(NACL_CIF, "ball-stick", 1.0).unwrap();
+    let atoms = js_sys::Array::from(&property(&scene, "atoms"));
+    let bonds = js_sys::Array::from(&property(&scene, "bonds"));
+    let edges = js_sys::Array::from(&property(&scene, "cell_edges"));
+    assert_eq!(atoms.length(), 8);
+    assert_eq!(bonds.length(), 24);
+    assert_eq!(edges.length(), 12);
+    let atom = atoms.get(0);
+    assert!(property(&atom, "element").as_string().is_some());
+    assert_eq!(
+        js_sys::Array::from(&property(&atom, "position")).length(),
+        3
+    );
+    assert!(property(&atom, "radius").as_f64().unwrap_or(0.0) > 0.0);
 }
 
 #[wasm_bindgen_test]
