@@ -190,3 +190,32 @@ Crate: `xtalforge-agent` (plus work across all crates).
   warning, `structure_info`, indexing, MOF, Rietveld and automatic-run fixes;
   the stable `v1.0.0` was published the same day with the same assets and the
   docs on Pages.
+
+## Task 8.9 — End-to-end audit and 3D playground
+
+- [x] 8.9.1 Independent reference harness
+  Read the curated corpus with gemmi, detect the space group and primitive
+  cell with spglib, derive the cell matrix, periodic neighbour list and
+  nanotube geometry with ASE, and compute Bragg angles with NumPy. Commit the
+  generated JSON; the browser never consumes it.
+- [x] 8.9.2 Full scene export and 3D playground
+  Add `scene_data` to WASM and Python and `mesh --scene` to the CLI, the P1
+  `n_atoms` summary field and text-returning transform/builder variants.
+  Build `/playground` with three.js: samples, paste, supercell, slab, P1,
+  asymmetric unit, primitive, standardize, Niggli, graphene, nanotube, C60,
+  C20, MOF, PXRD, four draw styles, cell/axes and PNG export.
+- [x] 8.9.3 Numeric and visual battery
+  Playwright suite in `tests/e2e/`: 38 checks against the reference JSON,
+  modulo-lattice P1 atom comparison, independent camera projection, PXRD
+  positions and deterministic PNG goldens for eight samples and seven
+  operations. `scripts/e2e.sh` rebuilds WASM, docs and the references.
+- [x] 8.9.4 Fix the findings
+  Supercells now expand the P1 cell before repeating; `is_p1` checks the
+  operations and not only the Hall symbol; the CIF-inspector demo uses a
+  complete silicon CIF; the WASM summary carries `n_atoms`.
+- [ ] 8.9.5 Extend the battery
+  Add force-field energies/forces, porosity, MOF chemistry and the
+  Le Bail/Pawley/Rietveld stages to the same scenario runner, and run the
+  numeric checks against the Python and CLI surfaces in addition to WASM.
+  Note: the current gaps and the visual-golden platform caveat are recorded in
+  `docs/guide/audit.md` and `tests/e2e/README.md`.
