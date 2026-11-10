@@ -25,9 +25,11 @@ let built = build_mof(&MofRequest::new("pcu", "Zn4O", "benzene"))?;
 println!("{} atoms, {} warnings", built.structure.sites().len(), built.warnings.len());
 ```
 
-The builder places the node at every vertex, orients it so its connection
-points follow the incident edges, scales the linker along each edge so the node
-and linker connection points meet at the midpoint, and returns a P1 structure.
+The builder fits a uniform cell scale to the linker, places the node at every
+vertex, orients it so its connection points follow the incident edges, places
+and scales the linker along each edge, and returns a P1 structure. `warnings`
+reports a degree mismatch, a linker outside the 0.8-1.25 scale range, a linker
+with more than two connection points and atom pairs closer than 0.9 Angstrom.
 A vertex degree that does not match the node's connection count is a warning,
 not a silent error. Unknown names are typed errors.
 
