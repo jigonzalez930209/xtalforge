@@ -254,6 +254,36 @@ fn non_p1_explicit_bonds_map_to_the_golden_count() {
 }
 
 #[test]
+fn an_operation_loop_without_a_space_group_symbol_is_not_p1() {
+    let text = "data_test\n_cell_length_a 5\n_cell_length_b 5\n_cell_length_c 5\n\
+                _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                loop_\n_symmetry_equiv_pos_as_xyz\nx,y,z\n-x,-y,z\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                Si1 Si 0.1 0.2 0.3\n";
+    let structure = read_cif(text).unwrap();
+    assert!(!structure.is_p1());
+    assert_eq!(structure.p1().unwrap().n_atoms(), 2);
+    assert_eq!(structure.formula(), "Si2");
+}
+
+#[test]
+fn a_hall_symbol_without_an_operation_loop_expands_silicon() {
+    let text = "data_Si\n_cell_length_a 5.430941\n_cell_length_b 5.430941\n\
+                _cell_length_c 5.430941\n_cell_angle_alpha 90\n\
+                _cell_angle_beta 90\n_cell_angle_gamma 90\n\
+                _space_group_name_Hall 'F 4d 2 3 -1d'\n\
+                loop_\n_atom_site_label\n_atom_site_type_symbol\n\
+                _atom_site_fract_x\n_atom_site_fract_y\n_atom_site_fract_z\n\
+                Si1 Si 0 0 0\n";
+    let structure = read_cif(text).unwrap();
+    assert!(!structure.is_p1());
+    assert_eq!(structure.p1().unwrap().n_atoms(), 8);
+    assert_eq!(structure.formula(), "Si8");
+    assert!((structure.density().unwrap() - 2.329_142).abs() < 1e-5);
+}
+
+#[test]
 fn an_operation_loop_count_disagreement_warns() {
     let text = "data_warn\n_cell_length_a 4\n_cell_length_b 4\n_cell_length_c 4\n\
                 _cell_angle_alpha 90\n_cell_angle_beta 90\n_cell_angle_gamma 90\n\
