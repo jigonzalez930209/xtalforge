@@ -55,6 +55,23 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   GFN0/GFN1/GFN2 methods are available in-process through the `sci-form`
   feature. The external launchers still need a real binary, so a complete
   DFTB+/xTB run is not executed in CI; ORCA remains input-only by design.
+- 4.4: held cell lengths/volume (`CellFreedom`) and an external pressure term
+  are not implemented; `OptimizeOptions.cell` relaxes the point-group-averaged
+  strain only.
+- 5.1 and 7.2: the calculated PXRD uses one Gaussian per reflection and the
+  `Instrument` has no wavelength or Caglioti `U, V, W`; Rietveld ignores
+  `RietveldOptions::kind` (area-normalised Gaussian, K alpha doublet by ratio).
+- 1.8: `Slab.cut` is always zero; severed bonds are not carried through the
+  cut.
+- 1.11: explicit bonds map to P1 indices and are not propagated to every
+  symmetry image; pair-specific bond ranges and a metal-metal switch are not
+  exposed.
+- 6.x: the MOF builder uses a curated topology/block subset and a greedy
+  orientation instead of PORMAKE's global RMSD fit.
+- 8.x: every library error exits the CLI with code 3 and Python raises
+  `XtalforgeError` (`InputError` for invalid input); the `code` string is the
+  discriminator.
+
 ## Release milestones
 
 Version rules are defined in `AGENTS.md` section 5. In short:
