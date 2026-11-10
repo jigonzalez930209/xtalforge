@@ -83,11 +83,11 @@ Crate: `xtalforge-agent` (plus work across all crates).
 
 ## Task 8.3 — Plugins and extension points
 
-- [ ] 8.3.1 Rust extension points
+- [x] 8.3.1 Rust extension points
   Document and test registering external formats, calculators, modules,
   scalars and draw styles (the registries of Phases 3 to 5) from a separate
   crate, with an example plugin crate in `examples/`.
-- [ ] 8.3.2 Python-side plugins
+- [x] 8.3.2 Python-side plugins
   Python callables registered as formats, calculators (for example wrapping an
   ASE calculator, the replacement for `ff/ase_engine.py`) or modules, with the
   GIL handled correctly and errors mapped.
