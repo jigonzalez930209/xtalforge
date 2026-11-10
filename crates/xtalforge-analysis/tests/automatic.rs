@@ -201,3 +201,52 @@ fn automatic_run_screens_space_groups_from_absences() {
     );
     assert_eq!(result.leading_cells[0].class_rank, 1);
 }
+
+/// A backgrounded, noisy copy of the silicon pattern with a deterministic
+/// pseudo-random generator (linear congruential), so the test never changes.
+fn noisy_pattern() -> Vec<PatternPoint> {
+    let clean = calculate_pxrd(
+        &silicon(),
+        &PxrdOptions {
+            radiation: Radiation::CuKa,
+            two_theta_range: [20.0, 80.0],
+            step: 0.04,
+            fwhm: 0.1,
+        },
+    )
+    .unwrap();
+    let maximum = clean
+        .points
+        .iter()
+        .map(|point| point.intensity)
+        .fold(0.0_f64, f64::max);
+    let mut state: u64 = 12_345;
+    clean
+        .points
+        .iter()
+        .map(|point| {
+            state = state
+                .wrapping_mul(6_364_136_223_846_793_005)
+                .wrapping_add(1_442_695_040_888_963_407);
+            let uniform = (state >> 33) as f64 / f64::from(1_u32 << 31) - 0.5;
+            let signal = 8000.0 * point.intensity / maximum;
+            let background = 150.0 + 0.5 * (80.0 - point.two_theta);
+            PatternPoint {
+                two_theta: point.two_theta,
+                intensity: signal + background + 40.0 * uniform,
+                uncertainty: None,
+            }
+        })
+        .collect()
+}
+
+#[test]
+fn a_noisy_pattern_on_a_raised_baseline_is_not_indexed_on_its_noise() {
+    let result = run_automatic(&silicon(), &noisy_pattern(), &AutomaticOptions::default()).unwrap();
+    // The one-atom cubic cell has 17 reflections between 20 and 80 degrees;
+    // noise maxima must not be taken for peaks (before the background fix the
+    // search kept the 30 strongest noise maxima), and the cell is the true one.
+    assert!(result.peaks.len() <= 20, "{} peaks", result.peaks.len());
+    let a = result.index.as_ref().unwrap().cell.a;
+    assert!((a - 5.43).abs() < 0.05, "indexed a = {a}");
+}
