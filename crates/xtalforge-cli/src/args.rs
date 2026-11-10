@@ -119,6 +119,14 @@ pub(crate) enum Command {
         #[command(subcommand)]
         action: ModelAction,
     },
+    /// Print a shell completion script.
+    Completions {
+        /// Shell to generate for.
+        #[arg(value_enum)]
+        shell: clap_complete::Shell,
+    },
+    /// Print the roff manual page.
+    Man,
     /// Add the hydrogens an X-ray structure is missing.
     Hydrogens {
         /// Input path, or `-` for standard input.

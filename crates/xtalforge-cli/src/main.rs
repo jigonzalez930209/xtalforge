@@ -15,6 +15,7 @@ mod build_structures;
 mod commands_extra;
 mod convert;
 mod dispatch;
+mod docs_commands;
 mod engine_commands;
 mod ff_commands;
 mod format;
