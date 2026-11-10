@@ -164,5 +164,8 @@ improper counts, inversion and mirror count.
 lattice as `BrillouinZone { vertices, faces, edges }`. Reciprocal vectors
 include `2 pi`, so coordinates are in `1/Angstrom`. The fcc primitive cell
 gives a truncated octahedron with 14 faces, 24 vertices and 36 edges.
+`brillouin_zone_for_structure(structure)` detects the primitive cell first, so
+a conventional centred cell (silicon, rock salt, bcc iron) does not return the
+cube of its conventional reciprocal cell.
 `band_path`/`band_path_for_structure` supply the Bravais special points and
 the k-path in the user's reciprocal basis.
