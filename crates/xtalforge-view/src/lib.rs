@@ -11,4 +11,4 @@ pub mod settings;
 pub use colormap::Colormap;
 pub use mesh::{Triangle, build_mesh, write_stl};
 pub use scene::{SceneAtom, SceneBond, SceneData, build_scene};
-pub use settings::{DrawStyle, ViewSettings};
+pub use settings::{DrawStyle, StylePreset, StyleRegistry, ViewSettings};
