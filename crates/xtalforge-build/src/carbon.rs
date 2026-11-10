@@ -36,7 +36,7 @@ pub fn graphene(
     let lattice = Lattice::new([
         [a * f64::from(nx), 0.0, 0.0],
         [
-            a * f64::from(nx) / 2.0,
+            a * f64::from(ny) / 2.0,
             a * f64::from(ny) * SQRT_3 / 2.0,
             0.0,
         ],
@@ -47,13 +47,15 @@ pub fn graphene(
         let z = (f64::from(layer) * interlayer + 1.0) / height;
         for i in 0..nx {
             for j in 0..ny {
-                let base_x = f64::from(i) + f64::from(j) / 2.0;
-                let base_y = f64::from(j) * SQRT_3 / 2.0;
+                // Primitive cell (i, j) of the nx x ny supercell: the two atoms
+                // sit at (0, 0) and (1/3, 1/3) of the primitive vectors
+                // a1 = (a, 0) and a2 = (a/2, a sqrt(3)/2), so the supercell
+                // fractional coordinates are (i + u) / nx and (j + v) / ny.
                 let positions = [
-                    [base_x / f64::from(nx), base_y / f64::from(ny)],
+                    [f64::from(i) / f64::from(nx), f64::from(j) / f64::from(ny)],
                     [
-                        (base_x + 1.0 / 2.0) / f64::from(nx),
-                        (base_y + 1.0 / (2.0 * SQRT_3)) / f64::from(ny),
+                        (f64::from(i) + 1.0 / 3.0) / f64::from(nx),
+                        (f64::from(j) + 1.0 / 3.0) / f64::from(ny),
                     ],
                 ];
                 for (index, [x, y]) in positions.iter().enumerate() {
@@ -101,35 +103,38 @@ pub fn nanotube(n: i32, m: i32, length: u32, vacuum: f64) -> Result<Structure, E
         f64::from(length) * translation[0],
         f64::from(length) * translation[1],
     ];
+    let t_one = (translation[0] * translation[0] + translation[1] * translation[1]).sqrt();
     let t_norm = (length_vector[0] * length_vector[0] + length_vector[1] * length_vector[1]).sqrt();
     if t_norm < 1e-9 {
         return Err(Error::InvalidInput(
             "nanotube translation vector is degenerate".to_owned(),
         ));
     }
-    let height = 2.0 * radius + vacuum;
-    let lattice = Lattice::new([
-        [circumference, 0.0, 0.0],
-        [0.0, t_norm, 0.0],
-        [0.0, 0.0, height],
-    ])?;
+    // The tube axis is y; the cross-section box is 2R + vacuum on x and z.
+    let width = 2.0 * radius + vacuum;
+    let lattice = Lattice::new([[width, 0.0, 0.0], [0.0, t_norm, 0.0], [0.0, 0.0, width]])?;
     let mut builder = StructureBuilder::new("nanotube", lattice);
     let count = (ni.abs() + mi.abs()).ceil() as i32 * 4 + 16;
+    let eps = 1e-6;
     let mut index = 0;
     for u in -count..=count {
         for v in -count..=count {
             for basis in [[0.0, 0.0], [A_GRAPHENE / 2.0, A_GRAPHENE / (2.0 * SQRT_3)]] {
                 let x = f64::from(u) * a1[0] + f64::from(v) * a2[0] + basis[0];
                 let y = f64::from(u) * a1[1] + f64::from(v) * a2[1] + basis[1];
-                let along = (x * chiral[0] + y * chiral[1]) / circumference;
-                let across = (x * translation[0] + y * translation[1]) / t_norm;
-                if !(0.0..1.0).contains(&(across / f64::from(length))) {
+                // Coordinates of the sheet atom along the chiral vector and
+                // along the tube translation, as fractions of the tube cell.
+                let around = (x * chiral[0] + y * chiral[1]) / (circumference * circumference);
+                let along =
+                    (x * translation[0] + y * translation[1]) / (t_one * t_one * f64::from(length));
+                let inside = |value: f64| value > -eps && value < 1.0 - eps;
+                if !inside(around) || !inside(along) {
                     continue;
                 }
-                let angle = 2.0 * std::f64::consts::PI * along / circumference;
-                let frac_x = along.rem_euclid(circumference) / circumference;
-                let frac_y = across.rem_euclid(t_norm) / t_norm;
-                let frac_z = (radius * angle.cos() + radius + vacuum / 2.0) / height;
+                let angle = 2.0 * std::f64::consts::PI * around;
+                let frac_x = (radius * angle.sin() + width / 2.0) / width;
+                let frac_y = along.max(0.0);
+                let frac_z = (radius * angle.cos() + width / 2.0) / width;
                 builder = builder.site(Site::new(
                     format!("C{}", index + 1),
                     "C",
@@ -148,7 +153,8 @@ pub fn nanotube(n: i32, m: i32, length: u32, vacuum: f64) -> Result<Structure, E
 }
 
 fn find_translation(n: i32, m: i32, a1: [f64; 2], a2: [f64; 2]) -> Result<[f64; 2], Error> {
-    let d = gcd(gcd(n.abs(), m.abs()), (n + m).abs()).max(1);
+    // d_R = gcd(2n + m, 2m + n); T = ((2m + n) a1 - (2n + m) a2) / d_R.
+    let d = gcd(2 * n + m, 2 * m + n).max(1);
     let t1 = (2 * m + n) / d;
     let t2 = -(2 * n + m) / d;
     let vector = [

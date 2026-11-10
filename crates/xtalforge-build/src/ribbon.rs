@@ -13,8 +13,9 @@ use crate::carbon::graphene;
 ///
 /// `width` and `length` are graphene repeats along `b` and `a`; the strip has
 /// `2 * width * length` carbon atoms. The `b` vector is lengthened by
-/// `vacuum` Angstrom while every fractional coordinate is kept, so the strip
-/// is unchanged and the empty space around it grows.
+/// `vacuum` Angstrom and the fractional `b` coordinate of every atom is divided
+/// by the same factor, so the Cartesian positions (and the C-C bonds) are
+/// unchanged and the empty space around the strip grows.
 ///
 /// # Errors
 ///
@@ -45,7 +46,8 @@ pub fn nanoribbon(width: u32, length: u32, vacuum: f64) -> Result<Structure, Err
     let lattice = Lattice::new([matrix[0], enlarged, matrix[2]])?;
     let mut builder = StructureBuilder::new("nanoribbon", lattice);
     for site in sheet.sites() {
-        builder = builder.site(site.clone());
+        let [x, y, z] = site.frac();
+        builder = builder.site(site.clone().with_frac([x, y / scale, z])?);
     }
     builder.build()
 }
