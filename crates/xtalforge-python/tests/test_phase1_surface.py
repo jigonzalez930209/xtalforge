@@ -45,7 +45,7 @@ Direct
 def test_read_cif_returns_the_cell_and_p1_cell() -> None:
     data = xtalforge.read_cif(SI)
     assert data["name"] == "9011998"
-    assert data["formula"] == "Si"
+    assert data["formula"] == "Si8"
     assert data["hall"] == "F 4d 2 3 -1d"
     assert data["n_sites"] == 1
     assert data["n_atoms"] == 8
@@ -226,7 +226,7 @@ def test_python_classes() -> None:
     assert site.frac.shape == (3,)
 
     structure = xtalforge.Structure.from_cif(text)
-    assert structure.formula == "Si"
+    assert structure.formula == "Si8"
     assert structure.n_sites == 1
     assert structure.p1().n_atoms == 8
     assert structure.supercell(2, 2, 2).p1().n_atoms == 64
@@ -367,7 +367,7 @@ def test_phase3_document_and_project_surface() -> None:
     archive = xtalforge.project_pack(text)
     assert archive[:2] == b"PK"
     payload = xtalforge.project_read(archive)
-    assert payload["formula"] == "Si"
+    assert payload["formula"] == "Si8"
 
     schema = xtalforge.param_schema("symmetry")
     assert schema["properties"]["symprec"]["type"] == "number"
