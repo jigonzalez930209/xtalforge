@@ -41,6 +41,10 @@ essential release, then `0.x.y`).
   Python `Plugins` registers callables as modules, calculators and formats,
   with JSON in/out and typed errors. The draw-style enum stays closed; the
   open part is the settings preset, recorded in `docs/api/plugins.md`.
+- Task 0.9: bundle a 14-structure subset of the QMOF Database (CC BY 4.0,
+  Figshare 13147324 v18) and validate the reader against the tabulated atom
+  count, volume, density and formula; four P1 files recover their QMOF space
+  group at `symprec 0.01 A`, and a CIF round-trip preserves the cell.
 - Task 0.9: bundle an 18-complex subset of tmQM 2024 (MIT, one complex per
   metal from Sc to Ir) and validate the XYZ reader against the header
   stoichiometry, the perceived metal coordination and an XYZ round-trip. UFF
