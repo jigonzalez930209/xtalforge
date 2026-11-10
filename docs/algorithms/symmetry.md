@@ -66,8 +66,8 @@ group and attaches its operations; the P1 expansion may therefore create or
 merge atoms, which is the caller's responsibility.
 
 `Impose` starts from the P1 cell. For every atom it applies every operation of
-the target group, takes the minimum-image displacement of each image relative
-to the atom, and averages the positions. The averaged positions are
+the target group, matches each image to the atom within 0.5 Angstrom (minimum
+image), and averages the positions. The averaged positions are
 deduplicated by element and a `1e-5 A` threshold. The report carries
 `n_input`, `n_output` and the largest displacement; a large displacement is a
 warning that the requested group is not a good description of the cell.
