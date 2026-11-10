@@ -9,6 +9,11 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 0 Task 0.9: external validation suite. EQeq is compared with the
+  authors' program on the COD MOF-5 cell (424 charges within 1e-3 e), UFF with
+  sci-form on methane and stretched water (within 1e-4 kcal/mol), and the
+  DFTB+ parser with a recorded Si SCC output. `docs/algorithms/external-validation.md`
+  records the bundled sources, their licences and the data sets still to add.
 - Phase 5 Task 5.6: bundle the full RCSR 2019-06-01 snapshot in `data/rcsr/`
   and identify nets by coordination sequence and point symbol against all
   2,931 entries. `RcsrIndex::from_embedded()` returns `RcsrIdentification`
