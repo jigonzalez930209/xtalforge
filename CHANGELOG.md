@@ -46,6 +46,11 @@ essential release, then `0.x.y`).
   migration table (no `modules` CLI command, no separate powder crate) and
   the stale Phase 0 status and `AGENTS.md` gap list; documented the Pawley
   profile-mismatch caveat.
+- Corrected the API examples so every Rust snippet compiles (missing `use`
+  lines and the `Calculator` trait, `ParamSet::with_param`, `f64` supercell
+  matrices), the `CommandStack::push` signature, the error-code tables
+  (`limit_exceeded`, `symmetry`), the isosurface algorithm name (marching
+  tetrahedra) and the `external` feature wording.
 - Corrected the QEq kernel description (hardness only, truncated 12 Angstrom
   sum), the duplicated external-validation bullet and the tutorial commands
   (`powder lebail/pawley`, `build graphene/nanotube` take positional arguments).
