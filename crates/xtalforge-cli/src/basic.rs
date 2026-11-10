@@ -15,7 +15,20 @@ pub(crate) fn info(cli: &Cli, path: &str) -> Result<(), CliError> {
     let summary = if is_json {
         xtalforge::core::structure_info(&text)
     } else {
-        input::structure_from_text(&text, path).and_then(|structure| structure.summary())
+        input::structure_from_text(&text, path).and_then(|structure| {
+            if !cli.quiet {
+                for key in ["symmetry_warning", "coincident_atoms_warning"] {
+                    if let Some(message) = structure
+                        .metadata()
+                        .get(key)
+                        .and_then(serde_json::Value::as_str)
+                    {
+                        eprintln!("warning: {message}");
+                    }
+                }
+            }
+            structure.summary()
+        })
     }
     .map_err(CliError::core)?;
     if cli.json {
