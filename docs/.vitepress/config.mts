@@ -88,6 +88,7 @@ export default defineConfig({
             { text: 'Commands', link: '/api/commands' },
             { text: 'Agent session', link: '/api/agent' },
             { text: 'Plugins and extension points', link: '/api/plugins' },
+            { text: 'Machine-learning potentials', link: '/api/ml' },
             { text: 'Modules and workspace', link: '/api/modules' },
             { text: 'Selection and tracking', link: '/api/selection' },
             { text: 'Hello-world API', link: '/api/hello-world' },
