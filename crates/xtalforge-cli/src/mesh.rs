@@ -14,6 +14,7 @@ pub(crate) fn run(
     path: &str,
     style: &str,
     scale: f64,
+    scene_json: bool,
     out: Option<&str>,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
@@ -34,6 +35,25 @@ pub(crate) fn run(
         ..ViewSettings::default()
     };
     let scene = build_scene(&structure, &settings).map_err(CliError::core)?;
+    if scene_json {
+        let json = serde_json::to_string_pretty(&scene).map_err(|error| {
+            CliError::input(format!("could not serialize the scene geometry: {error}"))
+        })?;
+        if let Some(destination) = out.filter(|value| *value != "-") {
+            output::write_destination(destination, &json)?;
+            if !cli.quiet {
+                println!(
+                    "wrote {} atoms, {} bonds and {} cell edges to {destination}",
+                    scene.atoms.len(),
+                    scene.bonds.len(),
+                    scene.cell_edges.len()
+                );
+            }
+        } else {
+            println!("{json}");
+        }
+        return Ok(());
+    }
     let triangles = build_mesh(&scene);
     let stl = write_stl(&triangles, structure.name());
     if let Some(destination) = out.filter(|value| *value != "-") {

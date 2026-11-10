@@ -61,7 +61,7 @@ fn check_size(cli: &Cli, structure: &Structure, repeats: [u32; 3]) -> Result<(),
     ];
     let verdict = check_supercell(
         &CoreLimits::new(cli.limits.profile()),
-        structure.sites().len() as u64,
+        structure.p1().map_err(CliError::core)?.n_atoms() as u64,
         matrix,
     )
     .map_err(CliError::core)?;

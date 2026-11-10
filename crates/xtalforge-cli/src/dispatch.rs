@@ -233,8 +233,9 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             path,
             style,
             scale,
+            scene,
             out,
-        } => mesh::run(cli, path, style, *scale, out.as_deref()),
+        } => mesh::run(cli, path, style, *scale, *scene, out.as_deref()),
         Command::Supercell {
             path,
             na,

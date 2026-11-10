@@ -266,6 +266,9 @@ pub(crate) enum Command {
         /// Atom radius multiplier.
         #[arg(long, default_value_t = 1.0)]
         scale: f64,
+        /// Emit the full scene geometry as JSON instead of an STL mesh.
+        #[arg(long)]
+        scene: bool,
         /// Output path; defaults to standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
