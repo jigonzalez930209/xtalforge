@@ -23,6 +23,7 @@ CRATES=(
   xtalforge-build
   xtalforge-mof
   xtalforge-modules
+  xtalforge-agent
   xtalforge
   xtalforge-cli
 )
