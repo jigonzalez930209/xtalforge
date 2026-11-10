@@ -252,7 +252,7 @@ zone with scipy's Voronoi. Both must be implemented here.
   classification used by ASE), and the special points (Gamma, X, M, L, …)
   defined for the standard setting.
   Note: `classify_bravais` covers the 14 types with primitive-volume centering
-  detection; the points come from the ASE 3.29 table in `data/kpaths.json`.
+  detection; the points come from the ASE 3.29 table in `crates/xtalforge-symmetry/data/kpaths.json`.
 - [x] 2.10.3 Path in the user's cell
   Express the special points in the reciprocal basis of the cell the user
   actually has (a primitive fcc cell, not the textbook one), because DFTB+ and
@@ -309,6 +309,6 @@ zone with scipy's Voronoi. Both must be implemented here.
   for Task 2.10.2-2.10.4.
 - [x] 2.12.4 Parity and release
   Parity matrix; changelog; PATCH release.
-  Note: parity and changelog are updated; the PATCH tag waits for the v0.0.1
-  gate and the external release dry run. The Phase 2 surface set is complete
+  Note: parity and changelog are updated; the PATCH release shipped with
+  `v0.0.1`..`v0.0.3` (2026-11-09). The Phase 2 surface set is complete
   for the implemented TypeScript/Python/CLI APIs.

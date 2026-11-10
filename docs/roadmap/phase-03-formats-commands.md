@@ -369,5 +369,5 @@ Crystal-Builder keeps it in the core so any front end draws the same thing.
   `docs/api/view.md`.
 - [x] 3.16.4 Parity and release
   Parity matrix; changelog; PATCH release.
-  Note: the matrix and changelog are updated; the PATCH tag waits for the
-  v0.0.1 gate and the external release dry run.
+  Note: the matrix and changelog are updated; the PATCH release shipped with
+  `v0.0.1`..`v0.0.3` (2026-11-09).

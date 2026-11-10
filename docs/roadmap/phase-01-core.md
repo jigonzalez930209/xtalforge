@@ -251,8 +251,9 @@ Methodology: [Phase 1 module development methodology](./phase-01-methodology).
   Stack `layers` layers, turn c to the plane normal (which moves no atom,
   only which in-plane copy is in the cell), add vacuum above, optional
   termination shift. Result is P1 with the in-plane lattice preserved.
-  Note: `make_slab` builds the atoms and vacuum; bond carrying waits for
-  Task 1.11 and the demo for Task 1.18.
+  Note: `make_slab` builds the atoms and vacuum; bond carrying is not implemented
+  (`Slab.cut` is always zero, see Known subsets in the roadmap index); the demo
+  shipped with Task 1.18.
 - [x] 1.8.3 Tests and demo
   fcc (111) and (100), rocksalt (100), wurtzite (0001), a low-symmetry case;
   atom counts per layer equal the bulk cell; browser demo with a slab builder.

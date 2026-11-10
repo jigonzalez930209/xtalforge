@@ -42,7 +42,8 @@ separate `xtalforge-powder` crate was created.
   repository), read the mathematics of each entry point (profile functions,
   background, instrument presets, indexing engines, figures of merit, the
   least-squares engine, esd computation) and write
-  `docs/algorithms/powder-scope.md`: per function, port, reimplement from the
+  the scope notes in `docs/algorithms/powder.md` (no separate
+  `powder-scope.md` was written): per function, port, reimplement from the
   literature, or drop, with reasons.
 - [x] 7.1.3 License and attribution
   Record the rietx and rietx-kernels licenses in `THIRD_PARTY.md`; if porting
