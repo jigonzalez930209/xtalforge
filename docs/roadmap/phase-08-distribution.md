@@ -181,11 +181,12 @@ Crate: `xtalforge-agent` (plus work across all crates).
   No unexplained gaps in `docs/api/parity.md`; every exception justified.
   Note: the matrix passes `scripts/check-parity.sh`, but the Rust-only builders
   (Tasks 6.1-6.4) are open gaps, listed at the end of `docs/api/parity.md`.
-- [ ] 8.8.3 Release candidate cycle
+- [x] 8.8.3 Release candidate cycle
   `v1.0.0-rc.1` with a stabilization period and fixes only, then `v1.0.0`;
   update `AGENTS.md` section 6 and the changelog.
-
   Note: `v1.0.0-rc.1` was published on 2026-11-10 (13 crates on crates.io,
   7 platform wheels plus an sdist on PyPI, npm, the GitHub release and Pages).
-  The remaining work is the fixes-only stabilization period and the `v1.0.0`
-  tag; this checkbox stays open until `1.0.0` is published.
+  The stabilization period accepted the formula, builder geometry, CIF
+  warning, `structure_info`, indexing, MOF, Rietveld and automatic-run fixes;
+  the stable `v1.0.0` was published the same day with the same assets and the
+  docs on Pages.

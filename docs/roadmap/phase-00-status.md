@@ -2,7 +2,8 @@
 
 > **Update 2026-11-10.** Actions were enabled on 2026-11-08, only the tag-driven
 > `release.yml` is kept, and the workflow has published `v0.0.1`, `v0.0.2`,
-> `v0.0.3` and `v1.0.0-rc.1` (crates.io, PyPI, npm, GitHub release and Pages).
+> `v0.0.3`, `v1.0.0-rc.1` and `v1.0.0` (crates.io, PyPI, npm, GitHub release and
+> Pages).
 > The names are published. Tasks 0.8.1-0.8.5 (CI matrix) stay open by
 > maintainer decision because the runner cost was not wanted; the checks run
 > locally (`AGENTS.md` section 5.4). The sections below are the original

@@ -27,16 +27,16 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-10)
 
-- Phases 0-8 are implemented, tested and pushed; the Rust API, CLI, Python and
-  WASM surfaces build and pass their checks. `v0.0.1`, `v0.0.2` and `v0.0.3`
-  are published on crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the
-  GitHub release and GitHub Pages; `1.0.0-rc.1` was published on 2026-11-10
-  (13 crates, 7 wheels plus sdist, npm and the hosted CLI assets).
-- Phase 8 is complete except the 1.0.0 stabilization: `xtalforge-agent`
-  (verbs, session, diagnostics, MCP, skill), plugins, the Python ML bridge,
-  distribution, benchmarks, robustness, tutorials and the API freeze.
-  `v1.0.0-rc.1` is published and the `v1.0.0` tag follows the fixes-only
-  period.
+- Phases 0-8 are complete and pushed; the Rust API, CLI, Python and WASM
+  surfaces build and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`,
+  `v1.0.0-rc.1` and the stable `v1.0.0` are published on crates.io, PyPI
+  (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub Pages.
+  `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
+  package and the hosted CLI assets.
+- Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
+  skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
+  tutorials and the API freeze. The stable API follows the SemVer policy and
+  the known subsets below are the only documented reference gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
   manual docs workflows were removed by maintainer decision (2026-11-08) to
   avoid runner cost. The release runs on a version tag: three CLI packages,
