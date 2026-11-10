@@ -82,7 +82,10 @@ fn symmetry_analysis_exports() {
     let zone = brillouin_zone(NACL_CIF).expect("zone");
     let faces = property(&zone, "faces");
     let faces: js_sys::Array = faces.unchecked_into();
-    assert_eq!(faces.length(), 6);
+    assert_eq!(faces.length(), 14);
+    let vertices = property(&zone, "vertices");
+    let vertices: js_sys::Array = vertices.unchecked_into();
+    assert_eq!(vertices.length(), 24);
     let ladder = tolerance_ladder_info(NACL_CIF).expect("ladder");
     assert!(ladder.length() > 0);
     let diagnostics = diagnose_info(NACL_CIF, "225").expect("diagnose");

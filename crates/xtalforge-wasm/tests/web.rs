@@ -13,11 +13,12 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::JsValue;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
-    angle, bonds, build_c60_info, build_graphene_info, build_nanotube_info, cell_volume,
-    convert_structure, distance, element_info, groups, lattice_info, lattice_minimum_image,
-    limits_bounds, limits_check, mesh_stl, neighbors, powder_index_info, pxrd_info, read_cif,
-    read_structure, rings, scene_data, scene_summary, slab_info, slab_text, structure_info,
-    supercell_info, supercell_text, torsion, version,
+    angle, bonds, build_c60_info, build_graphene_info, build_nanotube_info, build_polymer_text,
+    build_ribbon_text, cell_volume, convert_structure, distance, element_info, groups,
+    hydrogens_text, lattice_info, lattice_minimum_image, limits_bounds, limits_check, mesh_stl,
+    neighbors, powder_index_info, pxrd_info, read_cif, read_structure, rings, scene_data,
+    scene_summary, slab_info, slab_text, structure_info, supercell_info, supercell_text, torsion,
+    version,
 };
 
 const NACL_CIF: &str = include_str!("../../../tests/corpus/simple/NaCl.cif");
@@ -391,6 +392,17 @@ fn phase_one_exports_reject_invalid_input() {
     assert!(distance(HEXAGON_XYZ, 99, 0).is_err());
     assert!(supercell_info(NACL_CIF, 0, 1, 1).is_err());
     assert!(slab_info(NACL_CIF, 0, 0, 0, 1, 10.0).is_err());
+}
+
+#[wasm_bindgen_test]
+fn builder_text_variants_return_cif() {
+    let ribbon = build_ribbon_text(4, 4, 12.0).expect("ribbon text");
+    assert!(ribbon.starts_with("data_"));
+    let polymer = build_polymer_text("C=C", 3, 1.0).expect("polymer text");
+    assert!(polymer.starts_with("data_"));
+    let filled = hydrogens_text(METHANOL_XYZ, 1.0).expect("hydrogens text");
+    assert!(filled.starts_with("data_"));
+    assert!(filled.contains("H"));
 }
 
 #[wasm_bindgen_test]
