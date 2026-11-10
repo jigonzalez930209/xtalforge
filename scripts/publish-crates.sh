@@ -18,9 +18,9 @@ CRATES=(
   xtalforge-io
   xtalforge-view
   xtalforge-commands
-  xtalforge-ff
   xtalforge-analysis
   xtalforge-build
+  xtalforge-ff
   xtalforge-mof
   xtalforge-modules
   xtalforge-agent
