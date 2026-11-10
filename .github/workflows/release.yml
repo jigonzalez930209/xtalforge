@@ -189,8 +189,8 @@ jobs:
           - { label: manylinux-aarch64, os: ubuntu-24.04, target: aarch64-unknown-linux-gnu, manylinux: auto }
           - { label: musllinux-x86_64, os: ubuntu-24.04, target: x86_64-unknown-linux-musl, manylinux: musllinux_1_1 }
           - { label: musllinux-aarch64, os: ubuntu-24.04, target: aarch64-unknown-linux-musl, manylinux: musllinux_1_1 }
-          - { label: macos-x86_64, os: macos-13, target: x86_64-apple-darwin, manylinux: auto }
-          - { label: macos-arm64, os: macos-13, target: aarch64-apple-darwin, manylinux: auto }
+          - { label: macos-x86_64, os: macos-15-intel, target: x86_64-apple-darwin, manylinux: auto }
+          - { label: macos-arm64, os: macos-15-intel, target: aarch64-apple-darwin, manylinux: auto }
           - { label: windows-x86_64, os: windows-2022, target: x86_64-pc-windows-msvc, manylinux: auto }
     steps:
       - uses: actions/checkout@v7
