@@ -4,9 +4,9 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.0.0-rc.1` release candidate. Phases 0-8 are implemented and the
-> public API is frozen; `0.0.3` was the last published release and `v1.0.0`
-> follows the fixes-only stabilization period. The known reference gaps are
+> Status: `1.0.0-rc.1` published on 2026-11-10. Phases 0-8 are implemented and
+> the public API is frozen; `v1.0.0` follows the fixes-only stabilization
+> period. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).

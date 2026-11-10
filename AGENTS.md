@@ -267,8 +267,9 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.0.0-rc.1` (the 1.0 release candidate; `0.0.3` was the last
-  published release on 2026-11-09, and `v0.0.1` was the first on the same day).
+- Version: `1.0.0-rc.1` (published 2026-11-10 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages; `0.0.3` was the last pre-1.0 release, and
+  `v0.0.1` was the first on 2026-11-09).
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
@@ -280,9 +281,10 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   distribution metadata and package checks, benchmarks, robustness/limits
   tests, tutorials, the migration guide and the algorithm coverage page.
   Tasks 8.8.1 and 8.8.2 are done (stability policy, freeze test and parity
-  closure). Task 8.8.3 is the `v1.0.0-rc.1` release candidate: the version is
-  bumped, the gate is run and the tag is pushed for the release workflow; the
-  1.0.0 tag follows the stabilization period (fixes only). Phases 1-7 are
+  closure). Task 8.8.3 shipped `v1.0.0-rc.1` on 2026-11-10: 13 crates on
+  crates.io, 7 platform wheels plus an sdist on PyPI, `xtalforge-wasm` on npm,
+  the CLI/hosted assets on the GitHub release and the docs on Pages. The
+  `1.0.0` tag follows the fixes-only stabilization period. Phases 1-7 are
   complete and released at `0.0.3`; the remaining reference gaps (phonon
   q-mesh, preparation steps, general indexing, profile simplifications and
   others) are listed in `docs/roadmap/index.md` under "Known subsets". `0.0.2` carried the linked-cell neighbor search, grid-based

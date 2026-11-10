@@ -11,8 +11,10 @@ Nothing yet.
 
 ## [1.0.0-rc.1] - 2026-11-10
 
-The first release candidate for 1.0.0. The public API is frozen; the
-stabilization period accepts fixes only, then `1.0.0` follows.
+The first release candidate for 1.0.0, published on 2026-11-10 on crates.io
+(13 crates), PyPI (7 platform wheels plus sdist), npm, the GitHub release and
+GitHub Pages. The public API is frozen; the stabilization period accepts fixes
+only, then `1.0.0` follows.
 
 ### Added
 
