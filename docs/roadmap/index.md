@@ -25,17 +25,18 @@ are in `AGENTS.md` at the repository root.
 | 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
 | 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
 
-## Current status (2026-11-09)
+## Current status (2026-11-10)
 
-- Phases 0-7 are implemented, tested and pushed; the Rust API, CLI, Python and
+- Phases 0-8 are implemented, tested and pushed; the Rust API, CLI, Python and
   WASM surfaces build and pass their checks. `v0.0.1`, `v0.0.2` and `v0.0.3`
-  are published on crates.io (twelve crates), PyPI (`xtalforge`), npm
-  (`xtalforge-wasm`), the GitHub release and GitHub Pages; `0.0.3` carries the
-  full-corpus bond validation, periodic rings, the CIF round-trip fields and
-  lazy trajectories.
-- Phase 8 (agent and distribution) has not started. It is the remaining
-  planned phase: session verbs, MCP server, plugins, ML potentials,
-  distribution, performance/fuzzing and the API freeze.
+  are published on crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the
+  GitHub release and GitHub Pages; `1.0.0-rc.1` is the release candidate for
+  the frozen API.
+- Phase 8 is complete except the 1.0.0 stabilization: `xtalforge-agent`
+  (verbs, session, diagnostics, MCP, skill), plugins, the Python ML bridge,
+  distribution, benchmarks, robustness, tutorials and the API freeze. The
+  `v1.0.0-rc.1` tag runs the release workflow; `v1.0.0` follows the
+  fixes-only period.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
   manual docs workflows were removed by maintainer decision (2026-11-08) to
   avoid runner cost. The release runs on a version tag: three CLI packages,
