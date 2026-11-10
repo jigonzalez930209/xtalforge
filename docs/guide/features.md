@@ -39,7 +39,7 @@ cargo build -p xtalforge --all-features
    `scripts/check-wasm-size.sh`. The hello-world build was about 41 KiB; the
    Phase 1 readers and builders brought it to about 438 KiB, symmetry to about
    813 KiB, and the Phase 3-7 surfaces (including the polymer/embedding code)
-   and the agent session took the release package to 3766 KiB at 1.0.0-rc.1,
+   and the agent session took the release package to 3771 KiB at 1.0.0-rc.1,
    inside the 3840 KiB budget.
 
 ## Threaded WebAssembly
