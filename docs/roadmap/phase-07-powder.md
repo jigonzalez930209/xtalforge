@@ -65,6 +65,7 @@ separate `xtalforge-powder` crate was created.
   `Radiation`: wavelength(s) with Kα2 ratio, polarization, geometry
   (Bragg-Brentano, Debye-Scherrer), zero shift, sample displacement;
   instrument presets equivalent to rietx's.
+  Note: only the defaults exist, no named presets and no arbitrary wavelength.
   Note: `Instrument { geometry, zero_shift, displacement, ka2_ratio,
   polarization, sample_radius }`, `correct` and `doublet`; presets are the
   documented defaults.
@@ -85,6 +86,8 @@ separate `xtalforge-powder` crate was created.
   requested order, every kept line's position, area, width and Lorentzian
   fraction free, its Kα2 placed by Bragg's law with the instrument ratio;
   esds for every parameter (TOPAS `xo_Is`).
+  Note: not implemented as one whole-range fit; `fit_peaks` fits each named
+  position in its own window (Gaussian plus linear background).
 
 ## Task 7.4 — Least-squares engine
 
@@ -92,12 +95,20 @@ separate `xtalforge-powder` crate was created.
   Levenberg-Marquardt with bounds, parameter constraints (equalities, linear
   relations), analytic derivatives where cheap and finite differences
   otherwise, convergence and divergence handling, covariance and esds.
+  Note: `least_squares` is an unbounded Levenberg-Marquardt with finite
+  differences (`FitOptions { max_iterations, tolerance, lambda }`); bounds and
+  equality or linear constraints are handled by the Pawley and Rietveld
+  simplex searches themselves, not by this engine.
   Decide between `argmin` and an in-tree implementation (pure Rust either
   way); record the decision.
 - [x] 7.4.2 Profile functions
   Pseudo-Voigt, Thompson-Cox-Hastings, Caglioti widths, size and strain
   broadening, axial divergence asymmetry (Finger-Cox-Jephcoat), March-Dollase
   preferred orientation, as needed by the scope report.
+  Note: Gaussian, Lorentzian and pseudo-Voigt (fixed mixing) exist in
+  `profiles.rs`; Thompson-Cox-Hastings, Caglioti widths and Finger-Cox-Jephcoat
+  asymmetry are not implemented, the size/strain width is Pawley's own model and
+  March-Dollase lives in the Rietveld refinement.
 - [x] 7.4.3 Background models
   Chebyshev polynomial of chosen order; fixed interpolated background.
 
@@ -109,6 +120,9 @@ separate `xtalforge-powder` crate was created.
   dichotomy, TREOR-type and ITO-type methods are the usual set) and their
   agreement as confidence; search specification (crystal systems, volume
   range, impurity tolerance).
+  Note: there is one engine (the metric-family solver below), so no
+  agreement-as-confidence; `IndexingOptions` has `max_volume` and
+  `min_completeness`.
   Note: `index_pattern` solves the cubic, tetragonal, hexagonal, orthorhombic
   and monoclinic metric families from enumerated low-index assignments,
   refines each candidate and skips the singular first-line subsets. A
@@ -164,6 +178,9 @@ separate `xtalforge-powder` crate was created.
   fit's peak shape carries into the Rietveld step instead of restarting from
   a preset, and nothing is refitted where nobody can see it. Serialized in the
   run folder and the project.
+  Note: not implemented. The Pawley result is passed explicitly to the next
+  step by the automatic run; there is no `ParameterSet` or project part for
+  powder parameters.
 
 ## Task 7.8 — Rietveld
 
@@ -208,6 +225,8 @@ separate `xtalforge-powder` crate was created.
   Port `powder/pareto.py`: refine at a series of weights from pattern-only to
   energy-only, keep the points no other point beats on both counts, and pick
   the knee where giving up fit starts to buy little energy.
+  Note: only `pareto_front` (non-dominated points) and `combined_objective`
+  exist; there is no weight sweep driver and no knee picker.
 
 ## Task 7.10 — Automatic run and module steps
 
@@ -228,19 +247,29 @@ separate `xtalforge-powder` crate was created.
   previous step's output from the run folder, runnable headless
   (`xtalforge run pxrd.peaks --xy pattern.xy`), with logs and cancellation.
   Steps are not listed as generic menu modules, as in the source.
+  Note: not implemented; there is no `run` command and the steps are the
+  `powder` subcommands.
 
 ## Task 7.11 — Surfaces and docs
 
 - [x] 7.11.1 CLI
   `powder {peaks,index,pawley,rietveld,energy,pareto,auto}` with JSON results
   and run folders.
+  Note: the subcommands are `index`, `lebail`, `pawley`, `rietveld`,
+  `automatic`, `cells` and `rietx` (peaks are found inside `index`); there is no
+  `energy` or `pareto` subcommand and no run folders.
 - [x] 7.11.2 Python and WASM
   Cancellable refinements with progress; WASM supports small problems
   single-threaded and documents its limits.
+  Note: the refinements are synchronous; there is no cancellation token or
+  progress callback.
 - [x] 7.11.3 Docs and demos
   Algorithm pages: profile functions, Levenberg-Marquardt with constraints,
   indexing engines and figures of merit, Pawley, Rietveld refinement order,
   energy-weighted objective, Pareto knee. Demo: load a pattern, fit peaks and
   index it in the browser.
+  Note: the pages exist except the energy-weighted objective and Pareto knee;
+  no powder demo was built (the demos are the cell volume, CIF inspector and
+  editor).
 - [x] 7.11.4 Parity and release
   Parity matrix; changelog; MINOR release.

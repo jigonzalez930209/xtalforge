@@ -98,6 +98,8 @@ Crate: `xtalforge-agent` (plus work across all crates).
   Implement the decision of Task 4.11.1 behind feature `ml`: MACE, ORB-v3 and
   MatterSim calculators, or the subset the chosen backend supports, with
   forces and stress.
+  Note: the `ml` feature is a declared no-op; the backend is the Python
+  `MlCalculator` bridge over ASE (`docs/api/ml.md`), validated for MACE only.
 - [x] 8.4.2 Model management
   Weights are never bundled: download on demand into a cache with checksum and
   license recorded per model; CLI `models {list,fetch,verify,remove}`.
@@ -117,9 +119,14 @@ Crate: `xtalforge-agent` (plus work across all crates).
   arm64) and Windows (x86_64), plus sdist; trusted publishing; the `sci-form`
   and `ml` features in separate wheel variants if they are too large for the
   default wheel.
+  Note: published with `twine` and the `PYPI_API_TOKEN` secret, not trusted
+  publishing; there are no feature-variant wheels.
 - [x] 8.5.3 npm
   `xtalforge-wasm` with web, node and bundler targets, TypeScript types, size
   budget, provenance; MOF and RCSR bundles fetched on demand.
+  Note: the published npm package is the bundler build; the web build is the
+  docs artifact, the node build is not published, and the bundles are embedded,
+  not fetched.
 - [x] 8.5.4 CLI binaries
   Prebuilt `xtalforge` binaries per platform attached to GitHub releases
   (cargo-dist or equivalent), shell completions, man page; `cargo install
@@ -139,6 +146,9 @@ Crate: `xtalforge-agent` (plus work across all crates).
 - [x] 8.6.3 Fuzzing and property tests
   Fuzz every parser (CIF, POSCAR, XYZ, SHELX, LAMMPS, CGD, cube, project zip);
   property tests for symmetry, supercells, reduction and optimizers.
+  Note: `crates/xtalforge-io/fuzz` has one target (CIF); the other parsers are
+  covered by hand-written mutation and truncation tests, and there is no
+  property-testing crate.
 - [x] 8.6.4 Memory and limits audit
   Every allocating path respects `Limits` and fails with a `Verdict`; test with
   structures at and beyond each limit.
@@ -169,6 +179,8 @@ Crate: `xtalforge-agent` (plus work across all crates).
   page (from `AGENTS.md` section 5).
 - [x] 8.8.2 Parity matrix closure
   No unexplained gaps in `docs/api/parity.md`; every exception justified.
+  Note: the matrix passes `scripts/check-parity.sh`, but the Rust-only builders
+  (Tasks 6.1-6.4) are open gaps, listed at the end of `docs/api/parity.md`.
 - [ ] 8.8.3 Release candidate cycle
   `v1.0.0-rc.1` with a stabilization period and fixes only, then `v1.0.0`;
   update `AGENTS.md` section 6 and the changelog.

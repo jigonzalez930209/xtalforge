@@ -80,6 +80,9 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 6.1-6.4: SMILES parsing and embedding, sketches, the fragment library,
   substitution and guest placement are Rust-only (no CLI, Python or WASM
   surface), see the open gaps in `docs/api/parity.md`.
+- 7.x: no whole-range peak refinement, TCH/Caglioti/FCJ profiles, persistent
+  powder parameter sets, Pareto sweep or knee, `run` module steps, named
+  instrument presets, indexing engine agreement, cancellation or powder demo.
 - 1.8: `Slab.cut` is always zero; severed bonds are not carried through the
   cut.
 - 1.11: explicit bonds map to P1 indices and are not propagated to every
