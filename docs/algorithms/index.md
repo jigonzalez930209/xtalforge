@@ -9,6 +9,15 @@ One page per ported algorithm. Template for every page:
 5. Complexity and numerical caveats
 6. Validation data and tolerances
 
+Diagrams live in `docs/public/diagrams/` (29 SVG, one shared style, animated
+with SMIL and static under `prefers-reduced-motion`). Every page that describes
+a procedure or a geometry embeds one. The inventory and decision pages
+([Golden data](./golden-data), [External validation](./external-validation),
+[Algorithm coverage](./coverage), [Dependency map](./dependency-map),
+[sci-form reuse](./sci-form-reuse), [ML backend](./ml-backend),
+[Modules](./modules), [Symmetry backend](./symmetry-backend)) are tables and
+records of decisions and have no algorithm to draw.
+
 Pages are added with the feature that introduces them:
 
 - [Lattice conventions](./lattice) (Task 1.2.5)

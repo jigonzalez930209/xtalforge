@@ -1,5 +1,7 @@
 # Agent session and diagnostics
 
+![Agent session](/diagrams/agent-session.svg)
+
 Reference: Crystal-Builder `xtal/agent/` (MIT; `capabilities.py` 227 lines,
 `session.py` 1834, `inspect.py` 352, `diagnostics.py` 253, `changes.py` 197,
 `answers.py` 210, `render.py` 137). This page records how the port works and

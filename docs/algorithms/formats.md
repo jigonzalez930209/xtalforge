@@ -2,6 +2,9 @@
 
 ## Registry
 
+![Format registry](/diagrams/formats-registry.svg)
+
+
 Every format is a `FormatSpec { name, extensions, read, write, capabilities }`
 in one table. `find` accepts a name or extension; `read_with`/`write_with`
 resolve it. `sniff` inspects the content when the extension is missing or

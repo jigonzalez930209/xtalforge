@@ -7,6 +7,9 @@ it is disabled, with the atoms or molecules it changed.
 
 ## Order
 
+![Prepare for simulation](/diagrams/prepare-pipeline.svg)
+
+
 1. **duplicates** — merge sites with the same element at the same periodic
    position; the keeper's occupancy is the sum, clamped to one.
 2. **disorder** — group partial sites by `_atom_site_disorder_group`, or by

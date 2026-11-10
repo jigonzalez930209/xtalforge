@@ -2,6 +2,9 @@
 
 ## Stage order
 
+![Rietveld stages](/diagrams/rietveld-stages.svg)
+
+
 `refine_phase` follows the McCusker order. Each stage changes only its own
 parameters and leaves the rest at the value the previous stage reached:
 

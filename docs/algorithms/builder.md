@@ -46,6 +46,9 @@ explicit bonds; the density, monomer count and SMILES are recorded in metadata.
 
 ## Carbon allotropes
 
+![Graphene cell and nanotube roll](/diagrams/carbon-geometry.svg)
+
+
 - `graphene(nx, ny, layers, interlayer, vacuum)` is an AA-stacked honeycomb
   sheet. The cell is `nx a1` and `ny a2` with `a1 = (a, 0)`,
   `a2 = (a/2, a sqrt(3)/2)` and `a = 1.42 sqrt(3)`; the two atoms of primitive

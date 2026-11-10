@@ -21,6 +21,9 @@ occupied one.
 
 ## Detection
 
+![Symmetry detection](/diagrams/symmetry-detection.svg)
+
+
 `MoyoDataset::new(cell, symprec, angle_tolerance, setting, false)` performs the
 iterative search, identifies the space group and standardizes the cell. The
 moyo operations are converted to `SymOp`, keeping exact integer rotations and

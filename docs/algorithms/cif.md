@@ -2,6 +2,9 @@
 
 ## Pipeline
 
+![CIF reader pipeline](/diagrams/cif-pipeline.svg)
+
+
 1. `decode_text` strips a UTF-8 BOM, reads UTF-8 and falls back to Latin-1.
 2. The tokenizer walks lines, removes comments outside quotes, keeps quoted
    values together and collects semicolon-delimited text blocks.

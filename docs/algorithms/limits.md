@@ -8,6 +8,9 @@ so the caller can be warned or refused with a concrete alternative.
 
 ## Model
 
+![Limits model](/diagrams/limits-model.svg)
+
+
 Every budget has a soft and a hard limit. Standard is the 8 GB-class table;
 Generous doubles both; WarnOnly keeps the soft limit and removes the hard one.
 The check returns `Verdict { level, estimate, sentence }`:

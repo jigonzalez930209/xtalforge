@@ -12,6 +12,9 @@ representative per class.
 
 ## Structure-factor test
 
+![Extinction classes](/diagrams/extinction-classes.svg)
+
+
 For a group with operations `(R, t)` in the conventional cell, the structure
 factor of a single atom on a general position `r` is
 

@@ -18,6 +18,9 @@ PXRD reflection scale.
 
 ## Linear and non-linear parts
 
+![Pawley variable projection](/diagrams/pawley-varpro.svg)
+
+
 For fixed cell, zero shift and widths the model is **linear** in the
 intensities and the background coefficients. The normal equations are
 assembled only over the reflections whose profile reaches each observed point,

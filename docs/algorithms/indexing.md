@@ -16,6 +16,9 @@ free parameter:
 
 ## Solving a family
 
+![Powder indexing](/diagrams/indexing-pipeline.svg)
+
+
 A family with `k` parameters is solved from `k` observed lines whose `hkl` are
 enumerated up to `max_index`; the resulting linear system is solved by Gaussian
 elimination. The first lines of a family are often degenerate for this solve

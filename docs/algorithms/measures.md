@@ -1,5 +1,7 @@
 # Measures
 
+![Distance, angle and torsion](/diagrams/measures-geometry.svg)
+
 Distance, angle and torsion use the minimum image of the P1 cell, so a
 measurement across a boundary equals the same local geometry inside the cell.
 

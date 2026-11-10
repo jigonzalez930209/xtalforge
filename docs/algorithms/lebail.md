@@ -2,6 +2,9 @@
 
 ## Iteration
 
+![Le Bail iteration](/diagrams/lebail-iteration.svg)
+
+
 Le Bail extraction partitions the observed counts among the allowed reflections
 without a structural model. Starting from the PXRD reflection intensities
 `I_k^0`, each pass rebuilds the calculated pattern
