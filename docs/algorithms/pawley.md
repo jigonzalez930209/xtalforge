@@ -57,6 +57,18 @@ The weight is `1 / uncertainty^2` when the point carries one and `1 / max(y, 1)`
 otherwise. The number of parameters is the reflections, the background terms
 and the non-linear parameters together.
 
+## Profile mismatch and weights
+
+The default profile is pseudo-Voigt (`eta = 0.5`). With the weight
+`1 / max(y, 1)` a noise-free pattern whose lines are Gaussian (for example the
+calculated PXRD pattern, which has zero background) is fitted badly: the
+Lorentzian tails of the model fall on baseline points that carry weight 1,
+while the peaks carry weight `1 / y`, so the weighted least squares prefers
+small intensities and Rwp approaches 1 for counts in the millions. The same data
+fit with `--profile gaussian` give Rwp 0.07 and `a = 5.620`. Use the profile that
+matches the data, or give the pattern an uncertainty column, when refining a
+synthetic or very clean pattern.
+
 ## Documented conventions and limits
 
 - Intensities are profile heights under the area-normalised profile, reported

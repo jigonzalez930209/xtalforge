@@ -98,9 +98,9 @@ by default to match Crystal-Builder's spglib behaviour.
   `union-find`; no duplicate `nalgebra`, `serde` or `thiserror`.
 - Release compile of `xtalforge-symmetry` with moyo on this machine: about
   45 seconds; the incremental check is much faster.
-- WASM package: the full release is about 2905 KiB, including the symmetry
-  tables, force fields, analysis, builders and powder surfaces, inside the
-  3648 KiB budget checked by `scripts/check-wasm-size.sh`.
+- WASM package: the full release is 3766 KiB at 1.0.0-rc.1, including the symmetry
+  tables, force fields, analysis, builders, powder surfaces and the agent
+  session, inside the 3840 KiB budget checked by `scripts/check-wasm-size.sh`.
 
 ## Isolation
 
