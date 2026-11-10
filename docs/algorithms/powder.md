@@ -47,7 +47,10 @@ orders the table.
 
 `run_automatic` is the orchestrator:
 
-1. find peaks and estimate the background;
+1. find peaks: subtract a SNIP background (window 40 points), keep the lines
+   above 1 % of the strongest and above five times the noise (median absolute
+   deviation of the background-free signal), smoothed once, at most
+   `max_peaks` (default 30) strongest;
 2. index the peak list and keep the leading cells;
 3. for each leading cell, enumerate the extinction classes;
 4. Le Bail every (cell, class), score by BIC;
