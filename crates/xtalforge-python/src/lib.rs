@@ -13,6 +13,7 @@ use pyo3::prelude::*;
 mod agent;
 mod analysis;
 mod classes;
+mod ml;
 mod phase3;
 mod phase4;
 mod phase5;
@@ -346,5 +347,6 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(rietx, module)?)?;
     agent::register(module)?;
     plugins::register(module)?;
+    ml::register(module)?;
     Ok(())
 }
