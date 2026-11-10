@@ -129,7 +129,8 @@ pub(crate) fn wyckoff(cli: &Cli, path: &str, symprec: f64) -> Result<(), CliErro
 /// Returns [`CliError`] for a read or zone failure.
 pub(crate) fn brillouin(cli: &Cli, path: &str) -> Result<(), CliError> {
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
-    let zone = xtalforge::symmetry::brillouin_zone(structure.lattice()).map_err(CliError::core)?;
+    let zone =
+        xtalforge::symmetry::brillouin_zone_for_structure(&structure).map_err(CliError::core)?;
     if cli.json {
         println!(
             "{}",
