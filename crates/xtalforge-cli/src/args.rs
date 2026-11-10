@@ -35,6 +35,31 @@ pub(crate) enum ProjectAction {
     },
 }
 
+/// Model cache actions.
+#[derive(Debug, Subcommand)]
+pub(crate) enum ModelAction {
+    /// List the catalogue and the cache state.
+    List,
+    /// Download a model into the cache and record its checksum.
+    Fetch {
+        /// Catalogue name: mace-mp-0, orb-v3 or mattersim.
+        name: String,
+        /// Artifact URL chosen by the user.
+        #[arg(long)]
+        url: String,
+    },
+    /// Recompute the checksum of a cached model.
+    Verify {
+        /// Catalogue name.
+        name: String,
+    },
+    /// Remove a cached model and its metadata.
+    Remove {
+        /// Catalogue name.
+        name: String,
+    },
+}
+
 /// Skill document actions.
 #[derive(Debug, Subcommand)]
 pub(crate) enum SkillAction {
@@ -88,6 +113,11 @@ pub(crate) enum Command {
     Skill {
         #[command(subcommand)]
         action: SkillAction,
+    },
+    /// Manage the optional machine-learning model cache.
+    Models {
+        #[command(subcommand)]
+        action: ModelAction,
     },
     /// Add the hydrogens an X-ray structure is missing.
     Hydrogens {

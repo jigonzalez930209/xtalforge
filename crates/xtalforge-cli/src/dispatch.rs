@@ -2,8 +2,9 @@
 
 use crate::{
     Cli, CliError, agent_commands, analysis_commands, analyze, args, args::Command, basic, build,
-    build_structures, commands_extra, convert, ff_commands, measure, mesh, mof_commands,
-    powder_commands, pxrd, spacegroup, symmetry, symmetry::SymmetryAction, symmetry_analysis,
+    build_structures, commands_extra, convert, ff_commands, measure, mesh, model_commands,
+    mof_commands, powder_commands, pxrd, spacegroup, symmetry, symmetry::SymmetryAction,
+    symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -24,6 +25,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Agent { path } => agent_commands::session(cli, path),
         Command::Mcp => agent_commands::mcp(),
         Command::Skill { action } => agent_commands::skill(cli, action),
+        Command::Models { action } => model_commands::run(cli, action),
         Command::Hydrogens {
             path,
             distance,

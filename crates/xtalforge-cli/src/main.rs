@@ -22,6 +22,7 @@ mod input;
 mod limits;
 mod measure;
 mod mesh;
+mod model_commands;
 mod mof_commands;
 mod output;
 mod powder_commands;
