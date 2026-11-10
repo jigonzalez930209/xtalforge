@@ -24,7 +24,7 @@ validates it.
 | `io::project` | [Projects](../api/project) | pack/extract round-trip |
 | `io::trajectory` | [Formats](./formats) | lazy frames and counts |
 | `symmetry::dataset` | [Symmetry detection](./symmetry) | spglib/moyo audit, corpus |
-| `symmetry::backend` | [moyo backend](./symmetry-backend) | audit and fallbacks |
+| `symmetry::convert` | [moyo backend](./symmetry-backend) | audit and fallbacks |
 | `symmetry::reduction` | [Lattice reduction](./symmetry) | Niggli/Delaunay/Minkowski |
 | `symmetry::subgroups` | [Symmetry](./symmetry) | subgroup enumeration and lowering |
 | `symmetry::brillouin`, `kpath` | [Symmetry](./symmetry) | Bravais/k-path golden |

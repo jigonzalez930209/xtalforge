@@ -47,7 +47,8 @@ makes `undo`, `history` and `changes` see the assistant exactly like a person.
 
 ## 4. Diagnostics
 
-`diagnose(structure)` expands the P1 cell once and runs six checks. Each
+`diagnose(structure)` expands the P1 cell once and runs six groups of checks (empty cell, overlaps, occupancy, charge,
+bonding, symmetry) that produce the nine codes below. Each
 finding has a stable `code`, a `Severity` (`info`, `warning`, `error`), a
 message, the atom indices and an optional verb that would fix it.
 

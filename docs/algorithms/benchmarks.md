@@ -27,7 +27,7 @@ Notes:
 - The CLI `supercell` command replicates the asymmetric unit; callers that
   want every atom of the crystal expand to P1 first (the Python and WASM
   bindings do).
-- Release WebAssembly (`wasm-opt -Oz`) is 3775 KiB after the Phase 8 agent
+- Release WebAssembly (`wasm-opt -Oz`) is 3771 KiB after the Phase 8 agent
   surface, inside the 3840 KiB budget enforced by `scripts/check-wasm-size.sh`.
 - The workspace test suite (Rust, 38 WASM node tests and 41 pytest cases) runs
   in seconds; see the phase status page for the exact list.
@@ -48,7 +48,7 @@ Release CLI, median of five whole-process runs at `--symprec 0.001`:
 The larger MOF structures in the corpus take seconds to minutes at very small
 tolerances; the corpus sweep is an ignored test and the release gate uses the
 small-corpus set. The full release package, including the symmetry search, the
-force fields, analysis, builders, powder and agent surfaces, is 3775 KiB inside
+force fields, analysis, builders, powder and agent surfaces, is 3771 KiB inside
 the 3840 KiB budget.
 
 ## Function-level benchmarks (Task 8.6.1)
