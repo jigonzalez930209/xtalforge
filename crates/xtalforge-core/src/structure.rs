@@ -345,15 +345,21 @@ impl Structure {
 
 /// Parses a structure JSON document and returns its summary.
 ///
-/// This is the Phase 1 bridge until the CIF reader lands in Task 1.15.
+/// Accepts a bare structure object or the versioned `StructureDocument`
+/// envelope that the CLI writes with `--json`. CIF text is read with the `io`
+/// crate, not here.
 ///
 /// # Errors
 ///
 /// Returns [`Error::InvalidInput`] for invalid JSON or a structure that cannot
 /// produce a summary.
 pub fn structure_info(text: &str) -> Result<StructureSummary, Error> {
-    let structure: Structure = serde_json::from_str(text)
-        .map_err(|error| Error::InvalidInput(format!("invalid structure JSON: {error}")))?;
+    let structure: Structure = if text.contains("\"schema_version\"") {
+        StructureDocument::from_json(text)?.structure
+    } else {
+        serde_json::from_str(text)
+            .map_err(|error| Error::InvalidInput(format!("invalid structure JSON: {error}")))?
+    };
     structure.summary()
 }
 
