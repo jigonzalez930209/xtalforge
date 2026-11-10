@@ -277,6 +277,24 @@ fn uff_energy_is_finite_and_optimize_changes_the_geometry() {
 }
 
 #[test]
+fn size_limits_are_checked_before_allocating() {
+    let (mut session, _) = loaded();
+    let error = session
+        .run("supercell", &json!({"repeats": [1000, 1000, 1000]}))
+        .unwrap_err();
+    assert_eq!(error.code(), "limit_exceeded");
+    assert_eq!(
+        session
+            .active()
+            .expect("document")
+            .structure()
+            .sites()
+            .len(),
+        2
+    );
+}
+
+#[test]
 fn a_script_runs_against_one_session() {
     let script = serde_json::json!({
         "verbs": [
