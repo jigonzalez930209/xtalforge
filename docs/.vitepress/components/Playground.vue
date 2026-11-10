@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { SceneRenderer } from '../playground/scene'
-import { SAMPLES, loadSampleText } from '../playground/samples'
+import { SAMPLES, TABS, loadSampleText } from '../playground/samples'
 import {
   errorText,
   inspect,
@@ -10,8 +10,17 @@ import {
   type Inspection,
   type SceneStats,
 } from '../playground/wasm'
+import PlaygroundStructurePanel from './PlaygroundStructurePanel.vue'
+import PlaygroundSymmetryPanel from './PlaygroundSymmetryPanel.vue'
+import PlaygroundAnalysisPanel from './PlaygroundAnalysisPanel.vue'
+import PlaygroundPowderPanel from './PlaygroundPowderPanel.vue'
+import PlaygroundForcefieldPanel from './PlaygroundForcefieldPanel.vue'
+import PlaygroundExportPanel from './PlaygroundExportPanel.vue'
 
+type Measure = { kind: string; value: number; indices: number[] }
 const host = ref<HTMLElement | null>(null)
+const viewer = ref<HTMLElement | null>(null)
+const wasmModule = shallowRef<any>(null)
 const ready = ref(false)
 const busy = ref(false)
 const error = ref('')
@@ -20,49 +29,22 @@ const baseText = ref('')
 const label = ref('Silicon')
 const baseLabel = ref('Silicon')
 const selected = ref('Si')
+const tab = ref('structure')
 const inspection = ref<Inspection | null>(null)
 const scene = ref<SceneStats | null>(null)
-const pxrd = ref<any | null>(null)
+const selection = ref<number[]>([])
+const measure = ref<Measure | null>(null)
+const zone = ref<any | null>(null)
+const brillouin = ref(false)
+const fullscreen = ref(false)
 const style = ref('ball-stick')
 const scale = ref(1)
 const showCell = ref(true)
 const showAxes = ref(true)
 const autoRotate = ref(false)
-const showText = ref(false)
-const na = ref(2)
-const nb = ref(2)
-const nc = ref(2)
-const h = ref(1)
-const k = ref(0)
-const l = ref(0)
-const layers = ref(2)
-const vacuum = ref(10)
-const nx = ref(4)
-const ny = ref(4)
-const tubeN = ref(5)
-const tubeM = ref(5)
-const tubeLength = ref(2)
-const topology = ref('pcu')
-const node = ref('Zn4O')
-const linker = ref('benzene')
-const topologies = ref<string[]>([])
-const nodes = ref<string[]>([])
-const linkers = ref<string[]>([])
 let renderer: SceneRenderer | null = null
-let wasm: any = null
 
 const summary = computed(() => inspection.value?.summary)
-const symmetry = computed(() => inspection.value?.symmetry)
-const ringText = computed(
-  () =>
-    inspection.value?.ringStats
-      .map((entry) => `${entry.count} × ${entry.size}-ring`)
-      .join(', ') || 'none',
-)
-const wyckoffText = computed(
-  () => inspection.value?.wyckoff.map((entry: any) => entry.letter).join(' ') || '—',
-)
-const pxrdPeaks = computed(() => (pxrd.value?.reflections ?? []).slice(0, 12))
 
 function applyVisibility() {
   renderer?.setCellVisible(showCell.value)
@@ -71,9 +53,9 @@ function applyVisibility() {
 }
 
 function renderScene() {
-  if (!wasm || !renderer || !text.value) return
+  if (!wasmModule.value || !renderer || !text.value) return
   try {
-    const stats = sceneStats(wasm, text.value, style.value, Number(scale.value))
+    const stats = sceneStats(wasmModule.value, text.value, style.value, Number(scale.value))
     scene.value = stats
     renderer.setScene(stats.data)
     applyVisibility()
@@ -81,6 +63,15 @@ function renderScene() {
   } catch (caught) {
     error.value = errorText(caught)
   }
+}
+
+function resetInspection() {
+  selection.value = []
+  measure.value = null
+  zone.value = null
+  brillouin.value = false
+  renderer?.setSelection([])
+  renderer?.hideBrillouin()
 }
 
 async function loadText(next: string, name: string, keepBase = false) {
@@ -93,9 +84,9 @@ async function loadText(next: string, name: string, keepBase = false) {
       baseLabel.value = name
     }
     label.value = name
-    inspection.value = inspect(wasm, next)
+    inspection.value = inspect(wasmModule.value, next)
     if (inspection.value.error) throw new Error(inspection.value.error)
-    pxrd.value = null
+    resetInspection()
     renderScene()
   } catch (caught) {
     error.value = errorText(caught)
@@ -125,16 +116,17 @@ async function restore() {
   if (baseText.value) await loadText(baseText.value, baseLabel.value, true)
 }
 
-async function run(name: string, params: Record<string, number> = {}) {
-  if (!wasm || !text.value) return
+async function run(name: string, params: Record<string, any> = {}) {
+  if (!wasmModule.value || !text.value) return
   busy.value = true
   error.value = ''
   try {
+    const wasm = wasmModule.value
     let result = ''
     if (name === 'supercell') {
-      result = wasm.supercell_text(text.value, params.na ?? na.value, params.nb ?? nb.value, params.nc ?? nc.value)
+      result = wasm.supercell_text(text.value, params.na ?? 2, params.nb ?? 2, params.nc ?? 2)
     } else if (name === 'slab') {
-      result = wasm.slab_text(text.value, params.h ?? h.value, params.k ?? k.value, params.l ?? l.value, params.layers ?? layers.value, params.vacuum ?? vacuum.value)
+      result = wasm.slab_text(text.value, params.h ?? 1, params.k ?? 0, params.l ?? 0, params.layers ?? 2, params.vacuum ?? 10)
     } else if (name === 'p1') {
       result = wasm.to_p1_text(text.value)
     } else if (name === 'asymmetrize') {
@@ -146,15 +138,25 @@ async function run(name: string, params: Record<string, number> = {}) {
     } else if (name === 'reduce') {
       result = wasm.reduce_text(text.value, 'niggli')
     } else if (name === 'graphene') {
-      result = wasm.build_graphene_text(params.nx ?? nx.value, params.ny ?? ny.value, 1, 3.35, 15)
+      result = wasm.build_graphene_text(params.nx ?? 4, params.ny ?? 4, 1, 3.35, 15)
     } else if (name === 'nanotube') {
-      result = wasm.build_nanotube_text(params.n ?? tubeN.value, params.m ?? tubeM.value, params.length ?? tubeLength.value, 10)
+      result = wasm.build_nanotube_text(params.n ?? 5, params.m ?? 5, params.length ?? 2, 10)
     } else if (name === 'c60') {
       result = wasm.build_c60_text()
     } else if (name === 'c20') {
       result = wasm.build_c20_text()
+    } else if (name === 'ribbon') {
+      result = wasm.build_ribbon_text(params.width ?? 6, params.length ?? 6, params.vacuum ?? 12)
+    } else if (name === 'twist') {
+      result = wasm.build_twist_text(params.n ?? 6, params.m ?? 0, params.theta ?? 21.8, params.layers ?? 2)
+    } else if (name === 'ztc') {
+      result = wasm.build_ztc_text(params.samples ?? 16, params.cell ?? 12, params.isovalue ?? 0)
+    } else if (name === 'schwarzite') {
+      result = wasm.build_schwarzite_text(params.samples ?? 16, params.cell ?? 12, params.isovalue ?? 0)
+    } else if (name === 'polymer') {
+      result = wasm.build_polymer_text(params.smiles ?? 'C=C', params.monomers ?? 8, params.density ?? 1.0)
     } else if (name === 'mof') {
-      result = wasm.build_mof_text(params.topology ?? topology.value, params.node ?? node.value, params.linker ?? linker.value)
+      result = wasm.build_mof_text(params.topology ?? 'pcu', params.node ?? 'Zn4O', params.linker ?? 'benzene')
     } else {
       throw new Error(`unknown operation ${name}`)
     }
@@ -166,14 +168,71 @@ async function run(name: string, params: Record<string, number> = {}) {
   }
 }
 
-function calculatePxrd() {
-  if (!wasm || !text.value) return
+function toggleBrillouin() {
+  if (!wasmModule.value || !renderer) return
+  if (brillouin.value) {
+    renderer.hideBrillouin()
+    brillouin.value = false
+    return
+  }
   try {
-    pxrd.value = wasm.pxrd_info(text.value, 'cu-ka', 60, 0.02)
+    zone.value = wasmModule.value.brillouin_zone(text.value)
+    renderer.showBrillouin(zone.value.vertices, zone.value.faces)
+    brillouin.value = true
     error.value = ''
   } catch (caught) {
     error.value = errorText(caught)
   }
+}
+
+function updateMeasure() {
+  renderer?.setSelection(selection.value)
+  measure.value = null
+  if (!wasmModule.value) return
+  const wasm = wasmModule.value
+  const [i, j, k, l] = selection.value
+  try {
+    if (selection.value.length === 2) {
+      measure.value = {
+        kind: 'distance (Å)',
+        value: wasm.distance(text.value, i, j),
+        indices: [...selection.value],
+      }
+    } else if (selection.value.length === 3) {
+      measure.value = {
+        kind: 'angle (deg)',
+        value: wasm.angle(text.value, i, j, k),
+        indices: [...selection.value],
+      }
+    } else if (selection.value.length === 4) {
+      measure.value = {
+        kind: 'torsion (deg)',
+        value: wasm.torsion(text.value, i, j, k, l),
+        indices: [...selection.value],
+      }
+    }
+  } catch (caught) {
+    error.value = errorText(caught)
+  }
+}
+
+function onCanvasClick(event: MouseEvent) {
+  if (!renderer || brillouin.value) return
+  const index = renderer.pick(event.clientX, event.clientY)
+  if (index === null) return
+  const position = selection.value.indexOf(index)
+  if (position >= 0) {
+    selection.value.splice(position, 1)
+  } else {
+    if (selection.value.length >= 4) selection.value.shift()
+    selection.value.push(index)
+  }
+  updateMeasure()
+}
+
+function selectAtoms(indices: number[]) {
+  selection.value = indices.slice(0, 4)
+  updateMeasure()
 }
 
 function download(name: string, contents: string, type: string) {
@@ -185,28 +244,35 @@ function download(name: string, contents: string, type: string) {
   URL.revokeObjectURL(link.href)
 }
 
-function downloadCif() {
-  download(`${summary.value?.name ?? 'structure'}.cif`, text.value, 'chemical/x-cif')
-}
-
-function downloadPng() {
-  if (!renderer) return
-  const link = document.createElement('a')
-  link.href = renderer.snapshot()
-  link.download = `${summary.value?.name ?? 'structure'}.png`
-  link.click()
-}
-
-function wyckoffOrbitMultiplicities(): number[] {
-  const seen = new Set<string>()
-  const values: number[] = []
-  for (const entry of inspection.value?.wyckoff ?? []) {
-    const key = `${entry.label}|${entry.letter}`
-    if (seen.has(key)) continue
-    seen.add(key)
-    values.push(Number(entry.multiplicity))
+function exportAs(kind: string) {
+  if (!wasmModule.value) return
+  const wasm = wasmModule.value
+  const base = summary.value?.name ?? 'structure'
+  try {
+    if (kind === 'cif') download(`${base}.cif`, text.value, 'chemical/x-cif')
+    if (kind === 'poscar') download(`${base}.poscar`, wasm.convert_structure(text.value, '', 'poscar'), 'text/plain')
+    if (kind === 'xyz') download(`${base}.xyz`, wasm.convert_structure(text.value, '', 'xyz'), 'text/plain')
+    if (kind === 'stl') download(`${base}.stl`, wasm.mesh_stl(text.value, style.value, Number(scale.value)), 'model/stl')
+    if (kind === 'scene') download(`${base}-scene.json`, JSON.stringify(scene.value?.data ?? {}, null, 2), 'application/json')
+    if (kind === 'png' && renderer) {
+      const link = document.createElement('a')
+      link.href = renderer.snapshot()
+      link.download = `${base}.png`
+      link.click()
+    }
+    error.value = ''
+  } catch (caught) {
+    error.value = errorText(caught)
   }
-  return values
+}
+
+async function toggleFullscreen() {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen()
+    else await viewer.value?.requestFullscreen()
+  } catch (caught) {
+    error.value = errorText(caught)
+  }
 }
 
 function state() {
@@ -216,9 +282,9 @@ function state() {
     summary: summary.value,
     bonds: inspection.value?.bondsCount ?? 0,
     ringStats: inspection.value?.ringStats ?? [],
-    symmetry: symmetry.value,
+    symmetry: inspection.value?.symmetry,
     wyckoff: inspection.value?.wyckoff.map((entry: any) => entry.letter) ?? [],
-    wyckoffOrbits: wyckoffOrbitMultiplicities(),
+    wyckoffOrbits: orbitMultiplicities(),
     scene: scene.value
       ? {
           atoms: scene.value.atoms,
@@ -235,23 +301,41 @@ function state() {
       inspection.value?.bonds.map((bond: any) => Number(bond.distance)) ?? [],
     cellEdges: scene.value?.data.cell_edges ?? [],
     projected: renderer?.projectAtoms() ?? [],
-    pxrd: pxrd.value,
+    selection: selection.value,
+    measure: measure.value,
+    brillouin: brillouin.value,
+    zone: zone.value
+      ? {
+          vertices: zone.value.vertices.length,
+          faces: zone.value.faces.length,
+          edges: zone.value.edges.length,
+        }
+      : null,
     base: baseText.value,
   }
+}
+
+function orbitMultiplicities(): number[] {
+  const seen = new Set<string>()
+  const values: number[] = []
+  for (const entry of inspection.value?.wyckoff ?? []) {
+    const key = `${entry.label}|${entry.letter}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    values.push(Number(entry.multiplicity))
+  }
+  return values
 }
 
 onMounted(async () => {
   if (!host.value) return
   renderer = new SceneRenderer(host.value)
+  document.addEventListener('fullscreenchange', () => {
+    fullscreen.value = document.fullscreenElement === viewer.value
+  })
   try {
-    wasm = await loadWasm()
-    const blocks = wasm.mof_blocks_info()
-    topologies.value = wasm.mof_topologies_info().map((item: any) => item.name)
-    nodes.value = blocks.filter((item: any) => item.kind === 'Node').map((item: any) => item.name)
-    linkers.value = blocks.filter((item: any) => item.kind === 'Linker').map((item: any) => item.name)
-    topology.value = topologies.value[0] ?? 'pcu'
-    node.value = nodes.value[0] ?? 'Zn4O'
-    linker.value = linkers.value[0] ?? 'benzene'
+    const module = await loadWasm()
+    wasmModule.value = module
     ready.value = true
     const params = new URLSearchParams(window.location.search)
     await loadSample(params.get('sample') ?? 'Si')
@@ -268,7 +352,7 @@ onMounted(async () => {
       await loadSample(id)
       return state()
     },
-    operation: async (name: string, params: Record<string, number> = {}) => {
+    operation: async (name: string, params: Record<string, any> = {}) => {
       await run(name, params)
       return state()
     },
@@ -285,9 +369,11 @@ onMounted(async () => {
       if (options.rotate !== undefined) autoRotate.value = options.rotate
       applyVisibility()
     },
+    selectAtoms,
+    toggleBrillouin,
+    brillouinZone: () => wasmModule.value.brillouin_zone(text.value),
     pxrd: (radiation = 'cu-ka') => {
-      pxrd.value = wasm.pxrd_info(text.value, radiation, 60, 0.02)
-      return pxrd.value
+      return wasmModule.value.pxrd_info(text.value, radiation, 60, 0.02)
     },
     state,
     screenshot: () => renderer?.snapshot() ?? '',
@@ -311,15 +397,14 @@ onBeforeUnmount(() => {
         </select>
       </label>
       <button :disabled="!ready || busy" @click="restore">Restore input</button>
-      <button :disabled="!ready || !text" @click="downloadCif">Download CIF</button>
       <span class="status">{{ ready ? (busy ? 'Working…' : label) : 'Loading the WebAssembly module…' }}</span>
+      <button v-if="!fullscreen" :disabled="!ready" @click="toggleFullscreen">Fullscreen</button>
     </div>
-
     <p v-if="error" class="error">{{ error }}</p>
 
     <div class="layout">
-      <div class="viewer">
-        <div ref="host" class="canvas-host" />
+      <div ref="viewer" class="viewer">
+        <div ref="host" class="canvas-host" @click="onCanvasClick" />
         <div class="view-controls">
           <label>
             Style
@@ -338,99 +423,78 @@ onBeforeUnmount(() => {
           <label class="check"><input v-model="showAxes" type="checkbox" @change="applyVisibility" /> Axes</label>
           <label class="check"><input v-model="autoRotate" type="checkbox" @change="applyVisibility" /> Rotate</label>
           <button :disabled="!ready" @click="renderer?.resetView()">Reset view</button>
-          <button :disabled="!ready" @click="downloadPng">PNG</button>
+          <button v-if="fullscreen" :disabled="!ready" @click="toggleFullscreen">Exit fullscreen</button>
         </div>
+        <p class="hint canvas-hint">
+          Click atoms to measure distance, angle or torsion. {{ brillouin ? 'Brillouin zone shown.' : '' }}
+        </p>
       </div>
-
       <aside class="panel">
-        <section v-if="summary" class="summary">
-          <h3>{{ summary.formula }}</h3>
-          <dl>
-            <div><dt>Cell volume</dt><dd>{{ summary.volume.toFixed(3) }} Å³</dd></div>
-            <div><dt>Density</dt><dd>{{ summary.density.toFixed(4) }} g/cm³</dd></div>
-            <div><dt>Sites</dt><dd>{{ summary.n_sites }} → {{ summary.n_atoms }} P1 atoms</dd></div>
-            <div><dt>Scene</dt><dd>{{ scene?.atoms ?? 0 }} atoms · {{ scene?.bonds ?? 0 }} bonds</dd></div>
-            <div><dt>Bonds</dt><dd>{{ inspection?.bondsCount ?? 0 }}</dd></div>
-            <div><dt>Rings ≤ 8</dt><dd>{{ ringText }}</dd></div>
-            <div><dt>Space group</dt><dd>{{ symmetry ? `${symmetry.number} ${symmetry.hm_symbol}` : '—' }}</dd></div>
-            <div><dt>Hall</dt><dd>{{ symmetry?.hall_number ?? '—' }}</dd></div>
-            <div><dt>Wyckoff</dt><dd>{{ wyckoffText }}</dd></div>
-          </dl>
-        </section>
-
-        <details open>
-          <summary>Transforms</summary>
-          <div class="row">
-            <label>a<input v-model.number="na" type="number" min="1" max="8" /></label>
-            <label>b<input v-model.number="nb" type="number" min="1" max="8" /></label>
-            <label>c<input v-model.number="nc" type="number" min="1" max="8" /></label>
-            <button :disabled="busy" @click="run('supercell')">Supercell</button>
-          </div>
-          <div class="row">
-            <label>h<input v-model.number="h" type="number" /></label>
-            <label>k<input v-model.number="k" type="number" /></label>
-            <label>l<input v-model.number="l" type="number" /></label>
-            <label>layers<input v-model.number="layers" type="number" min="1" /></label>
-            <label>vacuum<input v-model.number="vacuum" type="number" min="0" /></label>
-            <button :disabled="busy" @click="run('slab')">Slab</button>
-          </div>
-          <div class="row buttons">
-            <button :disabled="busy" @click="run('p1')">P1</button>
-            <button :disabled="busy" @click="run('asymmetrize')">Asymmetric unit</button>
-            <button :disabled="busy" @click="run('primitive')">Primitive</button>
-            <button :disabled="busy" @click="run('standardize')">Standardize</button>
-            <button :disabled="busy" @click="run('reduce')">Niggli</button>
-          </div>
-        </details>
-
-        <details>
-          <summary>Builders</summary>
-          <div class="row">
-            <label>nx<input v-model.number="nx" type="number" min="1" /></label>
-            <label>ny<input v-model.number="ny" type="number" min="1" /></label>
-            <button :disabled="busy" @click="run('graphene')">Graphene</button>
-            <button :disabled="busy" @click="run('c60')">C60</button>
-            <button :disabled="busy" @click="run('c20')">C20</button>
-          </div>
-          <div class="row">
-            <label>n<input v-model.number="tubeN" type="number" /></label>
-            <label>m<input v-model.number="tubeM" type="number" /></label>
-            <label>length<input v-model.number="tubeLength" type="number" min="1" /></label>
-            <button :disabled="busy" @click="run('nanotube')">Nanotube</button>
-          </div>
-          <div class="row">
-            <label>topology<select v-model="topology"><option v-for="item in topologies" :key="item">{{ item }}</option></select></label>
-            <label>node<select v-model="node"><option v-for="item in nodes" :key="item">{{ item }}</option></select></label>
-            <label>linker<select v-model="linker"><option v-for="item in linkers" :key="item">{{ item }}</option></select></label>
-            <button :disabled="busy" @click="run('mof')">MOF</button>
-          </div>
-        </details>
-
-        <details>
-          <summary>Powder pattern</summary>
-          <button :disabled="busy" @click="calculatePxrd">Calculate Cu Kα PXRD</button>
-          <table v-if="pxrdPeaks.length">
-            <thead><tr><th>hkl</th><th>2θ</th><th>d</th><th>I</th></tr></thead>
-            <tbody>
-              <tr v-for="peak in pxrdPeaks" :key="peak.hkl.join(',')">
-                <td>({{ peak.hkl.join(' ') }})</td>
-                <td>{{ peak.two_theta.toFixed(3) }}</td>
-                <td>{{ peak.d.toFixed(3) }}</td>
-                <td>{{ peak.intensity.toFixed(1) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </details>
-
-        <details>
-          <summary>Edit the input</summary>
-          <button @click="showText = !showText">{{ showText ? 'Hide' : 'Show' }} CIF / POSCAR / XYZ</button>
-          <textarea v-if="showText" v-model="text" rows="12" spellcheck="false" aria-label="Structure text" />
-          <button :disabled="busy || !showText" @click="loadText(text, 'Pasted structure')">Apply text</button>
-        </details>
+        <nav class="tabs">
+          <button
+            v-for="[id, title] in TABS"
+            :key="id"
+            :class="{ active: tab === id }"
+            @click="tab = id"
+          >{{ title }}</button>
+        </nav>
+        <PlaygroundStructurePanel
+          v-if="tab === 'structure'"
+          :wasm="wasmModule"
+          :text="text"
+          :inspection="inspection"
+          :scene="scene"
+          :busy="busy"
+          :label="label"
+          @operation="run"
+          @apply="(contents, name) => loadText(contents, name)"
+          @restore="restore"
+        />
+        <PlaygroundSymmetryPanel
+          v-else-if="tab === 'symmetry'"
+          :wasm="wasmModule"
+          :text="text"
+          :inspection="inspection"
+          :zone="zone"
+          :brillouin="brillouin"
+          :busy="busy"
+          @toggle-brillouin="toggleBrillouin"
+        />
+        <PlaygroundAnalysisPanel
+          v-else-if="tab === 'analysis'"
+          :wasm="wasmModule"
+          :text="text"
+          :inspection="inspection"
+          :selection="selection"
+          :measure="measure"
+          :busy="busy"
+          @apply="(contents, name) => loadText(contents, name)"
+          @clear-selection="selectAtoms([])"
+        />
+        <PlaygroundPowderPanel
+          v-else-if="tab === 'powder'"
+          :wasm="wasmModule"
+          :text="text"
+          :busy="busy"
+        />
+        <PlaygroundForcefieldPanel
+          v-else-if="tab === 'forcefield'"
+          :wasm="wasmModule"
+          :text="text"
+          :busy="busy"
+          @apply="(contents, name) => loadText(contents, name)"
+        />
+        <PlaygroundExportPanel
+          v-else
+          :summary="summary"
+          :scene="scene"
+          :label="label"
+          :text="text"
+          :busy="busy"
+          @download="exportAs"
+        />
       </aside>
     </div>
   </div>
 </template>
-
-<style scoped src="../playground/playground.css"></style>
+<style src="../playground/playground.css"></style>
