@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "Command-line interface for xtalforge."
+include = ["src/**"]
 
 [[bin]]
 name = "xtalforge"
@@ -18,6 +19,8 @@ path = "src/main.rs"
 
 [dependencies]
 clap = { workspace = true }
+clap_complete = { workspace = true }
+clap_mangen = { workspace = true }
 serde_json = { workspace = true }
 xtalforge = { workspace = true }
 
@@ -49,3 +52,6 @@ assets = [
   { source = "../../assets/xtalforge.png", dest = "/usr/share/icons/hicolor/256x256/apps/xtalforge.png", mode = "644" },
   { source = "../../assets/io.github.jigonzalez930209.xtalforge.appdata.xml", dest = "/usr/share/metainfo/io.github.jigonzalez930209.xtalforge.appdata.xml", mode = "644" },
 ]
+
+[package.metadata.docs.rs]
+all-features = true
