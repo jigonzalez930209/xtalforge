@@ -25,6 +25,7 @@ Pages are added with the feature that introduces them:
 - [CIF parsing](./cif) (Task 1.15)
 - [POSCAR and XYZ](./formats) (Task 1.16)
 - [Symmetry detection](./symmetry) (Task 2.1)
+- [Agent session and diagnostics](./agent) (Task 8.1)
 - [UFF and UFF4MOF](./uff) (Task 4.2)
 - [Charges and electrostatics](./charges) (Task 4.3)
 - [Optimization, scans and EOS](./optimization) (Task 4.4-4.5)
