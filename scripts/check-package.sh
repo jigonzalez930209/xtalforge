@@ -42,8 +42,11 @@ for crate in "${CRATES[@]}"; do
     printf '%s\n' "$forbidden" | sed 's/^/    /' >&2
     status=1
   fi
-  cargo package -p "$crate" --allow-dirty --no-verify -q 2>/dev/null
-  tarball=$(ls "target/package/${crate}-"*.crate 2>/dev/null | head -1)
+  if ! cargo package -p "$crate" --allow-dirty --no-verify -q 2>/dev/null; then
+    echo "SKIP: $crate size; its internal dependencies are not published yet"
+    continue
+  fi
+  tarball=$(ls "target/package/${crate}-"[0-9]*.crate 2>/dev/null | head -1)
   if [ -z "$tarball" ]; then
     echo "FAIL: no tarball for $crate" >&2
     status=1

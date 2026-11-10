@@ -85,11 +85,11 @@ check_lock() {
 check_readme() {
   [ -f "$README" ] || return 0
   local found
-  found=$(grep -oE 'xtalforge@[0-9]+\.[0-9]+\.[0-9]+' "$README" | head -n 1 | cut -d@ -f2)
+  found=$(grep -oE 'xtalforge@[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?' "$README" | head -n 1 | cut -d@ -f2)
   [ -z "$found" ] || [ "$found" = "$version" ] || report "README cargo version $found should be $version"
-  found=$(grep -oE 'xtalforge==[0-9]+\.[0-9]+\.[0-9]+' "$README" | head -n 1 | sed 's/.*==//')
+  found=$(grep -oE 'xtalforge==[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?' "$README" | head -n 1 | sed 's/.*==//')
   [ -z "$found" ] || [ "$found" = "$version" ] || report "README pip version $found should be $version"
-  found=$(grep -oE 'xtalforge-wasm@[0-9]+\.[0-9]+\.[0-9]+' "$README" | head -n 1 | cut -d@ -f2)
+  found=$(grep -oE 'xtalforge-wasm@[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?' "$README" | head -n 1 | cut -d@ -f2)
   [ -z "$found" ] || [ "$found" = "$version" ] || report "README npm version $found should be $version"
 }
 
@@ -126,9 +126,9 @@ PY
 
 write_readme() {
   [ -f "$README" ] || return 0
-  sed -i -E "s/(xtalforge@)[0-9]+\.[0-9]+\.[0-9]+/\1$version/g" "$README"
-  sed -i -E "s/(xtalforge==)[0-9]+\.[0-9]+\.[0-9]+/\1$version/g" "$README"
-  sed -i -E "s/(xtalforge-wasm@)[0-9]+\.[0-9]+\.[0-9]+/\1$version/g" "$README"
+  sed -i -E "s/(xtalforge@)[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?/\1$version/g" "$README"
+  sed -i -E "s/(xtalforge==)[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?/\1$version/g" "$README"
+  sed -i -E "s/(xtalforge-wasm@)[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?/\1$version/g" "$README"
 }
 
 if [ "$CHECK" -eq 1 ]; then

@@ -11,7 +11,7 @@ AGENTS="$ROOT/AGENTS.md"
 
 version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' "$CARGO" | head -n 1)
 line=$(grep -m 1 '^- Version:' "$AGENTS" || true)
-found=$(printf '%s\n' "$line" | sed -n 's/.*`\([^`]*\)`.*/\1/p')
+found=$(printf '%s\n' "$line" | sed -n 's/^- Version: `\([^`]*\)`.*/\1/p')
 
 if [ -z "$version" ] || [ -z "$found" ]; then
   echo "FAIL: could not read the workspace or AGENTS.md version" >&2
