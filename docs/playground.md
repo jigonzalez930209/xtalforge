@@ -1,3 +1,7 @@
+---
+aside: false
+---
+
 # 3D playground
 
 Build, transform and inspect a structure in the browser, then look at the
@@ -17,13 +21,22 @@ import Playground from './.vitepress/components/Playground.vue'
   MFI, MOF-5, iron) or paste any CIF, POSCAR or XYZ file.
 - **Transform**: supercell, slab (h k l, layers, vacuum), P1 expansion,
   asymmetric unit, primitive cell, standardized cell and Niggli reduction.
-- **Build**: graphene, nanotube `(n, m)`, C60, C20 and a MOF from the
-  topology/node/linker catalogue.
+- **Build**: graphene, nanotube `(n, m)`, C60, C20, nanoribbon, twisted
+  bilayer, ZTC, Schwarz P, polymer and a MOF from the topology/node/linker
+  catalogue.
 - **Analyse**: formula, cell volume, density, P1 atom count, bonds, primitive
-  rings up to eight atoms, detected space group, Hall number, Wyckoff letters
-  and a Cu Kα powder pattern.
+  rings up to eight atoms, detected space group, Hall number, Wyckoff letters,
+  tolerance ladder, diagnostics, Brillouin zone, band path, periodic
+  neighbours, functional groups, porosity, hydrogens and atom-picked
+  distance/angle/torsion.
+- **Force field**: UFF energy, atom types, QEq/EQeq charges, vibrations and a
+  UFF minimization that replaces the current structure.
+- **Powder**: Cu Kα and other radiations, a plotted pattern, peak table and
+  CSV export.
 - **View**: ball-and-stick, space-fill, wireframe and sticks, with the cell
-  edges, axes, orbit, zoom, rotation and PNG export.
+  edges, axes, orbit, zoom, rotation, atom selection, fullscreen and PNG
+  export.
+- **Export**: CIF, POSCAR, XYZ, STL, PNG, scene JSON and CSV.
 
 The 3D frame is the [`scene_data`](/api/view) geometry: atom positions,
 display radii, element colours, bond endpoints and the 12 cell-edge segments.
@@ -54,3 +67,12 @@ await window.__xf.ready
 const state = await window.__xf.operation('supercell', { na: 2, nb: 2, nc: 2 })
 window.__xf.setView({ azimuth: 0.9, elevation: 0.4, zoom: 1 })
 ```
+
+<style>
+body:has(.playground) .VPDoc .container,
+body:has(.playground) .VPDoc .content,
+body:has(.playground) .VPDoc .content-container {
+  max-width: 1440px !important;
+  width: 100%;
+}
+</style>
