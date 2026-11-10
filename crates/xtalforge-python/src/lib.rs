@@ -19,6 +19,7 @@ mod phase5;
 mod phase6;
 mod phase6_extra;
 mod phase7;
+mod plugins;
 mod structures;
 mod symmetry;
 mod symmetry_analysis;
@@ -344,5 +345,6 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(powder_supported_groups, module)?)?;
     module.add_function(wrap_pyfunction!(rietx, module)?)?;
     agent::register(module)?;
+    plugins::register(module)?;
     Ok(())
 }
