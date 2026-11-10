@@ -316,3 +316,29 @@ fn ewald_rejects_bad_counts_and_options() {
     );
     assert!(charges.is_err());
 }
+
+#[test]
+fn eqeq_matches_the_authors_program_on_mof5() {
+    let structure =
+        xtalforge_io::cif::read_cif(include_str!("../../../tests/corpus/cod/MOF-5.cif")).unwrap();
+    let charges = eqeq_charges(&structure, &ChargeOptions::eqeq()).unwrap();
+    let golden: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/eqeq/mof5_cod_authors_program.json")).unwrap();
+    let reference: Vec<f64> = golden["charges"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|value| value.as_f64().unwrap())
+        .collect();
+    assert_eq!(charges.per_atom.len(), reference.len());
+    let worst = charges
+        .per_atom
+        .iter()
+        .zip(reference.iter())
+        .map(|(ours, theirs)| (ours - theirs).abs())
+        .fold(0.0_f64, f64::max);
+    assert!(
+        worst < 1e-3,
+        "EQeq differs from the authors' program by {worst}"
+    );
+}
