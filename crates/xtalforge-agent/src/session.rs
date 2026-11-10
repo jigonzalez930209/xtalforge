@@ -2,7 +2,7 @@
 //!
 //! A session owns documents, runs verbs by name with JSON arguments and
 //! returns typed answers. Every mutation goes through
-//! [`xtalforge_commands::Document`] with [`Origin::Agent`], so the history and
+//! [`xtalforge_commands::Document`] with [`xtalforge_commands::Origin::Agent`], so the history and
 //! the change bursts are the same objects a user front end sees.
 
 use std::collections::BTreeMap;

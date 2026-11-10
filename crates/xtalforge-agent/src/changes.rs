@@ -1,7 +1,7 @@
 //! Change tracking (Task 8.1.4).
 //!
 //! The document keeps one [`CommandRecord`] per edit with its
-//! [`Origin`](xtalforge_commands::Origin). This module groups consecutive
+//! [`xtalforge_commands::Origin`]. This module groups consecutive
 //! edits made through the agent into bursts, so a user can review the
 //! assistant's work and undo it as a unit.
 //!
@@ -26,7 +26,7 @@ pub struct ChangeBurst {
 
 /// Groups the agent-origin runs of a command log.
 ///
-/// A run is consecutive records whose origin is [`Origin::Agent`]; a user or
+/// A run is consecutive records whose origin is [`xtalforge_commands::Origin::Agent`]; a user or
 /// script edit between two agent edits starts a new burst. The log only holds
 /// entries that were not trimmed from the undo stack.
 #[must_use]
