@@ -7,6 +7,13 @@ essential release, then `0.x.y`).
 
 ## Unreleased
 
+Nothing yet.
+
+## [1.0.0-rc.1] - 2026-11-10
+
+The first release candidate for 1.0.0. The public API is frozen; the
+stabilization period accepts fixes only, then `1.0.0` follows.
+
 ### Added
 
 - Phase 8 Task 8.5: distribution metadata. Every published crate has an
@@ -173,6 +180,16 @@ essential release, then `0.x.y`).
   the acoustic sum rule, a Monkhorst-Pack q-mesh, Gaussian phonon DOS and a
   phonopy spring-model golden comparison. An explicit `q_path` samples a band
   path.
+
+### Changed
+
+- The workspace version is `1.0.0-rc.1`; the facade now forwards `sci-form`
+  to `xtalforge-ff` and `xtalforge-agent` instead of declaring a no-op.
+- The agent crate joins the published set and the crates.io publication order
+  (after the domain crates, before the facade).
+- The WASM release budget is 3840 KiB (3767 KiB measured).
+- Python wheels are built for manylinux/musllinux (x86_64, aarch64), macOS
+  (x86_64, arm64) and Windows (x86_64), plus an sdist.
 
 ## [0.0.3] - 2026-11-09
 

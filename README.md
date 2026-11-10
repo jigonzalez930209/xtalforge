@@ -4,15 +4,12 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: Phases 0-7 are complete locally at the documented-subset level
-> (`0.0.1`, release prepared, nothing published yet). The core, symmetry, formats and commands,
-> force fields, analysis, builders and powder refinement work through the Rust
-> API, CLI, Python and WASM packages; the known reference gaps are listed in
-> [`docs/roadmap/index.md`](docs/roadmap/index.md). Phase 8 (agent and
-> distribution) is next. GitHub Actions remain disabled until the maintainer
-> enables them, so the release dry run and the name reservation are still
-> pending. The plan is in [`docs/roadmap`](docs/roadmap/index.md); the project
-> rules are in [`AGENTS.md`](AGENTS.md).
+> Status: `1.0.0-rc.1` release candidate. Phases 0-8 are implemented and the
+> public API is frozen; `0.0.3` was the last published release and `v1.0.0`
+> follows the fixes-only stabilization period. The known reference gaps are
+> listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
+> [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
+> [`AGENTS.md`](AGENTS.md).
 
 ## What works today
 
@@ -30,17 +27,21 @@ parity with the Rust API.
 - Analysis and builders: PXRD, porosity, isosurfaces, nets, RCSR matching,
   graphene, nanotubes, fullerenes, SMILES embedding, polymers, MOF assembly
   and powder refinement.
+- Agent layer: session verbs, diagnostics, change bursts, SVG/PNG pictures,
+  MCP over stdio and skill documents; open extension registries.
+- Machine learning: the Python ASE bridge for MACE, ORB-v3 and MatterSim, with
+  a checksum-verified model cache.
 - Four surfaces at parity, with documented exceptions for the filesystem,
   subprocesses and threads in WASM. See `docs/api/parity.md`.
 
 ## Install
 
-Nothing is published yet. After the first release the commands will be:
+Install the release candidate:
 
 ```bash
-cargo add xtalforge@0.0.3
-pip install xtalforge==0.0.3
-npm install xtalforge-wasm@0.0.3
+cargo add xtalforge@1.0.0-rc.1
+pip install xtalforge==1.0.0-rc.1
+npm install xtalforge-wasm@1.0.0-rc.1
 ```
 
 ## Goals
