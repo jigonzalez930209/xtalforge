@@ -24,6 +24,7 @@ pub mod advanced;
 pub mod block;
 pub mod build;
 pub mod error;
+mod fit;
 pub mod orient;
 pub mod topology;
 
@@ -32,7 +33,10 @@ pub use advanced::{
     invent_linker, linkers_by_span, merge_frameworks, partition_pore_space,
 };
 pub use block::{Block, BlockKind, blocks, find_block};
-pub use build::{BuiltMof, MofRequest, build_mof, build_request_json};
+pub use build::{
+    BuiltMof, CLOSE_CONTACT, LINKER_SCALE_MAX, LINKER_SCALE_MIN, MofRequest, build_mof,
+    build_request_json,
+};
 pub use error::Error;
 pub use orient::node_oriented;
 pub use topology::{Topology, find_topology, topologies};

@@ -41,10 +41,20 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use xtalforge_core::{Lattice, Site, Structure, StructureBuilder, TopologyBond};
 
-use crate::block::{Block, BlockKind, find_block};
+use crate::block::{BlockKind, find_block};
 use crate::error::Error;
+use crate::fit::{fit_cell_scale, scaled_lattice, widest_connection_pair};
 use crate::orient::{self, Slot};
 use crate::topology::{Topology, find_topology};
+
+/// Smallest linker scale that is reported as an acceptable fit.
+pub const LINKER_SCALE_MIN: f64 = 0.8;
+/// Largest linker scale that is reported as an acceptable fit.
+pub const LINKER_SCALE_MAX: f64 = 1.25;
+
+/// Distance in Angstrom below which two atoms of a built framework are reported
+/// as overlapping.
+pub const CLOSE_CONTACT: f64 = 0.9;
 
 /// A request to build one framework.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -131,28 +141,19 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
     node.validate()?;
     linker.validate()?;
 
-    let lattice = topology.lattice()?;
-    let node_cart: Vec<[f64; 3]> = topology
-        .nodes
-        .iter()
-        .map(|fractional| lattice.to_cart(*fractional))
-        .collect();
+    let base_lattice = topology.lattice()?;
     let mut warnings = Vec::new();
+    let mut degree_mismatch: Vec<(usize, usize)> = Vec::new();
+    let mut scale_range = (f64::INFINITY, 0.0_f64);
     let mut rotations = Vec::with_capacity(topology.nodes.len());
     let mut assignments = vec![[None, None]; topology.edges.len()];
     let mut atoms: Vec<(String, [f64; 3])> = Vec::new();
     let mut seen = BTreeSet::new();
 
     for vertex in 0..topology.nodes.len() {
-        let slots = incident_slots(&topology, vertex, lattice);
+        let slots = incident_slots(&topology, vertex, base_lattice);
         if slots.len() != node.connection_count() {
-            warnings.push(format!(
-                "topology `{}` vertex {vertex} has degree {} but node block `{}` has {} connection points",
-                topology.name,
-                slots.len(),
-                node.name,
-                node.connection_count()
-            ));
+            degree_mismatch.push((vertex, slots.len()));
         }
         let rotation = match mean_slot_direction(&slots) {
             Some(direction) => orient::node_oriented(&node, direction)?,
@@ -173,7 +174,33 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
                 *value = Some(*connection);
             }
         }
-        let anchor = node_cart.get(vertex).copied().unwrap_or([0.0; 3]);
+    }
+
+    if let Some((vertex, degree)) = degree_mismatch.first().copied() {
+        warnings.push(format!(
+            "topology `{}`: {} of {} vertices have a degree different from the {} connection points of node block `{}` (for example vertex {vertex} has degree {degree}); edges without a connection point are skipped",
+            topology.name,
+            degree_mismatch.len(),
+            topology.nodes.len(),
+            node.connection_count(),
+            node.name
+        ));
+    }
+
+    let cell_scale = fit_cell_scale(
+        &topology,
+        base_lattice,
+        &rotations,
+        &assignments,
+        &node,
+        &linker,
+    );
+    let lattice = scaled_lattice(base_lattice, cell_scale)?;
+    for (vertex, fractional) in topology.nodes.iter().enumerate() {
+        let anchor = lattice.to_cart(*fractional);
+        let Some(rotation) = rotations.get(vertex).copied() else {
+            continue;
+        };
         for (point, element) in node.points.iter().zip(node.elements.iter()) {
             let world = orient::add(anchor, orient::matrix_apply(rotation, *point));
             push_atom(element, world, lattice, &mut atoms, &mut seen);
@@ -268,6 +295,7 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
         };
         let linker_rotation = orient::rotation_from_to(span_direction, direction);
         let scale = gap / span;
+        scale_range = (scale_range.0.min(scale), scale_range.1.max(scale));
         for (point, element) in linker.points.iter().zip(linker.elements.iter()) {
             let offset = orient::sub(*point, *local_start);
             let world = orient::add(
@@ -278,11 +306,21 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
         }
     }
 
+    if scale_range.0.is_finite()
+        && (scale_range.0 < LINKER_SCALE_MIN || scale_range.1 > LINKER_SCALE_MAX)
+    {
+        warnings.push(format!(
+            "linker `{}` is scaled by {:.2} to {:.2} to fit the fixed `{}` cell; outside {LINKER_SCALE_MIN}-{LINKER_SCALE_MAX} the linker geometry is distorted and atoms may overlap",
+            linker.name, scale_range.0, scale_range.1, topology.name
+        ));
+    }
+
     let name = format!("{}-{}-{}", topology.name, node.name, linker.name);
     let mut builder = StructureBuilder::new(name, lattice)
         .metadata("topology", Value::String(topology.name.clone()))
         .metadata("node", Value::String(node.name.clone()))
-        .metadata("linker", Value::String(linker.name.clone()));
+        .metadata("linker", Value::String(linker.name.clone()))
+        .metadata("cell_scale", Value::from(cell_scale));
     for (index, (element, fractional)) in atoms.iter().enumerate() {
         builder = builder.site(Site::new(
             format!("{element}{}", index + 1),
@@ -300,6 +338,19 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
         });
     }
     let structure = builder.build()?;
+    if linker.connection_count() > 2 {
+        warnings.push(format!(
+            "linker `{}` has {} connection points but spans each edge with its widest pair only; the other arms are left dangling",
+            linker.name,
+            linker.connection_count()
+        ));
+    }
+    let close = xtalforge_core::neighbors(&structure, CLOSE_CONTACT)?.len();
+    if close > 0 {
+        warnings.push(format!(
+            "{close} atom pairs are closer than {CLOSE_CONTACT} Angstrom; the node orientation is a greedy fit, so the geometry needs editing before use"
+        ));
+    }
     Ok(BuiltMof {
         structure,
         topology: topology.name,
@@ -358,19 +409,6 @@ fn mean_slot_direction(slots: &[Slot]) -> Option<[f64; 3]> {
         }
     }
     orient::normalize(sum).or(first)
-}
-
-fn widest_connection_pair(block: &Block) -> Option<(usize, usize)> {
-    let mut best: Option<(f64, usize, usize)> = None;
-    for (first, point) in block.connection_points.iter().enumerate() {
-        for (second, other) in block.connection_points.iter().enumerate().skip(first + 1) {
-            let distance = orient::norm(orient::sub(*other, *point));
-            if best.is_none_or(|(value, _, _)| distance > value + 1e-12) {
-                best = Some((distance, first, second));
-            }
-        }
-    }
-    best.map(|(_, first, second)| (first, second))
 }
 
 fn push_atom(
