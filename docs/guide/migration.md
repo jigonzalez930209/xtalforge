@@ -22,7 +22,7 @@ differences that will bite a script.
 | `builder/` (or `build/`) | `xtalforge-build` | molecules, carbon, polymers, hydrogens, fragments |
 | `mof/` (PORMAKE port) | `xtalforge-mof` | curated topology/block subset, not the full database |
 | `analysis/` (PXRD, grids, porosity, nets) | `xtalforge-analysis` | RCSR index embedded |
-| `powder/` (indexing, Le Bail, Pawley, Rietveld) | `xtalforge-analysis` and `xtalforge-powder` surfaces | refinement ranks are documented per page |
+| `powder/` (indexing, Le Bail, Pawley, Rietveld) | `xtalforge-analysis` (modules `indexing`, `lebail`, `pawley`, `rietveld`) and `xtalforge powder ...` | there is no separate powder crate; refinement ranks are documented per page |
 | `modules/`, `workspace/` | `xtalforge-modules` | on-disk runs and reports |
 | `agent/` | `xtalforge-agent` | verbs, session, diagnostics, MCP, skill |
 | `plugins.py` | `xtalforge` registries and Python `Plugins` | no global loader |
@@ -43,7 +43,7 @@ differences that will bite a script.
 | `bonds` | `xtalforge bonds` | graph with periodic images |
 | `types` | `xtalforge ff types` | UFF atom types and confidence |
 | `formats` | `xtalforge formats` | registry and capabilities |
-| `modules` | `xtalforge modules` (through the module APIs) | the CLI reads `run.json` directly |
+| `modules` | `xtalforge-modules` Rust API | no CLI command; the registry, jobs and run records are library-only |
 | `engines` | `xtalforge ff engines` | probe result per engine |
 | `run` | `xtalforge script` | JSON command list, undoable |
 | builders | `xtalforge build ...`, `xtalforge mof ...` | names differ; `--help` lists the options |

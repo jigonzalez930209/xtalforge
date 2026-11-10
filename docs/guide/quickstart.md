@@ -38,7 +38,8 @@ with `--out`. `--json` switches every command to a JSON object.
 ```python
 import xtalforge
 
-summary = xtalforge.structure_info(open("structure.cif").read())
+structure = xtalforge.Structure.from_cif(open("structure.cif").read())
+summary = structure.summary()
 info = xtalforge.element_info("Fe")
 volume = xtalforge.cell_volume(3, 4, 5, 60, 70, 80)
 ```
@@ -49,9 +50,9 @@ local development wheel is built with `maturin build --release`.
 ## WebAssembly
 
 ```js
-import init, { structure_info, version } from "xtalforge-wasm";
+import init, { read_cif, version } from "xtalforge-wasm";
 await init();
-const summary = structure_info(cifText);
+const summary = read_cif(cifText); // name, formula, hall, n_sites, volume, ...
 ```
 
 The browser demo in [Demos](/demos/) runs the same package offline. The
