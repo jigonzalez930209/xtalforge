@@ -62,6 +62,7 @@ cargo deny check
 maturin build --release --manifest-path crates/xtalforge-python/Cargo.toml
 python -m mypy --strict crates/xtalforge-python/python/xtalforge
 scripts/check-wasm-size.sh
+(cd crates/xtalforge-wasm && wasm-pack test --node && wasm-pack test --headless --chrome)
 scripts/check-parity.sh
 scripts/check-api-docs.sh
 cd docs && npm install && npm run docs:build
