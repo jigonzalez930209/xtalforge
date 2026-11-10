@@ -145,7 +145,7 @@ pub(crate) fn brillouin_zone<'py>(
 ) -> PyResult<Bound<'py, PyDict>> {
     let structure = load_structure(text, format_hint)?;
     let zone =
-        xtalforge::symmetry::brillouin_zone(structure.lattice()).map_err(crate::map_error)?;
+        xtalforge::symmetry::brillouin_zone_for_structure(&structure).map_err(crate::map_error)?;
     let dict = PyDict::new(py);
     dict.set_item(
         "vertices",
