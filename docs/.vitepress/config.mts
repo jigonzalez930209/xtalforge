@@ -1,4 +1,7 @@
 import { defineConfig } from 'vitepress'
+import { fileURLToPath } from 'node:url'
+
+const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url))
 
 const roadmapItems = [
   { text: 'Overview', link: '/roadmap/' },
@@ -22,6 +25,17 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   markdown: { math: true },
+  vite: {
+    server: {
+      fs: {
+        // The WASM package is a file dependency outside the docs root; the
+        // development server must be allowed to read the repository.
+        allow: [repositoryRoot],
+      },
+    },
+    optimizeDeps: { exclude: ['xtalforge-wasm'] },
+    assetsInclude: ['**/*.wasm'],
+  },
   editLink: {
     pattern: 'https://github.com/jigonzalez930209/xtalforge/edit/main/docs/:path',
     text: 'Edit this page on GitHub',
