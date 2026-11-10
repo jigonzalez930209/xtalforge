@@ -115,7 +115,9 @@ rules are on the [indexing algorithm page](../algorithms/indexing.md).
 `powder index --general` prints the ranked metric families,
 `--background`/`--refine-peaks` control peak detection, `powder pawley`
 prints the full fit with Rwp and esds, and `powder rietveld --refine` runs the
-McCusker stages (`--occupancies` and `--texture` add those parameters). Python `powder_index`, `powder_pawley`,
+McCusker stages (`--occupancies` and `--texture` add those parameters;
+`--no-doublet` models one wavelength instead of the Cu K alpha 1/K alpha 2
+doublet that the CLI uses by default, as Python's `doublet=False` does). Python `powder_index`, `powder_pawley`,
 `powder_automatic`, `powder_refine`, `powder_cells`, `rietx`; WASM
 `powder_index_info`, `powder_pawley_info`, `powder_automatic_info`,
 `powder_refine_info`, `powder_cells_info`, `rietx_inventory_info`.
