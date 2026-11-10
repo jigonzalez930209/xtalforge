@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Checks the release WASM size against the budget (Task 0.5.5).
 #
-# 3840 KiB since Phase 8: the agent session, its diagnostics and the PNG
-# renderer add functions every surface exports, and the 3648 KiB budget from
-# Phase 7 no longer fits (3775 KiB before this bump).
+# 3904 KiB since the 3D playground: scene_data, n_atoms, the text-returning
+# builders and the Brillouin-zone fix add exported surface (3845 KiB measured);
+# the Phase 8 budget of 3840 KiB no longer fits.
 #
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
@@ -12,7 +12,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=3840
+BUDGET_KIB=3904
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
