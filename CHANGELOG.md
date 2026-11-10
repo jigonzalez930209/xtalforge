@@ -46,6 +46,13 @@ essential release, then `0.x.y`).
   single-wavelength pattern drove the ADP multiplier to its bound; the new
   `--no-doublet` flag matches Python's `doublet=False`.
 
+- `powder automatic` / `run_automatic`: the peak search did not subtract the
+  background, so on a noisy pattern with a raised baseline every noise maximum
+  was a peak, the indexing returned a wrong cell (16.5 Angstrom for NaCl) and
+  the run did not finish in five minutes in a release build. It now subtracts a
+  SNIP background and applies a noise-based threshold; the same pattern runs in
+  2.4 s and returns Fm-3m first.
+
 ### Documentation
 
 - Added 29 diagrams with one shared style under `docs/public/diagrams/`
