@@ -28,12 +28,18 @@ essential release, then `0.x.y`).
   multiple of the true cell (NaCl returned 7.94 Angstrom); the smallest cell
   among equally good candidates is now chosen.
 
+### Tests
+
+- `xtalforge-wasm` has a browser suite (`tests/browser.rs`) that runs with
+  `wasm-pack test --headless --chrome`; the Node suites are unchanged.
+
 ### Documentation
 
-- Added 15 diagrams with one shared style under `docs/public/diagrams/`
-  (animated SVG; lattice, neighbour search, supercell, slab, bonding, rings,
-  P1 expansion, UFF terms, optimisation, Ewald split, Bragg/PXRD, powder
-  pipeline, nets, MOF assembly, vibrations) and embedded them in the matching
+- Added 29 diagrams with one shared style under `docs/public/diagrams/`
+  (animated SVG; every procedure page: lattice, neighbours, supercell, slab,
+  bonding, rings, P1, CIF, formats, prepare, UFF, optimisation, Ewald,
+  PXRD, indexing, Le Bail, Pawley, Rietveld, extinction, symmetry, nets, MOF,
+  carbon builders, vibrations, limits, validation, agent, measures) and embedded them in the matching
   algorithm pages.
 - Audited the algorithm and API pages against the code. Corrected the powder
   instrument description (no wavelength or Caglioti terms), the distance-grid
