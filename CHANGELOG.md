@@ -9,6 +9,24 @@ essential release, then `0.x.y`).
 
 ### Added
 
+- Phase 8 Task 8.5: distribution metadata. Every published crate has an
+  `include` allow-list (src, its own data bundle, the agent skill), docs.rs
+  metadata, and `scripts/check-package.sh` checks the tarballs and the 12 MB
+  ceiling. The release workflow builds abi3 wheels for manylinux/musllinux
+  (x86_64, aarch64), macOS (x86_64, arm64) and Windows; `xtalforge` gains
+  `completions <shell>` and `man`; crates.io publication includes the agent
+  crate.
+- Phase 8 Task 8.6: regression benchmarks for symmetry, UFF, PXRD and the
+  distance grid with `scripts/check-bench-budget.sh`, determinism tests across
+  threads, a deterministic mutation harness for every text parser and the
+  project archive, and a limits audit at and beyond every budget.
+- Phase 8 Task 8.7: tutorials for eight end-to-end workflows, the
+  Crystal-Builder migration guide, and consolidated algorithm pages for
+  analysis, builders, the MOF builder, the powder pipeline and modules with a
+  coverage index.
+- Phase 8 Task 8.8: the API stability and SemVer page, a compile-time freeze
+  test for representative signatures, and a closed parity matrix with every
+  exception recorded.
 - Phase 8 Task 8.4: the machine-learning bridge and model cache. Python
   `MlCalculator` wraps any ASE calculator (MACE, ORB-v3, MatterSim) and maps
   energy, forces and stress to eV, eV/Angstrom and GPa; `ml_backends()` probes

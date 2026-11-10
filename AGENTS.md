@@ -273,11 +273,18 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
 - Current phase: Phase 8 — Agent and distribution
-  (`docs/roadmap/phase-08-distribution.md`); no Phase 8 subtask is implemented
-  yet. Phases 1-7 are complete and released at `0.0.3`; the remaining
-  reference gaps (phonon q-mesh, preparation steps, general indexing, profile
-  simplifications and others) are listed in `docs/roadmap/index.md` under
-  "Known subsets". `0.0.2` carried the linked-cell neighbor search, grid-based
+  (`docs/roadmap/phase-08-distribution.md`). Tasks 8.1-8.7 are implemented:
+  the `xtalforge-agent` crate (verbs, session, diagnostics, change bursts,
+  SVG/PNG renderer, MCP over stdio, skill documents), the open extension
+  registries and `examples/plugin`, the Python ML bridge with the model cache,
+  distribution metadata and package checks, benchmarks, robustness/limits
+  tests, tutorials, the migration guide and the algorithm coverage page.
+  Tasks 8.8.1 and 8.8.2 are done (stability policy, freeze test and parity
+  closure); Task 8.8.3 (the `v1.0.0-rc.1` tag and publication) is waiting for
+  the maintainer release decision and registry credentials. Phases 1-7 are
+  complete and released at `0.0.3`; the remaining reference gaps (phonon
+  q-mesh, preparation steps, general indexing, profile simplifications and
+  others) are listed in `docs/roadmap/index.md` under "Known subsets". `0.0.2` carried the linked-cell neighbor search, grid-based
   P1/supercell deduplication and the Linux desktop/AppStream fix; `0.0.3`
   adds the full-corpus bond validation, periodic Franzblau rings, the CIF
   round-trip fields and lazy XYZ/XDATCAR trajectories.
@@ -307,8 +314,11 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   publication.
 - Testing: integration tests live in `crates/<crate>/tests/` (AGENTS.md
   section 2.2). Shared vectors are in `tests/vectors/`, the curated corpus in
-  `tests/corpus/`, and the Crystal-Builder golden data in `tests/golden/`
-  (Phase 1 generated; later phases add their own directories).
+  `tests/corpus/`, the Crystal-Builder golden data in `tests/golden/`, and the
+  external data sets in `tests/external/` (CoRE MOF 2019 and tmQM 2024
+  subsets, with licenses and citations in their READMEs). The agent tests add
+  the verb catalogue, session, diagnostics, MCP, skill, renderer, MCP JSON-RPC
+  and the ML bridge golden data.
 - Data policy: embedded bundles live inside the owning crate
   (`crates/<crate>/data/`) so `cargo package` carries them; the workspace
   `data/` holds canonical files, external bundles and repository-only assets.
@@ -316,9 +326,10 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 - Workspace members (Task 0.1.1, extended by later phases): `xtalforge-core`,
   `xtalforge-symmetry`, `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`,
   `xtalforge-ff`, `xtalforge-analysis`, `xtalforge-build`, `xtalforge-mof`,
-  `xtalforge-modules`, the facade `xtalforge`, `xtalforge-cli`,
-  `xtalforge-python`, `xtalforge-wasm` and the test crate
-  `xtalforge-testkit`. Rust edition 2024, MSRV 1.89, license
+  `xtalforge-modules`, `xtalforge-agent`, the facade `xtalforge`,
+  `xtalforge-cli`, `xtalforge-python`, `xtalforge-wasm`, the test crate
+  `xtalforge-testkit` and the unpublished example crate
+  `xtalforge-plugin-example` under `examples/plugin`. Rust edition 2024, MSRV 1.89, license
   `MIT OR Apache-2.0` (`LICENSE-MIT`, `LICENSE-APACHE`).
 - Decisions taken (2026-11-08): name `xtalforge`; symmetry through `moyo`
   (0.22, MIT OR Apache-2.0) behind our own types, subject to the audit in
