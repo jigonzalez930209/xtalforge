@@ -1275,6 +1275,7 @@ dependencies = [
  "sci-form",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror",
  "xtalforge-build",
  "xtalforge-core",
