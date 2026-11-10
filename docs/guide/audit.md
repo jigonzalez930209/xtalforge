@@ -42,7 +42,8 @@ It also covers:
   reduction;
 - graphene, `(5, 5)` nanotubes, C60, C20 and a `pcu` MOF;
 - Cu Kα PXRD peak positions for Si, NaCl, TiO2, Fe and graphene;
-- deterministic screenshots for eight samples and seven operations;
+- deterministic screenshots for eight samples, six operations and the
+  space-fill style;
 - the cell-volume, CIF-inspector and document-editor demos.
 
 ## Findings fixed by the audit
