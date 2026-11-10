@@ -18,6 +18,13 @@ under which licence, and what it can and cannot prove.
 | sci-form UFF (`sci-form`, MIT) | MIT | UFF total energy on methane and stretched water | `external_validation.rs`, within `1e-4` kcal/mol |
 | DFTB+ recorded Si SCC output (`tests/fixtures/dftb`) | MIT / recorded output | energy, forces, stress parser | `external.rs`, energy `-69.2989 eV` |
 | Analytic spring phonon model (`tests/golden/phase-4/phonons`) | project | q-mesh folding and dispersion | `phonons.rs` |
+| CoRE MOF 2019 subset (`tests/external/core_mof/`, 18 CIF) | CC BY 4.0 (Zenodo 14184621) | CIF parsing, P1 expansion, cell volume, formula, bonding, porosity and PXRD on charged and mixed-metal frameworks | `crates/xtalforge-io/tests/external_core_mof.rs`, `crates/xtalforge-analysis/tests/external_core_mof.rs` |
+| tmQM 2024 subset (`tests/external/tmqm/`, 18 XYZ) | MIT repository licence; citation in that directory's README | XYZ parsing and stoichiometry, perceived metal coordination, UFF/UFF4MOF types and forces for Sc-Ir | `crates/xtalforge-io/tests/external_tmqm.rs`, `crates/xtalforge-ff/tests/external_tmqm.rs` |
+
+The CoRE MOF and tmQM subsets are the **production data sets** in the table:
+the files are unmodified structures from the public archives, with the
+archives' own formula, volume and stoichiometry used as external checks. They
+are 256 KB and 76 KB; the full archives are not redistributed.
 
 The EQeq and UFF comparisons are the two that use a **different program** on
 the same coordinates. The rutile tables use Crystal-Builder's powder bridge,
@@ -31,21 +38,27 @@ repository yet; the licence and the download size must be checked before it is.
 
 | Source | What it would validate | Status |
 |---|---|---|
-| CoRE MOF 2019/2024 | framework porosity, MOF assembly, topology | licence and size to verify; no bundle |
-| QMOF | quantum MOF geometries and properties | CC BY 4.0; not downloaded |
-| tmQM | transition-metal complex geometries | CC BY 4.0; not downloaded |
-| Materials Project | structures, phonons, elastic constants | CC BY 4.0; API key and download policy |
-| NIST SRM 640/660 | PXRD line positions and instrument profiles | certified reference material, redistribution to verify |
-| RRUFF | mineral XRD/Raman references | non-commercial terms to verify |
-| AMCSD | mineral structures and powder patterns | public-domain status to verify |
-| Phonopy example cells | phonon dispersions and DOS | BSD; small, a good next addition |
-| DFTB+ test suite | HSD/output coverage | licence to verify; one recorded output already covers the parser |
-| xTB benchmark sets | GFN0/GFN1/GFN2 energies and geometries | licences vary by set; the in-process methods are compared with sci-form |
+| CoRE MOF 2019/2024 (full archive) | framework porosity, MOF assembly, topology | CC BY 4.0; the 81 MB archive is downloadable and the 18-CIF subset is bundled; the rest is not redistributed |
+| tmQM (full release) | transition-metal geometries | MIT repository licence; the 65 MB archive is downloadable and the 18-complex subset is bundled |
+| QMOF | quantum MOF geometries and properties | MIT repository licence, CC BY 4.0 data; the 392 MB archive is not bundled (the geometry checks are covered by CoRE MOF) |
+| Materials Project | structures, phonons, elastic constants | terms page returned 403 and an API key is required; licence not verified, not bundled |
+| NIST SRM 640/660 | PXRD line positions and instrument profiles | certified reference material; redistribution terms not verified, not bundled |
+| RRUFF | mineral XRD/Raman references | non-commercial terms; not bundled |
+| AMCSD | mineral structures and powder patterns | public-domain status not verified; not bundled |
+| Phonopy example cells | phonon dispersions and DOS | BSD-3-Clause; not bundled: no force-constant reference to compare against, the analytic spring golden covers the implementation |
+| DFTB+ test suite | HSD/output coverage | LGPL-3.0 code and CC BY-SA 4.0 docs; not copied, one recorded SCC output covers the parser |
+| xTB benchmark sets | GFN0/GFN1/GFN2 energies and geometries | licences vary by set; the in-process methods are compared with sci-form instead |
 
 ## What the current suite does not prove
 
-- UFF is compared on two small molecules. A metal-organic framework would
-  exercise the UFF4MOF metal types and periodic van der Waals lists.
+- UFF is compared numerically with sci-form on two small molecules. On CoRE
+  MOF and tmQM only the build, typing and finiteness are checked: no published
+  UFF energy exists for those structures. The tmQM subset does cover one
+  complex for each of 18 metals, Sc through Ir.
+- EQeq is compared on one framework and uses no external reference on tmQM
+  (the reference program has no ionisation data for several of those
+  environments); the parameter table's coverage beyond Zn/O/C/H is checked
+  only for neutrality and sign.
 - EQeq is compared on one framework. The parameter table's elements beyond
   Zn/O/C/H are only checked for neutrality and sign.
 - PXRD uses the reference's rutile pattern; a measured instrument profile
