@@ -5,6 +5,7 @@
 //! flags, emits one JSON value in `--json` mode and reports runtime failures
 //! with exit code 3.
 
+mod agent_commands;
 mod analysis_commands;
 mod analyze;
 mod args;

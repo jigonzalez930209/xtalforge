@@ -61,3 +61,12 @@ impl StructureFormat {
         }
     }
 }
+
+/// A picture format the CLI can write.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
+pub(crate) enum PictureFormat {
+    /// Vector document.
+    Svg,
+    /// Raster image.
+    Png,
+}

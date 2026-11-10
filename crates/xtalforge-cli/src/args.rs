@@ -39,6 +39,30 @@ pub(crate) enum ProjectAction {
 pub(crate) enum Command {
     /// Print the xtalforge version.
     Version,
+    /// Report the features, engines, data bundles and verbs of this installation.
+    Capabilities,
+    /// Draw a structure to SVG or PNG.
+    Render {
+        /// Input path, or `-` for standard input.
+        path: String,
+        /// Output path; defaults to standard output.
+        #[arg(long, value_name = "PATH")]
+        out: Option<String>,
+        /// Picture format.
+        #[arg(long, value_enum, default_value_t = crate::format::PictureFormat::Svg)]
+        format: crate::format::PictureFormat,
+        /// Width in pixels.
+        #[arg(long, default_value_t = 800)]
+        width: u32,
+        /// Height in pixels.
+        #[arg(long, default_value_t = 600)]
+        height: u32,
+    },
+    /// Run a JSON list of agent verbs against one session.
+    Agent {
+        /// Script path, or `-` for standard input.
+        path: String,
+    },
     /// Add the hydrogens an X-ray structure is missing.
     Hydrogens {
         /// Input path, or `-` for standard input.
