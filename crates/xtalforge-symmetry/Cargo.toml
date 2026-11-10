@@ -11,6 +11,7 @@ authors.workspace = true
 keywords.workspace = true
 categories.workspace = true
 description = "Symmetry types, space-group operations and reductions for xtalforge."
+include = ["src/**", "data/**"]
 
 [dependencies]
 moyo = { workspace = true }
@@ -29,3 +30,10 @@ parallel = ["dep:rayon"]
 
 [lints]
 workspace = true
+
+[[bench]]
+name = "detection"
+harness = false
+
+[package.metadata.docs.rs]
+all-features = true
