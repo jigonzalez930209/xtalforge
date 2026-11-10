@@ -33,6 +33,13 @@ essential release, then `0.x.y`).
 - `xtalforge-wasm` has a browser suite (`tests/browser.rs`) that runs with
   `wasm-pack test --headless --chrome`; the Node suites are unchanged.
 
+- `mof build`: the topology cell was fixed, so a long linker was squashed (0.45x
+  for stilbene in `pcu`) and thousands of atoms overlapped; the builder now
+  fits a uniform cell scale to the linker (`cell_scale` metadata). A node with
+  the wrong connection count, a linker with more than two arms, a linker scale
+  outside 0.8-1.25 and atom pairs closer than 0.9 Angstrom are reported in
+  `warnings`, and the CLI prints them on standard error.
+
 ### Documentation
 
 - Added 29 diagrams with one shared style under `docs/public/diagrams/`
