@@ -101,6 +101,11 @@ pub(crate) fn run(cli: &Cli, action: &MofAction) -> Result<(), CliError> {
             let request =
                 xtalforge::mof::MofRequest::new(topology.clone(), node.clone(), linker.clone());
             let built = xtalforge::mof::build_mof(&request).map_err(CliError::mof)?;
+            if !cli.quiet {
+                for warning in &built.warnings {
+                    eprintln!("warning: {warning}");
+                }
+            }
             if let Some(destination) = out {
                 output::emit_structure(cli, &built.structure, Some(destination), *format)?;
                 if !cli.quiet && !cli.json {
