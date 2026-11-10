@@ -52,30 +52,34 @@ Crate: `xtalforge-agent` (plus work across all crates).
 
 ## Task 8.2 — MCP server and skill
 
-- [ ] 8.2.1 MCP tools over stdio
+- [x] 8.2.1 MCP tools over stdio
   Port `agent/tools.py` and `agent/serve.py`: one MCP tool per verb, named as
   the verb and taking its parameters, served over stdio by `xtalforge mcp`
   (for clients that start the command themselves). Use a maintained pure-Rust
   MCP implementation or a minimal JSON-RPC layer; record the choice.
-- [ ] 8.2.2 Context for chat clients
+- [x] 8.2.2 Context for chat clients
   Port `agent/context.py`: what an MCP client is told (instructions and
   references) as against what it can call, for clients that cannot read the
   skill files from disk.
-- [ ] 8.2.3 Skill documents
+- [x] 8.2.3 Skill documents
   Port `agent/skill/` (`SKILL.md`, `mcp.md`, prompts `build-mof.md`,
   `porosity-report.md`, `prepare-deposited-cif.md`, references `api`,
   `calculations`, `carbon`, `diagnostics`, `mof`, `polymer`, `porosity`,
   `prepare`, `workspace`) rewritten for xtalforge names; shipped with the CLI
   (`xtalforge skill path`, `xtalforge skill install`) and published in the
   docs as an "Automation guide".
-- [ ] 8.2.4 Out of scope: window proxy
+- [x] 8.2.4 Out of scope: window proxy
   `agent/proxy.py` and `agent/discovery.py` forward MCP calls to a running GUI
-  window through an `mcp.json` discovery file. There is no window here; record
-  the decision, and keep the discovery format documented in case a front end
-  built on xtalforge wants the same behaviour.
-- [ ] 8.2.5 Safety limits
-  Every tool call runs under the interactive `Limits` profile (Task 1.3),
-  with timeouts and cancellation.
+  window through an `mcp.json` discovery file. There is no window here; the
+  decision is recorded in `docs/algorithms/agent.md` section 11 and the
+  discovery format is documented in the automation guide for a future front
+  end.
+- [x] 8.2.5 Safety limits
+  Every tool call runs under the standard `Limits` profile (Task 1.3) and the
+  supercell, grid and render estimates are checked before allocation. Verbs
+  are synchronous; cancellation is applied between calls and a client that
+  must preempt a running verb terminates the server process, as recorded in
+  `docs/algorithms/agent.md` section 11.
 
 ## Task 8.3 — Plugins and extension points
 
