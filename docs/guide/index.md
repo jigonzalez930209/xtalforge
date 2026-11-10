@@ -12,6 +12,7 @@ Start here:
   coordinates, symmetry and bonding
 - [File formats](./formats) and the format registry
 - [Automation guide](./automation): MCP server, verbs and skill documents
+- [FAQ](./faq): scope, accuracy, limits, licensing and the questions a user asks first
 - [Cargo features](./features) and the WASM budget
 - [Data bundles](./data) and the embedded-versus-external policy
 - [Contributing](./contributing) and the local check list
