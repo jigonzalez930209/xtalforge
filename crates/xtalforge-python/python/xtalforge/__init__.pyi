@@ -298,6 +298,8 @@ def scene_summary(
     scale: float = 1.0,
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
+def scene_data(text: str, style: str = "ball-stick", scale: float = 1.0,
+               format_hint: str | None = None) -> dict[str, object]: ...
 def mesh_stl(
     text: str,
     style: str = "ball-stick",
