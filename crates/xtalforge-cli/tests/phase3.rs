@@ -76,7 +76,7 @@ fn project_round_trip_through_the_cli() {
     let output = run(&["--json", "project", "info", &archive.to_string_lossy()]);
     assert!(output.status.success());
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
-    assert_eq!(value["formula"], "Si");
+    assert_eq!(value["formula"], "Si8");
     assert_eq!(value["n_sites"], 1);
 
     let extracted = directory.join("extracted");

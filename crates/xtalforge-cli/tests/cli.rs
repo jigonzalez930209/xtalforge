@@ -248,7 +248,7 @@ fn info_reads_a_cif_file() {
     assert!(output.status.success());
     let value: serde_json::Value =
         serde_json::from_slice(&output.stdout).expect("stdout must be JSON");
-    assert_eq!(value["formula"], "Si");
+    assert_eq!(value["formula"], "Si8");
     assert_eq!(value["n_sites"], 1);
 }
 
