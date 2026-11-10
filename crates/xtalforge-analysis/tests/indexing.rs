@@ -212,3 +212,36 @@ fn cubic_compatibility_path_still_works() {
     assert!(index.completeness >= 0.8);
     assert!(index.mean_error < 0.05);
 }
+
+#[test]
+fn face_centred_lines_index_on_the_smallest_cubic_cell() {
+    // NaCl (a = 5.62): lines 111, 200, 220, 311, 222, 400, 331 and 420. Every
+    // multiple a sqrt(2), a sqrt(3), ... indexes the same lines, so the choice
+    // between them must be the smallest cell, not the first or an arbitrary one.
+    let a = 5.62;
+    let hkls = [
+        [1, 1, 1],
+        [2, 0, 0],
+        [2, 2, 0],
+        [3, 1, 1],
+        [2, 2, 2],
+        [4, 0, 0],
+        [3, 3, 1],
+        [4, 2, 0],
+    ];
+    let peaks: Vec<Peak> = hkls
+        .iter()
+        .map(|hkl| {
+            let sum = (hkl[0] * hkl[0] + hkl[1] * hkl[1] + hkl[2] * hkl[2]) as f64;
+            let two_theta = 2.0 * (CU_KA1 / (2.0 * a / sum.sqrt())).asin().to_degrees();
+            Peak {
+                two_theta,
+                intensity: 1.0,
+                fwhm: 0.1,
+            }
+        })
+        .collect();
+    let index = index_cubic(&peaks, CU_KA1, 6, 0.1).unwrap().unwrap();
+    assert!((index.a - a).abs() < 0.01, "a = {}", index.a);
+    assert!((index.completeness - 1.0).abs() < 1e-12);
+}
