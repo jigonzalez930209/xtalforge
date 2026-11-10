@@ -20,7 +20,7 @@ committed; the browser never reads it.
 
 ## What the battery exercises
 
-The suite has 38 checks. For every sample in `Si`, `NaCl`, `diamond`,
+The suite has 49 checks. For every sample in `Si`, `NaCl`, `diamond`,
 `graphene`, `TiO2`, `MFI`, `MOF-5` and `Fe` it verifies:
 
 - formula, cell volume and density against gemmi;
@@ -42,6 +42,11 @@ It also covers:
   reduction;
 - graphene, `(5, 5)` nanotubes, C60, C20 and a `pcu` MOF;
 - Cu Kα PXRD peak positions for Si, NaCl, TiO2, Fe and graphene;
+- Brillouin-zone vertex, face and edge counts for fcc silicon and rock salt,
+  bcc iron, the graphene hexagonal prism and the orthorhombic MFI cell;
+- the playground tabs, Brillouin view, atom selection distances/angles/
+  torsions, nanoribbon/polymer/Schwarz P builders, powder plot, UFF energy,
+  POSCAR export and fullscreen;
 - deterministic screenshots for eight samples, six operations and the
   space-fill style;
 - the cell-volume, CIF-inspector and document-editor demos.
@@ -70,6 +75,14 @@ The battery exposed four real defects, all fixed in the same cycle:
    variants, plus Python `scene_data` and the CLI `mesh --scene` geometry
    dump, so the browser draws the same Rust scene instead of reimplementing
    geometry.
+5. **The Brillouin zone of a conventional centred cell was a cube.** The zone
+   was built from `structure.lattice()`, so silicon (fcc), rock salt (fcc) and
+   bcc iron all returned the reciprocal cell of the conventional cube instead
+   of the primitive zone. `brillouin_zone_for_structure` now detects the
+   primitive cell first, and the clipping uses an initial cube large enough
+   for anisotropic cells (graphene returned a box instead of its hexagonal
+   prism). The zone counts are now checked for fcc, bcc, simple cubic,
+   orthorhombic and hexagonal lattices.
 
 ## Known gaps
 
@@ -85,7 +98,7 @@ The battery exposed four real defects, all fixed in the same cycle:
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
   the 3D geometry.
-- The WASM bundle is close to its release budget (3835 KiB against 3840 KiB
+- The WASM bundle is close to its release budget (3845 KiB against 3904 KiB
   after the scene and text exports), so any further surface helper needs a
   deliberate size review.
 - The CLI, Python and WASM surfaces have their own integration suites; the
