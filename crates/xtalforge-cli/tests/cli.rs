@@ -268,3 +268,30 @@ fn help_lists_the_hello_world_commands_and_flags() {
     assert!(text.contains("--threads"));
     assert!(text.contains("--limits"));
 }
+
+#[test]
+fn a_closed_output_pipe_is_not_a_panic() {
+    use std::io::Read;
+    use std::process::{Command, Stdio};
+    let sample = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../docs/public/samples/Si.cif"
+    );
+    let mut child = Command::new(env!("CARGO_BIN_EXE_xtalforge"))
+        .args(["--json", "pxrd", "--step", "0.001", sample])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("spawn");
+    // Read a few bytes, then close the pipe like `| head -c 16`.
+    let mut head = [0u8; 16];
+    child
+        .stdout
+        .take()
+        .expect("stdout")
+        .read_exact(&mut head)
+        .expect("read");
+    let output = child.wait_with_output().expect("wait");
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!stderr.contains("panicked"), "{stderr}");
+}
