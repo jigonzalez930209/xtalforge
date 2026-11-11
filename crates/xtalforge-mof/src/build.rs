@@ -155,17 +155,22 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
         if slots.len() != node.connection_count() {
             degree_mismatch.push((vertex, slots.len()));
         }
-        let rotation = match mean_slot_direction(&slots) {
-            Some(direction) => orient::node_oriented(&node, direction)?,
-            None => orient::identity(),
-        };
+        let (rotation, assignment) =
+            if let Some(fit) = crate::align::kabsch_orientation(&node.connection_points, &slots) {
+                fit
+            } else {
+                let rotation = match mean_slot_direction(&slots) {
+                    Some(direction) => orient::node_oriented(&node, direction)?,
+                    None => orient::identity(),
+                };
+                let rotated: Vec<[f64; 3]> = node
+                    .connection_points
+                    .iter()
+                    .map(|connection| orient::matrix_apply(rotation, *connection))
+                    .collect();
+                (rotation, orient::assign_connections(&rotated, &slots))
+            };
         rotations.push(rotation);
-        let rotated: Vec<[f64; 3]> = node
-            .connection_points
-            .iter()
-            .map(|connection| orient::matrix_apply(rotation, *connection))
-            .collect();
-        let assignment = orient::assign_connections(&rotated, &slots);
         for (slot, connection) in slots.iter().zip(assignment.iter()) {
             if let Some(connection) = connection
                 && let Some(entry) = assignments.get_mut(slot.edge)
@@ -348,7 +353,7 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
     let close = xtalforge_core::neighbors(&structure, CLOSE_CONTACT)?.len();
     if close > 0 {
         warnings.push(format!(
-            "{close} atom pairs are closer than {CLOSE_CONTACT} Angstrom; the node orientation is a greedy fit, so the geometry needs editing before use"
+            "{close} atom pairs are closer than {CLOSE_CONTACT} Angstrom; the blocks may be chemically incompatible (two carboxylate-terminated blocks, for example) or the net may not suit the node, so the geometry needs editing before use"
         ));
     }
     Ok(BuiltMof {

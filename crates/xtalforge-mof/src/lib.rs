@@ -21,6 +21,7 @@
 //! quantum-chemistry-optimized structures. The builder does not relax them.
 
 pub mod advanced;
+mod align;
 pub mod block;
 pub mod build;
 pub mod error;
