@@ -146,6 +146,28 @@ ASE neighbour lists and geometry checks). It found and fixed:
 17. **EEQ was QEq.** `eeq_charges` reused the QEq table and returned the QEq
     charges. It is now EEQ2019 and matches the sci-form/dftd4 reference for
     water and methanol to 2e-3.
+18. **Rietveld cell refinement was local.** From a rutile cell 1 % off it
+    stopped at Rwp 0.47 with `c = 2.932` (true 2.989). A Pawley cell stage
+    (`pawley_cell`) now runs first; the same start recovers `a = 4.6399` and
+    `c = 2.9890` (Rwp 0.12).
+19. **Incompatible MOF blocks were built.** Two metal-free carboxylate blocks
+    (`benzene_tri` with `benzene`) placed oxygens 0.6 Angstrom apart; the
+    builder now refuses them with an `invalid_input` error.
+20. **ZTC/Schwarz P below their minimum cell.** Below 12 Angstrom (gyroid) or
+    8 Angstrom (Schwarz P) fewer than 90 % of the carbons are
+    three-coordinate; the builders now refuse such cells, and still reject
+    fewer than two samples (the new WASM suite run caught that regression).
+21. **Surface differences.** A field-by-field comparison of CLI, Python and
+    WASM on the eight samples (`scripts/check-surfaces.sh`) found: `eeq` was
+    missing from Python and WASM; the CLI `info` JSON had no `n_atoms`; twelve
+    WASM errors were thrown as bare strings without `Error.code`; and the PXRD
+    reflections with equal two-theta came out in a different order in WASM
+    (last-bit differences in the sort key). All four are fixed and the 91
+    compared fields now agree.
+22. **Periodic EEQ was not converged.** The real-space Coulomb cutoff gave
+    MOF-5 Zn at +4.4. EEQ now uses an Ewald sum for the Gaussian charges; a
+    rutile 2 x 1 x 1 supercell repeats the unit-cell charges to 1e-4 and
+    MOF-5 ranges from -0.58 to +0.79.
 
 Verified as correct in the same pass: formula, volume and density of the eight
 samples; space groups; bond counts, ring census and Si-Si distances; C60,
@@ -161,26 +183,17 @@ Angstrom).
 
 ## Known gaps
 
-- `build_ztc` needs a cell of at least about 12 Angstrom; at 10 Angstrom the
-  gyroid channels are too narrow and a third of the carbons end up over- or
-  under-coordinated.
-- Rietveld refinement is local: from a cell 1 % off the true one, `powder
-  rietveld --refine` stays in a local minimum (Rwp 0.47). Start from a
-  Pawley or `powder automatic` cell, which recovers rutile to 0.05 %.
-- MOF blocks are not checked for chemical compatibility: an organic
-  carboxylate node with a carboxylate linker overlaps its oxygens; the
-  builder reports the close contacts.
 - Polymers carry the heavy-atom backbone only; hydrogens are added with
   `hydrogens` afterwards.
 
 - The battery covers the structure, symmetry, builder, view and powder-position
-  surfaces. Force fields, porosity, MOF chemistry and the Le Bail/Pawley/
-  Rietveld stages still rely on their Rust golden-data tests; extending the
-  scenario runner to them is the next coverage step.
-- Wyckoff orbit multiplicities are compared in the conventional setting. MOF-5
-  is stored in a primitive rhombohedral cell while its detected group is the
-  conventional `Fm-3m` setting, so the primitive orbit sizes differ by the
-  fourfold F centring and that one check is skipped.
+  surfaces. `scripts/check-surfaces.sh` adds UFF energies and QEq/EQeq/EEQ
+  charges on the CLI, Python and WASM surfaces; porosity, MOF chemistry and
+  the Le Bail/Pawley/Rietveld stages are covered by their Rust tests and the
+  synthetic-rutile checks of this audit, not yet by the browser runner.
+- Wyckoff multiplicities are compared per atom with the spglib orbit sizes,
+  divided by the centring factor when a sample is stored in its primitive
+  cell (MOF-5); the earlier MOF-5 exclusion is gone.
 - Screenshot goldens are renderer- and platform-specific. They catch changes
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
