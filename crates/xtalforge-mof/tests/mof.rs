@@ -338,3 +338,18 @@ fn a_linker_that_does_not_fit_the_cell_is_reported() {
         built.warnings
     );
 }
+
+#[test]
+fn kabsch_orientation_keeps_linkers_unstretched() {
+    for topology in ["srs", "hcb"] {
+        let built = build_mof(&MofRequest::new(topology, "benzene_tri", "benzene")).unwrap();
+        assert!(
+            built
+                .warnings
+                .iter()
+                .all(|warning| !warning.contains("is scaled by")),
+            "{topology}: {:?}",
+            built.warnings
+        );
+    }
+}
