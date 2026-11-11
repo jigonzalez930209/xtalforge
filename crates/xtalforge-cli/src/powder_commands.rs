@@ -397,6 +397,18 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
     let points = pattern(pattern_path)?;
     let result = run_automatic(&structure, &points, &AutomaticOptions::default())
         .map_err(CliError::analysis)?;
+    // The Pawley cell of the leading candidate, or its indexed cell when the
+    // Pawley fit was skipped (the same fallback as Python and WASM).
+    let best_cell = result
+        .pawley
+        .as_ref()
+        .map(|pawley| pawley.cell)
+        .or_else(|| {
+            result.leading_cells.first().map(|row| {
+                let cell = &row.index.cell;
+                [cell.a, cell.b, cell.c, cell.alpha, cell.beta, cell.gamma]
+            })
+        });
     if cli.json {
         println!(
             "{}",
@@ -404,6 +416,7 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
                 "peaks": result.peaks.len(),
                 "index": result.index,
                 "pawley_rwp": result.pawley.as_ref().map(|pawley| pawley.rwp),
+                "best_cell": best_cell,
                 "leading_cells": result.leading_cells,
                 "lebail": result.lebail.as_ref().map(|lebail| lebail.r_factor),
                 "rwp": result.phase.as_ref().map(|phase| phase.rwp),
@@ -413,6 +426,13 @@ fn automatic(cli: &Cli, structure_path: &str, pattern_path: &str) -> Result<(), 
     } else {
         for step in &result.steps {
             println!("{step}");
+        }
+        if let Some(pawley) = &result.pawley {
+            let [a, b, c, alpha, beta, gamma] = pawley.cell;
+            println!(
+                "best cell (Pawley): a={a:.4} b={b:.4} c={c:.4} alpha={alpha:.2} beta={beta:.2} gamma={gamma:.2} Rwp={:.4}",
+                pawley.rwp
+            );
         }
         for (rank, row) in result.leading_cells.iter().enumerate() {
             println!(
