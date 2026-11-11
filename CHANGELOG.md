@@ -9,8 +9,8 @@ essential release, then `0.x.y`).
 
 ### Added
 
-- Roadmap to `2.0.0`: Phases 9-15 (usability audit and 1.x polish, native
-  bindings, ecosystem interoperability, scientific completeness, performance,
+- Roadmap to `2.0.0`: Phases 9-16 (core features beyond Crystal-Builder
+  parity, usability audit and 1.x polish, native bindings, ecosystem interoperability, scientific completeness, performance,
   workflows and the 2.0 redesign), with the 2026-11-11 usability findings.
 
 ## [1.1.0] - 2026-11-11
