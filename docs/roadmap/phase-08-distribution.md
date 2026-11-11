@@ -218,7 +218,7 @@ Crate: `xtalforge-agent` (plus work across all crates).
   complete silicon CIF; the WASM summary carries `n_atoms`; the Brillouin
   zone is built from the primitive Bravais lattice and works for anisotropic
   cells.
-- [ ] 8.9.5 Extend the battery
+- [x] 8.9.5 Extend the battery
   Add force-field energies/forces, porosity, MOF chemistry and the
   Le Bail/Pawley/Rietveld stages to the same scenario runner, and run the
   numeric checks against the Python and CLI surfaces in addition to WASM.
@@ -227,8 +227,10 @@ Crate: `xtalforge-agent` (plus work across all crates).
   Note (2026-11-11): the numeric checks now also run against the CLI and
   Python surfaces through `scripts/check-surfaces.sh` (summaries, symmetry,
   Wyckoff letters, bonds, rings, PXRD, UFF energy and the three charge
-  models); porosity, MOF and powder-refinement scenarios remain for the
-  browser runner.
+  models, porosity, MOF assembly, Le Bail, Pawley, Rietveld and the
+  automatic run); the browser runner covers the porosity panel, the MOF
+  builder and the new refinement panel against the Python surface. Force
+  fields are checked by energies, charges and the UFF gradient/Hessian tests.
 - [x] 8.9.6 Functional audit of every surface command
   Run every CLI subcommand on the curated samples and compare with
   independent references. Fixed the PXRD form factors (International Tables
