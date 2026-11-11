@@ -224,6 +224,11 @@ Crate: `xtalforge-agent` (plus work across all crates).
   numeric checks against the Python and CLI surfaces in addition to WASM.
   Note: the current gaps and the visual-golden platform caveat are recorded in
   `docs/guide/audit.md` and `tests/e2e/README.md`.
+  Note (2026-11-11): the numeric checks now also run against the CLI and
+  Python surfaces through `scripts/check-surfaces.sh` (summaries, symmetry,
+  Wyckoff letters, bonds, rings, PXRD, UFF energy and the three charge
+  models); porosity, MOF and powder-refinement scenarios remain for the
+  browser runner.
 - [x] 8.9.6 Functional audit of every surface command
   Run every CLI subcommand on the curated samples and compare with
   independent references. Fixed the PXRD form factors (International Tables
