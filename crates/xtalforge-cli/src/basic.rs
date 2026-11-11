@@ -12,10 +12,13 @@ pub(crate) fn info(cli: &Cli, path: &str) -> Result<(), CliError> {
     let text = input::read_source(path).map_err(CliError::core)?;
     let is_json =
         path.to_ascii_lowercase().ends_with(".json") || text.trim_start().starts_with('{');
+    let mut n_atoms = None;
     let summary = if is_json {
         xtalforge::core::structure_info(&text)
     } else {
         input::structure_from_text(&text, path).and_then(|structure| {
+            // The P1 atom count, as in the Python and WASM summaries.
+            n_atoms = Some(structure.p1()?.n_atoms());
             if !cli.quiet {
                 for key in ["symmetry_warning", "coincident_atoms_warning"] {
                     if let Some(message) = structure
@@ -32,16 +35,22 @@ pub(crate) fn info(cli: &Cli, path: &str) -> Result<(), CliError> {
     }
     .map_err(CliError::core)?;
     if cli.json {
-        let payload = serde_json::to_string(&summary)
+        let mut value = serde_json::to_value(&summary)
+            .map_err(|error| CliError::new("json_error", error.to_string()))?;
+        if let (Some(count), Some(object)) = (n_atoms, value.as_object_mut()) {
+            object.insert("n_atoms".to_owned(), serde_json::json!(count));
+        }
+        let payload = serde_json::to_string(&value)
             .map_err(|error| CliError::new("json_error", error.to_string()))?;
         println!("{payload}");
     } else {
         println!(
-            "{}: {} [{}] sites={} volume={:.3} A^3 density={:.4} g/cm^3 charge={:.3} p1={}",
+            "{}: {} [{}] sites={}{} volume={:.3} A^3 density={:.4} g/cm^3 charge={:.3} p1={}",
             summary.name,
             summary.formula,
             summary.hall,
             summary.n_sites,
+            n_atoms.map_or_else(String::new, |count| format!(" atoms={count}")),
             summary.volume,
             summary.density,
             summary.total_charge,
