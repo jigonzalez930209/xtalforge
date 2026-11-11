@@ -25,14 +25,15 @@ are in `AGENTS.md` at the repository root.
 | 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
 | 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
 
-## Current status (2026-11-10)
+## Current status (2026-11-11)
 
 - Phases 0-8 are complete and pushed; the Rust API, CLI, Python and WASM
   surfaces build and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`,
-  `v1.0.0-rc.1` and the stable `v1.0.0` are published on crates.io, PyPI
-  (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub Pages.
-  `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
-  package and the hosted CLI assets.
+  `v1.0.0-rc.1`, the stable `v1.0.0` and `v1.1.0` are published on crates.io,
+  PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub
+  Pages. `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the
+  npm package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
+  playground and the end-to-end audit battery.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. The stable API follows the SemVer policy and
