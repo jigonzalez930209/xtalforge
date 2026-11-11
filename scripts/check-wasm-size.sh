@@ -8,7 +8,7 @@
 # 3968 KiB since the functional audit of 2026-11-11: the International Tables
 # form factors, the commensurate twist, the periodic polymer, the embedder
 # angle term, the carbon relaxation, the remeshed ZTC/Schwarz P dual, the
-# Le Bail/Pawley background and the MOF quaternion fit (3940 KiB measured).
+# Le Bail/Pawley background and the MOF quaternion fit (3943 KiB measured).
 #
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
