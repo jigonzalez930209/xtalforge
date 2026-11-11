@@ -110,28 +110,45 @@ pub fn le_bail(
         .iter()
         .map(|reflection| reflection.intensity.max(1e-9))
         .collect();
+    let (background, net) = split_background(observed, options);
     for _ in 0..options.iterations {
-        let calculated = profile_sum(&positions, &intensities, observed, options);
+        let calculated = profile_sum(&positions, &intensities, &net, options);
         let mut next = vec![0.0; positions.len()];
+        // Le Bail partition: every observed point is shared among the
+        // reflections in proportion to their calculated contribution,
+        // H_k <- H_k * sum_i P_ik (y_obs,i / y_calc,i) / sum_i P_ik.
         for (index, position) in positions.iter().enumerate() {
             let half_width = options.window * options.fwhm;
-            let mut observed_sum = 0.0;
-            let mut calculated_sum = 0.0;
-            for (point, value) in observed.iter().zip(calculated.iter()) {
-                if (point.two_theta - position).abs() <= half_width {
-                    observed_sum += point.intensity;
-                    calculated_sum += value;
+            let shape = Profile {
+                kind: options.kind,
+                center: *position,
+                fwhm: options.fwhm,
+                eta: options.eta,
+                height: 1.0,
+            };
+            let mut numerator = 0.0;
+            let mut denominator = 0.0;
+            for (point, value) in net.iter().zip(calculated.iter()) {
+                if (point.two_theta - position).abs() > half_width || *value <= 1e-12 {
+                    continue;
                 }
+                let weight = shape.value(point.two_theta);
+                numerator += weight * point.intensity.max(0.0) / value;
+                denominator += weight;
             }
-            if calculated_sum > 1e-12 {
-                next[index] = intensities[index] * observed_sum / calculated_sum;
+            next[index] = if denominator > 1e-12 {
+                intensities[index] * numerator / denominator
             } else {
-                next[index] = intensities[index];
-            }
+                intensities[index]
+            };
         }
         intensities = next;
     }
-    let pattern_values = profile_sum(&positions, &intensities, observed, options);
+    let pattern_values: Vec<f64> = profile_sum(&positions, &intensities, observed, options)
+        .into_iter()
+        .zip(&background)
+        .map(|(value, base)| value + base)
+        .collect();
     let pattern: Vec<PatternPoint> = observed
         .iter()
         .zip(pattern_values.iter())
@@ -155,6 +172,41 @@ pub fn le_bail(
         positions,
         pattern,
     })
+}
+
+/// SNIP background under the observed pattern and the net observed points.
+///
+/// The clipping window spans about ten peak widths, so a Bragg line is
+/// clipped while a slowly varying baseline survives.
+fn split_background(
+    observed: &[PatternPoint],
+    options: &LebailOptions,
+) -> (Vec<f64>, Vec<PatternPoint>) {
+    let step = match (observed.first(), observed.last()) {
+        (Some(first), Some(last)) if observed.len() > 1 => {
+            ((last.two_theta - first.two_theta) / (observed.len() - 1) as f64).abs()
+        }
+        _ => 0.0,
+    };
+    let window = if step > 0.0 {
+        ((10.0 * options.fwhm / step).ceil() as usize).max(1)
+    } else {
+        0
+    };
+    let background = if window == 0 {
+        vec![0.0; observed.len()]
+    } else {
+        crate::peaks::background_envelope(observed, window)
+    };
+    let net = observed
+        .iter()
+        .zip(&background)
+        .map(|(point, base)| PatternPoint {
+            intensity: point.intensity - base,
+            ..*point
+        })
+        .collect();
+    (background, net)
 }
 
 fn profile_sum(
@@ -227,9 +279,10 @@ pub fn pawley(
     }
     let count = positions.len();
     let weights = weights(observed);
+    let (background, net) = split_background(observed, options);
     let mut normal = vec![vec![0.0; count]; count];
     let mut rhs = vec![0.0; count];
-    for (row_index, point) in observed.iter().enumerate() {
+    for (row_index, point) in net.iter().enumerate() {
         let weight = weights.get(row_index).copied().unwrap_or(1.0);
         let row: Vec<f64> = positions
             .iter()
@@ -266,7 +319,11 @@ pub fn pawley(
             "the Pawley normal matrix is singular".to_owned(),
         ));
     };
-    let pattern_values = profile_sum(&positions, &intensities, observed, options);
+    let pattern_values: Vec<f64> = profile_sum(&positions, &intensities, observed, options)
+        .into_iter()
+        .zip(&background)
+        .map(|(value, base)| value + base)
+        .collect();
     let pattern: Vec<PatternPoint> = observed
         .iter()
         .zip(pattern_values.iter())

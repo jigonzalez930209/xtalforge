@@ -19,19 +19,16 @@
 //!
 //! # Approximations (deliberate, documented here)
 //!
-//! * **Atomic form factor.** Instead of the Cromer-Mann / Waasmaier-Kirfel
-//!   tables this module uses the isotropic Gaussian approximation
+//! * **Atomic form factor.** Neutral atoms use the International Tables
+//!   Vol. C (1992) Table 6.1.1.4 four-Gaussian coefficients,
 //!
 //!   ```text
-//!   f(s) = Z exp(-b s^2),   s = sin(theta) / lambda,
-//!   b = 0.5 Z^(2/3)  (Angstrom^2).
+//!   f(s) = sum_{i=1..4} a_i exp(-b_i s^2) + c,   s = sin(theta) / lambda,
 //!   ```
 //!
-//!   The coefficient is calibrated so that `f(s)/Z` is close to the
-//!   International Tables values around `s = 0.5 Angstrom^-1` for light and
-//!   medium elements. It has no core tail, so absolute intensities and the
-//!   high-angle falloff are approximate; peak positions, multiplicities and
-//!   systematic absences are exact for the supplied cell and operations.
+//!   embedded from `data/it92.json` for H to Cf. Elements beyond Cf fall
+//!   back to the Gaussian `f(s) = Z exp(-0.5 Z^(2/3) s^2)`. Ionic form
+//!   factors are not used; formal charges do not change `f`.
 //! * **Anomalous scattering** is ignored (`f' = f'' = 0`), so Friedel pairs
 //!   have equal intensity.
 //! * **Debye-Waller.** An isotropic `U_iso` present on a site is applied as
