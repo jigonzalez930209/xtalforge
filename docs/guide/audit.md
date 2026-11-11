@@ -183,6 +183,17 @@ ASE neighbour lists and geometry checks). It found and fixed:
     default and the three surfaces agree.
 26. **The CLI panicked on a closed pipe.** `xtalforge ... | head` printed a
     panic and a backtrace hint; it now exits quietly with status 141.
+27. **The refinement panel showed the indexed cell as the Pawley cell.** The
+    automatic result exposed only the quick cubic-index edge as `cell`, and
+    the panel printed the leading row's indexing candidate (a = 4.5902
+    Angstrom for rutile) while the Pawley fit had refined it. CLI, Python and
+    WASM now return `best_cell` from the Pawley stage, falling back to the
+    leading indexed cell when Pawley is skipped; rutile reports a = 4.5993
+    Angstrom, and the panel and CLI print it.
+28. **Playground state after a transform.** Running a builder or transform
+    left the sample selector on a stale sample id; it now shows "Built or
+    transformed". The nanotube tour step looks from +x so the tube lies
+    across the view instead of end-on.
 
 Verified as correct in the same pass: formula, volume and density of the eight
 samples; space groups; bond counts, ring census and Si-Si distances; C60,
