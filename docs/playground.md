@@ -17,13 +17,19 @@ import Playground from './.vitepress/components/Playground.vue'
 
 ## What can be tested
 
+- **Tour**: the first tab walks through sixteen steps, from reading a CIF and
+  detecting its space group to the Brillouin zone, measures, supercells,
+  slabs, PXRD, nanotubes, twisted bilayers, C60, MOFs, disordered carbon,
+  polymers, porosity, the force field and the exports. Each step runs the
+  real function, sets the camera and opens the tab where the result is read.
 - **Load** the bundled samples (silicon, NaCl, diamond, graphene, rutile,
   MFI, MOF-5, iron) or paste any CIF, POSCAR or XYZ file.
 - **Transform**: supercell, slab (h k l, layers, vacuum), P1 expansion,
   asymmetric unit, primitive cell, standardized cell and Niggli reduction.
-- **Build**: graphene, nanotube `(n, m)`, C60, C20, nanoribbon, twisted
-  bilayer, ZTC, Schwarz P, polymer and a MOF from the topology/node/linker
-  catalogue.
+- **Build**: graphene, nanotube `(n, m)`, C60, C20, nanoribbon, commensurate
+  twisted bilayer (21.79°, 13.17°, 9.43°…), ZTC, Schwarz P, disordered carbon
+  on the dia/pcu nets, polymer from a SMILES repeat unit and a MOF from the
+  topology/node/linker catalogue.
 - **Analyse**: formula, cell volume, density, P1 atom count, bonds, primitive
   rings up to eight atoms, detected space group, Hall number, Wyckoff letters,
   tolerance ladder, diagnostics, Brillouin zone, band path, periodic
@@ -31,8 +37,8 @@ import Playground from './.vitepress/components/Playground.vue'
   distance/angle/torsion.
 - **Force field**: UFF energy, atom types, QEq/EQeq charges, vibrations and a
   UFF minimization that replaces the current structure.
-- **Powder**: Cu Kα and other radiations, a plotted pattern, peak table and
-  CSV export.
+- **Powder**: Cu Kα and other radiations, International Tables form factors,
+  a plotted pattern with hkl labels, an I/I₀ peak table and CSV export.
 - **View**: ball-and-stick, space-fill, wireframe and sticks, with the cell
   edges, axes, orbit, zoom, rotation, atom selection, fullscreen and PNG
   export.
