@@ -79,7 +79,7 @@ written from the published algorithms; any ported code is recorded in
 - [ ] 9.3.4 Radial distribution and structure fingerprints
   Description: partial and total RDF/PDF with smoothing, bond-angle
   distributions, a composition-and-site fingerprint for quick similarity.
-  Arrays on Python (Task 11.2) and typed arrays in WASM.
+  Arrays on Python (Task 12.2) and typed arrays in WASM.
 
 ## Task 9.4 — Surfaces of crystals
 

@@ -25,13 +25,14 @@ are in `AGENTS.md` at the repository root.
 | 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
 | 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
 | 9 | [Core features](./phase-09-core-features.md) | Structure matcher, strain/rattle/site edits, Voronoi and coordination, BVS/oxidation states, RDF, unique Miller indices and terminations, Wulff, adsorption sites, defects, orderings/SQS, interfaces, elastic tensor, EOS, convex hull | v1.2.0 |
-| 10 | [Usability audit and 1.x polish](./phase-10-usability.md) | Fix the 2026-11-11 usability findings, close the Rust-only parity gaps, deprecation mechanism, recipes | v1.3.0 |
-| 11 | [Native bindings](./phase-11-native-api.md) | Object API in Python and JS, NumPy, typed TS results, typed arrays, workers | v1.4.0 |
-| 12 | [Ecosystem interoperability](./phase-12-interop.md) | ASE, pymatgen, phonopy, RDKit adapters; QE/CASTEP/VASP outputs/mmCIF/SDF; OPTIMADE, COD, MP | v1.5.0 |
-| 13 | [Scientific completeness](./phase-13-completeness.md) | Close every known subset; instrument model, MD, full topology and porosity | v1.6.0 |
-| 14 | [Performance and scale](./phase-14-performance.md) | Comparative benchmarks, million-atom structures, streaming IO, split WASM | v1.7.0 |
-| 15 | [Workflows and provenance](./phase-15-workflows.md) | Declarative workflows, provenance, datasets, deduplication, ML descriptors | v1.8.0 |
-| 16 | [2.0 redesign and freeze](./phase-16-v2.md) | Remove deprecations, unified options and errors, schema v2, migration guide | **v2.0.0** |
+| 10 | [MOF platform](./phase-10-mof.md) | MOF checker and cleaning, SBU/linker deconstruction, topology from structure, MOFid/MOFkey, open metal sites, native PLD/LCD/ASA, Widom/Henry/GCMC, PSM, MOF defects, CoRE MOF/QMOF screening | v1.3.0 |
+| 11 | [Usability audit and 1.x polish](./phase-11-usability.md) | Fix the 2026-11-11 usability findings, close the Rust-only parity gaps, deprecation mechanism, recipes | v1.4.0 |
+| 12 | [Native bindings](./phase-12-native-api.md) | Object API in Python and JS, NumPy, typed TS results, typed arrays, workers | v1.5.0 |
+| 13 | [Ecosystem interoperability](./phase-13-interop.md) | ASE, pymatgen, phonopy, RDKit adapters; QE/CASTEP/VASP outputs/mmCIF/SDF; OPTIMADE, COD, MP | v1.6.0 |
+| 14 | [Scientific completeness](./phase-14-completeness.md) | Close every known subset; instrument model, MD, full topology | v1.7.0 |
+| 15 | [Performance and scale](./phase-15-performance.md) | Comparative benchmarks, million-atom structures, streaming IO, split WASM | v1.8.0 |
+| 16 | [Workflows and provenance](./phase-16-workflows.md) | Declarative workflows, provenance, datasets, deduplication, ML descriptors | v1.9.0 |
+| 17 | [2.0 redesign and freeze](./phase-17-v2.md) | Remove deprecations, unified options and errors, schema v2, migration guide | **v2.0.0** |
 
 ## Current status (2026-11-11)
 
@@ -122,10 +123,11 @@ Version rules are defined in `AGENTS.md` section 5. In short:
   documentation complete.
 - **v1.2.0** — Phase 9 complete: the core features of a standard crystal
   library beyond Crystal-Builder parity.
-- **v1.3.0 … v1.8.0** — Phases 10 to 15, one MINOR release per completed
+- **v1.3.0** — Phase 10 complete: the MOF platform (focus of the 2.0 road).
+- **v1.4.0 … v1.9.0** — Phases 11 to 16, one MINOR release per completed
   phase; every change is backward compatible and anything to be removed is
-  deprecated first (Task 10.4.2).
-- **v2.0.0** — Phase 16 complete: deprecated surface removed, unified options
+  deprecated first (Task 11.4.2).
+- **v2.0.0** — Phase 17 complete: deprecated surface removed, unified options
   and errors, schema version 2, after a `2.0.0-rc.N` stabilization period.
 
 ### Road to 2.0.0 (started 2026-11-11)
@@ -133,10 +135,13 @@ Version rules are defined in `AGENTS.md` section 5. In short:
 The goal is to make xtalforge the default crystal-structure library across
 Rust, Python, the CLI and the browser. The plan starts from the core
 gap check and usability audit of 2026-11-11 and orders the work by user
-impact: first the missing core operations (Phase 9), then remove friction
-(Phases 10-11), then meet users where they are (Phase 12), then close the
-science gaps (Phase 13), then scale (Phases 14-15), and only then break the
-API once (Phase 16). Phases 9-15 may overlap; Phase 16 starts when they are
+impact. **Focus: metal-organic frameworks** (decided 2026-11-11): first the
+missing core operations (Phase 9), then the MOF platform (Phase 10), then
+remove friction (Phases 11-12), then meet users where they are (Phase 13),
+then close the science gaps (Phase 14), then scale (Phases 15-16), and only
+then break the API once (Phase 17). No other capability is dropped: the MOF
+focus sets priorities inside each phase (table at the end of Phase 10).
+Phases 9-16 may overlap; Phase 17 starts when they are
 complete or explicitly descoped with a `Note:`.
 
 ## Cross-cutting requirements (apply to every phase)
