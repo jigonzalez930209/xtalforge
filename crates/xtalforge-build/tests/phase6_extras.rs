@@ -17,9 +17,38 @@ use xtalforge_build::{
 fn twists_and_ribbons_build() {
     let flat = commensurate_twist(2, 2, 0.0, 2).unwrap();
     assert_eq!(flat.sites().len(), 16);
-    let twisted = commensurate_twist(2, 2, 58.0, 2).unwrap();
-    assert_eq!(twisted.sites().len(), 16);
-    assert_eq!(twisted.metadata()["twist_approximation"], 60.0);
+    // (i, j) = (2, 1): 21.787 degrees and 14 atoms per layer.
+    let twisted = commensurate_twist(1, 1, 21.79, 2).unwrap();
+    assert_eq!(twisted.sites().len(), 28);
+    assert_eq!(
+        twisted.metadata()["twist_indices"],
+        serde_json::json!([2, 1])
+    );
+    let angle = twisted.metadata()["twist_angle"].as_f64().unwrap();
+    assert!((angle - 21.786_789).abs() < 1e-5, "{angle}");
+    // (3, 2): 13.174 degrees, 38 atoms per layer, repeated 2 x 1.
+    let small = commensurate_twist(2, 1, 13.17, 2).unwrap();
+    assert_eq!(small.sites().len(), 2 * 2 * 38);
+    // Every atom keeps three in-plane neighbours at the graphene bond length.
+    let p1 = twisted.p1().unwrap();
+    let lattice = twisted.lattice();
+    for (index, atom) in p1.atoms.iter().enumerate() {
+        let close = p1
+            .atoms
+            .iter()
+            .enumerate()
+            .filter(|(other, b)| {
+                *other != index && (b.frac[2] - atom.frac[2]).abs() < 1e-9 && {
+                    let d = lattice.distance(atom.frac, b.frac);
+                    (d - 1.42).abs() < 0.01
+                }
+            })
+            .count();
+        assert_eq!(close, 3, "atom {index}");
+    }
+    let sixty = commensurate_twist(1, 1, 58.0, 2).unwrap();
+    let sixty_angle = sixty.metadata()["twist_angle"].as_f64().unwrap();
+    assert!((sixty_angle - 60.0).abs() < 1e-9);
     let ribbon = nanoribbon(2, 3, 12.0).unwrap();
     assert!(!ribbon.sites().is_empty());
     assert!(ribbon.lattice().lengths()[1] > 12.0);

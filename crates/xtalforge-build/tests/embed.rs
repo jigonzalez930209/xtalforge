@@ -124,3 +124,67 @@ fn coordination_warns_when_the_degree_differs() {
     assert!(warnings[0].contains("2 neighbours"));
     assert!(warnings[0].contains("square planar"));
 }
+
+/// Bond lengths and bond angles of the embedded heavy-atom skeleton.
+fn skeleton_geometry(smiles: &str) -> (Vec<f64>, Vec<f64>) {
+    let graph = parse_smiles(smiles).unwrap();
+    let structure = embed_smiles(&graph, &EmbedOptions::default()).unwrap();
+    let points = structure.cart_sites();
+    let distance = |a: usize, b: usize| {
+        let (p, q) = (points[a], points[b]);
+        ((p[0] - q[0]).powi(2) + (p[1] - q[1]).powi(2) + (p[2] - q[2]).powi(2)).sqrt()
+    };
+    let lengths = graph
+        .bonds
+        .iter()
+        .map(|bond| distance(bond.a, bond.b))
+        .collect();
+    let mut angles = Vec::new();
+    for center in 0..graph.atoms.len() {
+        let arms: Vec<usize> = graph
+            .bonds
+            .iter()
+            .filter_map(|bond| match (bond.a == center, bond.b == center) {
+                (true, _) => Some(bond.b),
+                (_, true) => Some(bond.a),
+                _ => None,
+            })
+            .collect();
+        for (index, &first) in arms.iter().enumerate() {
+            for &second in &arms[index + 1..] {
+                let (a, b, c) = (
+                    distance(center, first),
+                    distance(center, second),
+                    distance(first, second),
+                );
+                angles.push(
+                    ((a * a + b * b - c * c) / (2.0 * a * b))
+                        .acos()
+                        .to_degrees(),
+                );
+            }
+        }
+    }
+    (lengths, angles)
+}
+
+#[test]
+fn embedded_rings_keep_their_bond_angles() {
+    for (smiles, angle, tolerance) in [
+        ("c1ccccc1", 120.0, 3.0),
+        ("c1ccc2ccccc2c1", 120.0, 6.0),
+        ("C1CCCCC1", 109.47, 6.0),
+        ("CC(C)(C)C", 109.47, 2.0),
+        ("C#CC", 180.0, 6.0),
+    ] {
+        let (lengths, angles) = skeleton_geometry(smiles);
+        assert!(
+            lengths.iter().all(|length| (1.15..1.62).contains(length)),
+            "{smiles}: {lengths:?}"
+        );
+        assert!(
+            angles.iter().all(|value| (value - angle).abs() < tolerance),
+            "{smiles}: {angles:?}"
+        );
+    }
+}

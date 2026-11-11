@@ -66,3 +66,25 @@ fn invalid_samples_and_cell_error() {
         .is_err()
     );
 }
+
+#[test]
+fn schwarzite_carbons_are_three_coordinate_sp2() {
+    for structure in [
+        xtalforge_build::build_ztc(&ZtcOptions::default()).unwrap(),
+        xtalforge_build::build_schwarzite(&ZtcOptions::default()).unwrap(),
+    ] {
+        let graph = structure.bond_graph().unwrap();
+        let mut degree = vec![0usize; structure.sites().len()];
+        for bond in &graph.bonds {
+            assert!((1.2..1.82).contains(&bond.distance), "{bond:?}");
+            degree[bond.i] += 1;
+            degree[bond.j] += 1;
+        }
+        let three = degree.iter().filter(|value| **value == 3).count();
+        assert!(
+            three as f64 >= 0.97 * degree.len() as f64,
+            "{three} of {}",
+            degree.len()
+        );
+    }
+}

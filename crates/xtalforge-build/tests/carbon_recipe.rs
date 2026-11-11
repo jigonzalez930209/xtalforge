@@ -48,3 +48,27 @@ fn pcu_dual_percolates() {
     let surface = carbon_surface("pcu", [1, 1, 1], 10.5, 0.25, 0).unwrap();
     println!("pcu dual {} {}", surface.carbons, surface.periodicity);
 }
+
+#[test]
+fn carbon_recipe_geometry_is_physical() {
+    for net in ["dia", "pcu"] {
+        let recipe = CarbonRecipe {
+            net: net.to_owned(),
+            repeat: [1, 1, 1],
+            seed: 0,
+            ..CarbonRecipe::default()
+        };
+        let structure = build_carbon(&recipe).unwrap().structure;
+        let graph = structure.bond_graph().unwrap();
+        for bond in &graph.bonds {
+            assert!(bond.distance < 1.9, "{net}: bond {bond:?}");
+        }
+        let p1 = structure.p1().unwrap();
+        let lattice = structure.lattice();
+        for (i, a) in p1.atoms.iter().enumerate() {
+            for b in &p1.atoms[i + 1..] {
+                assert!(lattice.distance(a.frac, b.frac) > 0.9, "{net}: overlap");
+            }
+        }
+    }
+}
