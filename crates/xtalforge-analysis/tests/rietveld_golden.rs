@@ -79,7 +79,13 @@ fn refinement_returns_the_oxygen_to_its_golden_position() {
     let result = refine_phase(&start, &observed(), &RietveldOptions::default(), &options).unwrap();
     assert_eq!(
         result.stages,
-        vec!["background_scale", "zero_cell", "width", "structure"]
+        vec![
+            "pawley_cell",
+            "background_scale",
+            "zero_cell",
+            "width",
+            "structure"
+        ]
     );
     assert!(result.converged, "the refinement did not converge");
     assert!(result.rwp < 0.25, "Rwp {}", result.rwp);

@@ -137,7 +137,7 @@ fn cell_zero_and_width_recover_a_synthetic_pattern() {
     let result = refine_phase(&truth, &observed, &rietveld(BASE_FWHM), &options).unwrap();
     assert_eq!(
         result.stages,
-        vec!["background_scale", "zero_cell", "width"]
+        vec!["pawley_cell", "background_scale", "zero_cell", "width"]
     );
     assert!(result.rwp < 1e-4, "Rwp {}", result.rwp);
     assert!((parameter(&result, "zero") - 0.03).abs() < 2e-3);
@@ -261,7 +261,13 @@ fn every_stage_runs_in_mccusker_order() {
     let result = refine_phase(&structure, &observed, &rietveld(BASE_FWHM), &options).unwrap();
     assert_eq!(
         result.stages,
-        vec!["background_scale", "zero_cell", "width", "structure"]
+        vec![
+            "pawley_cell",
+            "background_scale",
+            "zero_cell",
+            "width",
+            "structure"
+        ]
     );
     for name in [
         "zero",
