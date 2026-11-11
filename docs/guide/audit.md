@@ -226,7 +226,7 @@ Angstrom).
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
   the 3D geometry.
-- The WASM bundle measures 3940 KiB against a 3968 KiB budget. The budget
+- The WASM bundle measures 3943 KiB against a 3968 KiB budget. The budget
   was 3904 KiB after the scene and text exports and was raised by this audit
   for the fixes listed above; any further surface helper needs a deliberate
   size review.
