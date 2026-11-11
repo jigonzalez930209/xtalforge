@@ -5,6 +5,14 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [Unreleased]
+
+### Added
+
+- Roadmap to `2.0.0`: Phases 9-15 (usability audit and 1.x polish, native
+  bindings, ecosystem interoperability, scientific completeness, performance,
+  workflows and the 2.0 redesign), with the 2026-11-11 usability findings.
+
 ## [1.1.0] - 2026-11-11
 
 First feature release after `1.0.0`, published on 2026-11-11. It adds the 3D
