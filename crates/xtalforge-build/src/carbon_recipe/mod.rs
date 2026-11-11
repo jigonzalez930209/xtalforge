@@ -7,13 +7,15 @@
 //! public entry point.
 
 mod build;
-mod editor;
+mod clash;
+pub(crate) mod editor;
 mod editor_ops;
-mod field;
-mod graph;
-mod mesh;
+pub(crate) mod field;
+pub(crate) mod graph;
+pub(crate) mod mesh;
 mod net;
 mod relax;
+pub(crate) mod settle;
 mod surface;
 mod terminate;
 

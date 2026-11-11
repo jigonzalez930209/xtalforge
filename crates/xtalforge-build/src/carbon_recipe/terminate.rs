@@ -132,7 +132,7 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
     record("fluorine", wanted.fluorine, fluorine.len());
     let hydrogen = take(wanted.hydrogen, &mut used);
     record("hydrogen", wanted.hydrogen, hydrogen.len());
-    let bare_edges = edge_sites
+    let mut bare_edges = edge_sites
         .len()
         .saturating_sub(used.iter().filter(|value| **value).count());
     let lattice = graph.lattice;
@@ -157,7 +157,7 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
     let mut fluorine_count = 0usize;
     let mut oxygen_count = ether.len();
     for index in hydroxyl {
-        let direction = outward(graph, &degree, index);
+        let direction = outward(graph, index);
         let mut oxygen = sites[index].frac();
         let oxygen_cart = lattice.to_cart(oxygen);
         let position = add(oxygen_cart, direction.map(|value| value * C_O));
@@ -189,7 +189,7 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
         hydrogen_count += 1;
     }
     for index in carbonyl {
-        let direction = outward(graph, &degree, index);
+        let direction = outward(graph, index);
         let position = add(
             lattice.to_cart(sites[index].frac()),
             direction.map(|value| value * 1.23),
@@ -210,7 +210,7 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
         oxygen_count += 1;
     }
     for index in fluorine {
-        let direction = outward(graph, &degree, index);
+        let direction = outward(graph, index);
         let position = add(
             lattice.to_cart(sites[index].frac()),
             direction.map(|value| value * C_F),
@@ -231,7 +231,7 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
         fluorine_count += 1;
     }
     for index in hydrogen {
-        let direction = outward(graph, &degree, index);
+        let direction = outward(graph, index);
         let position = add(
             lattice.to_cart(sites[index].frac()),
             direction.map(|value| value * C_H),
@@ -251,6 +251,17 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
         next += 1;
         hydrogen_count += 1;
     }
+    let pruned = super::clash::prune(&lattice, sites, bonds, graph.len());
+    for element in &pruned.dropped {
+        match element.as_str() {
+            "H" => hydrogen_count = hydrogen_count.saturating_sub(1),
+            "F" => fluorine_count = fluorine_count.saturating_sub(1),
+            "O" => oxygen_count = oxygen_count.saturating_sub(1),
+            _ => {}
+        }
+    }
+    bare_edges += pruned.groups;
+    let (sites, bonds) = (pruned.sites, pruned.bonds);
     let carbon_count = elements.iter().filter(|element| *element == "C").count();
     let structure = build(lattice, &sites, &bonds, "carbon")?;
     let carbon_sites: Vec<Site> = sites
@@ -309,7 +320,7 @@ pub(crate) fn terminate(graph: &CarbonGraph, ratios: Ratios) -> Result<Terminate
     })
 }
 
-fn outward(graph: &CarbonGraph, degree: &[usize], index: usize) -> [f64; 3] {
+fn outward(graph: &CarbonGraph, index: usize) -> [f64; 3] {
     let matrix = graph.lattice.matrix();
     let mut sum = [0.0; 3];
     for bond in &graph.bonds {
@@ -327,11 +338,13 @@ fn outward(graph: &CarbonGraph, degree: &[usize], index: usize) -> [f64; 3] {
             sum = add(sum, vector);
         }
     }
+    // An sp2 edge carbon's free valence lies in the sheet, opposite its bonds;
+    // the sheet normal is only the fallback for a carbon whose bonds cancel.
     let normal = graph.normals.get(index).copied().unwrap_or([0.0; 3]);
-    let direction = if degree.get(index).copied().unwrap_or(0) >= 2 && norm(normal) > 0.1 {
-        normal
-    } else {
+    let direction = if norm(sum) > 0.1 {
         sum.map(|value| -value)
+    } else {
+        normal
     };
     let length = norm(direction).max(1e-12);
     direction.map(|value| value / length)

@@ -200,6 +200,7 @@ pub fn build_carbon(recipe: &CarbonRecipe) -> Result<CarbonBuild, Error> {
     let target = solved.carbons + recipe.ratios().wanted(solved.carbons).ether;
     let cut = graph::cut(&closed, &solved.segments, &solved.vertices, target)?;
     let periodicity = cut.periodicity();
+    let cut = super::settle::settle(&cut);
     let terminated = terminate(&cut, recipe.ratios())?;
     let mut notes = Vec::new();
     let census = match xtalforge_core::rings::ring_counts_explicit(&terminated.carbon_structure, 10)

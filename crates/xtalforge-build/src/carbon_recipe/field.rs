@@ -125,7 +125,7 @@ impl GaussianField {
     }
 
     /// Field value and Cartesian gradient at one fractional point.
-    pub(crate) fn value_gradient(&self, frac: [f64; 3]) -> (f64, [f64; 3]) {
+    pub(crate) fn gaussian_value_gradient(&self, frac: [f64; 3]) -> (f64, [f64; 3]) {
         let matrix = self.lattice.matrix();
         let point = transform(frac, matrix);
         let cutoff2 = (CUTOFF_WIDTHS * self.width).powi(2);
@@ -239,4 +239,16 @@ fn bin_of(frac: [f64; 3], bins: [usize; 3]) -> [i32; 3] {
 fn lattice_lengths(lattice: &Lattice) -> [f64; 3] {
     let matrix = lattice.matrix();
     [norm(matrix[0]), norm(matrix[1]), norm(matrix[2])]
+}
+
+/// A periodic scalar field whose level set is remeshed and relaxed.
+pub(crate) trait LevelSet {
+    /// Field value and Cartesian gradient at one fractional point.
+    fn value_gradient(&self, frac: [f64; 3]) -> (f64, [f64; 3]);
+}
+
+impl LevelSet for GaussianField {
+    fn value_gradient(&self, frac: [f64; 3]) -> (f64, [f64; 3]) {
+        self.gaussian_value_gradient(frac)
+    }
 }

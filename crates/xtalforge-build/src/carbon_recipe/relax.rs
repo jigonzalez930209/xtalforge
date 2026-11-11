@@ -4,7 +4,7 @@
 
 use xtalforge_core::Error;
 
-use super::field::GaussianField;
+use super::field::LevelSet;
 use super::mesh::Mesh;
 use super::net::{add, dot, norm, sub, transform};
 
@@ -12,7 +12,7 @@ use super::net::{add, dot, norm, sub, transform};
 /// and puts it back on the level set with a capped Newton step.
 pub(crate) fn relax(
     mesh: &Mesh,
-    field: &GaussianField,
+    field: &dyn LevelSet,
     level: f64,
     damping: f64,
 ) -> Result<Mesh, Error> {

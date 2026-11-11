@@ -218,7 +218,7 @@ impl Editor {
 /// Remeshes the sheet towards an even `TARGET_EDGE` triangulation.
 pub(crate) fn remesh(
     mesh: &Mesh,
-    field: &super::field::GaussianField,
+    field: &dyn super::field::LevelSet,
     level: f64,
     iterations: usize,
     target: f64,
