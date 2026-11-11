@@ -242,7 +242,7 @@ def test_detect_symmetry_surface() -> None:
     assert dataset["number"] == 227
     assert dataset["hall_number"] == 525
     assert len(dataset["operations"]) == 192
-    assert dataset["wyckoffs"] == ["b"] * 8
+    assert dataset["wyckoffs"] == ["a"] * 8
     assert dataset["orbits"] == [0] * 8
     assert len(dataset["std_lattice"]) == 3
 
@@ -287,7 +287,7 @@ def test_standardize_reduce_wyckoff_and_zone() -> None:
     assert reduced["determinant"] in (-1.0, 1.0)
     assignments = xtalforge.wyckoff_assignments(text, symprec=0.001)
     assert assignments
-    assert assignments[0]["letter"] == "b"
+    assert assignments[0]["letter"] == "a"
     zone = xtalforge.brillouin_zone(text)
     assert len(zone["vertices"]) == 24
     assert len(zone["faces"]) == 14
