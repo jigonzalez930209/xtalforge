@@ -186,6 +186,15 @@ def test_pxrd_positions_match_bragg_reference(page, base_url, sample):
         assert abs(nearest["d"] - reflection["d"]) < 1e-3
 
 
+@pytest.mark.parametrize("sample", SAMPLES)
+def test_wyckoff_letters_match_spglib(page, base_url, sample):
+    state = open_sample(page, base_url, sample)
+    letters: dict[str, int] = {}
+    for letter in state["wyckoff"]:
+        letters[letter] = letters.get(letter, 0) + 1
+    assert letters == REFERENCE["samples"][sample]["wyckoff_letters"]
+
+
 @pytest.mark.parametrize("sample", ["Si", "NaCl", "TiO2", "Fe"])
 def test_pxrd_intensities_match_the_it92_reference(page, base_url, sample):
     open_sample(page, base_url, sample)
