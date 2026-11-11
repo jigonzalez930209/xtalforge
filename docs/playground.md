@@ -17,7 +17,7 @@ import Playground from './.vitepress/components/Playground.vue'
 
 ## What can be tested
 
-- **Tour**: the first tab walks through sixteen steps, from reading a CIF and
+- **Tour**: the first tab walks through seventeen steps, from reading a CIF and
   detecting its space group to the Brillouin zone, measures, supercells,
   slabs, PXRD, nanotubes, twisted bilayers, C60, MOFs, disordered carbon,
   polymers, porosity, the force field and the exports. Each step runs the
@@ -38,7 +38,10 @@ import Playground from './.vitepress/components/Playground.vue'
 - **Force field**: UFF energy, atom types, QEq/EQeq charges, vibrations and a
   UFF minimization that replaces the current structure.
 - **Powder**: Cu Kα and other radiations, International Tables form factors,
-  a plotted pattern with hkl labels, an I/I₀ peak table and CSV export.
+  a plotted pattern with hkl labels, an I/I₀ peak table and CSV export, plus a
+  refinement panel: Le Bail, Pawley, Rietveld and the automatic run against
+  the bundled synthetic rutile pattern or your own 2θ/intensity file, with an
+  observed/calculated/difference plot.
 - **View**: ball-and-stick, space-fill, wireframe and sticks, with the cell
   edges, axes, orbit, zoom, rotation, atom selection, fullscreen and PNG
   export.
