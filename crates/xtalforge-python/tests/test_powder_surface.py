@@ -85,6 +85,7 @@ def test_powder_refine_surface() -> None:
         doublet=True,
     )
     assert result["stages"] == [
+        "pawley_cell",
         "background_scale",
         "zero_cell",
         "width",
