@@ -165,7 +165,7 @@ new JSON and object fields are additive.
 - The WASM budget moves from 3904 to 3968 KiB for the audit fixes (IT92
   table, commensurate twist, periodic polymer, embedder angles, carbon
   relaxation, ZTC/Schwarz P dual, Le Bail/Pawley background, MOF quaternion
-  fit and `build_carbon_text`; 3940 KiB measured).
+  fit and `build_carbon_text`; 3943 KiB measured).
 - The WASM release budget moves from 3840 to 3904 KiB for `scene_data`,
   `n_atoms` and the text-returning builders (3845 KiB measured).
 
