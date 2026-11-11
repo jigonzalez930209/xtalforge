@@ -17,13 +17,14 @@ const roadmapItems = [
   { text: 'Phase 7 — Powder refinement', link: '/roadmap/phase-07-powder' },
   { text: 'Phase 8 — Agent and distribution', link: '/roadmap/phase-08-distribution' },
   { text: 'Phase 9 — Core features', link: '/roadmap/phase-09-core-features' },
-  { text: 'Phase 10 — Usability and 1.x polish', link: '/roadmap/phase-10-usability' },
-  { text: 'Phase 11 — Native bindings', link: '/roadmap/phase-11-native-api' },
-  { text: 'Phase 12 — Interoperability', link: '/roadmap/phase-12-interop' },
-  { text: 'Phase 13 — Scientific completeness', link: '/roadmap/phase-13-completeness' },
-  { text: 'Phase 14 — Performance and scale', link: '/roadmap/phase-14-performance' },
-  { text: 'Phase 15 — Workflows and provenance', link: '/roadmap/phase-15-workflows' },
-  { text: 'Phase 16 — 2.0 redesign and freeze', link: '/roadmap/phase-16-v2' },
+  { text: 'Phase 10 — MOF platform', link: '/roadmap/phase-10-mof' },
+  { text: 'Phase 11 — Usability and 1.x polish', link: '/roadmap/phase-11-usability' },
+  { text: 'Phase 12 — Native bindings', link: '/roadmap/phase-12-native-api' },
+  { text: 'Phase 13 — Interoperability', link: '/roadmap/phase-13-interop' },
+  { text: 'Phase 14 — Scientific completeness', link: '/roadmap/phase-14-completeness' },
+  { text: 'Phase 15 — Performance and scale', link: '/roadmap/phase-15-performance' },
+  { text: 'Phase 16 — Workflows and provenance', link: '/roadmap/phase-16-workflows' },
+  { text: 'Phase 17 — 2.0 redesign and freeze', link: '/roadmap/phase-17-v2' },
 ]
 
 export default defineConfig({
