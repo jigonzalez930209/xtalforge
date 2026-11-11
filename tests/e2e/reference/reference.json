@@ -127,6 +127,9 @@
       ],
       "spacegroup": 229,
       "volume": 23.526415870264003,
+      "wyckoff_letters": {
+        "a": 2
+      },
       "wyckoff_multiplicities": [
         2
       ]
@@ -12916,6 +12919,10 @@
       ],
       "spacegroup": 62,
       "volume": 5327.635999892463,
+      "wyckoff_letters": {
+        "c": 16,
+        "d": 272
+      },
       "wyckoff_multiplicities": [
         4,
         4,
@@ -14788,6 +14795,12 @@
       ],
       "spacegroup": 225,
       "volume": 4305.720441906056,
+      "wyckoff_letters": {
+        "c": 2,
+        "f": 8,
+        "g": 24,
+        "k": 72
+      },
       "wyckoff_multiplicities": [
         2,
         8,
@@ -15037,6 +15050,10 @@
       ],
       "spacegroup": 225,
       "volume": 177.50432800000002,
+      "wyckoff_letters": {
+        "a": 4,
+        "b": 4
+      },
       "wyckoff_multiplicities": [
         4,
         4
@@ -15268,6 +15285,9 @@
       ],
       "spacegroup": 227,
       "volume": 160.1862572980187,
+      "wyckoff_letters": {
+        "a": 8
+      },
       "wyckoff_multiplicities": [
         8
       ]
@@ -15481,6 +15501,10 @@
       ],
       "spacegroup": 136,
       "volume": 62.434723178803,
+      "wyckoff_letters": {
+        "a": 2,
+        "f": 4
+      },
       "wyckoff_multiplicities": [
         2,
         4
@@ -15643,6 +15667,9 @@
       ],
       "spacegroup": 227,
       "volume": 45.384150878559396,
+      "wyckoff_letters": {
+        "a": 8
+      },
       "wyckoff_multiplicities": [
         8
       ]
@@ -15947,6 +15974,9 @@
       ],
       "spacegroup": 191,
       "volume": 104.8167866708382,
+      "wyckoff_letters": {
+        "c": 2
+      },
       "wyckoff_multiplicities": [
         2
       ]

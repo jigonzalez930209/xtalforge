@@ -83,6 +83,7 @@ def symmetry_reference(structure: gemmi.SmallStructure) -> dict[str, object]:
     return {
         "spacegroup": int(dataset.number),
         "wyckoff_multiplicities": sorted(orbits.values()),
+        "wyckoff_letters": dict(sorted(Counter(str(letter) for letter in dataset.wyckoffs).items())),
     }
 
 
@@ -216,6 +217,7 @@ def sample_reference(name: str, path: Path) -> dict[str, object]:
         "n_atoms": len(sites),
         "spacegroup": symmetry["spacegroup"],
         "wyckoff_multiplicities": symmetry["wyckoff_multiplicities"],
+        "wyckoff_letters": symmetry["wyckoff_letters"],
         "primitive_volume": primitive_volume(structure),
         "atom_positions": [
             [
