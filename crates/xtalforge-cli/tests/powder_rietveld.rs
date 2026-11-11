@@ -42,7 +42,13 @@ fn powder_rietveld_reports_stages_and_esds() {
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).expect("JSON");
     assert_eq!(
         value["stages"],
-        serde_json::json!(["background_scale", "zero_cell", "width", "structure"])
+        serde_json::json!([
+            "pawley_cell",
+            "background_scale",
+            "zero_cell",
+            "width",
+            "structure"
+        ])
     );
     assert!(value["rwp"].as_f64().unwrap() < 0.3);
     let parameters = value["parameters"].as_array().unwrap();
