@@ -3,7 +3,9 @@
 //! This is a deliberately small distance-geometry embedder, not ETKDG. It
 //! initializes the atoms on a seeded Fibonacci spiral, gives every bond an
 //! element-pair ideal length, and relaxes the graph with a gradient descent on
-//! a bond-length plus non-bonded repulsion objective. Rings close because the
+//! a bond-length, bond-angle (1-3 distance) and non-bonded repulsion
+//! objective. Ideal angles follow the hybridization implied by the bond
+//! orders: 180, 120 or 109.47 degrees. Rings close because the
 //! ring-closing bond is part of the objective; the result makes no
 //! stereochemical claim and can be trapped in a local minimum for large or
 //! highly fused graphs.
@@ -14,6 +16,7 @@
 //! Crystal-Builder applies to RDKit geometries (`build/coordination.py`), at a
 //! reduced level of theory.
 
+mod angles;
 mod geometry;
 mod relax;
 
@@ -21,6 +24,7 @@ use xtalforge_core::elements::element_by_symbol;
 use xtalforge_core::{Error, Structure};
 
 use crate::smiles::SmilesMolecule;
+use angles::angle_targets;
 use geometry::{
     extra_direction, ideal_bond_length, ideal_bonds, is_metal, neighbours_of, radii,
     repulsion_pairs, shape_vertices, spiral,
@@ -48,7 +52,7 @@ impl Default for EmbedOptions {
     fn default() -> Self {
         Self {
             bond_length: DEFAULT_BOND_LENGTH,
-            iterations: 200,
+            iterations: 1500,
             seed: 7,
         }
     }
@@ -190,9 +194,12 @@ fn embed_points(graph: &SmilesMolecule, options: &EmbedOptions) -> Result<Vec<[f
     }
     let radii = radii(graph)?;
     let bonds = ideal_bonds(graph, options)?;
-    let repulsion = repulsion_pairs(count, &bonds, &radii);
+    let angles = angle_targets(graph, &bonds);
+    let mut constrained = bonds.clone();
+    constrained.extend(angles.iter().copied());
+    let repulsion = repulsion_pairs(count, &constrained, &radii);
     let mut points = spiral(count, options);
-    relax(&mut points, &bonds, &repulsion, options.iterations);
+    relax(&mut points, &bonds, &angles, &repulsion, options.iterations);
     Ok(points)
 }
 

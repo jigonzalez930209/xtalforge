@@ -8,13 +8,16 @@ const MAX_STEP: f64 = 0.12;
 const LEARNING_RATE: f64 = 0.35;
 /// Stiffness of the bond-length term.
 const BOND_STIFFNESS: f64 = 1.0;
+/// Stiffness of the 1-3 (bond-angle) distance term.
+const ANGLE_STIFFNESS: f64 = 0.4;
 /// Stiffness of the non-bonded repulsion term.
 const REPULSION_STIFFNESS: f64 = 0.35;
 
-/// Gradient descent on bond lengths and non-bonded repulsion.
+/// Gradient descent on bond lengths, bond angles and non-bonded repulsion.
 pub(super) fn relax(
     points: &mut [[f64; 3]],
     bonds: &[(usize, usize, f64)],
+    angles: &[(usize, usize, f64)],
     repulsion: &[(usize, usize, f64)],
     iterations: usize,
 ) {
@@ -25,6 +28,12 @@ pub(super) fn relax(
             let (delta, distance) = pair_vector(points, first, second);
             let direction = unit(delta, first, second);
             let magnitude = BOND_STIFFNESS * (distance - target);
+            apply_force(&mut forces, first, second, direction, magnitude);
+        }
+        for &(first, second, target) in angles {
+            let (delta, distance) = pair_vector(points, first, second);
+            let direction = unit(delta, first, second);
+            let magnitude = ANGLE_STIFFNESS * (distance - target);
             apply_force(&mut forces, first, second, direction, magnitude);
         }
         for &(first, second, minimum) in repulsion {
