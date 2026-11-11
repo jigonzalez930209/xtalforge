@@ -86,6 +86,14 @@ export const TOUR: TourStep[] = [
     tab: 'powder',
   },
   {
+    id: 'refine',
+    title: 'Refine a measured pattern',
+    area: 'Powder',
+    note: 'Below the calculated pattern: load the reference rutile pattern and run Le Bail, Pawley, Rietveld (it starts from a Pawley cell) or the automatic run.',
+    sample: 'TiO2',
+    tab: 'powder',
+  },
+  {
     id: 'nanotube',
     title: 'Carbon nanotube',
     area: 'Builders',

@@ -222,6 +222,21 @@
 .playground .pxrd-plot .peak-label {
   fill: var(--vp-c-brand-1);
 }
+.playground .pxrd-plot .observed {
+  fill: none;
+  stroke: var(--vp-c-text-2);
+  stroke-width: 0.8;
+}
+.playground .pxrd-plot .difference {
+  fill: none;
+  stroke: var(--vp-c-danger-1, #c33);
+  stroke-width: 0.7;
+}
+.playground .refine-results th {
+  text-align: left;
+  font-weight: 500;
+  padding-right: 1rem;
+}
 .playground .chip {
   display: inline-block;
   padding: 0.05rem 0.45rem;
