@@ -20,7 +20,8 @@ committed; the browser never reads it.
 
 ## What the battery exercises
 
-The suite has 49 checks. For every sample in `Si`, `NaCl`, `diamond`,
+The suite has 54 checks (49 from the first audit, plus the PXRD intensity
+checks for Si, NaCl, TiO2 and Fe and the guided tour). For every sample in `Si`, `NaCl`, `diamond`,
 `graphene`, `TiO2`, `MFI`, `MOF-5` and `Fe` it verifies:
 
 - formula, cell volume and density against gemmi;
@@ -42,6 +43,11 @@ It also covers:
   reduction;
 - graphene, `(5, 5)` nanotubes, C60, C20 and a `pcu` MOF;
 - Cu Kα PXRD peak positions for Si, NaCl, TiO2, Fe and graphene;
+- relative Cu Kα PXRD intensities for Si, NaCl, TiO2 and Fe against
+  `|F|^2 m LP` with gemmi's IT92 form factors (within 1 % of the strongest
+  line);
+- the sixteen-step playground tour (zone counts, the tetrahedral angle, the
+  NaCl supercell, the twisted-bilayer cell and every builder step);
 - Brillouin-zone vertex, face and edge counts for fcc silicon and rock salt,
   bcc iron, the graphene hexagonal prism and the orthorhombic MFI cell;
 - the playground tabs, Brillouin view, atom selection distances/angles/
@@ -84,7 +90,86 @@ The battery exposed four real defects, all fixed in the same cycle:
    prism). The zone counts are now checked for fcc, bcc, simple cubic,
    orthorhombic and hexagonal lattices.
 
+## Functional audit of 2026-11-11
+
+A second pass ran every CLI subcommand on the samples and compared the
+results with independent calculations (gemmi IT92 structure factors, spglib,
+ASE neighbour lists and geometry checks). It found and fixed:
+
+6. **PXRD relative intensities.** The form factor was the Z-based Gaussian
+   for every element; rutile `(1 1 1)` came out at 28 % of `(1 1 0)` instead of
+   19 % and silicon `(2 2 0)` at 77 % instead of 67 %. The International
+   Tables (1992) coefficients are now embedded and the Si, NaCl, Fe and rutile
+   lines agree with the independent `|F|^2 m LP` to 0.1 %.
+7. **Twisted bilayers ignored the angle.** `build twist 2 1 21.79` returned an
+   untwisted AA bilayer (any angle was rounded to 0 or 60 degrees). The
+   builder now constructs the commensurate moire cell; every carbon keeps three
+   1.42 Angstrom neighbours in its layer.
+8. **Polymers overlapped themselves.** A six-unit polyethylene chain was
+   packed into a 6.2 Angstrom cube, giving C-C contacts of 0.67 Angstrom. The
+   chain is now periodic along `a`, joined head to tail.
+9. **SMILES rings collapsed.** The embedder had no angle term; benzene came
+   out non-planar with 1.17 Angstrom 1-3 contacts. Hybridization-based angle
+   targets fix rings, chains and alkynes.
+10. **Disordered carbon contacts.** `build carbon` produced carbons 0.15
+    Angstrom apart and terminations colliding across narrow gaps. The dual
+    graph is relaxed to 1.42 Angstrom/120 degrees, terminations follow the
+    free in-plane valence, overlapping terminations are dropped and every bond
+    that crosses the cell boundary carries its lattice image (71 bonds of the
+    default build were drawn across the whole cell).
+11. **Playground defaults.** The twisted-bilayer form called the builder with
+    `m = 0`, which is rejected.
+12. **Vibrations of crystals were nonsense.** `ff vibrations Si.cif` reported
+    modes of -13 847 and +16 528 cm^-1. The P1 expansion turned a coordinate
+    of -1e-32 (a Cartesian round trip of 0) into exactly 1.0, which
+    duplicated an atom in the UFF view (+1028 eV). Coordinates now stay in
+    `[0, 1)` (`P1Cell::expand`, `Lattice::wrap`) and silicon has three zero
+    acoustic modes and triply degenerate optical modes (347-749 cm^-1 with
+    UFF).
+13. **Le Bail and Pawley ignored the background.** With a 50-count baseline
+    Le Bail reached R = 0.69 even from the true cell, because the partition
+    inflated the peaks to absorb the baseline. Both now subtract a SNIP
+    envelope (about ten peak widths) and Le Bail uses the standard
+    profile-weighted partition; R drops to 0.27 on the same data.
+14. **MOF node orientation.** The greedy rule left the in-plane angle of
+    planar nodes arbitrary, so `srs` linkers were stretched 0.55-1.26 times.
+    A Kabsch fit over every connection-to-edge assignment now orients the
+    nodes.
+15. **ZTC and Schwarz P carbons were not sp2.** They are now the relaxed dual
+    of the remeshed surface (see below); the sampled grid also gained the
+    closing plane that the marching tetrahedra need for a closed surface.
+
+Verified as correct in the same pass: formula, volume and density of the eight
+samples; space groups; bond counts, ring census and Si-Si distances; C60,
+C20, graphene, ribbon and `(5, 5)` nanotube bond lengths; QEq/EQeq charge
+neutrality; supercells, slabs and the Brillouin zones; analytic UFF forces
+and the Gamma-point Hessian against central differences of the energy
+(`crates/xtalforge-ff/tests/uff_gradient.rs`); the general indexing of a
+synthetic rutile pattern (a = 4.6403, c = 2.9870 against 4.6400 and 2.9890);
+Pawley cell refinement from a 1 % expanded start (a = 4.6399); Rietveld
+from a near cell (a = 4.6399, c = 2.9890, Rwp 0.12) and the automatic
+powder run; MOF assembly of pcu/sql/Cr3O frameworks (C-C 1.35-1.48
+Angstrom).
+
 ## Known gaps
+
+- Wyckoff letters follow moyo's choice of origin among the
+  Euclidean-normalizer equivalents: silicon in origin choice 1 is reported as
+  `8b` (template `1/2, 1/2, 1/2`) where spglib reports `8a`. Both are the same
+  orbit up to an origin shift; the multiplicity and site symmetry agree.
+- `eeq_charges` with the default `dielectric = 1` reproduces QEq to rounding
+  (documented in `charges/eeq.rs`); the EEQ2019 parameter set is not bundled.
+- `build_ztc` needs a cell of at least about 12 Angstrom; at 10 Angstrom the
+  gyroid channels are too narrow and a third of the carbons end up over- or
+  under-coordinated.
+- Rietveld refinement is local: from a cell 1 % off the true one, `powder
+  rietveld --refine` stays in a local minimum (Rwp 0.47). Start from a
+  Pawley or `powder automatic` cell, which recovers rutile to 0.05 %.
+- MOF blocks are not checked for chemical compatibility: an organic
+  carboxylate node with a carboxylate linker overlaps its oxygens; the
+  builder reports the close contacts.
+- Polymers carry the heavy-atom backbone only; hydrogens are added with
+  `hydrogens` afterwards.
 
 - The battery covers the structure, symmetry, builder, view and powder-position
   surfaces. Force fields, porosity, MOF chemistry and the Le Bail/Pawley/
@@ -98,9 +183,10 @@ The battery exposed four real defects, all fixed in the same cycle:
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
   the 3D geometry.
-- The WASM bundle is close to its release budget (3845 KiB against 3904 KiB
-  after the scene and text exports), so any further surface helper needs a
-  deliberate size review.
+- The WASM bundle measures 3910 KiB against a 3968 KiB budget. The budget
+  was 3904 KiB after the scene and text exports and was raised by this audit
+  for the fixes listed above; any further surface helper needs a deliberate
+  size review.
 - The CLI, Python and WASM surfaces have their own integration suites; the
   Playwright battery targets the WASM surface because it is the one a browser
   user sees. `scripts/check-parity.sh` keeps the four surfaces aligned.
