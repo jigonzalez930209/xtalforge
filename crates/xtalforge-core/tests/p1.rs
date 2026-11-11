@@ -112,3 +112,18 @@ fn disorder_sites_at_the_same_position_both_survive() {
     assert_eq!(p1.atoms[0].site_idx, 0);
     assert_eq!(p1.atoms[1].site_idx, 1);
 }
+
+#[test]
+fn tiny_negative_coordinates_wrap_to_zero() {
+    let structure = StructureBuilder::new("round-trip", Lattice::cubic(5.43).unwrap())
+        .site(Site::new("Si1", "Si", [-1.2e-32, 0.5, -6e-33]).unwrap())
+        .build()
+        .unwrap();
+    let p1 = structure.p1().unwrap();
+    let frac = p1.atoms[0].frac;
+    assert!(
+        frac.iter().all(|value| (0.0..1.0).contains(value)),
+        "{frac:?}"
+    );
+    assert_eq!(Lattice::wrap([-1e-22, 0.25, 1.0]), [0.0, 0.25, 0.0]);
+}
