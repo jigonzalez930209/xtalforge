@@ -33,6 +33,7 @@ export async function loadSampleText(sample: Sample): Promise<string> {
 }
 
 export const TABS = [
+  ['tour', 'Tour'],
   ['structure', 'Structure'],
   ['symmetry', 'Symmetry'],
   ['analysis', 'Analysis'],

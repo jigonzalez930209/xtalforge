@@ -213,6 +213,93 @@
   stroke: var(--vp-c-text-2);
   stroke-width: 1;
 }
+.playground .pxrd-plot .peak-label,
+.playground .pxrd-plot .tick-label {
+  fill: var(--vp-c-text-2);
+  font-size: 9px;
+  font-family: var(--vp-font-family-mono);
+}
+.playground .pxrd-plot .peak-label {
+  fill: var(--vp-c-brand-1);
+}
+.playground .chip {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+.playground .tour-areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.playground .tour-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  counter-reset: tour;
+}
+.playground .tour-steps li {
+  counter-increment: tour;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  margin: 0;
+}
+.playground .tour-steps li.active {
+  border-color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+.playground .tour-steps li.done {
+  opacity: 0.75;
+}
+.playground .tour-steps li > button {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  background: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  color: var(--vp-c-text-1);
+}
+.playground .tour-steps li > button::before {
+  content: counter(tour);
+  min-width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 0.75rem;
+  background: var(--vp-c-default-soft);
+}
+.playground .tour-steps li.active > button::before {
+  background: var(--vp-c-brand-1);
+  color: var(--vp-c-white);
+}
+.playground .tour-steps li > button strong {
+  flex: 1;
+  font-weight: 600;
+}
+.playground .tour-note {
+  margin: 0.35rem 0 0.1rem 1.9rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.playground button.primary {
+  background: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-white);
+}
 .playground .viewer:fullscreen {
   display: flex;
   flex-direction: column;
