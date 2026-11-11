@@ -40,6 +40,7 @@ check_rust() {
     refine_phase) name=refine_phase ;;
     powder_index) name=index_pattern ;;
     powder_pawley) name=pawley_refine ;;
+    powder_lebail) name=le_bail ;;
     param_schema) name=preset ;;
     project_pack) name=write_project ;;
     workspace_archive) name=archive_records ;;
@@ -109,6 +110,7 @@ check_wasm() {
     run_automatic) name=powder_automatic_info ;;
     powder_index) name=powder_index_info ;;
     powder_pawley) name=powder_pawley_info ;;
+    powder_lebail) name=powder_lebail_info ;;
     refine_phase) name=powder_refine_info ;;
     param_schema) name=param_schema ;;
     project_pack) name=project_pack ;;
@@ -149,7 +151,7 @@ check_cli() {
     pxrd) command=pxrd ;;
     build_graphene|build_nanotube|build_c20|build_c60|twist|ribbon|build_ztc|build_schwarzite|build_carbon|build_polymer) command=build ;;
     build_mof) command=mof ;;
-    run_automatic|refine_phase|powder_index|powder_pawley) command=powder ;;
+    run_automatic|refine_phase|powder_index|powder_pawley|powder_lebail) command=powder ;;
     param_schema) command=params ;;
     project_pack) command=project ;;
     prepare) command=ff ;;
