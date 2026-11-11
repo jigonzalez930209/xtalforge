@@ -34,12 +34,16 @@ def test_sample_matches_standard_library(page, base_url, sample):
     assert summary["density"] == pytest.approx(reference["density"], rel=1e-6)
     assert summary["n_atoms"] == reference["n_atoms"]
     assert state["symmetry"]["number"] == reference["spacegroup"]
-    if sample != "MOF-5":
-        # MOF-5 is stored in its primitive rhombohedral cell while the detected
-        # group is the conventional Fm-3m setting; the Wyckoff multiplicity is
-        # reported in the conventional cell, so the two orbit lists differ by
-        # the fourfold F centring.
-        assert sorted(state["wyckoffOrbits"]) == reference["wyckoff_multiplicities"]
+    # Wyckoff multiplicities are conventional-cell numbers. A sample stored in
+    # its primitive cell (MOF-5, rhombohedral setting of Fm-3m) has orbits
+    # smaller by the centring factor of the lattice symbol. Every atom must
+    # carry the size of its spglib orbit.
+    centring = {"P": 1, "A": 2, "B": 2, "C": 2, "I": 2, "R": 3, "F": 4}
+    primitive_input = abs(reference["volume"] - reference["primitive_volume"]) < 1e-3 * reference["volume"]
+    factor = centring.get(state["symmetry"]["hm_symbol"].strip()[0], 1) if primitive_input else 1
+    per_atom = sorted(size // factor for size in state["wyckoffAtoms"])
+    expected = sorted(size for size in reference["wyckoff_multiplicities"] for _ in range(size))
+    assert per_atom == expected
     assert corners_match(state, reference["cell_matrix"]) < 2e-3
 
     _, worst = periodic_match(
