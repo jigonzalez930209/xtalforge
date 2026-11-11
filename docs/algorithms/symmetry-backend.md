@@ -51,9 +51,12 @@ compares:
   `Setting::default`, Si selects Hall 526 instead of spglib's 525 (origin
   choice 2 instead of 1);
 - number of operations: **agrees in all 32 cases**;
-- Wyckoff letters: agrees except Si, where moyo reports `8b` and spglib
-  reports `8a` for the same Hall-525 structure (origin shift); recorded as a
-  known origin-choice difference;
+- Wyckoff letters: raw moyo agrees except Si, where moyo reports `8b` and
+  spglib reports `8a` for the same Hall-525 structure (origin shift). Since
+  the 2026-11-11 audit the wrapper matches the letters on the input
+  coordinates when the input basis is conventional
+  (`xtalforge-symmetry/src/wyckoff_origin.rs`), so xtalforge reports `8a` like
+  spglib; the e2e battery checks the letter counts of all eight samples;
 - standardized lattice parameters: agrees for Si, NaCl, MOF-5 and ZIF-8;
   differs for graphite, quartz, the triclinic edge case and the hexagonal edge
   case. The differences are conventions, not detection errors: moyo refines
@@ -76,8 +79,8 @@ by default to match Crystal-Builder's spglib behaviour.
   `xtalforge-symmetry::convert`.
 - `Setting::Spglib` reproduces spglib's Hall number on the audit corpus;
   `Setting::default` chooses origin choice 2 for Si (Hall 526) instead of
-  spglib's 525. The origin choice also explains the `8a`/`8b` Wyckoff
-  difference.
+  spglib's 525. The origin choice also explains moyo's `8a`/`8b` Wyckoff
+  difference, which the wrapper now resolves in the input origin.
 
 ## Gap decisions
 

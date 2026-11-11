@@ -28,15 +28,23 @@ running away from the neutral-atom parabola.
 
 ## EEQ
 
-`eeq_charges` is the EEQ kernel `C / (eps sqrt(r^2 + R_i R_j))` with a Coulomb
-radius per element and a dielectric `eps`. The fitted EEQ2019 table of sci-form
-is **not** vendored: `chi` and `J` come from the QEq table and each radius is
-the Ohno radius implied by the hardness. With the default `dielectric = 1` this
-is the same linear system as QEq, and the two methods return identical charges
-(NaCl +-0.202, MOF-5 from -0.617 to +1.246). Only a dielectric above one
-(`ChargeOptions::eqeq`) gives screened charges that differ from QEq, so EEQ is
-not an independent third method yet; the corpus comparison against the fitted
-table is not done.
+`eeq_charges` is EEQ2019 (Caldeweyher et al., J. Chem. Phys. 150, 154122,
+2019), ported from sci-form `src/charges_eeq/eeq2019.rs` with the
+grimme-lab/multicharge parameters for H to Lr (`crates/xtalforge-ff/data/
+eeq2019.json`). In atomic units it solves
+
+```
+A_ii = eta_i + sqrt(2/pi) / rad_i
+A_ij = sum_images erf(r / sqrt(rad_i^2 + rad_j^2)) / (eps r)
+x_i  = -chi_i + kcn_i sqrt(CN_i),   A q = x,   sum q = Q
+```
+
+with an erf-counted coordination number (D3 covalent radii, smooth cap at 8,
+images within 25 Bohr). Coulomb images are summed inside `options.cutoff`, the
+same real-space rule as QEq; `dielectric = 1` is plain EEQ2019. For isolated
+water and methanol the charges match sci-form (validated against dftd4) to
+2e-3 (`eeq2019_matches_the_sci_form_reference`). Before the 2026-11-11 audit
+this function reused the QEq table and returned exactly the QEq charges.
 
 ## Ewald
 
@@ -54,6 +62,6 @@ finite differences and the energy with a spherical direct sum.
 
 - QEq: fast, neutral organic molecules and a first guess.
 - EQeq: frameworks with metals, where measured ionisation energies matter.
-- EEQ: QEq with a dielectric screening; identical to QEq at `dielectric = 1`.
+- EEQ: EEQ2019 with periodic images in real space (no Ewald sum).
 - Ewald: the periodic electrostatic energy and forces on top of any charge
   model.
