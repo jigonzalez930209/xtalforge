@@ -20,7 +20,8 @@ committed; the browser never reads it.
 
 ## What the battery exercises
 
-The suite has 62 checks (49 from the first audit, plus the Wyckoff letter
+The suite has 68 checks (49 from the first audit, plus the porosity, MOF and
+refinement-panel checks against Python, the Wyckoff letter
 checks against spglib for the eight samples, the PXRD intensity
 checks for Si, NaCl, TiO2 and Fe and the guided tour). For every sample in `Si`, `NaCl`, `diamond`,
 `graphene`, `TiO2`, `MFI`, `MOF-5` and `Fe` it verifies:
@@ -47,7 +48,7 @@ It also covers:
 - relative Cu Kα PXRD intensities for Si, NaCl, TiO2 and Fe against
   `|F|^2 m LP` with gemmi's IT92 form factors (within 1 % of the strongest
   line);
-- the sixteen-step playground tour (zone counts, the tetrahedral angle, the
+- the seventeen-step playground tour (zone counts, the tetrahedral angle, the
   NaCl supercell, the twisted-bilayer cell and every builder step);
 - Brillouin-zone vertex, face and edge counts for fcc silicon and rock salt,
   bcc iron, the graphene hexagonal prism and the orthorhombic MFI cell;
@@ -168,6 +169,20 @@ ASE neighbour lists and geometry checks). It found and fixed:
     MOF-5 Zn at +4.4. EEQ now uses an Ewald sum for the Gaussian charges; a
     rutile 2 x 1 x 1 supercell repeats the unit-cell charges to 1e-4 and
     MOF-5 ranges from -0.58 to +0.79.
+23. **The Rietveld phase fit ignored the background.** `fit_phase` documents
+    a scale and background fit but kept the background at its start value
+    (0), so the automatic run reported Rwp 1.05 on the reference rutile
+    pattern. Scale and background are now a weighted linear least-squares
+    pair; the same fit gives Rwp 0.33 (the rest is the fixed width).
+24. **Le Bail existed only in the CLI.** Python `powder_lebail` and WASM
+    `powder_lebail_info` were added, with a parity-matrix row; WASM gained
+    `powder_pawley_width_info` because its Pawley could not refine the size
+    and strain widths that Python can (Rwp 0.31 to 0.21 on rutile).
+25. **CLI and bindings disagreed on Rietveld.** The CLI forced 30
+    iterations where Python and WASM use the library default; it now uses the
+    default and the three surfaces agree.
+26. **The CLI panicked on a closed pipe.** `xtalforge ... | head` printed a
+    panic and a backtrace hint; it now exits quietly with status 141.
 
 Verified as correct in the same pass: formula, volume and density of the eight
 samples; space groups; bond counts, ring census and Si-Si distances; C60,
@@ -187,10 +202,12 @@ Angstrom).
   `hydrogens` afterwards.
 
 - The battery covers the structure, symmetry, builder, view and powder-position
-  surfaces. `scripts/check-surfaces.sh` adds UFF energies and QEq/EQeq/EEQ
-  charges on the CLI, Python and WASM surfaces; porosity, MOF chemistry and
-  the Le Bail/Pawley/Rietveld stages are covered by their Rust tests and the
-  synthetic-rutile checks of this audit, not yet by the browser runner.
+  surfaces. `scripts/check-surfaces.sh` adds UFF energies, QEq/EQeq/EEQ
+  charges, MFI porosity, the pcu/Zn4O/benzene MOF and Le Bail, Pawley,
+  Rietveld and the automatic run on the reference rutile pattern, on the CLI,
+  Python and WASM surfaces (97 fields). The browser runner checks the
+  porosity panel, the MOF builder and the refinement panel (all four methods)
+  against the Python results.
 - Wyckoff multiplicities are compared per atom with the spglib orbit sizes,
   divided by the centring factor when a sample is stored in its primitive
   cell (MOF-5); the earlier MOF-5 exclusion is gone.
@@ -198,7 +215,7 @@ Angstrom).
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
   the 3D geometry.
-- The WASM bundle measures 3920 KiB against a 3968 KiB budget. The budget
+- The WASM bundle measures 3940 KiB against a 3968 KiB budget. The budget
   was 3904 KiB after the scene and text exports and was raised by this audit
   for the fixes listed above; any further surface helper needs a deliberate
   size review.
