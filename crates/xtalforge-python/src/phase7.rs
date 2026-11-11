@@ -40,6 +40,19 @@ pub(crate) fn powder_automatic<'py>(
         "pawley_rwp",
         result.pawley.as_ref().map(|pawley| pawley.rwp),
     )?;
+    // `index` is only the quick cubic-index edge; `best_cell` is the
+    // Pawley-refined cell of the leading candidate (as in WASM).
+    let best_cell = result
+        .pawley
+        .as_ref()
+        .map(|pawley| pawley.cell.to_vec())
+        .or_else(|| {
+            result.leading_cells.first().map(|row| {
+                let cell = &row.index.cell;
+                vec![cell.a, cell.b, cell.c, cell.alpha, cell.beta, cell.gamma]
+            })
+        });
+    dict.set_item("best_cell", best_cell)?;
     let leading = PyList::empty(py);
     for row in &result.leading_cells {
         let item = PyDict::new(py);
