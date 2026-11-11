@@ -342,3 +342,54 @@ fn eqeq_matches_the_authors_program_on_mof5() {
         "EQeq differs from the authors' program by {worst}"
     );
 }
+
+/// Molecule in a 60 Angstrom box, far from its periodic images.
+fn isolated(atoms: &[(&str, [f64; 3])]) -> Structure {
+    let lattice = xtalforge_core::Lattice::cubic(60.0).unwrap();
+    let mut builder = xtalforge_core::StructureBuilder::new("molecule", lattice);
+    for (index, (element, cart)) in atoms.iter().enumerate() {
+        let shifted = [cart[0] + 30.0, cart[1] + 30.0, cart[2] + 30.0];
+        builder = builder.site(
+            xtalforge_core::Site::new(
+                format!("{element}{index}"),
+                element,
+                lattice.to_frac(shifted),
+            )
+            .unwrap(),
+        );
+    }
+    builder.build().unwrap()
+}
+
+#[test]
+fn eeq2019_matches_the_sci_form_reference() {
+    // Reference: sci-form compute_eeq2019_charges (validated against dftd4).
+    let water = isolated(&[
+        ("O", [0.0, 0.0, 0.117]),
+        ("H", [0.0, 0.757, -0.469]),
+        ("H", [0.0, -0.757, -0.469]),
+    ]);
+    let charges = eeq_charges(&water, &ChargeOptions::default()).unwrap();
+    for (value, expected) in charges
+        .per_atom
+        .iter()
+        .zip([-0.598_369, 0.299_185, 0.299_185])
+    {
+        assert!((value - expected).abs() < 2e-3, "{:?}", charges.per_atom);
+    }
+    let methanol = isolated(&[
+        ("C", [0.0, 0.0, 0.0]),
+        ("O", [0.0, 0.0, 1.43]),
+        ("H", [0.9, 0.0, -0.4]),
+        ("H", [-0.45, 0.78, -0.4]),
+        ("H", [-0.45, -0.78, -0.4]),
+        ("H", [0.9, 0.0, 1.75]),
+    ]);
+    let charges = eeq_charges(&methanol, &ChargeOptions::default()).unwrap();
+    let expected = [
+        -0.113_554, -0.472_621, 0.098_487, 0.114_503, 0.114_503, 0.258_682,
+    ];
+    for (value, reference) in charges.per_atom.iter().zip(expected) {
+        assert!((value - reference).abs() < 2e-3, "{:?}", charges.per_atom);
+    }
+}
