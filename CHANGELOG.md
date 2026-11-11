@@ -5,7 +5,13 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
-## [Unreleased]
+## [1.1.0] - 2026-11-11
+
+First feature release after `1.0.0`, published on 2026-11-11. It adds the 3D
+playground and the end-to-end audit battery, exposes the scene and
+text-returning WASM helpers, and folds in the fixes from the functional audit
+of every surface (Task 8.9). The public API remains backward compatible: the
+new JSON and object fields are additive.
 
 ### Added
 
@@ -23,18 +29,20 @@ essential release, then `0.x.y`).
   `build_ribbon_text`, `build_twist_text`, `build_ztc_text`,
   `build_schwarzite_text`, `build_polymer_text`, `hydrogens_text` and
   `ff_optimize_text`).
-- The end-to-end audit battery (`tests/e2e/`): 49 Playwright checks against
+- The end-to-end audit battery (`tests/e2e/`): 68 Playwright checks against
   gemmi, spglib, ASE and NumPy references, plus deterministic 3D screenshot
   goldens, and `scripts/e2e.sh` to run it. The playground UI checks cover the
   tabbed panels, atom selection, the Brillouin zone, the powder plot, UFF
-  energy, exports and fullscreen.
-- A guided **Tour** tab in the playground: sixteen steps that load a sample or
-  run a builder, set the camera and open the tab where the result is read
+  energy, exports, fullscreen, porosity, the MOF builder and all four powder
+  refinement methods.
+- A guided **Tour** tab in the playground: seventeen steps that load a sample
+  or run a builder, set the camera and open the tab where the result is read
   (CIF reading, space group, Brillouin zone, measures, supercell, slab, PXRD,
   nanotube, twisted bilayer, C60, MOF, disordered carbon, polymer, porosity,
-  force field and export). The powder plot gains a 2θ axis, hkl labels for
-  the strongest lines, I/I0 in the table and recalculates when the structure
-  changes; the structure panel adds the disordered-carbon builder.
+  force field, powder refinement and export). The powder plot gains a 2θ axis,
+  hkl labels for the strongest lines, I/I0 in the table and recalculates when
+  the structure changes; the structure panel adds the disordered-carbon
+  builder.
 - `build_carbon_text` on the WASM surface returns the disordered carbon as CIF
   for a viewer.
 

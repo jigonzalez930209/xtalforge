@@ -269,10 +269,11 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.0.0` (published 2026-11-10 on crates.io, PyPI, npm, the GitHub
-  release and GitHub Pages, after the `1.0.0-rc.1` stabilization period;
-  `0.0.3` was the last pre-1.0 release, and `v0.0.1` was the first on
-  2026-11-09).
+- Version: `1.1.0` (published 2026-11-11 on crates.io, PyPI, npm, the GitHub
+  release and GitHub Pages; `1.0.0` followed the `1.0.0-rc.1` stabilization
+  period on 2026-11-10; `0.0.3` was the last pre-1.0 release, and `v0.0.1`
+  was the first on 2026-11-09). `1.1.0` is backward compatible: the 3D
+  playground, the audit fixes and additive WASM/JSON fields.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
@@ -290,13 +291,15 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   crates.io, 7 platform wheels plus an sdist on PyPI, `xtalforge-wasm` on npm,
   the CLI/hosted assets on the GitHub release and the docs on Pages. Task 8.9
   added the 3D playground and the end-to-end audit battery (`tests/e2e/`,
-  `scripts/e2e.sh`): 49 Playwright checks (68 after the 2026-11-11 functional audit, Tasks
-  8.9.6-8.9.7, which fixed PXRD form factors, twisted bilayers, polymers, the
-  SMILES embedder and disordered carbon, and added the playground tour)
-  against gemmi, spglib, ASE and NumPy
-  references plus deterministic screenshot goldens; it also fixed the
-  supercell symmetry expansion and the Hall-only `is_p1` check. The remaining
-  coverage notes are recorded in `docs/guide/audit.md`; Task 8.9.5 closed with `scripts/check-surfaces.sh` and the refinement, porosity and MOF browser checks. Phases 1-7 are
+  `scripts/e2e.sh`): 68 Playwright checks against gemmi, spglib, ASE and NumPy
+  references plus deterministic screenshot goldens. The 2026-11-11 functional
+  audit (Tasks 8.9.6-8.9.7) fixed PXRD form factors, twisted bilayers,
+  polymers, the SMILES embedder and disordered carbon, added the playground
+  tour, and also fixed the supercell symmetry expansion and the Hall-only
+  `is_p1` check. The remaining coverage notes are recorded in
+  `docs/guide/audit.md`; Task 8.9.5 closed with `scripts/check-surfaces.sh`
+  and the refinement, porosity and MOF browser checks. `v1.1.0` published
+  Task 8.9 on 2026-11-11. Phases 1-7 are
   complete and released at `0.0.3`; the remaining reference gaps (held cell
   quantities and pressure in the optimizer, the PXRD/Rietveld profile
   simplifications, bond carrying in slabs, the curated MOF subset and others)
