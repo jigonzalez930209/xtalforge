@@ -84,7 +84,7 @@ fn wyckoff_assignments_carry_multiplicity_and_parameters() {
     assert!(
         assignments
             .iter()
-            .all(|assignment| assignment.letter == 'b')
+            .all(|assignment| assignment.letter == 'a' && assignment.coordinates == "0,0,0")
     );
     assert!(
         assignments
