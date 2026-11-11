@@ -71,7 +71,8 @@ compares this table with the symbols each surface actually exports.
 | `run_automatic` | 7 | done | done | done | done | Automatic run with the Le Bail-BIC extinction-class ranking and the Pawley-ranked (cell, class) table (Task 7.10); Python `powder_automatic` |
 | `refine_phase` | 7 | done | done | done | done | McCusker-order structural refinement with esds and stages (Task 7.8); Python `powder_refine` |
 | `powder_index` | 7 | done | done | done | done | General metric-family indexing with M20/F_N (Task 7.5); Python `powder_index`, WASM `powder_index_info` |
-| `powder_pawley` | 7 | done | done | done | done | Pawley fit with esds and free cell/instrument parameters (Task 7.6.2); Python `powder_pawley`, WASM `powder_pawley_info` |
+| `powder_lebail` | 7 | done | done | done | done | Le Bail intensity extraction with a SNIP background (Task 7.6.1; Python/WASM added by the 2026-11-11 audit); Rust `le_bail`, CLI `powder lebail`, WASM `powder_lebail_info` |
+| `powder_pawley` | 7 | done | done | done | done | Pawley fit with esds and free cell/instrument parameters (Task 7.6.2); Python `powder_pawley`, WASM `powder_pawley_info` and `powder_pawley_width_info` (size/strain refinement, added by the 2026-11-11 audit) |
 | `agent_capabilities` | 8 | done | done | done | done | Runtime feature, engine, bundle and verb report (Task 8.1.1); Rust `capability_report`, CLI `capabilities` |
 | `agent_verbs` | 8 | done | done | done | done | The shared verb catalogue (Task 8.1.1); Rust `catalogue`, CLI `capabilities` |
 | `agent_run` | 8 | done | done | done | done | Batch session over a JSON script (Task 8.1.2); Rust `run_verbs`, CLI `agent` |

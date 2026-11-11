@@ -24,12 +24,17 @@ and `doublet` splits a reflection into the Kα1/Kα2 pair. `Geometry` is
 
 ## Le Bail
 
-`le_bail(structure, observed, &LebailOptions)` iterates the observed-to-
-calculated ratio inside every reflection window and returns `LebailResult {
+`le_bail(structure, observed, &LebailOptions)` subtracts a SNIP background,
+shares every observed point among the reflections in proportion to their
+calculated profile (the Le Bail partition) and returns `LebailResult {
 intensities, intensity_esds, positions, pattern, r_factor, rwp, chi_squared }`.
 The intensity esds are the diagonal of `(A^T W A)^-1` scaled by the reduced
 chi-squared; above 128 reflections the covariance diagonal is used instead of
 the exact inverse. See [Le Bail extraction](../algorithms/lebail.md).
+Python `powder_lebail(text, pattern_text)` and WASM
+`powder_lebail_info(text, pattern_text)` return `positions`, `intensities`,
+`intensity_esds`, `r_factor`, `rwp` and `chi_squared`, like
+`xtalforge --json powder lebail`.
 
 ## Pawley
 
@@ -119,7 +124,10 @@ search `run_automatic` uses), `--refine-peaks` fits each line; `powder pawley`
 prints the full fit with Rwp and esds, and `powder rietveld --refine` runs the
 McCusker stages (`--occupancies` and `--texture` add those parameters;
 `--no-doublet` models one wavelength instead of the Cu K alpha 1/K alpha 2
-doublet that the CLI uses by default, as Python's `doublet=False` does). Python `powder_index`, `powder_pawley`,
+doublet that the CLI uses by default, as Python's `doublet=False` does). Python `powder_index`, `powder_lebail`, `powder_pawley`,
 `powder_automatic`, `powder_refine`, `powder_cells`, `rietx`; WASM
-`powder_index_info`, `powder_pawley_info`, `powder_automatic_info`,
-`powder_refine_info`, `powder_cells_info`, `rietx_inventory_info`.
+`powder_index_info`, `powder_lebail_info`, `powder_pawley_info`,
+`powder_pawley_width_info` (with `refine_size`/`refine_strain`; both Pawley
+results carry `size`, `strain` and the fitted `calculated` profile),
+`powder_automatic_info`, `powder_refine_info`, `powder_cells_info`,
+`rietx_inventory_info`.
