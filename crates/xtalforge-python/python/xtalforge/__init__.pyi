@@ -456,6 +456,7 @@ def powder_pawley(
     refine_strain: bool = False,
     profile: str = "pseudo_voigt",
 ) -> dict[str, object]: ...
+def powder_lebail(text: str, pattern_text: str, format_hint: str | None = None) -> dict[str, object]: ...
 def powder_refine(
     text: str,
     pattern_text: str,
