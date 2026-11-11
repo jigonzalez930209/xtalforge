@@ -5,6 +5,11 @@
 # builders and the Brillouin-zone fix add exported surface (3845 KiB measured);
 # the Phase 8 budget of 3840 KiB no longer fits.
 #
+# 3968 KiB since the functional audit of 2026-11-11: the International Tables
+# form factors, the commensurate twist, the periodic polymer, the embedder
+# angle term, the carbon relaxation, the remeshed ZTC/Schwarz P dual, the
+# Le Bail/Pawley background and the MOF quaternion fit (3910 KiB measured).
+#
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
 set -u
@@ -12,7 +17,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=3904
+BUDGET_KIB=3968
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
