@@ -1,6 +1,6 @@
 # End-to-end audit and visual validation
 
-The `1.0.0` API is verified against independent reference implementations and
+The `1.1.0` API is verified against independent reference implementations and
 against deterministic 3D frames. The battery lives in `tests/e2e/` and runs
 through Playwright against a built VitePress site; it is also the regression
 gate for the [3D playground](/playground).
