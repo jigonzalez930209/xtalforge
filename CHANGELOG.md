@@ -104,6 +104,19 @@ essential release, then `0.x.y`).
   JSON and text carry `n_atoms`; WASM errors that were bare strings are now
   `Error` objects with `code = "invalid_input"`; PXRD reflections with equal
   two-theta are ordered identically on native and WebAssembly builds.
+- A refinement panel in the playground (Powder tab): load the bundled
+  synthetic rutile pattern or a file and run Le Bail, Pawley (with size and
+  strain), Rietveld or the automatic run, with an observed/calculated/
+  difference plot; the tour has a matching step (seventeen steps).
+- Python `powder_lebail`, WASM `powder_lebail_info` and
+  `powder_pawley_width_info`; WASM Pawley results carry `size`, `strain` and
+  the fitted `calculated` profile. `scripts/check-surfaces.sh` and the release
+  checklist compare 97 fields across CLI, Python and WASM.
+- `fit_phase` refines the constant background with the scale, as documented
+  (the automatic run's phase Rwp on rutile drops from 1.05 to 0.33).
+- The CLI Rietveld uses the library's default iteration count, like Python
+  and WASM, and exits quietly (status 141) when its output pipe closes instead
+  of panicking.
 - The playground radiation selector was empty: seven static `<option>`
   elements were hoisted into one static block that Vue cannot insert into a
   `<select>`. The options are now rendered from a list.
@@ -135,7 +148,7 @@ essential release, then `0.x.y`).
 - The WASM budget moves from 3904 to 3968 KiB for the audit fixes (IT92
   table, commensurate twist, periodic polymer, embedder angles, carbon
   relaxation, ZTC/Schwarz P dual, Le Bail/Pawley background, MOF quaternion
-  fit and `build_carbon_text`; 3920 KiB measured).
+  fit and `build_carbon_text`; 3940 KiB measured).
 - The WASM release budget moves from 3840 to 3904 KiB for `scene_data`,
   `n_atoms` and the text-returning builders (3845 KiB measured).
 
