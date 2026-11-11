@@ -64,7 +64,7 @@ pub(crate) fn ff_optimize<'py>(
     Ok(dict)
 }
 
-/// Returns QEq or EQeq charges.
+/// Returns QEq, EQeq or EEQ2019 charges (`qeq`, `eqeq`, `eeq`).
 #[pyfunction]
 #[pyo3(signature = (text, method = "qeq".to_string(), total_charge = 0.0, format_hint = None))]
 pub(crate) fn ff_charges<'py>(
@@ -82,9 +82,10 @@ pub(crate) fn ff_charges<'py>(
     let charges = match method.as_str() {
         "qeq" => qeq_charges(&structure, &options),
         "eqeq" => eqeq_charges(&structure, &options),
+        "eeq" => xtalforge::ff::eeq_charges(&structure, &options),
         other => {
             return Err(crate::invalid_input(format!(
-                "unknown charge method {other:?}; use qeq or eqeq"
+                "unknown charge method {other:?}; use qeq, eqeq or eeq"
             )));
         }
     }
