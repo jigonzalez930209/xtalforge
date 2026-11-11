@@ -108,6 +108,15 @@ essential release, then `0.x.y`).
   synthetic rutile pattern or a file and run Le Bail, Pawley (with size and
   strain), Rietveld or the automatic run, with an observed/calculated/
   difference plot; the tour has a matching step (seventeen steps).
+- The automatic powder result exposed only the quick cubic-index edge as its
+  `cell`, so the refinement panel and the CLI table showed the indexing
+  candidate as the "best" cell. CLI, Python and WASM now also return
+  `best_cell`: the Pawley-refined cell of the leading candidate, or its
+  indexed cell when the Pawley stage was skipped (rutile automatics report
+  a = 4.5993 Angstrom instead of the indexed 4.5902 Angstrom).
+- Running a builder or transform in the playground left the sample selector
+  on a stale sample id; it now shows "Built or transformed", and the nanotube
+  tour step looks from +x so the tube lies across the view.
 - Python `powder_lebail`, WASM `powder_lebail_info` and
   `powder_pawley_width_info`; WASM Pawley results carry `size`, `strain` and
   the fitted `calculated` profile. `scripts/check-surfaces.sh` and the release
