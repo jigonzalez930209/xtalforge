@@ -10,14 +10,23 @@
 use std::f64::consts::TAU;
 
 use xtalforge_analysis::{TriangleMesh, isosurface};
-use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder};
+use xtalforge_core::{Error, ExplicitBond, Lattice, Site, Structure, StructureBuilder};
+
+use crate::carbon_recipe::editor::remesh;
+use crate::carbon_recipe::field::LevelSet;
+use crate::carbon_recipe::graph::dualise;
+use crate::carbon_recipe::mesh::weld;
+use crate::carbon_recipe::settle::settle;
 use xtalforge_io::grid::Grid3;
 
 /// Default number of samples along each cube axis.
 pub const DEFAULT_SAMPLES: usize = 16;
 /// Default cubic cell side in Angstrom.
 pub const DEFAULT_CELL: f64 = 12.0;
-/// Minimum spacing between carbon sites when a mesh becomes a structure.
+/// Minimum spacing between carbon sites of the former vertex-thinning model.
+///
+/// Kept for API stability; the builders now place one carbon per triangle of
+/// the remeshed surface and relax the bonds to 1.42 Angstrom.
 pub const MIN_CARBON_DISTANCE: f64 = 1.0;
 
 /// Grid and level used to mesh a schwarzite surface.
@@ -78,8 +87,9 @@ pub fn schwarzite_surface_mesh(options: &ZtcOptions) -> Result<TriangleMesh, Err
 /// Returns the errors of [`ztc_surface_mesh`] or [`Error::InvalidInput`] when
 /// the mesh has no vertex.
 pub fn build_ztc(options: &ZtcOptions) -> Result<Structure, Error> {
+    let options = &carbon_grid(options);
     let mesh = ztc_surface_mesh(options)?;
-    structure_from_mesh("ztc", options, &mesh)
+    structure_from_mesh("ztc", options, &mesh, Surface::Gyroid)
 }
 
 /// Builds a carbon structure from the Schwarz P mesh of [`ZtcOptions`].
@@ -91,8 +101,9 @@ pub fn build_ztc(options: &ZtcOptions) -> Result<Structure, Error> {
 /// Returns the errors of [`schwarzite_surface_mesh`] or
 /// [`Error::InvalidInput`] when the mesh has no vertex.
 pub fn build_schwarzite(options: &ZtcOptions) -> Result<Structure, Error> {
+    let options = &carbon_grid(options);
     let mesh = schwarzite_surface_mesh(options)?;
-    structure_from_mesh("schwarzite", options, &mesh)
+    structure_from_mesh("schwarzite", options, &mesh, Surface::SchwarzP)
 }
 
 fn mesh(options: &ZtcOptions, field: fn(f64, f64, f64) -> f64) -> Result<TriangleMesh, Error> {
@@ -116,26 +127,41 @@ fn sample(options: &ZtcOptions, field: fn(f64, f64, f64) -> f64) -> Result<Grid3
             "the schwarzite isovalue must be finite".to_owned(),
         ));
     }
-    let total = options
+    // One extra sample closes the period: the marching tetrahedra stop one
+    // sample before the end of each axis, so without the plane at `cell` the
+    // surface would have an open seam on the cell faces.
+    let points = options
         .samples
-        .checked_mul(options.samples)
-        .and_then(|value| value.checked_mul(options.samples))
+        .checked_add(1)
+        .ok_or_else(|| Error::InvalidInput("the schwarzite grid dimensions overflow".to_owned()))?;
+    let total = points
+        .checked_mul(points)
+        .and_then(|value| value.checked_mul(points))
         .ok_or_else(|| Error::InvalidInput("the schwarzite grid dimensions overflow".to_owned()))?;
     let samples = options.samples;
     let scale = TAU / samples as f64;
     let step = options.cell / samples as f64;
     let mut data = Vec::with_capacity(total);
-    for z in 0..samples {
-        for y in 0..samples {
-            for x in 0..samples {
-                data.push(field(x as f64 * scale, y as f64 * scale, z as f64 * scale));
+    for z in 0..=samples {
+        for y in 0..=samples {
+            for x in 0..=samples {
+                // A sample exactly on the isovalue (the gyroid vanishes on
+                // many grid points of an even grid) produces no triangle and
+                // leaves a hole; nudge it to one side.
+                let value = field(x as f64 * scale, y as f64 * scale, z as f64 * scale);
+                let value = if (value - options.isovalue).abs() < 1e-9 {
+                    options.isovalue + 1e-9
+                } else {
+                    value
+                };
+                data.push(value);
             }
         }
     }
     Grid3::new(
         [0.0; 3],
         [[step, 0.0, 0.0], [0.0, step, 0.0], [0.0, 0.0, step]],
-        [samples; 3],
+        [samples + 1; 3],
         data,
         true,
     )
@@ -145,31 +171,86 @@ fn structure_from_mesh(
     name: &str,
     options: &ZtcOptions,
     mesh: &TriangleMesh,
+    surface: Surface,
 ) -> Result<Structure, Error> {
     let lattice = Lattice::cubic(options.cell)?;
+    let welded = weld(
+        &mesh.vertices,
+        &mesh.triangles,
+        &lattice,
+        [options.samples + 1; 3],
+    )?;
+    let field = TrigField {
+        surface,
+        cell: options.cell,
+    };
+    let even = remesh(&welded, &field, options.isovalue, 12, DUAL_EDGE)?;
+    let graph = settle(&dualise(&even)?);
     let mut builder = StructureBuilder::new(name, lattice);
-    let mut kept: Vec<[f64; 3]> = Vec::new();
-    for vertex in &mesh.vertices {
-        let frac = [
-            vertex[0] / options.cell,
-            vertex[1] / options.cell,
-            vertex[2] / options.cell,
-        ];
-        let close = kept
-            .iter()
-            .any(|other| lattice.distance(frac, *other) < MIN_CARBON_DISTANCE);
-        if close {
-            continue;
-        }
-        kept.push(frac);
-        builder = builder.site(Site::new(format!("C{}", kept.len()), "C", frac)?);
+    for (index, center) in graph.centers.iter().enumerate() {
+        builder = builder.site(Site::new(format!("C{}", index + 1), "C", *center)?);
     }
-    if kept.is_empty() {
-        return Err(Error::InvalidInput(
-            "the schwarzite mesh has no vertex to place".to_owned(),
-        ));
+    for bond in &graph.bonds {
+        builder = builder.explicit_bond(ExplicitBond {
+            i: bond.a,
+            j: bond.b,
+            image: bond.image,
+            order: 1.0,
+            remove: false,
+        });
     }
     builder.build()
+}
+
+/// Grid spacing, in Angstrom, from which the carbon remesh converges to an
+/// even honeycomb.
+const CARBON_GRID_SPACING: f64 = 1.2;
+
+/// The options with the sampling the carbon builders start from.
+fn carbon_grid(options: &ZtcOptions) -> ZtcOptions {
+    let samples = if options.cell.is_finite() && options.cell > 0.0 {
+        ((options.cell / CARBON_GRID_SPACING).round() as usize).clamp(4, 200)
+    } else {
+        options.samples
+    };
+    ZtcOptions {
+        samples,
+        ..*options
+    }
+}
+
+/// Mesh edge whose dual is a 1.42 Angstrom honeycomb (`1.42 sqrt(3)`).
+const DUAL_EDGE: f64 = 2.459;
+
+/// Which triply periodic surface a carbon is built on.
+#[derive(Debug, Clone, Copy)]
+enum Surface {
+    Gyroid,
+    SchwarzP,
+}
+
+/// The trigonometric field of [`Surface`] over a cubic cell.
+struct TrigField {
+    surface: Surface,
+    cell: f64,
+}
+
+impl LevelSet for TrigField {
+    fn value_gradient(&self, frac: [f64; 3]) -> (f64, [f64; 3]) {
+        let [x, y, z] = frac.map(|value| value * TAU);
+        let (value, gradient) = match self.surface {
+            Surface::Gyroid => (
+                gyroid(x, y, z),
+                [
+                    x.cos() * y.cos() - z.sin() * x.sin(),
+                    y.cos() * z.cos() - x.sin() * y.sin(),
+                    z.cos() * x.cos() - y.sin() * z.sin(),
+                ],
+            ),
+            Surface::SchwarzP => (schwarz_p(x, y, z), [-x.sin(), -y.sin(), -z.sin()]),
+        };
+        (value, gradient.map(|component| component * TAU / self.cell))
+    }
 }
 
 fn gyroid(x: f64, y: f64, z: f64) -> f64 {

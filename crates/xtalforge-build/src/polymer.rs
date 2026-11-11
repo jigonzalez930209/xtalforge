@@ -2,7 +2,7 @@
 //! (Tasks 6.9.1 to 6.9.4).
 
 use serde::Deserialize;
-use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder};
+use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder, element_info};
 
 use crate::embed::{EmbedOptions, embed_smiles};
 use crate::smiles::parse_smiles;
@@ -15,10 +15,8 @@ const AVOGADRO: f64 = 6.022_140_76e23;
 const A3_PER_CM3: f64 = 1.0e24;
 /// Chains closer than this to an already placed chain are skipped, Angstrom.
 const MIN_CHAIN_DISTANCE: f64 = 1.0;
-/// Empty space around a replicated chain, Angstrom.
-const CHAIN_PADDING: f64 = 10.0;
-/// Gap between two replicated repeat units, Angstrom.
-const REPEAT_GAP: f64 = 1.5;
+/// Closest approach allowed between a chain and its periodic image, Angstrom.
+const MIN_IMAGE_DISTANCE: f64 = 2.5;
 
 /// Target conditions for [`build_polymer`].
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -117,17 +115,24 @@ pub fn pack_chains(chains: &[Structure], density: f64) -> Result<Structure, Erro
     builder.build()
 }
 
-/// Builds one chain from a SMILES repeat unit and packs it.
+/// Builds one periodic chain from a SMILES repeat unit.
 ///
-/// The repeat unit is embedded with [`EmbedOptions::default`], copied
-/// `monomers` times along `x` with a small gap, and packed with
-/// [`pack_chains`] at [`PolymerOptions::density`]. The returned steps record
-/// the parse, embed, replicate and pack operations, in that order.
+/// The repeat unit is embedded with [`EmbedOptions::default`] and rotated so
+/// that its first SMILES atom (the head) and its last atom (the tail) lie on
+/// the `a` axis. `monomers` copies are joined head to tail, the tail of each
+/// unit bonded to the head of the next at the sum of their covalent radii, and
+/// the last unit bonds to the first one through the periodic boundary, so the
+/// chain is infinite along `a`. The cell is orthorhombic: `a` is the chain
+/// period and the square cross-section is chosen from the real atomic masses
+/// so the model reaches [`PolymerOptions::density`]. When that cross-section
+/// would bring the chain closer than 2.5 Angstrom to its own periodic image,
+/// the cell is widened and the lower density is reported in the steps.
+/// Hydrogens are not added; the SMILES atoms are the heavy-atom backbone.
 ///
 /// # Errors
 ///
 /// Returns [`Error::InvalidInput`] for zero monomers, a bad density, an empty
-/// or unparsable SMILES, or any error of [`pack_chains`].
+/// or unparsable SMILES, or a non-representable cell.
 pub fn build_polymer(
     smiles: &str,
     monomers: u32,
@@ -154,16 +159,56 @@ pub fn build_polymer(
         "embedded one repeat unit with {} sites",
         monomer.sites().len()
     ));
-    let chain = repeat_chain(&monomer, monomers)?;
+    let (unit, period) = align_unit(&monomer)?;
+    let chain_period = period * f64::from(monomers);
     steps.push(format!(
-        "replicated the repeat unit {monomers} times along a"
+        "joined {monomers} repeat units head to tail along a ({chain_period:.3} A period)"
     ));
-    let structure = pack_chains(std::slice::from_ref(&chain), options.density)?;
-    steps.push(format!(
-        "packed one chain at {} g/cm3 in a cubic P1 cell",
-        options.density
-    ));
-    Ok(PolymerBuild { structure, steps })
+    let mut mass = 0.0;
+    let mut radius: f64 = 0.0;
+    for (element, point) in &unit {
+        mass += element_info(element)?.mass;
+        radius = radius.max(point[1].hypot(point[2]));
+    }
+    let mass_g = mass * f64::from(monomers) / AVOGADRO;
+    let target_side = (mass_g / options.density * A3_PER_CM3 / chain_period).sqrt();
+    let min_side = 2.0 * radius + MIN_IMAGE_DISTANCE;
+    let side = target_side.max(min_side);
+    if !side.is_finite() || side <= 0.0 || !chain_period.is_finite() {
+        return Err(Error::InvalidInput(
+            "the polymer cell is not representable".to_owned(),
+        ));
+    }
+    let lattice = Lattice::new([[chain_period, 0.0, 0.0], [0.0, side, 0.0], [0.0, 0.0, side]])?;
+    let mut builder = StructureBuilder::new("polymer_chain", lattice);
+    let mut label = 0usize;
+    for copy in 0..monomers {
+        let dx = f64::from(copy) * period;
+        for (element, point) in &unit {
+            label += 1;
+            let cart = [point[0] + dx, point[1] + side / 2.0, point[2] + side / 2.0];
+            builder = builder.site(Site::new(
+                format!("{element}{label}"),
+                element,
+                Lattice::wrap(lattice.to_frac(cart)),
+            )?);
+        }
+    }
+    let density = mass_g / (chain_period * side * side / A3_PER_CM3);
+    if side > target_side {
+        steps.push(format!(
+            "widened the cell to {side:.3} A so the chain clears its images; density {density:.3} g/cm3 instead of {}",
+            options.density
+        ));
+    } else {
+        steps.push(format!(
+            "set the {side:.3} A square cross-section for {density:.3} g/cm3"
+        ));
+    }
+    Ok(PolymerBuild {
+        structure: builder.build()?,
+        steps,
+    })
 }
 
 /// The documented equilibration protocol, one line per stage.
@@ -231,29 +276,62 @@ fn grid_offset(index: usize, grid: usize, spacing: f64) -> [f64; 3] {
     ]
 }
 
-fn repeat_chain(monomer: &Structure, monomers: u32) -> Result<Structure, Error> {
+/// An element symbol and its Cartesian position.
+type Atom = (String, [f64; 3]);
+
+/// Rotates the repeat unit so its head sits at the origin and its tail on +x.
+///
+/// Returns the aligned atoms and the period: head-tail distance plus the
+/// tail-head bond.
+fn align_unit(monomer: &Structure) -> Result<(Vec<Atom>, f64), Error> {
     let points = monomer.cart_sites();
-    if points.is_empty() {
+    let (Some(head), Some(tail)) = (points.first(), points.last()) else {
         return Err(Error::InvalidInput(
             "a repeat unit needs at least one atom".to_owned(),
         ));
+    };
+    let elements: Vec<&str> = monomer.sites().iter().map(|site| site.element()).collect();
+    let head_element = elements.first().copied().unwrap_or("C");
+    let tail_element = elements.last().copied().unwrap_or("C");
+    let bond =
+        element_info(head_element)?.covalent_radius + element_info(tail_element)?.covalent_radius;
+    let axis = [tail[0] - head[0], tail[1] - head[1], tail[2] - head[2]];
+    let length = (axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]).sqrt();
+    let rotation = if length > 1e-8 {
+        rotation_to_x([axis[0] / length, axis[1] / length, axis[2] / length])
+    } else {
+        [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+    };
+    let aligned = elements
+        .iter()
+        .zip(&points)
+        .map(|(element, point)| {
+            let d = [point[0] - head[0], point[1] - head[1], point[2] - head[2]];
+            let rotated = rotation.map(|row| row[0] * d[0] + row[1] * d[1] + row[2] * d[2]);
+            ((*element).to_owned(), rotated)
+        })
+        .collect();
+    Ok((aligned, length + bond))
+}
+
+/// Rotation matrix taking the unit vector `u` onto `+x` (Rodrigues).
+fn rotation_to_x(u: [f64; 3]) -> [[f64; 3]; 3] {
+    // Axis k = u x x = (0, u_z, -u_y), cos = u_x, sin = |k|.
+    let cosine = u[0];
+    let (ky, kz) = (u[2], -u[1]);
+    let sine = ky.hypot(kz);
+    if sine < 1e-12 {
+        return if cosine > 0.0 {
+            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
+        } else {
+            [[-1.0, 0.0, 0.0], [0.0, -1.0, 0.0], [0.0, 0.0, 1.0]]
+        };
     }
-    let mut min_x = f64::INFINITY;
-    let mut max_x = f64::NEG_INFINITY;
-    for point in &points {
-        min_x = min_x.min(point[0]);
-        max_x = max_x.max(point[0]);
-    }
-    let shift = (max_x - min_x) + REPEAT_GAP;
-    let mut atoms = Vec::with_capacity(monomer.sites().len().saturating_mul(monomers as usize));
-    for copy in 0..monomers {
-        let dx = f64::from(copy) * shift;
-        for (site, point) in monomer.sites().iter().zip(&points) {
-            atoms.push((
-                site.element().to_owned(),
-                [point[0] + dx, point[1], point[2]],
-            ));
-        }
-    }
-    Structure::molecule("polymer_chain", &atoms, CHAIN_PADDING)
+    let (y, z) = (ky / sine, kz / sine);
+    let t = 1.0 - cosine;
+    [
+        [cosine, -z * sine, y * sine],
+        [z * sine, cosine + y * y * t, y * z * t],
+        [-y * sine, y * z * t, cosine + z * z * t],
+    ]
 }
