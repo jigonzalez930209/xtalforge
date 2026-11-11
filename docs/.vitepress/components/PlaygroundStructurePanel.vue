@@ -32,15 +32,18 @@ const tubeM = ref(5)
 const tubeLength = ref(2)
 const ribbonWidth = ref(6)
 const ribbonLength = ref(6)
-const twistN = ref(6)
-const twistM = ref(0)
-const twistAngle = ref(21.8)
+const twistN = ref(1)
+const twistM = ref(1)
+const twistAngle = ref(21.79)
 const twistLayers = ref(2)
 const ztcSamples = ref(16)
 const ztcCell = ref(12)
 const ztcIso = ref(0)
-const polymerSmiles = ref('C=C')
-const polymerMonomers = ref(8)
+const carbonNet = ref('dia')
+const carbonDensity = ref(0.42)
+const carbonSeed = ref(0)
+const polymerSmiles = ref('C(c1ccccc1)C')
+const polymerMonomers = ref(4)
 const polymerDensity = ref(1.0)
 const topology = ref('pcu')
 const node = ref('Zn4O')
@@ -146,9 +149,9 @@ const ringText = computed(
         <button :disabled="busy" @click="emit('operation', 'ribbon', { width: ribbonWidth, length: ribbonLength })">Nanoribbon</button>
       </div>
       <div class="row">
-        <label>n<input v-model.number="twistN" type="number" /></label>
-        <label>m<input v-model.number="twistM" type="number" /></label>
-        <label>angle<input v-model.number="twistAngle" type="number" step="0.1" /></label>
+        <label>angle°<input v-model.number="twistAngle" type="number" step="0.01" /></label>
+        <label>repeat a<input v-model.number="twistN" type="number" min="1" /></label>
+        <label>repeat b<input v-model.number="twistM" type="number" min="1" /></label>
         <label>layers<input v-model.number="twistLayers" type="number" min="1" /></label>
         <button :disabled="busy" @click="emit('operation', 'twist', { n: twistN, m: twistM, theta: twistAngle, layers: twistLayers })">Twist</button>
       </div>
@@ -158,6 +161,13 @@ const ringText = computed(
         <label>iso<input v-model.number="ztcIso" type="number" step="0.1" /></label>
         <button :disabled="busy" @click="emit('operation', 'ztc', { samples: ztcSamples, cell: ztcCell, isovalue: ztcIso })">ZTC</button>
         <button :disabled="busy" @click="emit('operation', 'schwarzite', { samples: ztcSamples, cell: ztcCell, isovalue: ztcIso })">Schwarz P</button>
+      </div>
+      <p class="hint">Commensurate moiré cells: 21.79°, 13.17°, 9.43°, 7.34°, 6.01°…; other angles use the closest cell.</p>
+      <div class="row">
+        <label>net<select v-model="carbonNet"><option>dia</option><option>pcu</option></select></label>
+        <label>density<input v-model.number="carbonDensity" type="number" step="0.02" /></label>
+        <label>seed<input v-model.number="carbonSeed" type="number" min="0" /></label>
+        <button :disabled="busy" @click="emit('operation', 'carbon', { net: carbonNet, repeat: 1, density: carbonDensity, seed: carbonSeed })">Disordered carbon</button>
       </div>
       <div class="row">
         <label>SMILES<input v-model="polymerSmiles" class="wide" /></label>

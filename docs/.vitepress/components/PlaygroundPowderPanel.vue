@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   wasm: any
@@ -7,6 +7,17 @@ const props = defineProps<{
   busy: boolean
 }>()
 
+// Rendered with v-for: five or more static <option> nodes are hoisted into
+// one static HTML block, which Vue cannot insert inside a <select>.
+const RADIATIONS = [
+  ['cu-ka', 'Cu Kα'],
+  ['cu-ka1', 'Cu Kα1'],
+  ['mo-ka', 'Mo Kα'],
+  ['co-ka', 'Co Kα'],
+  ['fe-ka', 'Fe Kα'],
+  ['cr-ka', 'Cr Kα'],
+  ['ag-ka', 'Ag Kα'],
+] as const
 const radiation = ref('cu-ka')
 const maxAngle = ref(60)
 const pattern = ref<any | null>(null)
@@ -29,13 +40,34 @@ const polyline = computed(() => {
     })
     .join(' ')
 })
+const strongest = computed(() =>
+  peaks.value.reduce((value, peak) => Math.max(value, Number(peak.intensity)), 0) || 1,
+)
+const toX = (angle: number) => ((angle - 5) / Math.max(Number(maxAngle.value) - 5, 1)) * 420
+// Sticks are integrated intensities, scaled to their own maximum so they
+// read as I/I0 next to the profile (whose height also depends on the width).
 const sticks = computed(() =>
   peaks.value.map((peak) => {
-    const x = ((Number(peak.two_theta) - 5) / Math.max(Number(maxAngle.value) - 5, 1)) * 420
-    const y = 150 - (Number(peak.intensity) / maximum.value) * 140
-    return { x, y, label: `(${peak.hkl.join(' ')})` }
+    const relative = Number(peak.intensity) / strongest.value
+    return {
+      x: toX(Number(peak.two_theta)),
+      y: 150 - relative * 140,
+      relative,
+      label: `${peak.hkl.join('')}`,
+    }
   }),
 )
+const labels = computed(() =>
+  [...sticks.value]
+    .sort((a, b) => b.relative - a.relative)
+    .slice(0, 6)
+    .filter((stick) => stick.relative > 0.05),
+)
+const ticks = computed(() => {
+  const out: number[] = []
+  for (let angle = 10; angle <= Number(maxAngle.value); angle += 10) out.push(angle)
+  return out
+})
 
 function calculate() {
   try {
@@ -51,6 +83,16 @@ function calculate() {
     error.value = value.code && value.message ? `${value.code}: ${value.message}` : String(caught)
   }
 }
+
+watch(
+  () => props.text,
+  () => {
+    if (props.wasm && props.text) calculate()
+  },
+)
+onMounted(() => {
+  if (props.wasm && props.text) calculate()
+})
 
 function downloadCsv() {
   const lines = ['two_theta,intensity']
@@ -70,13 +112,7 @@ function downloadCsv() {
       <label>
         radiation
         <select v-model="radiation">
-          <option value="cu-ka">Cu Kα</option>
-          <option value="cu-ka1">Cu Kα1</option>
-          <option value="mo-ka">Mo Kα</option>
-          <option value="co-ka">Co Kα</option>
-          <option value="fe-ka">Fe Kα</option>
-          <option value="cr-ka">Cr Kα</option>
-          <option value="ag-ka">Ag Kα</option>
+          <option v-for="[value, name] in RADIATIONS" :key="value" :value="value">{{ name }}</option>
         </select>
       </label>
       <label>2θ max<input v-model.number="maxAngle" type="number" min="10" max="150" /></label>
@@ -86,7 +122,7 @@ function downloadCsv() {
     <p v-if="error" class="error">{{ error }}</p>
     <template v-if="pattern">
       <p class="hint">{{ peaks.length }} reflections · {{ points.length }} pattern points</p>
-      <svg class="pxrd-plot" viewBox="0 0 420 160" role="img" aria-label="Calculated powder pattern">
+      <svg class="pxrd-plot" viewBox="-6 -14 432 190" role="img" aria-label="Calculated powder pattern">
         <line x1="0" y1="150" x2="420" y2="150" class="axis" />
         <line x1="0" y1="0" x2="0" y2="150" class="axis" />
         <polyline :points="polyline" class="pattern" />
@@ -99,16 +135,29 @@ function downloadCsv() {
           :y2="stick.y"
           class="stick"
         />
+        <text
+          v-for="stick in labels"
+          :key="`label-${stick.label}-${stick.x}`"
+          :x="stick.x"
+          :y="Math.max(stick.y - 3, -4)"
+          class="peak-label"
+          text-anchor="middle"
+        >{{ stick.label }}</text>
+        <g v-for="angle in ticks" :key="`tick-${angle}`">
+          <line :x1="toX(angle)" :x2="toX(angle)" y1="150" y2="154" class="axis" />
+          <text :x="toX(angle)" y="166" class="tick-label" text-anchor="middle">{{ angle }}</text>
+        </g>
+        <text x="420" y="176" class="tick-label" text-anchor="end">2θ (°)</text>
       </svg>
       <table>
-        <thead><tr><th>hkl</th><th>2θ</th><th>d (Å)</th><th>multiplicity</th><th>intensity</th></tr></thead>
+        <thead><tr><th>hkl</th><th>2θ</th><th>d (Å)</th><th>mult.</th><th>I/I₀ (%)</th></tr></thead>
         <tbody>
           <tr v-for="peak in peaks.slice(0, 15)" :key="peak.hkl.join(',')">
             <td>({{ peak.hkl.join(' ') }})</td>
             <td>{{ Number(peak.two_theta).toFixed(4) }}</td>
             <td>{{ Number(peak.d).toFixed(4) }}</td>
             <td>{{ peak.multiplicity }}</td>
-            <td>{{ Number(peak.intensity).toFixed(1) }}</td>
+            <td>{{ (100 * Number(peak.intensity) / strongest).toFixed(1) }}</td>
           </tr>
         </tbody>
       </table>

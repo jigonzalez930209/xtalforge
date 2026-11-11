@@ -16,6 +16,9 @@ import PlaygroundAnalysisPanel from './PlaygroundAnalysisPanel.vue'
 import PlaygroundPowderPanel from './PlaygroundPowderPanel.vue'
 import PlaygroundForcefieldPanel from './PlaygroundForcefieldPanel.vue'
 import PlaygroundExportPanel from './PlaygroundExportPanel.vue'
+import PlaygroundTourPanel from './PlaygroundTourPanel.vue'
+import { runOperation } from '../playground/operations'
+import type { TourStep } from '../playground/tour'
 
 type Measure = { kind: string; value: number; indices: number[] }
 const host = ref<HTMLElement | null>(null)
@@ -29,7 +32,8 @@ const baseText = ref('')
 const label = ref('Silicon')
 const baseLabel = ref('Silicon')
 const selected = ref('Si')
-const tab = ref('structure')
+const tab = ref('tour')
+const tourIndex = ref(-1)
 const inspection = ref<Inspection | null>(null)
 const scene = ref<SceneStats | null>(null)
 const selection = ref<number[]>([])
@@ -121,51 +125,32 @@ async function run(name: string, params: Record<string, any> = {}) {
   busy.value = true
   error.value = ''
   try {
-    const wasm = wasmModule.value
-    let result = ''
-    if (name === 'supercell') {
-      result = wasm.supercell_text(text.value, params.na ?? 2, params.nb ?? 2, params.nc ?? 2)
-    } else if (name === 'slab') {
-      result = wasm.slab_text(text.value, params.h ?? 1, params.k ?? 0, params.l ?? 0, params.layers ?? 2, params.vacuum ?? 10)
-    } else if (name === 'p1') {
-      result = wasm.to_p1_text(text.value)
-    } else if (name === 'asymmetrize') {
-      result = wasm.asymmetrize_text(text.value, params.tolerance ?? 0.001)
-    } else if (name === 'primitive') {
-      result = wasm.primitive_text(text.value, params.tolerance ?? 0.001)
-    } else if (name === 'standardize') {
-      result = wasm.standardize_text(text.value, params.tolerance ?? 0.001)
-    } else if (name === 'reduce') {
-      result = wasm.reduce_text(text.value, 'niggli')
-    } else if (name === 'graphene') {
-      result = wasm.build_graphene_text(params.nx ?? 4, params.ny ?? 4, 1, 3.35, 15)
-    } else if (name === 'nanotube') {
-      result = wasm.build_nanotube_text(params.n ?? 5, params.m ?? 5, params.length ?? 2, 10)
-    } else if (name === 'c60') {
-      result = wasm.build_c60_text()
-    } else if (name === 'c20') {
-      result = wasm.build_c20_text()
-    } else if (name === 'ribbon') {
-      result = wasm.build_ribbon_text(params.width ?? 6, params.length ?? 6, params.vacuum ?? 12)
-    } else if (name === 'twist') {
-      result = wasm.build_twist_text(params.n ?? 6, params.m ?? 0, params.theta ?? 21.8, params.layers ?? 2)
-    } else if (name === 'ztc') {
-      result = wasm.build_ztc_text(params.samples ?? 16, params.cell ?? 12, params.isovalue ?? 0)
-    } else if (name === 'schwarzite') {
-      result = wasm.build_schwarzite_text(params.samples ?? 16, params.cell ?? 12, params.isovalue ?? 0)
-    } else if (name === 'polymer') {
-      result = wasm.build_polymer_text(params.smiles ?? 'C=C', params.monomers ?? 8, params.density ?? 1.0)
-    } else if (name === 'mof') {
-      result = wasm.build_mof_text(params.topology ?? 'pcu', params.node ?? 'Zn4O', params.linker ?? 'benzene')
-    } else {
-      throw new Error(`unknown operation ${name}`)
-    }
+    const result = runOperation(wasmModule.value, text.value, name, params)
     await loadText(result, name, true)
   } catch (caught) {
     error.value = errorText(caught)
   } finally {
     busy.value = false
   }
+}
+
+async function tourStep(step: TourStep, index: number) {
+  tourIndex.value = index
+  if (step.sample && (step.sample !== selected.value || text.value !== baseText.value || step.operation)) {
+    await loadSample(step.sample)
+  }
+  if (step.operation) await run(step.operation, step.params ?? {})
+  const nextStyle = step.style ?? 'ball-stick'
+  if (nextStyle !== style.value || (step.scale ?? 1) !== scale.value) {
+    style.value = nextStyle
+    scale.value = step.scale ?? 1
+    renderScene()
+  }
+  renderer?.resetView()
+  if (step.view) renderer?.setView(step.view)
+  if (Boolean(step.brillouin) !== brillouin.value) toggleBrillouin()
+  selectAtoms(step.select ?? [])
+  if (step.tab) tab.value = step.tab
 }
 
 function toggleBrillouin() {
@@ -370,6 +355,12 @@ onMounted(async () => {
       applyVisibility()
     },
     selectAtoms,
+    tourStep: async (id: string) => {
+      const { TOUR } = await import('../playground/tour')
+      const index = TOUR.findIndex((step) => step.id === id)
+      if (index >= 0) await tourStep(TOUR[index], index)
+      return { ...state(), tab: tab.value }
+    },
     toggleBrillouin,
     brillouinZone: () => wasmModule.value.brillouin_zone(text.value),
     pxrd: (radiation = 'cu-ka') => {
@@ -438,8 +429,14 @@ onBeforeUnmount(() => {
             @click="tab = id"
           >{{ title }}</button>
         </nav>
+        <PlaygroundTourPanel
+          v-if="tab === 'tour'"
+          :busy="busy"
+          :current="tourIndex"
+          @step="tourStep"
+        />
         <PlaygroundStructurePanel
-          v-if="tab === 'structure'"
+          v-else-if="tab === 'structure'"
           :wasm="wasmModule"
           :text="text"
           :inspection="inspection"
