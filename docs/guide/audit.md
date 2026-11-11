@@ -20,7 +20,8 @@ committed; the browser never reads it.
 
 ## What the battery exercises
 
-The suite has 54 checks (49 from the first audit, plus the PXRD intensity
+The suite has 62 checks (49 from the first audit, plus the Wyckoff letter
+checks against spglib for the eight samples, the PXRD intensity
 checks for Si, NaCl, TiO2 and Fe and the guided tour). For every sample in `Si`, `NaCl`, `diamond`,
 `graphene`, `TiO2`, `MFI`, `MOF-5` and `Fe` it verifies:
 
@@ -138,6 +139,13 @@ ASE neighbour lists and geometry checks). It found and fixed:
 15. **ZTC and Schwarz P carbons were not sp2.** They are now the relaxed dual
     of the remeshed surface (see below); the sampled grid also gained the
     closing plane that the marching tetrahedra need for a closed surface.
+16. **Wyckoff letters used moyo's origin.** Silicon at `0, 0, 0` in origin
+    choice 1 was reported as `8b`. When the input basis is the conventional one
+    (or a signed axis permutation in a cubic group) the letter is now matched
+    on the input coordinates; all eight samples agree atom by atom with spglib.
+17. **EEQ was QEq.** `eeq_charges` reused the QEq table and returned the QEq
+    charges. It is now EEQ2019 and matches the sci-form/dftd4 reference for
+    water and methanol to 2e-3.
 
 Verified as correct in the same pass: formula, volume and density of the eight
 samples; space groups; bond counts, ring census and Si-Si distances; C60,
@@ -153,12 +161,6 @@ Angstrom).
 
 ## Known gaps
 
-- Wyckoff letters follow moyo's choice of origin among the
-  Euclidean-normalizer equivalents: silicon in origin choice 1 is reported as
-  `8b` (template `1/2, 1/2, 1/2`) where spglib reports `8a`. Both are the same
-  orbit up to an origin shift; the multiplicity and site symmetry agree.
-- `eeq_charges` with the default `dielectric = 1` reproduces QEq to rounding
-  (documented in `charges/eeq.rs`); the EEQ2019 parameter set is not bundled.
 - `build_ztc` needs a cell of at least about 12 Angstrom; at 10 Angstrom the
   gyroid channels are too narrow and a third of the carbons end up over- or
   under-coordinated.
@@ -183,7 +185,7 @@ Angstrom).
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
   the 3D geometry.
-- The WASM bundle measures 3910 KiB against a 3968 KiB budget. The budget
+- The WASM bundle measures 3920 KiB against a 3968 KiB budget. The budget
   was 3904 KiB after the scene and text exports and was raised by this audit
   for the fixes listed above; any further surface helper needs a deliberate
   size review.
