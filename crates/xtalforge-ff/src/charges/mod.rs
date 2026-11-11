@@ -30,6 +30,7 @@ use crate::structure_util::rebuild;
 
 pub(crate) mod data;
 pub(crate) mod eeq;
+mod eeq_ewald;
 pub(crate) mod eqeq;
 pub mod ewald;
 pub(crate) mod periodic;
