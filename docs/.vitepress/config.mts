@@ -16,6 +16,13 @@ const roadmapItems = [
   { text: 'Phase 6 — Builders', link: '/roadmap/phase-06-builders' },
   { text: 'Phase 7 — Powder refinement', link: '/roadmap/phase-07-powder' },
   { text: 'Phase 8 — Agent and distribution', link: '/roadmap/phase-08-distribution' },
+  { text: 'Phase 9 — Usability and 1.x polish', link: '/roadmap/phase-09-usability' },
+  { text: 'Phase 10 — Native bindings', link: '/roadmap/phase-10-native-api' },
+  { text: 'Phase 11 — Interoperability', link: '/roadmap/phase-11-interop' },
+  { text: 'Phase 12 — Scientific completeness', link: '/roadmap/phase-12-completeness' },
+  { text: 'Phase 13 — Performance and scale', link: '/roadmap/phase-13-performance' },
+  { text: 'Phase 14 — Workflows and provenance', link: '/roadmap/phase-14-workflows' },
+  { text: 'Phase 15 — 2.0 redesign and freeze', link: '/roadmap/phase-15-v2' },
 ]
 
 export default defineConfig({
