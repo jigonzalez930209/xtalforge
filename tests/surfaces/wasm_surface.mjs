@@ -35,6 +35,6 @@ const refined = plain(m.powder_refine_info(tio2, rutile, true, true, false, true
 const parameters = Array.isArray(refined.parameters) ? Object.fromEntries(refined.parameters) : refined.parameters;
 extra.rietveld = [refined.rwp, refined.stages, parameters['cell.0']];
 const automatic = plain(m.powder_automatic_info(tio2, rutile));
-extra.automatic = [automatic.rwp, automatic.pawley_rwp];
+extra.automatic = [automatic.rwp, automatic.pawley_rwp, automatic.best_cell];
 out.extra = extra;
 fs.writeFileSync(process.argv[2], JSON.stringify(out));

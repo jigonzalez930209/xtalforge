@@ -40,6 +40,6 @@ extra["pawley"] = [pawley["cell"][0], pawley["cell"][2], pawley["rwp"]]
 refined = x.powder_refine(tio2, rutile, refine_positions=True, refine_adps=True, refine_zero=True, refine_cell=True, refine_width=True, doublet=True)
 extra["rietveld"] = [refined["rwp"], refined["stages"], dict(refined["parameters"])["cell.0"]]
 automatic = x.powder_automatic(tio2, rutile)
-extra["automatic"] = [automatic["rwp"], automatic["pawley_rwp"]]
+extra["automatic"] = [automatic["rwp"], automatic["pawley_rwp"], automatic["best_cell"]]
 out["extra"] = extra
 json.dump(out, open(sys.argv[1], "w"))

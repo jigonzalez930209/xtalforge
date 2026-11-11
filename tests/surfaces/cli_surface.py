@@ -46,6 +46,6 @@ extra["pawley"] = [pawley["cell"][0], pawley["cell"][2], pawley["rwp"]]
 refined = run("powder", "rietveld", "--refine", TIO2, RUTILE)
 extra["rietveld"] = [refined["rwp"], refined["stages"], dict(refined["parameters"])["cell.0"]]
 automatic = run("powder", "automatic", TIO2, RUTILE)
-extra["automatic"] = [automatic["rwp"], automatic["pawley_rwp"]]
+extra["automatic"] = [automatic["rwp"], automatic["pawley_rwp"], automatic["best_cell"]]
 out["extra"] = extra
 json.dump(out, open(sys.argv[1], "w"))
