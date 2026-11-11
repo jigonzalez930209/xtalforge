@@ -88,7 +88,7 @@ def test_fullscreen_toggle(page, base_url):
 
 def test_tour_steps_drive_the_viewer(page, base_url):
     open_sample(page, base_url, "Si")
-    assert page.locator(".tour-steps li").count() == 16
+    assert page.locator(".tour-steps li").count() == 17
     zone = page.evaluate("window.__xf.tourStep('zone')")
     assert zone["tab"] == "symmetry"
     assert zone["zone"] == {"vertices": 24, "faces": 14, "edges": 36}
@@ -106,3 +106,65 @@ def test_tour_steps_drive_the_viewer(page, base_url):
     assert page.locator(".tour-steps li.active").count() == 0
     page.get_by_role("button", name="Tour", exact=True).click()
     assert page.locator(".tour-steps li.active").count() == 1
+
+
+def _python_reference():
+    import xtalforge
+
+    root = Path(__file__).resolve().parents[2]
+    tio2 = (root / "docs/public/samples/TiO2.cif").read_text()
+    rutile = (root / "docs/public/samples/rutile-cuka.xy").read_text()
+    mfi = (root / "docs/public/samples/MFI.cif").read_text()
+    return xtalforge, tio2, rutile, mfi
+
+
+def test_porosity_panel_matches_the_python_surface(page, base_url):
+    xtalforge, _, _, mfi = _python_reference()
+    open_sample(page, base_url, "MFI")
+    page.get_by_role("button", name="Analysis", exact=True).click()
+    section = page.locator("details", has=page.locator("summary", has_text="Porosity"))
+    section.locator("summary").click()
+    section.get_by_label("spacing (Å)").fill("0.5")
+    section.get_by_label("probe (Å)").fill("1.2")
+    section.get_by_role("button", name="Run distance grid").click()
+    page.wait_for_selector("text=Largest included", timeout=60_000)
+    shown = section.locator("dl.summary-grid").inner_text()
+    reference = xtalforge.porosity(mfi, 0.5, 1.2)
+    for key in ("accessible_volume", "pore_volume", "surface_area", "largest_included_diameter"):
+        assert f"{reference[key]:.2f}" in shown, (key, reference[key], shown)
+
+
+def test_mof_builder_matches_the_python_surface(page, base_url):
+    xtalforge, _, _, _ = _python_reference()
+    open_sample(page, base_url, "Si")
+    built = operation(page, "mof", topology="pcu", node="Zn4O", linker="benzene")
+    reference = xtalforge.build_mof("pcu", "Zn4O", "benzene")
+    assert built["summary"]["n_atoms"] == reference["n_atoms"]
+    assert built["summary"]["volume"] == pytest.approx(reference["volume"], rel=1e-9)
+
+
+@pytest.mark.parametrize("method", ["lebail", "pawley", "rietveld", "automatic"])
+def test_refinement_panel_matches_the_python_surface(page, base_url, method):
+    xtalforge, tio2, rutile, _ = _python_reference()
+    open_sample(page, base_url, "TiO2")
+    page.get_by_role("button", name="Powder", exact=True).click()
+    page.get_by_role("button", name="Reference rutile pattern").click()
+    page.wait_for_selector("text=rutile-cuka.xy", timeout=30_000)
+    page.locator("details.refine select").select_option(method)
+    page.get_by_role("button", name="Refine", exact=True).click()
+    page.wait_for_selector("table.refine-results", timeout=120_000)
+    table = page.locator("table.refine-results").inner_text()
+    if method == "lebail":
+        expected = xtalforge.powder_lebail(tio2, rutile)["rwp"]
+    elif method == "pawley":
+        expected = xtalforge.powder_pawley(tio2, rutile, refine_size=True, refine_strain=True)["rwp"]
+        assert page.locator("polyline.difference").count() == 1
+    elif method == "rietveld":
+        expected = xtalforge.powder_refine(
+            tio2, rutile, refine_positions=True, refine_adps=True, refine_zero=True,
+            refine_cell=True, refine_width=True, doublet=True,
+        )["rwp"]
+        assert "pawley_cell" in table
+    else:
+        expected = xtalforge.powder_automatic(tio2, rutile)["rwp"]
+    assert f"{expected:.4f}" in table, (method, expected, table)
