@@ -382,9 +382,13 @@ pub fn calculate_pxrd(structure: &Structure, options: &PxrdOptions) -> Result<Pa
         }
     }
 
+    // Equivalent reflections share a two-theta up to the last bits, which
+    // differ between native and WebAssembly maths; compare on a 1e-9 degree
+    // grid so the hkl tie-break gives the same order on every platform.
+    let key = |value: f64| (value * 1e9).round();
     reflections.sort_by(|left, right| {
-        left.two_theta
-            .total_cmp(&right.two_theta)
+        key(left.two_theta)
+            .total_cmp(&key(right.two_theta))
             .then_with(|| left.hkl.cmp(&right.hkl))
     });
 

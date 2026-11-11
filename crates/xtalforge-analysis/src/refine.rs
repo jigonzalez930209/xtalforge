@@ -191,6 +191,24 @@ pub fn refine_phase(
         )));
     }
     let terms = background_terms(options.background);
+    // A Rietveld cell refinement is local: from a cell 1 % off, the Bragg
+    // positions miss the observed lines by more than a width and the fit
+    // settles in a false minimum. Pawley fits the cell with free
+    // intensities, which converges from much further away, so its cell (when
+    // it moves less than 5 %) is the starting point.
+    let pawley_start = if refine.refine_cell {
+        pawley_cell(structure, observed)
+    } else {
+        None
+    };
+    let started;
+    let structure = match pawley_start {
+        Some(lattice) => {
+            started = structure.clone().with_lattice(lattice);
+            &started
+        }
+        None => structure,
+    };
     let parameters = build_parameters(structure, refine);
     let peaks = count_peaks(observed)?;
     if parameters.len() > peaks {
@@ -218,7 +236,11 @@ pub fn refine_phase(
         texture_axis: refine.texture_axis,
         doublet: refine.doublet,
     };
-    let mut stages = vec!["background_scale".to_owned()];
+    let mut stages = if pawley_start.is_some() {
+        vec!["pawley_cell".to_owned(), "background_scale".to_owned()]
+    } else {
+        vec!["background_scale".to_owned()]
+    };
     let mut current = context.model(&values, terms)?;
     let mut iterations = 0;
     let mut converged = true;
@@ -368,4 +390,28 @@ fn count_peaks(observed: &[PatternPoint]) -> Result<usize, Error> {
         },
     )?;
     Ok(peaks.len())
+}
+
+/// The Pawley cell of `structure`, when it fits and stays within 5 %.
+fn pawley_cell(
+    structure: &Structure,
+    observed: &[PatternPoint],
+) -> Option<xtalforge_core::Lattice> {
+    let result = crate::pawley::pawley_refine(
+        structure,
+        observed,
+        &crate::pawley::PawleyOptions::default(),
+    )
+    .ok()?;
+    let start = structure.lattice().parameters();
+    let close = result
+        .cell
+        .iter()
+        .zip(start.iter())
+        .all(|(fitted, initial)| fitted.is_finite() && (fitted / initial - 1.0).abs() < 0.05);
+    if !close {
+        return None;
+    }
+    let [a, b, c, alpha, beta, gamma] = result.cell;
+    xtalforge_core::Lattice::from_parameters(a, b, c, alpha, beta, gamma).ok()
 }
