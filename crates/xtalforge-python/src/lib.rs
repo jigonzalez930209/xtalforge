@@ -13,6 +13,7 @@ use pyo3::prelude::*;
 mod agent;
 mod analysis;
 mod classes;
+mod lebail;
 mod ml;
 mod phase3;
 mod phase4;
@@ -28,6 +29,7 @@ mod view;
 
 use analysis::{angle, bonds, distance, groups, neighbors, pxrd, ring_paths, rings, torsion};
 use classes::{Lattice, P1Cell, Site, Structure};
+use lebail::powder_lebail;
 use phase3::{
     Document, param_schema, project_pack, project_read, workspace_archive, workspace_open,
     workspace_read_archive, workspace_read_run, workspace_runs, workspace_write_run,
@@ -342,6 +344,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(powder_automatic, module)?)?;
     module.add_function(wrap_pyfunction!(powder_index, module)?)?;
     module.add_function(wrap_pyfunction!(powder_pawley, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_lebail, module)?)?;
     module.add_function(wrap_pyfunction!(powder_refine, module)?)?;
     module.add_function(wrap_pyfunction!(powder_cells, module)?)?;
     module.add_function(wrap_pyfunction!(powder_supported_groups, module)?)?;
