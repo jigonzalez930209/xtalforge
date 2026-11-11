@@ -317,8 +317,8 @@ fn view_style(name: &str) -> Result<xtalforge::view::DrawStyle, JsValue> {
         "space-fill" | "space_fill" => Ok(xtalforge::view::DrawStyle::SpaceFill),
         "wireframe" => Ok(xtalforge::view::DrawStyle::Wireframe),
         "sticks" => Ok(xtalforge::view::DrawStyle::Sticks),
-        other => Err(JsValue::from_str(&format!(
-            "invalid_input: unknown draw style {other:?}"
+        other => Err(crate::common::invalid_input(&format!(
+            "unknown draw style {other:?}"
         ))),
     }
 }
@@ -346,8 +346,8 @@ pub fn pxrd_info(
         "cr-ka" | "crka" => Radiation::CrKa,
         "ag-ka" | "agka" => Radiation::AgKa,
         other => {
-            return Err(JsValue::from_str(&format!(
-                "invalid_input: unknown radiation {other:?}"
+            return Err(crate::common::invalid_input(&format!(
+                "unknown radiation {other:?}"
             )));
         }
     };

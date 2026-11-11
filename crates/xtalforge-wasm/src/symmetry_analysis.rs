@@ -55,8 +55,8 @@ pub fn reduce_info(text: &str, algorithm: &str) -> Result<JsValue, JsValue> {
         "delaunay" => xtalforge::symmetry::Reduction::Delaunay,
         "minkowski" => xtalforge::symmetry::Reduction::Minkowski,
         other => {
-            return Err(JsValue::from_str(&format!(
-                "invalid_input: unknown reduction {other:?}"
+            return Err(crate::common::invalid_input(&format!(
+                "unknown reduction {other:?}"
             )));
         }
     };

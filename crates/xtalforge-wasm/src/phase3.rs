@@ -129,13 +129,13 @@ impl WasmDocument {
             .into_iter()
             .map(|site| {
                 let index = usize::try_from(site)
-                    .map_err(|_| JsValue::from_str("invalid_input: bad site index"))?;
+                    .map_err(|_| crate::common::invalid_input("bad site index"))?;
                 let atom = self
                     .inner
                     .structure()
                     .sites()
                     .get(index)
-                    .ok_or_else(|| JsValue::from_str("invalid_input: site out of range"))?;
+                    .ok_or_else(|| crate::common::invalid_input("site out of range"))?;
                 let frac = atom.frac();
                 Ok((index, [frac[0] + dx, frac[1] + dy, frac[2] + dz]))
             })
@@ -154,8 +154,7 @@ impl WasmDocument {
     ///
     /// Returns a JavaScript `Error` for an unknown element or site.
     pub fn set_element(&mut self, site: u32, element: &str) -> Result<(), JsValue> {
-        let index =
-            usize::try_from(site).map_err(|_| JsValue::from_str("invalid_input: bad site"))?;
+        let index = usize::try_from(site).map_err(|_| crate::common::invalid_input("bad site"))?;
         let command =
             xtalforge::commands::SetElement::new(vec![index], element).map_err(to_js_error)?;
         self.inner
@@ -228,7 +227,7 @@ impl WasmDocument {
 #[wasm_bindgen]
 pub fn workspace_archive(records_json: &str) -> Result<Vec<u8>, JsValue> {
     let records: Vec<xtalforge::modules::RunRecord> = serde_json::from_str(records_json)
-        .map_err(|error| JsValue::from_str(&format!("invalid_input: {error}")))?;
+        .map_err(|error| crate::common::invalid_input(&format!("{error}")))?;
     xtalforge::modules::archive_records(&records).map_err(to_js_error)
 }
 

@@ -141,8 +141,8 @@ pub fn set_space_group_info(text: &str, symbol: &str, mode: &str) -> Result<JsVa
         "reinterpret" => xtalforge::symmetry::SetMode::Reinterpret,
         "impose" => xtalforge::symmetry::SetMode::Impose,
         other => {
-            return Err(JsValue::from_str(&format!(
-                "invalid_input: unknown set mode {other:?}; use reinterpret or impose"
+            return Err(crate::common::invalid_input(&format!(
+                "unknown set mode {other:?}; use reinterpret or impose"
             )));
         }
     };

@@ -39,8 +39,8 @@ pub fn ff_optimize_info(
         "fire" => xtalforge::ff::Minimizer::Fire,
         "lbfgs" => xtalforge::ff::Minimizer::Lbfgs,
         other => {
-            return Err(JsValue::from_str(&format!(
-                "invalid_input: unknown minimizer {other:?}"
+            return Err(crate::common::invalid_input(&format!(
+                "unknown minimizer {other:?}"
             )));
         }
     };
@@ -79,8 +79,8 @@ pub fn ff_optimize_text(
         "fire" => xtalforge::ff::Minimizer::Fire,
         "lbfgs" => xtalforge::ff::Minimizer::Lbfgs,
         other => {
-            return Err(JsValue::from_str(&format!(
-                "invalid_input: unknown minimizer {other:?}"
+            return Err(crate::common::invalid_input(&format!(
+                "unknown minimizer {other:?}"
             )));
         }
     };
@@ -95,7 +95,7 @@ pub fn ff_optimize_text(
     xtalforge::io::write_cif(&result.structure).map_err(to_js_error)
 }
 
-/// Returns QEq or EQeq charges.
+/// Returns QEq, EQeq or EEQ2019 charges (`qeq`, `eqeq`, `eeq`).
 ///
 /// # Errors
 ///
@@ -110,9 +110,10 @@ pub fn ff_charges_info(text: &str, method: &str, total_charge: f64) -> Result<Js
     let charges = match method {
         "qeq" => xtalforge::ff::qeq_charges(&structure, &options),
         "eqeq" => xtalforge::ff::eqeq_charges(&structure, &options),
+        "eeq" => xtalforge::ff::eeq_charges(&structure, &options),
         other => {
-            return Err(JsValue::from_str(&format!(
-                "invalid_input: unknown charge method {other:?}"
+            return Err(crate::common::invalid_input(&format!(
+                "unknown charge method {other:?}"
             )));
         }
     }

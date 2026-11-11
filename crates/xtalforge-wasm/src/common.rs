@@ -154,6 +154,18 @@ fn looks_like_poscar(text: &str) -> bool {
     lattice_ok && species_ok && counts_ok
 }
 
+/// A JavaScript `Error` with the `invalid_input` code, like a core
+/// [`Error::InvalidInput`].
+pub(crate) fn invalid_input(message: &str) -> JsValue {
+    let js_error = js_sys::Error::new(&format!("invalid input: {message}"));
+    let _ = js_sys::Reflect::set(
+        &js_error,
+        &JsValue::from_str("code"),
+        &JsValue::from_str("invalid_input"),
+    );
+    js_error.into()
+}
+
 /// Converts a core error into a JavaScript `Error` with a stable `code`.
 pub(crate) fn to_js_error(error: Error) -> JsValue {
     let js_error = js_sys::Error::new(&error.message());

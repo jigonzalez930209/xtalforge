@@ -177,8 +177,8 @@ pub fn lattice_minimum_image(
     delta: Vec<f64>,
 ) -> Result<JsValue, JsValue> {
     let [dx, dy, dz] = delta.as_slice() else {
-        return Err(JsValue::from_str(
-            "invalid_input: delta must contain three fractional coordinates",
+        return Err(crate::common::invalid_input(
+            "delta must contain three fractional coordinates",
         ));
     };
     let (vector, distance) =
