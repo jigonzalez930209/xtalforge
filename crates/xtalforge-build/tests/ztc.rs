@@ -88,3 +88,28 @@ fn schwarzite_carbons_are_three_coordinate_sp2() {
         );
     }
 }
+
+#[test]
+fn carbon_builders_reject_a_degenerate_grid() {
+    let options = ZtcOptions {
+        samples: 1,
+        ..ZtcOptions::default()
+    };
+    assert!(xtalforge_build::build_ztc(&options).is_err());
+    assert!(xtalforge_build::build_schwarzite(&options).is_err());
+}
+
+#[test]
+fn carbon_builders_refuse_cells_too_small_for_sp2() {
+    let small = ZtcOptions {
+        cell: 10.0,
+        ..ZtcOptions::default()
+    };
+    assert!(xtalforge_build::build_ztc(&small).is_err());
+    assert!(xtalforge_build::build_schwarzite(&small).is_ok());
+    let tiny = ZtcOptions {
+        cell: 6.0,
+        ..ZtcOptions::default()
+    };
+    assert!(xtalforge_build::build_schwarzite(&tiny).is_err());
+}
