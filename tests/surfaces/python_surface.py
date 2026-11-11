@@ -24,3 +24,22 @@ for s in ['Si','NaCl','diamond','graphene','TiO2','MFI','MOF-5','Fe']:
             except Exception as e: r[m]='ERR '+str(e)
     out[s]=r
 json.dump(out,open(sys.argv[1],'w'))
+
+# Porosity, MOF assembly and powder refinement on fixed inputs.
+tio2 = open("tests/corpus/simple/TiO2.cif").read()
+rutile = open("tests/golden/phase-7/rietveld/rutile.xy").read()
+extra = {}
+porosity = x.porosity(open("docs/public/samples/MFI.cif").read(), 0.5, 1.2)
+extra["porosity"] = [porosity[k] for k in ("accessible_volume", "pore_volume", "surface_area", "largest_included_diameter")]
+mof = x.build_mof("pcu", "Zn4O", "benzene")
+extra["mof"] = [mof["n_sites"], round(mof["volume"], 3), len(mof["warnings"])]
+lebail = x.powder_lebail(tio2, rutile)
+extra["lebail"] = [lebail["r_factor"], lebail["rwp"], len(lebail["intensities"])]
+pawley = x.powder_pawley(tio2, rutile)
+extra["pawley"] = [pawley["cell"][0], pawley["cell"][2], pawley["rwp"]]
+refined = x.powder_refine(tio2, rutile, refine_positions=True, refine_adps=True, refine_zero=True, refine_cell=True, refine_width=True, doublet=True)
+extra["rietveld"] = [refined["rwp"], refined["stages"], dict(refined["parameters"])["cell.0"]]
+automatic = x.powder_automatic(tio2, rutile)
+extra["automatic"] = [automatic["rwp"], automatic["pawley_rwp"]]
+out["extra"] = extra
+json.dump(out, open(sys.argv[1], "w"))
