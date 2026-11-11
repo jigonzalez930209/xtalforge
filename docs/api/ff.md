@@ -33,8 +33,8 @@ solve charge equilibration and return `Charges { per_atom, total }`;
 `apply_charges` writes them into the sites. `EwaldOptions` and
 `ewald_energy`/`ewald_energy_forces` return an `EwaldResult` and provide the
 periodic electrostatic term.
-EEQ reuses the local charge table (the sci-form fitted table is not vendored);
-the module documents the approximation.
+`eeq_charges` is EEQ2019 with the multicharge parameters (H to Lr) and a
+coordination-dependent electronegativity; see [charges](../algorithms/charges.md).
 
 ## Optimizers
 
