@@ -393,3 +393,32 @@ fn eeq2019_matches_the_sci_form_reference() {
         assert!((value - reference).abs() < 2e-3, "{:?}", charges.per_atom);
     }
 }
+
+#[test]
+fn eeq2019_is_converged_for_ionic_crystals() {
+    let text = include_str!("../../../docs/public/samples/TiO2.cif");
+    let rutile = xtalforge_io::cif::read_cif(text).unwrap().as_p1().unwrap();
+    let single = eeq_charges(&rutile, &ChargeOptions::default()).unwrap();
+    // The Ewald sum makes the charges a property of the crystal: a 2x1x1
+    // supercell repeats them.
+    let double = eeq_charges(
+        &rutile.supercell(2, 1, 1).unwrap(),
+        &ChargeOptions::default(),
+    )
+    .unwrap();
+    let titanium = single.per_atom[0];
+    assert!(titanium > 1.0 && titanium < 2.0, "{:?}", single.per_atom);
+    for value in &double.per_atom {
+        let nearest = single
+            .per_atom
+            .iter()
+            .map(|reference| (reference - value).abs())
+            .fold(f64::INFINITY, f64::min);
+        assert!(
+            nearest < 1e-4,
+            "{:?} vs {:?}",
+            double.per_atom,
+            single.per_atom
+        );
+    }
+}
