@@ -64,10 +64,22 @@ impl P1Cell {
             for (op_idx, operation) in operations.iter().enumerate() {
                 let base = operation.apply(site.frac());
                 let [bx, by, bz] = base;
-                let floor_x = bx.floor();
-                let floor_y = by.floor();
-                let floor_z = bz.floor();
-                let frac = [bx - floor_x, by - floor_y, bz - floor_z];
+                // `x - floor(x)` is exactly 1.0 for a tiny negative `x` such
+                // as -1e-32 (a Cartesian round trip of 0); such a value is
+                // 0 of the next cell so the coordinate stays in [0, 1).
+                let unit = |value: f64| {
+                    let floor = value.floor();
+                    let frac = value - floor;
+                    if frac >= 1.0 {
+                        (0.0, floor + 1.0)
+                    } else {
+                        (frac, floor)
+                    }
+                };
+                let (fx, floor_x) = unit(bx);
+                let (fy, floor_y) = unit(by);
+                let (fz, floor_z) = unit(bz);
+                let frac = [fx, fy, fz];
                 let tau = [-floor_x as i32, -floor_y as i32, -floor_z as i32];
                 let mut duplicate = false;
                 grid.for_each_candidate(site.element(), frac, |existing_index| {

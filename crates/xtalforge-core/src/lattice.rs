@@ -248,7 +248,13 @@ impl Lattice {
     /// Wraps fractional coordinates into `[0, 1)`.
     #[must_use]
     pub fn wrap(frac: [f64; 3]) -> [f64; 3] {
-        frac.map(|value| value.rem_euclid(1.0))
+        // `rem_euclid` rounds a tiny negative value such as -1e-22 up to
+        // exactly 1.0, which is outside [0, 1) and duplicates the atom of the
+        // neighbouring cell; that value maps to 0.
+        frac.map(|value| {
+            let wrapped = value.rem_euclid(1.0);
+            if wrapped >= 1.0 { 0.0 } else { wrapped }
+        })
     }
 
     /// Wraps fractional coordinates and maps values within `tolerance` of 1
@@ -258,7 +264,7 @@ impl Lattice {
         let tolerance = tolerance.max(0.0);
         frac.map(|value| {
             let wrapped = value.rem_euclid(1.0);
-            if wrapped >= 1.0 - tolerance {
+            if wrapped >= 1.0 - tolerance || wrapped >= 1.0 {
                 0.0
             } else {
                 wrapped
