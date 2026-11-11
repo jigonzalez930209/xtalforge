@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import PlaygroundRefinePanel from './PlaygroundRefinePanel.vue'
 
 const props = defineProps<{
   wasm: any
@@ -162,5 +163,6 @@ function downloadCsv() {
         </tbody>
       </table>
     </template>
+    <PlaygroundRefinePanel :wasm="wasm" :text="text" :busy="busy" />
   </section>
 </template>
