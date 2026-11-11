@@ -79,7 +79,8 @@ const rows = computed<[string, string][]>(() => {
   const leading = value.leading_cells?.[0]
   if (leading) {
     out.push(['best cell', `${leading.system} ${leading.class_symbol}`])
-    out.push(['best a, b, c (Å)', [leading.a, leading.b, leading.c].map((x: number) => Number(x).toFixed(4)).join(', ')])
+    const best = Array.isArray(value.best_cell) ? value.best_cell : [leading.a, leading.b, leading.c]
+    out.push(['best a, b, c (Å)', best.slice(0, 3).map((x: number) => Number(x).toFixed(4)).join(', ')])
   }
   if (value.zero_shift !== undefined) out.push(['zero shift (°)', number(value.zero_shift)])
   if (value.size !== undefined) out.push(['FWHM size, strain (°)', `${number(value.size)}, ${number(value.strain)}`])

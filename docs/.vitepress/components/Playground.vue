@@ -126,6 +126,7 @@ async function run(name: string, params: Record<string, any> = {}) {
   error.value = ''
   try {
     const result = runOperation(wasmModule.value, text.value, name, params)
+    selected.value = ''
     await loadText(result, name, true)
   } catch (caught) {
     error.value = errorText(caught)
@@ -385,6 +386,7 @@ onBeforeUnmount(() => {
       <label>
         Sample
         <select v-model="selected" :disabled="!ready || busy" @change="loadSample(selected)">
+          <option value="" disabled>Built or transformed</option>
           <option v-for="sample in SAMPLES" :key="sample.id" :value="sample.id">{{ sample.label }}</option>
         </select>
       </label>
