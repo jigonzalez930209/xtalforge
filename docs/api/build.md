@@ -58,10 +58,13 @@ or 2). The CLI exposes it as `xtalforge hydrogens`.
 
 ## Twists, ribbons, spirals and ZTC
 
-`commensurate_twist(n, m, theta_degrees, layers)` builds two graphene layers
-with a relative twist. Zero and 60 degrees are exact; another angle is
-approximated by the nearest of the two and recorded in the structure metadata
-(`twist_requested`, `twist_approximation`). `nanoribbon(width, length, vacuum)`
+`commensurate_twist(n, m, theta_degrees, layers)` builds a twisted graphene
+multilayer in the smallest commensurate moire cell whose angle is within
+0.05 degrees of `theta_degrees` (or the closest one), repeated `n x m` times in
+plane. The metadata records `twist_requested`, the exact `twist_angle`, the
+moire indices `twist_indices` and `twist_approximation` (equal to
+`twist_angle`). `(1, 1, 21.79, 2)` gives the `(2, 1)` cell: 21.787 degrees and
+28 atoms. `nanoribbon(width, length, vacuum)`
 adds vacuum to a periodic honeycomb strip.
 
 `ZtcOptions { samples, cell, isovalue }` controls the level-set surfaces.
@@ -72,21 +75,28 @@ three-coordinate dual and the requested edge termination. It returns
 `CarbonBuild { structure, recipe, census, density, ratios, edge_fraction,
 pieces, periodicity, edge_length, closed_carbons, bare_edges, mean_bond,
 notes }`. `CarbonSurface` exposes the remeshed sheet for tests. The CLI is
-`build carbon`, Python `build_carbon`, WASM `build_carbon_recipe_info`.
+`build carbon`, Python `build_carbon`, WASM `build_carbon_recipe_info` (statistics) and `build_carbon_text` (CIF for a viewer).
 See [Disordered carbons](../algorithms/carbon.md).
 
 `build_ztc` samples the gyroid `sin x cos y + sin y cos z + sin z cos x` and
 `build_schwarzite` the Schwarz P surface `cos x + cos y + cos z = 0`;
 `ztc_surface_mesh` and `schwarzite_surface_mesh` return the periodic
-`TriangleMesh`. The result is a geometric carbon model, not a relaxed
-amorphous structure.
+`TriangleMesh`. The carbon structures are the relaxed dual of the remeshed
+surface: one three-coordinate carbon per triangle, 1.42 Angstrom bonds, with
+explicit bonds stored. The carbon builders sample their own ~1.2 Angstrom
+grid; `samples` sets the resolution of the returned meshes. `build_carbon` relaxes its dual
+carbon graph to 1.42 Angstrom bonds and 120 degree angles before terminating
+the edges, and drops a termination that would overlap another atom.
 
 ## Polymers
 
 `build_polymer(smiles, monomers, &PolymerOptions)` parses a repeat unit,
-embeds it, replicates it and packs the chain, recording every step in
+embeds it, joins `monomers` copies head (first SMILES atom) to tail (last
+atom) into a chain that is periodic along `a`, and sizes the square
+cross-section for the target density, recording every step in
 `PolymerBuild::steps`. `pack_chains(&[Structure], density)` fills a cubic cell
-at a target density with a deterministic grid and a clash check.
+at a target density with a deterministic grid and a clash check; it does not
+unwrap a chain longer than the cell.
 `polymer_protocol()` loads the documented equilibration protocol (minimise,
 anneal, NVT, NPT, production) from `data/polymer_protocol.json`.
 
