@@ -20,21 +20,30 @@ full PORMAKE database.
 
 
 PORMAKE fits the connection directions to a slot by RMSD over all rotations.
-This port uses a deterministic subset:
+This port does the same with a Kabsch fit (`xtalforge-mof/src/align.rs`):
+when the vertex degree equals the node's connection count (at most six),
+every one-to-one assignment of connection points to incident edges is tried,
+the proper rotation that best maps the unit connection directions onto the
+unit edge directions is computed with Horn's quaternion method, and the
+assignment with the smallest
+residual wins (ties keep the first permutation, so the result is
+deterministic). Rotation entries within 1e-9 of -1, 0 or 1 are snapped.
+
+When the degree differs from the connection count, the earlier greedy rule
+is kept as the fallback:
 
 1. Local reference = normalised mean of the node connection vectors. If that
    mean is zero (octahedral or trigonal), use the lowest-index connection.
 2. Target = normalised mean of the incident edge directions; if zero, use the
    lowest-index edge.
-3. Rotation = minimal proper rotation between those directions. The
-   antiparallel case uses a fixed perpendicular axis, so it is deterministic.
+3. Rotation = minimal proper rotation between those directions.
 4. Greedy matching: the connection/edge pair with the largest cosine is
    assigned first; ties use the index order.
 
-The difference is recorded because an RMSD fit picks the global best over all
-rotations, while the greedy fit is cheaper and reproducible. For the curated
-symmetric topologies the two agree on the resulting connectivity; the geometry
-can differ by a rotation of a node.
+Before the 2026-11-11 audit only the greedy rule existed. It left the
+in-plane angle of a planar node arbitrary, so in `srs` the benzene linker had
+to be scaled from 0.55 to 1.26 times its length; with the Kabsch fit the
+linkers stay within the 0.8-1.25 band.
 
 ## Cell scale and linker placement
 
