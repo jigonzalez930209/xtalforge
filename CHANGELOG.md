@@ -28,8 +28,69 @@ essential release, then `0.x.y`).
   goldens, and `scripts/e2e.sh` to run it. The playground UI checks cover the
   tabbed panels, atom selection, the Brillouin zone, the powder plot, UFF
   energy, exports and fullscreen.
+- A guided **Tour** tab in the playground: sixteen steps that load a sample or
+  run a builder, set the camera and open the tab where the result is read
+  (CIF reading, space group, Brillouin zone, measures, supercell, slab, PXRD,
+  nanotube, twisted bilayer, C60, MOF, disordered carbon, polymer, porosity,
+  force field and export). The powder plot gains a 2θ axis, hkl labels for
+  the strongest lines, I/I0 in the table and recalculates when the structure
+  changes; the structure panel adds the disordered-carbon builder.
+- `build_carbon_text` on the WASM surface returns the disordered carbon as CIF
+  for a viewer.
 
 ### Fixed
+
+- PXRD intensities used the Z-based Gaussian form factor
+  `Z exp(-0.5 Z^(2/3) s^2)` for every element, so relative intensities were off
+  by up to 50 % (rutile `(1 1 1)` 28 % of `(1 1 0)` instead of 19 %). The
+  neutral-atom International Tables (1992) coefficients are now embedded for H
+  to Cf and the Si, NaCl, Fe and rutile patterns match an independent
+  calculation to 0.1 %. Rietveld/Le Bail/Pawley stages that start from the
+  calculated pattern inherit the change.
+- `commensurate_twist` ignored the requested angle: it rounded every twist to
+  0 or 60 degrees, and its "60 degree" variant shifted both layers. It now
+  builds the commensurate moire cell (`(2, 1)` for 21.79 degrees, 14 atoms per
+  layer) and records `twist_angle` and `twist_indices`; `n x m` repeats the
+  moire cell.
+- `build_polymer` packed the chain into a cube shorter than the chain, so the
+  periodic images overlapped (C-C 0.67 Angstrom, coordination 5-7 for
+  polyethylene). The repeat units are now joined head to tail along `a` into a
+  periodic chain and the cross-section sets the density.
+- `embed_smiles` had no bond-angle term, so rings collapsed (benzene with
+  1.17 Angstrom 1-3 contacts and non-planar). Angle targets from the
+  hybridization (180, 120, 109.47 degrees) are now part of the relaxation and
+  the default iteration count is 1500.
+- `build_carbon` placed carbons at mesh-patch centres without relaxing them,
+  so atoms could sit 0.15 Angstrom apart, and put edge terminations along the
+  sheet normal instead of the free in-plane valence. The dual graph is now
+  relaxed to 1.42 Angstrom bonds and 120 degree angles, terminations follow
+  the free valence, and a termination that would overlap another atom is
+  dropped and reported as a bare edge. Termination and graph bonds that
+  cross the cell boundary now carry their lattice image; before, 71 of the
+  default dia build's bonds were stored without it and drawn 23-33 Angstrom
+  long across the cell.
+- `P1Cell::expand` and `Lattice::wrap` turned a tiny negative coordinate
+  (such as -1e-32 from a Cartesian round trip of 0) into exactly 1.0. The UFF
+  view then held a duplicated atom, so `ff vibrations` on silicon reported
+  modes of +-14 000 cm^-1 (energy +1028 eV after the Hessian displacements).
+  Coordinates now stay in `[0, 1)`; silicon gives three zero acoustic modes and
+  degenerate optical modes.
+- `le_bail` and `pawley` subtract a SNIP background before extracting
+  intensities and `le_bail` uses the profile-weighted partition; on rutile
+  with a 50-count baseline R drops from 0.69 to 0.27.
+- MOF nodes are oriented with a Kabsch fit over every connection-to-edge
+  assignment instead of the greedy mean-direction rule, so planar nodes in
+  `srs`/`hcb` no longer force linkers to be stretched 0.55-1.26 times.
+- `build_ztc` and `build_schwarzite` return three-coordinate sp2 carbon (the
+  relaxed dual of the remeshed gyroid/Schwarz P surface, with explicit bonds)
+  instead of mesh vertices with coordination 5-8; their sampled grid now
+  includes the closing plane, so `ztc_surface_mesh` and
+  `schwarzite_surface_mesh` are closed across the cell faces.
+- The playground radiation selector was empty: seven static `<option>`
+  elements were hoisted into one static block that Vue cannot insert into a
+  `<select>`. The options are now rendered from a list.
+- The playground twisted-bilayer form called the builder with `m = 0`, which
+  is rejected; it now defaults to the `(2, 1)` cell at 21.79 degrees.
 
 - `Structure::supercell` copied only the asymmetric sites, so a supercell of a
   symmetric structure lost its symmetry expansion (a `2 x 2 x 2` silicon
@@ -53,6 +114,10 @@ essential release, then `0.x.y`).
 
 ### Changed
 
+- The WASM budget moves from 3904 to 3968 KiB for the audit fixes (IT92
+  table, commensurate twist, periodic polymer, embedder angles, carbon
+  relaxation, ZTC/Schwarz P dual, Le Bail/Pawley background, MOF quaternion
+  fit and `build_carbon_text`; 3910 KiB measured).
 - The WASM release budget moves from 3840 to 3904 KiB for `scene_data`,
   `n_atoms` and the text-returning builders (3845 KiB measured).
 

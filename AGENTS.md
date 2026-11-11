@@ -288,7 +288,10 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   crates.io, 7 platform wheels plus an sdist on PyPI, `xtalforge-wasm` on npm,
   the CLI/hosted assets on the GitHub release and the docs on Pages. Task 8.9
   added the 3D playground and the end-to-end audit battery (`tests/e2e/`,
-  `scripts/e2e.sh`): 49 Playwright checks against gemmi, spglib, ASE and NumPy
+  `scripts/e2e.sh`): 49 Playwright checks (54 after the 2026-11-11 functional audit, Tasks
+  8.9.6-8.9.7, which fixed PXRD form factors, twisted bilayers, polymers, the
+  SMILES embedder and disordered carbon, and added the playground tour)
+  against gemmi, spglib, ASE and NumPy
   references plus deterministic screenshot goldens; it also fixed the
   supercell symmetry expansion and the Hall-only `is_p1` check. The remaining
   coverage gaps are recorded in `docs/guide/audit.md` and Task 8.9.5. Phases 1-7 are
