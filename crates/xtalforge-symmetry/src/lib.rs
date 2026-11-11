@@ -19,6 +19,7 @@ pub mod spacegroup;
 pub mod standardize;
 pub mod subgroups;
 pub mod workflow;
+mod wyckoff_origin;
 
 pub use brillouin::{BrillouinZone, brillouin_zone, brillouin_zone_for_structure};
 pub use convert::AtomType;

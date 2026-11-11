@@ -153,15 +153,17 @@ pub fn detect_symmetry(
             options.symprec
         ))
     })?;
-    dataset_from_moyo(&dataset, &moyo_cell, p1.atoms.len(), options.symprec)
+    let positions: Vec<[f64; 3]> = p1.atoms.iter().map(|atom| atom.frac).collect();
+    dataset_from_moyo(&dataset, &moyo_cell, &positions, options.symprec)
 }
 
 fn dataset_from_moyo(
     dataset: &MoyoDataset,
     moyo_cell: &crate::convert::MoyoCell,
-    n_atoms: usize,
+    positions: &[[f64; 3]],
     symprec: f64,
 ) -> Result<SymmetryDataset, Error> {
+    let n_atoms = positions.len();
     let operations = crate::convert::operations_from_moyo(&dataset.operations)?;
     let orbits = lift_orbits(dataset, n_atoms, symprec)?;
     let std_lattice = dataset.std_cell.lattice.basis.transpose().into();
@@ -179,6 +181,13 @@ fn dataset_from_moyo(
         *slot = *value;
     }
     let std_rotation_matrix: [[f64; 3]; 3] = dataset.std_rotation_matrix.into();
+    let wyckoffs = crate::wyckoff_origin::input_origin_letters(
+        &operations,
+        dataset.hall_number as u32,
+        std_linear,
+        positions,
+        &dataset.wyckoffs,
+    );
     Ok(SymmetryDataset {
         number: dataset.number as u32,
         hall_number: dataset.hall_number as u32,
@@ -186,7 +195,7 @@ fn dataset_from_moyo(
         pearson_symbol: dataset.pearson_symbol.clone(),
         operations,
         orbits,
-        wyckoffs: dataset.wyckoffs.clone(),
+        wyckoffs,
         site_symmetry_symbols: dataset.site_symmetry_symbols.clone(),
         std_lattice,
         std_positions,
