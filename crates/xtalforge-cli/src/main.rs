@@ -103,7 +103,32 @@ impl CliError {
     }
 }
 
+/// Exit status of a process whose output pipe closed (128 + SIGPIPE).
+const BROKEN_PIPE_EXIT_CODE: i32 = 141;
+
+/// Ends quietly when standard output is a closed pipe (`xtalforge ... | head`).
+///
+/// `println!` panics on a broken pipe; without this hook the CLI printed a
+/// panic message and a backtrace hint for a normal shell pipeline. Every other
+/// panic keeps the default report.
+fn install_broken_pipe_hook() {
+    let default = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        let message = info
+            .payload()
+            .downcast_ref::<String>()
+            .map(String::as_str)
+            .or_else(|| info.payload().downcast_ref::<&str>().copied())
+            .unwrap_or("");
+        if message.contains("failed printing to stdout") && message.contains("Broken pipe") {
+            std::process::exit(BROKEN_PIPE_EXIT_CODE);
+        }
+        default(info);
+    }));
+}
+
 fn main() -> ExitCode {
+    install_broken_pipe_hook();
     let cli = Cli::parse();
     match dispatch::run(&cli) {
         Ok(()) => ExitCode::SUCCESS,

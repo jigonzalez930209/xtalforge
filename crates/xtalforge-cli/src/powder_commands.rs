@@ -333,7 +333,6 @@ fn rietveld(
             &points,
             &options,
             &RefineOptions {
-                max_iterations: 30,
                 refine_positions: true,
                 refine_adps: true,
                 refine_occupancies: occupancies,
