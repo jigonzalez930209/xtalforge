@@ -86,6 +86,12 @@ essential release, then `0.x.y`).
   instead of mesh vertices with coordination 5-8; their sampled grid now
   includes the closing plane, so `ztc_surface_mesh` and
   `schwarzite_surface_mesh` are closed across the cell faces.
+- Wyckoff letters are matched on the input coordinates when the input basis
+  is conventional, so they follow the input origin like spglib and the CIF
+  (silicon in origin choice 1 is `8a`, not moyo's `8b`).
+- `eeq_charges` is now EEQ2019 (multicharge parameters, coordination-dependent
+  electronegativity, erf-damped Coulomb) instead of a copy of QEq; isolated
+  water gives O -0.598 like the sci-form/dftd4 reference.
 - The playground radiation selector was empty: seven static `<option>`
   elements were hoisted into one static block that Vue cannot insert into a
   `<select>`. The options are now rendered from a list.
@@ -117,7 +123,7 @@ essential release, then `0.x.y`).
 - The WASM budget moves from 3904 to 3968 KiB for the audit fixes (IT92
   table, commensurate twist, periodic polymer, embedder angles, carbon
   relaxation, ZTC/Schwarz P dual, Le Bail/Pawley background, MOF quaternion
-  fit and `build_carbon_text`; 3910 KiB measured).
+  fit and `build_carbon_text`; 3920 KiB measured).
 - The WASM release budget moves from 3840 to 3904 KiB for `scene_data`,
   `n_atoms` and the text-returning builders (3845 KiB measured).
 
