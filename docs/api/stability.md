@@ -70,7 +70,9 @@ rustdoc and the parity matrix are the full inventory.
 
 ## Current status
 
-`1.0.0` is published (2026-11-10) on crates.io, PyPI, npm, the GitHub release
-and GitHub Pages, after the `1.0.0-rc.1` stabilization period. The public API
-is frozen, the parity matrix is closed, and later changes follow the table
-above. `0.0.3` was the last published pre-1.0 release.
+`1.1.0` is published (2026-11-11) on crates.io, PyPI, npm, the GitHub release
+and GitHub Pages. It is the first feature release after the stable `1.0.0`
+(2026-11-10), which followed the `1.0.0-rc.1` stabilization period; its new
+fields and WASM exports are backward compatible. The public API is frozen, the
+parity matrix is closed, and later changes follow the table above. `0.0.3` was
+the last published pre-1.0 release.
