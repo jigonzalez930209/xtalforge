@@ -92,7 +92,15 @@ generating position:
 - `a` and `c` within `2e-3` Angstrom, with `a = b` exactly,
 - zero shift within `0.02` degree,
 - `Rwp < 0.25`, every requested parameter with a positive esd,
-- stages exactly `background_scale -> zero_cell -> width -> structure`.
+- stages exactly `pawley_cell -> background_scale -> zero_cell -> width ->
+  structure`.
+
+When the cell is refined, a Pawley fit runs first (`pawley_cell`) and its
+cell becomes the starting point when it moves less than 5 %. A Rietveld cell
+refinement alone is local: from a rutile cell 1 % off it stopped at
+Rwp 0.47 with `c = 2.932` instead of `2.989`; with the Pawley start it
+recovers `a = 4.6399` and `c = 2.9890` (Rwp 0.12, the same as from the true
+cell). Added by the functional audit of 2026-11-11.
 
 The synthetic tests in `tests/rietveld_stages.rs` add exact recoveries of a
 known zero shift, cell, width multiplier, March-Dollase ratio, ADP multiplier,
