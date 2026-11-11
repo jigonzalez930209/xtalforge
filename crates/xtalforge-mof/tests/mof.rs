@@ -342,7 +342,7 @@ fn a_linker_that_does_not_fit_the_cell_is_reported() {
 #[test]
 fn kabsch_orientation_keeps_linkers_unstretched() {
     for topology in ["srs", "hcb"] {
-        let built = build_mof(&MofRequest::new(topology, "benzene_tri", "benzene")).unwrap();
+        let built = build_mof(&MofRequest::new(topology, "benzene_tri", "triphenylene")).unwrap();
         assert!(
             built
                 .warnings
@@ -352,4 +352,11 @@ fn kabsch_orientation_keeps_linkers_unstretched() {
             built.warnings
         );
     }
+}
+
+#[test]
+fn two_metal_free_carboxylate_blocks_are_refused() {
+    let error = build_mof(&MofRequest::new("srs", "benzene_tri", "benzene")).unwrap_err();
+    assert_eq!(error.code(), "invalid_input");
+    assert!(error.to_string().contains("carboxylate"));
 }
