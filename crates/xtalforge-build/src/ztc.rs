@@ -87,7 +87,8 @@ pub fn schwarzite_surface_mesh(options: &ZtcOptions) -> Result<TriangleMesh, Err
 /// Returns the errors of [`ztc_surface_mesh`] or [`Error::InvalidInput`] when
 /// the mesh has no vertex.
 pub fn build_ztc(options: &ZtcOptions) -> Result<Structure, Error> {
-    let options = &carbon_grid(options);
+    minimum_cell(options, MIN_GYROID_CELL, "gyroid")?;
+    let options = &carbon_grid(options)?;
     let mesh = ztc_surface_mesh(options)?;
     structure_from_mesh("ztc", options, &mesh, Surface::Gyroid)
 }
@@ -101,7 +102,8 @@ pub fn build_ztc(options: &ZtcOptions) -> Result<Structure, Error> {
 /// Returns the errors of [`schwarzite_surface_mesh`] or
 /// [`Error::InvalidInput`] when the mesh has no vertex.
 pub fn build_schwarzite(options: &ZtcOptions) -> Result<Structure, Error> {
-    let options = &carbon_grid(options);
+    minimum_cell(options, MIN_SCHWARZ_P_CELL, "Schwarz P")?;
+    let options = &carbon_grid(options)?;
     let mesh = schwarzite_surface_mesh(options)?;
     structure_from_mesh("schwarzite", options, &mesh, Surface::SchwarzP)
 }
@@ -207,16 +209,40 @@ fn structure_from_mesh(
 const CARBON_GRID_SPACING: f64 = 1.2;
 
 /// The options with the sampling the carbon builders start from.
-fn carbon_grid(options: &ZtcOptions) -> ZtcOptions {
+///
+/// The caller's `samples` is still validated, so the builders reject the same
+/// options as the mesh functions.
+fn carbon_grid(options: &ZtcOptions) -> Result<ZtcOptions, Error> {
+    if options.samples < 2 {
+        return Err(Error::InvalidInput(
+            "a schwarzite grid needs at least two samples per axis".to_owned(),
+        ));
+    }
     let samples = if options.cell.is_finite() && options.cell > 0.0 {
         ((options.cell / CARBON_GRID_SPACING).round() as usize).clamp(4, 200)
     } else {
         options.samples
     };
-    ZtcOptions {
+    Ok(ZtcOptions {
         samples,
         ..*options
+    })
+}
+
+/// Smallest gyroid cell, in Angstrom, whose channels hold an sp2 sheet: at
+/// 12 Angstrom 98 % of the carbons are three-coordinate, at 10 only 36 %.
+pub const MIN_GYROID_CELL: f64 = 12.0;
+/// Smallest Schwarz P cell, in Angstrom (96 % three-coordinate at 8).
+pub const MIN_SCHWARZ_P_CELL: f64 = 8.0;
+
+fn minimum_cell(options: &ZtcOptions, minimum: f64, surface: &str) -> Result<(), Error> {
+    if options.cell.is_finite() && options.cell < minimum {
+        return Err(Error::InvalidInput(format!(
+            "a {surface} carbon needs a cell of at least {minimum} Angstrom; at {} Angstrom the channels are too narrow for three-coordinate carbon",
+            options.cell
+        )));
     }
+    Ok(())
 }
 
 /// Mesh edge whose dual is a 1.42 Angstrom honeycomb (`1.42 sqrt(3)`).
