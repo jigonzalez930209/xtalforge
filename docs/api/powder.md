@@ -129,5 +129,9 @@ doublet that the CLI uses by default, as Python's `doublet=False` does). Python 
 `powder_index_info`, `powder_lebail_info`, `powder_pawley_info`,
 `powder_pawley_width_info` (with `refine_size`/`refine_strain`; both Pawley
 results carry `size`, `strain` and the fitted `calculated` profile),
-`powder_automatic_info`, `powder_refine_info`, `powder_cells_info`,
+`powder_automatic_info` (its `cell` is only the quick cubic-index edge kept for
+the 1.0 signature; `best_cell` is the Pawley-refined cell of the leading
+candidate, or its indexed cell when the Pawley stage was skipped; Python
+`powder_automatic` and `xtalforge --json powder automatic` carry the same
+`best_cell`), `powder_refine_info`, `powder_cells_info`,
 `rietx_inventory_info`.
