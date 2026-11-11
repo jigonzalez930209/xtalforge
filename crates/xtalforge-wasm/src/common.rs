@@ -157,11 +157,16 @@ fn looks_like_poscar(text: &str) -> bool {
 /// A JavaScript `Error` with the `invalid_input` code, like a core
 /// [`Error::InvalidInput`].
 pub(crate) fn invalid_input(message: &str) -> JsValue {
-    let js_error = js_sys::Error::new(&format!("invalid input: {message}"));
+    coded_error("invalid_input", &format!("invalid input: {message}"))
+}
+
+/// A JavaScript `Error` with an explicit stable `code`.
+pub(crate) fn coded_error(code: &str, message: &str) -> JsValue {
+    let js_error = js_sys::Error::new(message);
     let _ = js_sys::Reflect::set(
         &js_error,
         &JsValue::from_str("code"),
-        &JsValue::from_str("invalid_input"),
+        &JsValue::from_str(code),
     );
     js_error.into()
 }

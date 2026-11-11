@@ -294,6 +294,34 @@ pub fn powder_pawley_info(
     pattern_text: &str,
     profile: &str,
 ) -> Result<JsValue, JsValue> {
+    pawley_info(text, pattern_text, profile, false, false)
+}
+
+/// Pawley fit that can also refine the size (constant) and strain
+/// (`tan theta`) width terms, like Python `powder_pawley(refine_size=...,
+/// refine_strain=...)`.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a failed fit.
+#[wasm_bindgen]
+pub fn powder_pawley_width_info(
+    text: &str,
+    pattern_text: &str,
+    profile: &str,
+    refine_size: bool,
+    refine_strain: bool,
+) -> Result<JsValue, JsValue> {
+    pawley_info(text, pattern_text, profile, refine_size, refine_strain)
+}
+
+fn pawley_info(
+    text: &str,
+    pattern_text: &str,
+    profile: &str,
+    refine_size: bool,
+    refine_strain: bool,
+) -> Result<JsValue, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
     let observed = pattern(pattern_text)?;
     let kind = match profile.to_ascii_lowercase().as_str() {
@@ -303,7 +331,7 @@ pub fn powder_pawley_info(
             xtalforge::analysis::ProfileKind::PseudoVoigt
         }
         other => {
-            return Err(JsValue::from_str(&format!(
+            return Err(crate::common::invalid_input(&format!(
                 "unknown profile {other:?}; use gaussian, lorentzian or pseudo_voigt"
             )));
         }
@@ -313,6 +341,8 @@ pub fn powder_pawley_info(
         &observed,
         &xtalforge::analysis::PawleyOptions {
             kind,
+            refine_size,
+            refine_strain,
             ..xtalforge::analysis::PawleyOptions::default()
         },
     )
@@ -341,9 +371,18 @@ pub fn powder_pawley_info(
         ("rwp", result.rwp),
         ("rexp", result.rexp),
         ("chi_squared", result.chi_squared),
+        ("size", result.size),
+        ("strain", result.strain),
     ] {
         set(&object, key, JsValue::from_f64(value));
     }
     set(&object, "converged", JsValue::from_bool(result.converged));
+    // The fitted profile at the observed points, for an observed/calculated
+    // overlay.
+    let calculated = js_sys::Array::new();
+    for point in &result.pattern {
+        calculated.push(&JsValue::from_f64(point.intensity));
+    }
+    set(&object, "calculated", calculated.into());
     Ok(object.into())
 }

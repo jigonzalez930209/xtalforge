@@ -17,6 +17,8 @@ mod common;
 #[cfg(target_arch = "wasm32")]
 mod forcefield;
 #[cfg(target_arch = "wasm32")]
+mod lebail_export;
+#[cfg(target_arch = "wasm32")]
 mod mof_export;
 #[cfg(target_arch = "wasm32")]
 mod phase1;
@@ -48,6 +50,8 @@ pub use forcefield::{
     ff_thermo_info, ff_types_info, ff_vibrations_info,
 };
 #[cfg(target_arch = "wasm32")]
+pub use lebail_export::powder_lebail_info;
+#[cfg(target_arch = "wasm32")]
 pub use mof_export::{build_mof_info, mof_blocks_info, mof_topologies_info};
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
@@ -68,7 +72,7 @@ pub use phase6_export::{
 #[cfg(target_arch = "wasm32")]
 pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
-    powder_refine_info, rietx_inventory_info,
+    powder_pawley_width_info, powder_refine_info, rietx_inventory_info,
 };
 #[cfg(target_arch = "wasm32")]
 pub use scene_export::scene_data;

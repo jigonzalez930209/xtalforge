@@ -13,9 +13,12 @@ use crate::common::{parse_any, set, summary_object, to_js_error};
 pub fn param_schema(name: &str) -> Result<JsValue, JsValue> {
     let set = xtalforge::core::preset(name).map_err(to_js_error)?;
     let schema = set.schema();
-    let text = serde_json::to_string(&schema)
-        .map_err(|error| JsValue::from_str(&format!("json_error: {error}")))?;
-    js_sys::JSON::parse(&text).map_err(|error| JsValue::from_str(&format!("json_error: {error:?}")))
+    let text = serde_json::to_string(&schema).map_err(|error| {
+        crate::common::coded_error("json_error", &format!("json_error: {error}"))
+    })?;
+    js_sys::JSON::parse(&text).map_err(|error| {
+        crate::common::coded_error("json_error", &format!("json_error: {error:?}"))
+    })
 }
 
 /// Packs structure text into `.xtalproj` bytes.

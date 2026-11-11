@@ -28,7 +28,8 @@ pub fn agent_verbs() -> String {
 #[wasm_bindgen]
 pub fn agent_run(script_json: &str) -> Result<String, JsValue> {
     let answers = xtalforge::agent::run_verbs(script_json).map_err(agent_error)?;
-    serde_json::to_string(&answers).map_err(|error| JsValue::from_str(&error.to_string()))
+    serde_json::to_string(&answers)
+        .map_err(|error| crate::common::coded_error("json_error", &error.to_string()))
 }
 
 fn agent_error(error: xtalforge::agent::Error) -> JsValue {
@@ -41,7 +42,7 @@ fn agent_error(error: xtalforge::agent::Error) -> JsValue {
     let _ = js_sys::Reflect::set(
         &object,
         &JsValue::from_str("message"),
-        &JsValue::from_str(&error.to_string()),
+        &crate::common::coded_error("json_error", &error.to_string()),
     );
     object.into()
 }
@@ -69,9 +70,10 @@ impl AgentSession {
     /// Returns a JavaScript object with `code` and `message` properties.
     pub fn run(&mut self, verb: &str, arguments_json: &str) -> Result<String, JsValue> {
         let arguments: serde_json::Value = serde_json::from_str(arguments_json)
-            .map_err(|error| JsValue::from_str(&error.to_string()))?;
+            .map_err(|error| crate::common::coded_error("json_error", &error.to_string()))?;
         let answer = self.inner.run(verb, &arguments).map_err(agent_error)?;
-        serde_json::to_string(&answer).map_err(|error| JsValue::from_str(&error.to_string()))
+        serde_json::to_string(&answer)
+            .map_err(|error| crate::common::coded_error("json_error", &error.to_string()))
     }
 
     /// Names of the open documents as JSON.
@@ -86,7 +88,8 @@ impl AgentSession {
     /// Returns a JavaScript object with `code` and `message` properties.
     pub fn structure_json(&self, name: Option<String>) -> Result<String, JsValue> {
         let structure = self.inner.structure(name.as_deref()).map_err(agent_error)?;
-        serde_json::to_string(structure).map_err(|error| JsValue::from_str(&error.to_string()))
+        serde_json::to_string(structure)
+            .map_err(|error| crate::common::coded_error("json_error", &error.to_string()))
     }
 
     /// Name of the active document.
