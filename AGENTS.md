@@ -247,6 +247,8 @@ publishes, and runs no tests. Never create a tag before this gate passes.
    cargo check -p xtalforge-wasm --target wasm32-unknown-unknown
    (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
    scripts/check-wasm-size.sh
+   (cd crates/xtalforge-wasm && wasm-pack test --node --release)
+   scripts/check-surfaces.sh
    (cd crates/xtalforge-python && maturin build --release)
    python -m mypy --strict crates/xtalforge-python/python/xtalforge
    (cd docs && npm ci && npm run docs:build)

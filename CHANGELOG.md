@@ -92,6 +92,18 @@ essential release, then `0.x.y`).
 - `eeq_charges` is now EEQ2019 (multicharge parameters, coordination-dependent
   electronegativity, erf-damped Coulomb) instead of a copy of QEq; isolated
   water gives O -0.598 like the sci-form/dftd4 reference.
+- `refine_phase` with `refine_cell` starts from a Pawley cell (new first stage
+  `pawley_cell`), so a cell 1 % off no longer traps the refinement.
+- `build_mof` refuses two metal-free carboxylate blocks, whose oxygens would
+  overlap, instead of returning the overlapping framework.
+- `build_ztc` refuses cells below 12 Angstrom and `build_schwarzite` below 8
+  Angstrom, where the surfaces cannot hold three-coordinate carbon.
+- `eeq_charges` uses an Ewald sum for the periodic Coulomb term (MOF-5 Zn was
+  +4.4 with the real-space cutoff).
+- Python `ff_charges` and WASM `ff_charges_info` accept `eeq`; the CLI `info`
+  JSON and text carry `n_atoms`; WASM errors that were bare strings are now
+  `Error` objects with `code = "invalid_input"`; PXRD reflections with equal
+  two-theta are ordered identically on native and WebAssembly builds.
 - The playground radiation selector was empty: seven static `<option>`
   elements were hoisted into one static block that Vue cannot insert into a
   `<select>`. The options are now rendered from a list.
