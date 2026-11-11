@@ -74,10 +74,11 @@ pub use powder_export::{
 pub use scene_export::scene_data;
 #[cfg(target_arch = "wasm32")]
 pub use structure_text::{
-    asymmetrize_text, build_c20_text, build_c60_text, build_graphene_text, build_mof_text,
-    build_nanotube_text, build_polymer_text, build_ribbon_text, build_schwarzite_text,
-    build_twist_text, build_ztc_text, change_setting_text, hydrogens_text, lower_to_subgroup_text,
-    primitive_text, reduce_text, set_space_group_text, standardize_text, to_p1_text,
+    asymmetrize_text, build_c20_text, build_c60_text, build_carbon_text, build_graphene_text,
+    build_mof_text, build_nanotube_text, build_polymer_text, build_ribbon_text,
+    build_schwarzite_text, build_twist_text, build_ztc_text, change_setting_text, hydrogens_text,
+    lower_to_subgroup_text, primitive_text, reduce_text, set_space_group_text, standardize_text,
+    to_p1_text,
 };
 #[cfg(target_arch = "wasm32")]
 pub use symmetry::{

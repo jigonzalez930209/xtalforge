@@ -309,6 +309,32 @@ pub fn build_polymer_text(smiles: &str, monomers: u32, density: f64) -> Result<S
     cif(&build.structure)
 }
 
+/// Builds a disordered carbon from a net recipe and returns it as CIF.
+///
+/// The other recipe fields keep their defaults; `build_carbon_recipe_info`
+/// exposes the full recipe and its statistics.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for an unknown net or invalid options.
+#[wasm_bindgen]
+pub fn build_carbon_text(
+    net: &str,
+    repeat: u32,
+    density: f64,
+    seed: u32,
+) -> Result<String, JsValue> {
+    let recipe = xtalforge::build::CarbonRecipe {
+        net: net.to_owned(),
+        repeat: [repeat as usize; 3],
+        density,
+        seed: u64::from(seed),
+        ..xtalforge::build::CarbonRecipe::default()
+    };
+    let build = xtalforge::build::build_carbon(&recipe).map_err(to_js_error)?;
+    cif(&build.structure)
+}
+
 /// Adds hydrogens at the missing valences and returns the result as CIF.
 ///
 /// # Errors
