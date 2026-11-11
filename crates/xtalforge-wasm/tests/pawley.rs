@@ -73,8 +73,9 @@ fn powder_refine_reports_the_mccusker_stages() {
     )
     .expect("Rietveld refinement");
     let stages = as_array(&property(&result, "stages"));
-    assert_eq!(stages.length(), 4);
-    assert_eq!(stages.get(0).as_string().unwrap(), "background_scale");
+    assert_eq!(stages.length(), 5);
+    assert_eq!(stages.get(0).as_string().unwrap(), "pawley_cell");
+    assert_eq!(stages.get(1).as_string().unwrap(), "background_scale");
     let esds = property(&result, "parameter_esds");
     assert!(!property(&esds, "zero").is_undefined());
     let rwp = property(&result, "rwp").as_f64().unwrap();
