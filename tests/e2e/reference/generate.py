@@ -135,7 +135,7 @@ def reciprocal_vectors(lattice: np.ndarray) -> np.ndarray:
     return np.linalg.inv(lattice).T
 
 
-def pxrd_peaks(lattice: np.ndarray) -> list[dict[str, object]]:
+def pxrd_peaks(lattice: np.ndarray, sites) -> list[dict[str, object]]:
     reciprocal = reciprocal_vectors(lattice)
     wavelength = CU_KA
     d_min = wavelength / (2.0 * math.sin(math.radians(MAX_TWO_THETA / 2.0)))
@@ -173,6 +173,23 @@ def pxrd_peaks(lattice: np.ndarray) -> list[dict[str, object]]:
         entry["multiplicity"] = int(entry["multiplicity"]) + 1
         if (h, k, l) < tuple(entry["hkl"]):
             entry["hkl"] = [h, k, l]
+    # Integrated intensity |F|^2 m LP with the gemmi IT92 form factors, as an
+    # independent check of the relative intensities.
+    for entry in peaks.values():
+        h, k, l = entry["hkl"]
+        s2 = 1.0 / (4.0 * float(entry["d"]) ** 2)
+        factor = sum(
+            site.occ
+            * site.element.it92.calculate_sf(s2)
+            * np.exp(2j * math.pi * (h * site.fract.x + k * site.fract.y + l * site.fract.z))
+            for site in sites
+        )
+        theta = math.radians(float(entry["two_theta"]) / 2.0)
+        lp = (1.0 + math.cos(2.0 * theta) ** 2) / (math.sin(theta) ** 2 * math.cos(theta))
+        entry["intensity"] = float(abs(factor) ** 2) * int(entry["multiplicity"]) * lp
+    strongest = max((float(entry["intensity"]) for entry in peaks.values()), default=1.0) or 1.0
+    for entry in peaks.values():
+        entry["relative_intensity"] = float(entry["intensity"]) / strongest
     return sorted(peaks.values(), key=lambda item: float(item["two_theta"]))
 
 
@@ -210,7 +227,7 @@ def sample_reference(name: str, path: Path) -> dict[str, object]:
             for site in sites
         ],
         "neighbours": neighbour_reference(structure),
-        "pxrd": pxrd_peaks(lattice),
+        "pxrd": pxrd_peaks(lattice, sites),
     }
     return reference
 
