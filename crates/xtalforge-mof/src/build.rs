@@ -41,7 +41,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use xtalforge_core::{Lattice, Site, Structure, StructureBuilder, TopologyBond};
 
-use crate::block::{BlockKind, find_block};
+use crate::block::{Block, BlockKind, find_block};
 use crate::error::Error;
 use crate::fit::{fit_cell_scale, scaled_lattice, widest_connection_pair};
 use crate::orient::{self, Slot};
@@ -140,6 +140,7 @@ pub fn build_mof(request: &MofRequest) -> Result<BuiltMof, Error> {
     topology.validate()?;
     node.validate()?;
     linker.validate()?;
+    check_compatible(&node, &linker)?;
 
     let base_lattice = topology.lattice()?;
     let mut warnings = Vec::new();
@@ -457,4 +458,25 @@ fn edge_image(topology: &Topology, lattice: Lattice, first: usize, second: usize
         (dy - wy).round() as i32,
         (dz - wz).round() as i32,
     ]
+}
+
+/// Refuses two metal-free blocks that both carry oxygen.
+///
+/// The catalogue's linkers end in carboxylates, and so does the organic
+/// `benzene_tri` node; without a metal cluster between them the two
+/// carboxylates are placed on top of each other (O-O at 0.6 Angstrom).
+fn check_compatible(node: &Block, linker: &Block) -> Result<(), Error> {
+    let metal = |block: &Block| {
+        block.elements.iter().any(|element| {
+            xtalforge_core::elements::element_by_symbol(element).is_ok_and(|info| info.is_metal)
+        })
+    };
+    let oxygen = |block: &Block| block.elements.iter().any(|element| element == "O");
+    if !metal(node) && !metal(linker) && oxygen(node) && oxygen(linker) {
+        return Err(Error::InvalidInput(format!(
+            "node `{}` and linker `{}` are both carboxylate-terminated and neither holds a metal, so their oxygens would overlap; use a metal node (Zn4O, Cu2, Cr3O) or an oxygen-free linker such as triphenylene",
+            node.name, linker.name
+        )));
+    }
+    Ok(())
 }
