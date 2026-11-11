@@ -24,6 +24,13 @@ are in `AGENTS.md` at the repository root.
 | 6 | [Builders](./phase-06-builders.md) | Molecules, substituents, fill, carbon, graphene, nanotubes, fullerenes, polymers, MOF builder | v0.y |
 | 7 | [Powder refinement](./phase-07-powder.md) | Pattern data, peaks, indexing, Pawley, Rietveld, energy-weighted refinement, automatic run | v0.y |
 | 8 | [Agent and distribution](./phase-08-distribution.md) | Session verbs, inspection, MCP server, ML potentials, distribution, performance, API freeze | **v1.0.0** |
+| 9 | [Usability audit and 1.x polish](./phase-09-usability.md) | Fix the 2026-11-11 usability findings, close the Rust-only parity gaps, deprecation mechanism, recipes | v1.2.0 |
+| 10 | [Native bindings](./phase-10-native-api.md) | Object API in Python and JS, NumPy, typed TS results, typed arrays, workers | v1.3.0 |
+| 11 | [Ecosystem interoperability](./phase-11-interop.md) | ASE, pymatgen, phonopy, RDKit adapters; QE/CASTEP/VASP outputs/mmCIF/SDF; OPTIMADE, COD, MP | v1.4.0 |
+| 12 | [Scientific completeness](./phase-12-completeness.md) | Close every known subset; instrument model, MD, disorder, interfaces, defects, full topology | v1.5.0 |
+| 13 | [Performance and scale](./phase-13-performance.md) | Comparative benchmarks, million-atom structures, streaming IO, split WASM | v1.6.0 |
+| 14 | [Workflows and provenance](./phase-14-workflows.md) | Declarative workflows, provenance, datasets, deduplication, ML descriptors | v1.7.0 |
+| 15 | [2.0 redesign and freeze](./phase-15-v2.md) | Remove deprecations, unified options and errors, schema v2, migration guide | **v2.0.0** |
 
 ## Current status (2026-11-11)
 
@@ -112,6 +119,21 @@ Version rules are defined in `AGENTS.md` section 5. In short:
 - **v0.y.z** — Phases 5 to 7; MINOR bump at each completed phase.
 - **v1.0.0** — Phase 8 complete: API frozen, parity matrix closed,
   documentation complete.
+- **v1.2.0 … v1.7.0** — Phases 9 to 14, one MINOR release per completed
+  phase; every change is backward compatible and anything to be removed is
+  deprecated first (Task 9.4.2).
+- **v2.0.0** — Phase 15 complete: deprecated surface removed, unified options
+  and errors, schema version 2, after a `2.0.0-rc.N` stabilization period.
+
+### Road to 2.0.0 (started 2026-11-11)
+
+The goal is to make xtalforge the default crystal-structure library across
+Rust, Python, the CLI and the browser. The plan starts from the usability
+audit in Phase 9 and orders the work by user impact: first remove friction
+(Phases 9-10), then meet users where they are (Phase 11), then close the
+science gaps (Phase 12), then scale (Phases 13-14), and only then break the
+API once (Phase 15). Phases 9-14 may overlap; Phase 15 starts when they are
+complete or explicitly descoped with a `Note:`.
 
 ## Cross-cutting requirements (apply to every phase)
 
