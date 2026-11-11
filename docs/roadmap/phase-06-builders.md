@@ -231,8 +231,9 @@ This is the largest phase. Task groups ship independently: 6.1–6.4
   described in `PROVENANCE.md` with Rust equivalents.
   Note: the scaler is implemented as a uniform fit of the topology cell to the
   linker span (`xtalforge-mof/src/fit.rs`, `cell_scale` metadata); the locator
-  is a deterministic greedy fit, not an RMSD search over all rotations, and
-  the framework carries warnings instead of an RMSD report.
+  is a Kabsch RMSD fit over every connection-to-edge assignment (functional
+  audit 2026-11-11; the greedy fit remains the fallback when the degrees
+  differ), and the framework carries warnings instead of an RMSD report.
 - [x] 6.12.3 Builder and framework
   Port `pormake/builder.py` and `framework.py`: place nodes and edges, join
   connection points, remove dummies, produce the framework and its RMSD

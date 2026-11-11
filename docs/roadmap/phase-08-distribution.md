@@ -224,3 +224,18 @@ Crate: `xtalforge-agent` (plus work across all crates).
   numeric checks against the Python and CLI surfaces in addition to WASM.
   Note: the current gaps and the visual-golden platform caveat are recorded in
   `docs/guide/audit.md` and `tests/e2e/README.md`.
+- [x] 8.9.6 Functional audit of every surface command
+  Run every CLI subcommand on the curated samples and compare with
+  independent references. Fixed the PXRD form factors (International Tables
+  1992 coefficients), the commensurate twisted bilayer, the periodic polymer
+  chain, the SMILES embedder angle term, the disordered-carbon relaxation and
+  termination clashes, and the playground twist defaults. Recorded the
+  Wyckoff-origin and EEQ gaps in `docs/guide/audit.md`. A second pass fixed
+  the P1 wrap that broke crystal vibrations, the Le Bail/Pawley background,
+  the MOF node orientation (Kabsch fit) and the ZTC/Schwarz P carbon (relaxed
+  surface dual).
+- [x] 8.9.7 Guided playground tour
+  A Tour tab whose steps load samples or run builders through the WASM
+  package, set the camera and open the matching tab; the powder plot gains
+  axis ticks, hkl labels and I/I0; the disordered-carbon builder is exposed
+  through `build_carbon_text`.
