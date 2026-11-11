@@ -41,6 +41,29 @@ pub fn powder_automatic_info(text: &str, pattern_text: &str) -> Result<JsValue, 
             .index
             .map_or(JsValue::NULL, |index| JsValue::from_f64(index.cell.a)),
     );
+    // `cell` is only the edge of the quick cubic index (kept for the 1.0
+    // signature); `best_cell` is the Pawley-refined cell of the leading
+    // (cell, extinction class) candidate, `[a, b, c, alpha, beta, gamma]`.
+    let best = js_sys::Array::new();
+    if let Some(pawley) = &result.pawley {
+        for value in pawley.cell {
+            best.push(&JsValue::from_f64(value));
+        }
+    } else if let Some(row) = result.leading_cells.first() {
+        let cell = &row.index.cell;
+        for value in [cell.a, cell.b, cell.c, cell.alpha, cell.beta, cell.gamma] {
+            best.push(&JsValue::from_f64(value));
+        }
+    }
+    set(
+        &object,
+        "best_cell",
+        if best.length() == 0 {
+            JsValue::NULL
+        } else {
+            best.into()
+        },
+    );
     set(
         &object,
         "rwp",
