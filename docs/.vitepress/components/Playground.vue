@@ -270,6 +270,7 @@ function state() {
     symmetry: inspection.value?.symmetry,
     wyckoff: inspection.value?.wyckoff.map((entry: any) => entry.letter) ?? [],
     wyckoffOrbits: orbitMultiplicities(),
+    wyckoffAtoms: inspection.value?.wyckoff.map((entry: any) => Number(entry.multiplicity)) ?? [],
     scene: scene.value
       ? {
           atoms: scene.value.atoms,
