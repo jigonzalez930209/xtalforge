@@ -31,7 +31,9 @@ and scales the linker along each edge, and returns a P1 structure. `warnings`
 reports a degree mismatch, a linker outside the 0.8-1.25 scale range, a linker
 with more than two connection points and atom pairs closer than 0.9 Angstrom.
 A vertex degree that does not match the node's connection count is a warning,
-not a silent error. Unknown names are typed errors.
+not a silent error. Unknown names are typed errors. Two metal-free blocks that
+both carry oxygen (the carboxylate `benzene_tri` node with a carboxylate
+linker) are refused with `invalid_input`, because their oxygens would overlap.
 
 `MofRequest`, `BuiltMof { structure, topology, node, linker, warnings }`,
 `BlockKind` (`Node`/`Linker`) and the `find_topology`/`find_block` lookups are

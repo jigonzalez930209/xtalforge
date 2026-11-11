@@ -84,7 +84,10 @@ See [Disordered carbons](../algorithms/carbon.md).
 `TriangleMesh`. The carbon structures are the relaxed dual of the remeshed
 surface: one three-coordinate carbon per triangle, 1.42 Angstrom bonds, with
 explicit bonds stored. The carbon builders sample their own ~1.2 Angstrom
-grid; `samples` sets the resolution of the returned meshes. `build_carbon` relaxes its dual
+grid; `samples` sets the resolution of the returned meshes. `build_ztc`
+refuses cells below `MIN_GYROID_CELL` (12 Angstrom) and `build_schwarzite`
+below `MIN_SCHWARZ_P_CELL` (8 Angstrom), where fewer than 90 % of the carbons
+would be three-coordinate. `build_carbon` relaxes its dual
 carbon graph to 1.42 Angstrom bonds and 120 degree angles before terminating
 the edges, and drops a termination that would overlap another atom.
 
