@@ -231,7 +231,7 @@ fn symmetry_analysis_commands() {
             .as_array()
             .expect("array")
             .iter()
-            .all(|item| item["letter"] == "b")
+            .all(|item| item["letter"] == "a")
     );
 
     let output = run(&["--json", "symmetry", "brillouin", &path]);
