@@ -95,23 +95,37 @@ pub fn fit_phase(
         }
         *slot = value;
     }
-    let count = observed.len() as f64;
-    let background = match options.background {
+    // Weighted linear least squares for the scale and a constant background,
+    // w = 1 / max(y_obs, 1): minimise sum w (y_obs - s u - b)^2. A
+    // `Background::Constant` start value is the fallback when the system is
+    // singular (a calculated pattern that is flat across the range).
+    let start = match options.background {
         Background::Constant(value) => value,
         _ => 0.0,
     };
-    let mut numerator = 0.0;
-    let mut denominator = 0.0;
+    let (mut swu, mut swuu, mut sw, mut swy, mut swuy) = (0.0, 0.0, 0.0, 0.0, 0.0);
     for (point, value) in observed.iter().zip(unit.iter()) {
-        numerator += value * (point.intensity - background);
-        denominator += value * value;
+        let weight = 1.0 / point.intensity.abs().max(1.0);
+        swu += weight * value;
+        swuu += weight * value * value;
+        sw += weight;
+        swy += weight * point.intensity;
+        swuy += weight * value * point.intensity;
     }
-    if denominator <= 0.0 {
+    if swuu <= 0.0 {
         return Err(Error::InvalidInput(
             "the calculated pattern has no intensity in the observed range".to_owned(),
         ));
     }
-    let scale = numerator / denominator;
+    let determinant = swuu * sw - swu * swu;
+    let (scale, background) = if determinant.abs() > 1e-12 * swuu * sw {
+        (
+            (swuy * sw - swu * swy) / determinant,
+            (swuu * swy - swu * swuy) / determinant,
+        )
+    } else {
+        ((swuy - start * swu) / swuu, start)
+    };
     let pattern: Vec<PatternPoint> = observed
         .iter()
         .zip(unit.iter())
@@ -134,7 +148,6 @@ pub fn fit_phase(
         .map(|point| point.intensity.abs().max(1.0))
         .sum();
     let rwp = (weighted / total).sqrt();
-    let _ = count;
     Ok(RietveldPhase {
         scale,
         background,
