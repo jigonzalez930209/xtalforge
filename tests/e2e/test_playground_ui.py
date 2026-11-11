@@ -50,6 +50,9 @@ def test_new_builders_from_the_playground(page, base_url):
 def test_powder_plot_and_uff_energy(page, base_url):
     open_sample(page, base_url, "Si")
     page.get_by_role("button", name="Powder", exact=True).click()
+    radiation = page.locator(".tab-section select").first
+    assert radiation.locator("option").count() == 7
+    assert radiation.input_value() == "cu-ka"
     page.get_by_role("button", name="Calculate", exact=True).click()
     assert page.locator(".pxrd-plot").count() == 1
     assert page.locator(".tab-section tbody tr").count() >= 3
@@ -81,3 +84,25 @@ def test_fullscreen_toggle(page, base_url):
     assert page.evaluate("document.fullscreenElement?.className") == "viewer"
     page.get_by_role("button", name="Exit fullscreen", exact=True).click()
     page.wait_for_function("document.fullscreenElement === null", timeout=10_000)
+
+
+def test_tour_steps_drive_the_viewer(page, base_url):
+    open_sample(page, base_url, "Si")
+    assert page.locator(".tour-steps li").count() == 16
+    zone = page.evaluate("window.__xf.tourStep('zone')")
+    assert zone["tab"] == "symmetry"
+    assert zone["zone"] == {"vertices": 24, "faces": 14, "edges": 36}
+    measure = page.evaluate("window.__xf.tourStep('measure')")
+    assert measure["brillouin"] is False
+    assert measure["measure"]["kind"] == "angle (deg)"
+    assert abs(measure["measure"]["value"] - 109.4712) < 0.01
+    supercell = page.evaluate("window.__xf.tourStep('supercell')")
+    assert supercell["summary"]["n_atoms"] == 64
+    twist = page.evaluate("window.__xf.tourStep('twist')")
+    assert twist["summary"]["n_atoms"] == 2 * 2 * 28
+    for step in ["pxrd", "nanotube", "c60", "mof", "carbon", "polymer", "uff", "export"]:
+        current = page.evaluate(f"window.__xf.tourStep('{step}')")
+        assert current["scene"]["atoms"] > 0, step
+    assert page.locator(".tour-steps li.active").count() == 0
+    page.get_by_role("button", name="Tour", exact=True).click()
+    assert page.locator(".tour-steps li.active").count() == 1

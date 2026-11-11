@@ -186,6 +186,23 @@ def test_pxrd_positions_match_bragg_reference(page, base_url, sample):
         assert abs(nearest["d"] - reflection["d"]) < 1e-3
 
 
+@pytest.mark.parametrize("sample", ["Si", "NaCl", "TiO2", "Fe"])
+def test_pxrd_intensities_match_the_it92_reference(page, base_url, sample):
+    open_sample(page, base_url, sample)
+    reference = REFERENCE["samples"][sample]["pxrd"]
+    reflections = pxrd(page)["reflections"]
+    strongest = max(reflection["intensity"] for reflection in reflections)
+    for reflection in reflections:
+        nearest = min(reference, key=lambda peak: abs(peak["d"] - reflection["d"]))
+        relative = reflection["intensity"] / strongest
+        assert abs(relative - nearest["relative_intensity"]) < 0.01, (
+            sample,
+            reflection["hkl"],
+            relative,
+            nearest["relative_intensity"],
+        )
+
+
 def test_invalid_input_reports_the_stable_code(page, base_url):
     open_sample(page, base_url, "Si")
     page.evaluate("window.__xf.loadText('not a structure', 'broken')")
