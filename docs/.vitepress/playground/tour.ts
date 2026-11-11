@@ -101,6 +101,8 @@ export const TOUR: TourStep[] = [
     operation: 'nanotube',
     params: { n: 5, m: 5, length: 3 },
     tab: 'structure',
+    // The tube axis is y: look from +x so the tube lies across the view.
+    view: { azimuth: 0, elevation: 0.2 },
   },
   {
     id: 'twist',
