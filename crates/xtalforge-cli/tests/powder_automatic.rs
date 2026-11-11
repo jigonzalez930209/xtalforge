@@ -45,4 +45,14 @@ fn powder_automatic_reports_space_group_candidates() {
     assert!(!groups.is_empty());
     assert!(groups[0]["number"].as_u64().unwrap() > 0);
     assert!(!groups[0]["symbol"].as_str().unwrap().is_empty());
+    // `best_cell` is the Pawley-refined cell, not the quick cubic-index edge
+    // in `index.cell` (a = 10.26 for rutile).
+    let best = value["best_cell"].as_array().expect("a best cell");
+    assert_eq!(best.len(), 6);
+    let a = best[0].as_f64().unwrap();
+    let c = best[2].as_f64().unwrap();
+    assert!((a - 4.5993).abs() < 0.01, "{a}");
+    assert!((c - 2.9629).abs() < 0.01, "{c}");
+    let cubic = value["index"]["cell"]["a"].as_f64().unwrap();
+    assert!((cubic - 10.2619).abs() < 0.01, "{cubic}");
 }
