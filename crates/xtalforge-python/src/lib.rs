@@ -21,6 +21,9 @@ mod phase5;
 mod phase6;
 mod phase6_extra;
 mod phase7;
+mod phase9;
+mod phase9_analysis;
+mod phase9_local;
 mod plugins;
 mod structures;
 mod symmetry;
@@ -47,6 +50,19 @@ use phase6_extra::{
 use phase7::{
     powder_automatic, powder_cells, powder_index, powder_pawley, powder_refine,
     powder_supported_groups, rietx,
+};
+use phase9::{
+    deform, edit_structure, group_structures, interpolate, interpolate_structures,
+    kabsch_alignment, match_structures, optimal_supercell, periodic_rmsd, rattle,
+};
+use phase9_analysis::{
+    adsorption_sites, convex_hull, elastic_tensor, eos_fit, interstitials, lattice_matches,
+    orderings, place_molecule, slab_terminations, special_quasirandom, stack_slabs, substitutions,
+    unique_miller_indices, vacancies, wulff,
+};
+use phase9_local::{
+    bond_valence_sums, coordination, fingerprint_similarity, oxidation_states, radial_distribution,
+    structure_fingerprint, voronoi,
 };
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
@@ -349,6 +365,38 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(powder_cells, module)?)?;
     module.add_function(wrap_pyfunction!(powder_supported_groups, module)?)?;
     module.add_function(wrap_pyfunction!(rietx, module)?)?;
+    module.add_function(wrap_pyfunction!(match_structures, module)?)?;
+    module.add_function(wrap_pyfunction!(periodic_rmsd, module)?)?;
+    module.add_function(wrap_pyfunction!(kabsch_alignment, module)?)?;
+    module.add_function(wrap_pyfunction!(group_structures, module)?)?;
+    module.add_function(wrap_pyfunction!(deform, module)?)?;
+    module.add_function(wrap_pyfunction!(rattle, module)?)?;
+    module.add_function(wrap_pyfunction!(edit_structure, module)?)?;
+    module.add_function(wrap_pyfunction!(interpolate_structures, module)?)?;
+    module.add_function(wrap_pyfunction!(interpolate, module)?)?;
+    module.add_function(wrap_pyfunction!(optimal_supercell, module)?)?;
+    module.add_function(wrap_pyfunction!(voronoi, module)?)?;
+    module.add_function(wrap_pyfunction!(coordination, module)?)?;
+    module.add_function(wrap_pyfunction!(bond_valence_sums, module)?)?;
+    module.add_function(wrap_pyfunction!(oxidation_states, module)?)?;
+    module.add_function(wrap_pyfunction!(radial_distribution, module)?)?;
+    module.add_function(wrap_pyfunction!(structure_fingerprint, module)?)?;
+    module.add_function(wrap_pyfunction!(fingerprint_similarity, module)?)?;
+    module.add_function(wrap_pyfunction!(unique_miller_indices, module)?)?;
+    module.add_function(wrap_pyfunction!(slab_terminations, module)?)?;
+    module.add_function(wrap_pyfunction!(wulff, module)?)?;
+    module.add_function(wrap_pyfunction!(adsorption_sites, module)?)?;
+    module.add_function(wrap_pyfunction!(place_molecule, module)?)?;
+    module.add_function(wrap_pyfunction!(vacancies, module)?)?;
+    module.add_function(wrap_pyfunction!(substitutions, module)?)?;
+    module.add_function(wrap_pyfunction!(interstitials, module)?)?;
+    module.add_function(wrap_pyfunction!(orderings, module)?)?;
+    module.add_function(wrap_pyfunction!(special_quasirandom, module)?)?;
+    module.add_function(wrap_pyfunction!(lattice_matches, module)?)?;
+    module.add_function(wrap_pyfunction!(stack_slabs, module)?)?;
+    module.add_function(wrap_pyfunction!(elastic_tensor, module)?)?;
+    module.add_function(wrap_pyfunction!(eos_fit, module)?)?;
+    module.add_function(wrap_pyfunction!(convex_hull, module)?)?;
     agent::register(module)?;
     plugins::register(module)?;
     ml::register(module)?;
