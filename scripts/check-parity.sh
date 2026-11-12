@@ -60,6 +60,29 @@ check_rust() {
     edit_structure) name=replace_species ;;
     structure_fingerprint) name=fingerprint ;;
     eos_fit) name=fit_eos ;;
+    mof_check) name=check_mof ;;
+    mof_solvent_remove) name=remove_solvent ;;
+    mof_disorder) name=resolve_disorder ;;
+    mof_charge_balance) name=charge_balance ;;
+    mof_deconstruct) name=deconstruct ;;
+    mof_mofid) name=mofid ;;
+    mof_open_metal_sites) name=open_metal_sites ;;
+    mof_descriptors) name=framework_descriptors ;;
+    mof_pores) name=pore_descriptors ;;
+    mof_guests) name=guests ;;
+    mof_forcefield) name=force_field ;;
+    mof_widom) name=widom_insertion ;;
+    mof_gcmc) name=gcmc_isotherm ;;
+    mof_energy_grid) name=energy_grid ;;
+    mof_raspa) name=raspa_input ;;
+    mof_functionalize) name=functionalize ;;
+    mof_defects) name=missing_defects ;;
+    mof_interpenetrate) name=interpenetrate ;;
+    mof_stack_layers) name=stack_layers ;;
+    mof_mixed) name=mixed_framework ;;
+    mof_read_database) name=read_core_mof ;;
+    mof_screen) name=screen_database ;;
+    mof_deduplicate) name=deduplicate ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -163,6 +186,7 @@ check_cli() {
     agent_capabilities|agent_verbs) command=capabilities ;;
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
+    mof_check|mof_solvent_remove|mof_disorder|mof_charge_balance|mof_deconstruct|mof_mofid|mof_open_metal_sites|mof_descriptors|mof_pores|mof_guests|mof_forcefield|mof_widom|mof_gcmc|mof_energy_grid|mof_raspa|mof_functionalize|mof_defects|mof_interpenetrate|mof_stack_layers|mof_mixed|mof_read_database|mof_screen|mof_deduplicate) command=mof ;;
     match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
     deform) command=deform ;;
     rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;

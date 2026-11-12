@@ -14,6 +14,10 @@
 # valence data, surface and defect generators, ordering/SQS search and
 # elasticity/EOS/hull fits (4603 KiB measured).
 #
+# 5120 KiB since 1.3.0: the MOF platform checker, deconstruction, MOFid,
+# native percolation, TraPPE host-guest fields, Widom/GCMC/grids and
+# modification (4936 KiB measured).
+#
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
 set -u
@@ -21,7 +25,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=4736
+BUDGET_KIB=5120
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
