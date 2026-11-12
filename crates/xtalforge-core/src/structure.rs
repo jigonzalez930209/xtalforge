@@ -99,6 +99,36 @@ impl Structure {
             .collect()
     }
 
+    /// Structured warnings collected from the structure metadata.
+    #[must_use]
+    pub fn warnings(&self) -> Vec<StructureWarning> {
+        let mut warnings = Vec::new();
+        for (key, value) in &self.metadata {
+            let Some(message) = value.as_str() else {
+                continue;
+            };
+            let code = key
+                .strip_suffix("_warning")
+                .unwrap_or(key.as_str())
+                .to_owned();
+            let hint = if code.contains("symmetry") {
+                Some("use --spacegroup SYMBOL to override the setting".to_owned())
+            } else if code.contains("coincident") {
+                Some("remove one of the overlapping atoms or lower --symprec".to_owned())
+            } else {
+                None
+            };
+            warnings.push(StructureWarning {
+                code,
+                message: message.to_owned(),
+                atoms: Vec::new(),
+                fields: vec![key.clone()],
+                hint,
+            });
+        }
+        warnings
+    }
+
     /// Summary used by the CLI, Python and WASM `info` surfaces.
     ///
     /// # Errors
@@ -114,6 +144,7 @@ impl Structure {
             density: self.density()?,
             total_charge: self.total_charge(),
             is_p1: self.is_p1(),
+            warnings: self.warnings(),
         })
     }
 
@@ -275,6 +306,21 @@ pub fn structure_info(text: &str) -> Result<StructureSummary, Error> {
     structure.summary()
 }
 
+/// One structured warning attached to a structure.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct StructureWarning {
+    /// Stable snake_case code.
+    pub code: String,
+    /// Human-readable message.
+    pub message: String,
+    /// P1 atom indices involved, when known.
+    pub atoms: Vec<usize>,
+    /// Fields involved, when known.
+    pub fields: Vec<String>,
+    /// Suggested fix, when one exists.
+    pub hint: Option<String>,
+}
+
 /// Summary of a structure for the surfaces.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct StructureSummary {
@@ -294,6 +340,8 @@ pub struct StructureSummary {
     pub total_charge: f64,
     /// Whether the structure is P1.
     pub is_p1: bool,
+    /// Structured reader and geometry warnings.
+    pub warnings: Vec<StructureWarning>,
 }
 
 /// Builder for a [`Structure`].

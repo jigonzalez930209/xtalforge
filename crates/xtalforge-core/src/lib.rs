@@ -8,6 +8,7 @@ pub mod bonding;
 pub mod cell;
 pub mod compare;
 pub mod data;
+pub mod deprecation;
 pub mod describe;
 pub mod edits;
 pub mod elements;
@@ -20,6 +21,7 @@ pub mod local;
 pub mod measure;
 pub mod neighbors;
 pub mod p1;
+pub mod parallel;
 pub mod param_presets;
 pub mod params;
 pub mod polyhedron;
@@ -38,6 +40,7 @@ pub mod transforms;
 pub use bonding::{Bond, BondGraph, BondRules, ExplicitBond, TopologyBond, perceive_bonds};
 pub use cell::cell_volume;
 pub use compare::{Alignment, interpolate, kabsch_alignment, periodic_rmsd};
+pub use deprecation::warn_deprecated;
 pub use describe::describe_atom;
 pub use edits::{
     RattleOptions, RattleReport, SiteSort, SpeciesReplacement, SupercellChoice, add_sites, deform,
@@ -60,6 +63,7 @@ pub use local::{
 pub use measure::{angle, centroid, distance, interplanar_angle, torsion};
 pub use neighbors::{Neighbor, neighbors, neighbors_of};
 pub use p1::{P1Atom, P1Cell};
+pub use parallel::{ParallelOptions, set_global_threads};
 pub use param_presets::{PRESET_NAMES, preset, presets};
 pub use params::{ParamSet, ParamSpec, ParamType};
 pub use polyhedron::{FULL_SPHERE, HalfSpace, Polyhedron};
@@ -73,7 +77,7 @@ pub use site::Site;
 pub use slab::{Slab, make_slab, plane_angle, surface_basis};
 pub use structure::{
     SCHEMA_VERSION, Structure, StructureBuilder, StructureDocument, StructureSummary,
-    structure_info,
+    StructureWarning, structure_info,
 };
 pub use surface::{
     AdsorptionKind, AdsorptionSite, SurfaceEnergy, WulffFacet, WulffShape, adsorption_sites,
@@ -154,5 +158,22 @@ impl Error {
     #[must_use]
     pub fn message(&self) -> String {
         self.to_string()
+    }
+
+    /// Stable machine-readable category for the JSON error object.
+    ///
+    /// Categories are `input`, `unsupported`, `numerical`, `limit`, `engine`
+    /// and `internal`.
+    #[must_use]
+    pub fn category(&self) -> &'static str {
+        match self {
+            Self::InvalidInput(_) => "input",
+            Self::DataCompression { .. }
+            | Self::DataChecksum { .. }
+            | Self::DataDigest { .. }
+            | Self::DataJson { .. } => "internal",
+            Self::LimitExceeded(_) => "limit",
+            Self::Symmetry(_) => "numerical",
+        }
     }
 }
