@@ -16,6 +16,7 @@ mod classes;
 mod lebail;
 mod ml;
 mod phase10;
+mod phase11;
 mod phase3;
 mod phase4;
 mod phase5;
@@ -71,6 +72,11 @@ use phase10::{
     mof_interpenetrate, mof_mixed, mof_mofid, mof_open_metal_sites, mof_pores, mof_raspa,
     mof_read_database, mof_screen, mof_solvent_remove, mof_stack_layers, mof_widom,
 };
+use phase11::{
+    deprecation_warning, fragment_library, fragment_names, fragment_structure,
+    molecule_from_smiles, place_guest_structure, read, sketch_roundtrip, substitute_structure,
+    write,
+};
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
 };
@@ -101,6 +107,29 @@ create_exception!(
 #[pyfunction]
 fn version() -> &'static str {
     xtalforge::core::version()
+}
+
+/// Installs the process-wide worker pool.
+#[pyfunction]
+fn set_threads(threads: usize) -> PyResult<bool> {
+    if threads == 0 {
+        return Err(crate::invalid_input("threads must be positive"));
+    }
+    xtalforge::core::set_global_threads(threads).map_err(crate::invalid_input)
+}
+
+/// Machine-readable category for a stable error code.
+#[pyfunction]
+fn error_category(code: &str) -> &'static str {
+    match code {
+        "invalid_input" | "invalid_argument" | "unknown_verb" | "unknown_document"
+        | "no_document" | "io" | "typing" | "unknown_element" | "unknown_type" | "topology"
+        | "unknown_calculator" | "unknown_topology" | "unknown_block" => "input",
+        "limit_exceeded" => "limit",
+        "quantum" => "engine",
+        "unsupported" => "unsupported",
+        _ => "internal",
+    }
 }
 
 fn map_error(error: xtalforge::core::Error) -> PyErr {
@@ -281,6 +310,8 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add("XtalforgeError", module.py().get_type::<XtalforgeError>())?;
     module.add("InputError", module.py().get_type::<InputError>())?;
     module.add_function(wrap_pyfunction!(version, module)?)?;
+    module.add_function(wrap_pyfunction!(set_threads, module)?)?;
+    module.add_function(wrap_pyfunction!(error_category, module)?)?;
     module.add_function(wrap_pyfunction!(cell_volume, module)?)?;
     module.add_function(wrap_pyfunction!(element_info, module)?)?;
     module.add_function(wrap_pyfunction!(lattice_info, module)?)?;
@@ -427,6 +458,16 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(mof_read_database, module)?)?;
     module.add_function(wrap_pyfunction!(mof_screen, module)?)?;
     module.add_function(wrap_pyfunction!(mof_deduplicate, module)?)?;
+    module.add_function(wrap_pyfunction!(deprecation_warning, module)?)?;
+    module.add_function(wrap_pyfunction!(read, module)?)?;
+    module.add_function(wrap_pyfunction!(write, module)?)?;
+    module.add_function(wrap_pyfunction!(molecule_from_smiles, module)?)?;
+    module.add_function(wrap_pyfunction!(sketch_roundtrip, module)?)?;
+    module.add_function(wrap_pyfunction!(fragment_library, module)?)?;
+    module.add_function(wrap_pyfunction!(fragment_names, module)?)?;
+    module.add_function(wrap_pyfunction!(fragment_structure, module)?)?;
+    module.add_function(wrap_pyfunction!(substitute_structure, module)?)?;
+    module.add_function(wrap_pyfunction!(place_guest_structure, module)?)?;
     agent::register(module)?;
     plugins::register(module)?;
     ml::register(module)?;

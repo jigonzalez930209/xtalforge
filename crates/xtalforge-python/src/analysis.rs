@@ -187,7 +187,7 @@ fn atom_index(value: i64) -> PyResult<usize> {
 
 /// Calculates a PXRD pattern.
 #[pyfunction]
-#[pyo3(signature = (text, radiation = "cu-ka".to_string(), max_two_theta = 80.0, step = 0.02, format_hint = None))]
+#[pyo3(signature = (text, radiation = "cu-ka".to_string(), max_two_theta = 80.0, step = 0.02, format_hint = None, threads = None))]
 #[allow(clippy::too_many_arguments)] // one Python argument per pattern option
 pub(crate) fn pxrd<'py>(
     py: Python<'py>,
@@ -196,6 +196,7 @@ pub(crate) fn pxrd<'py>(
     max_two_theta: f64,
     step: f64,
     format_hint: Option<&str>,
+    threads: Option<usize>,
 ) -> PyResult<Bound<'py, PyDict>> {
     use xtalforge::analysis::{PxrdOptions, Radiation, calculate_pxrd};
     let structure = load_structure(text, format_hint)?;
@@ -209,16 +210,20 @@ pub(crate) fn pxrd<'py>(
         "ag-ka" | "agka" => Radiation::AgKa,
         other => return Err(crate::invalid_input(format!("unknown radiation {other:?}"))),
     };
-    let pattern = calculate_pxrd(
-        &structure,
-        &PxrdOptions {
-            radiation,
-            two_theta_range: [5.0, max_two_theta],
-            step,
-            ..PxrdOptions::default()
-        },
-    )
-    .map_err(crate::map_error)?;
+    let pattern = xtalforge::core::ParallelOptions::new(threads)
+        .install(|| {
+            calculate_pxrd(
+                &structure,
+                &PxrdOptions {
+                    radiation,
+                    two_theta_range: [5.0, max_two_theta],
+                    step,
+                    ..PxrdOptions::default()
+                },
+            )
+        })
+        .map_err(crate::invalid_input)?
+        .map_err(crate::map_error)?;
     let dict = PyDict::new(py);
     let reflections = PyList::empty(py);
     for reflection in &pattern.reflections {

@@ -5,6 +5,8 @@ use pyo3::types::{PyDict, PyList};
 
 use xtalforge::core::{Lattice, P1Cell, Site, Structure, StructureBuilder};
 
+use crate::phase9_analysis::json_value;
+
 /// Reads a structure from text with a format hint.
 ///
 /// Parameters
@@ -183,6 +185,7 @@ pub(crate) fn structure_payload<'py>(
     dict.set_item("density", summary.density)?;
     dict.set_item("total_charge", summary.total_charge)?;
     dict.set_item("is_p1", summary.is_p1)?;
+    dict.set_item("warnings", json_value(&summary.warnings)?)?;
     dict.set_item("lattice", lattice_payload(py, structure.lattice())?)?;
     dict.set_item("sites", sites_payload(py, structure)?)?;
     dict.set_item("p1", p1_payload(py, &p1)?)?;
