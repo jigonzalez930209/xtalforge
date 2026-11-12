@@ -15,11 +15,21 @@ include = ["src/**", "data/**"]
 
 [dependencies]
 xtalforge-analysis = { workspace = true }
+xtalforge-build = { workspace = true }
 xtalforge-core = { workspace = true }
+xtalforge-ff = { workspace = true }
 xtalforge-io = { workspace = true }
+xtalforge-symmetry = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+sha2 = { workspace = true }
 thiserror = { workspace = true }
+
+[features]
+default = []
+# The full PORMAKE topology and block bundle is a curated subset in this
+# release; the flag is reserved for the complete data drop.
+mof-data = []
 
 [lints]
 workspace = true
