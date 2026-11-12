@@ -35,13 +35,13 @@ cargo build -p xtalforge --all-features
 4. Features stay additive. Two features enabled together must behave like the
    union of their capabilities, never like a different code path that changes
    numeric output.
-5. The default WASM package has a 4736 KiB budget, checked by
+5. The default WASM package has a 5120 KiB budget, checked by
    `scripts/check-wasm-size.sh`. The hello-world build was about 41 KiB; the
    Phase 1 readers and builders brought it to about 438 KiB, symmetry to about
    813 KiB, and the Phase 3-7 surfaces (including the polymer/embedding code)
    and the agent session took the release package to 3943 KiB at 1.1.0.
-   The Phase 9 core features take it to 4603 KiB at 1.2.0, inside the
-   4736 KiB budget.
+   The Phase 9 core features took it to 4603 KiB at 1.2.0 and the MOF
+   platform to 4936 KiB at 1.3.0, inside the 5120 KiB budget.
 
 ## Threaded WebAssembly
 
