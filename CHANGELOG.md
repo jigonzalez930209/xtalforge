@@ -5,6 +5,52 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.3.0] - 2026-11-12
+
+Phase 10 makes xtalforge a MOF platform: experimental CIFs can be checked and
+cleaned, deconstructed into nodes, linkers and a topology, described with the
+standard geometric and adsorption descriptors, modified, and screened in
+batches. The public API is additive.
+
+### Added
+
+- MOF checking and cleaning: `mof_check` (overlaps, fragments, valence,
+  disorder, metal coordination, charge), `mof_solvent_remove` with the
+  embedded solvent table and the CoRE FSR/ASR policy, `mof_disorder` and
+  `mof_charge_balance`.
+- Framework understanding: `mof_deconstruct` (all-node SBU/linker split and
+  contracted quotient net), `mof_mofid` (canonical unit SMILES, topology,
+  `MOFid` string and SHA-256 `MOFkey`), `mof_open_metal_sites` and
+  `mof_descriptors`.
+- Native porosity: `mof_pores` with periodic union-find PLD, LCD, accessible
+  surface area in m2/g and m2/cm3, accessible volume, void fraction, channel
+  dimensionality and the geometric pore-size distribution.
+- Adsorption: `mof_guests` (TraPPE CO2, N2, CH4, H2, H2O),
+  `mof_forcefield` (UFF/EQeq host, Lorentz-Berthelot mixing),
+  `mof_widom` (Henry coefficient and heat of adsorption), `mof_gcmc`
+  (single-component isotherm), `mof_energy_grid` and `mof_raspa` input export.
+- Modification: `mof_functionalize` (NH2/OH/CH3/F), `mof_defects` (missing
+  linker and cluster defects with formate/water/hydroxide caps),
+  `mof_interpenetrate`, `mof_stack_layers` and `mof_mixed` (ordered orbit or
+  seeded random mixed-metal/linker frameworks).
+- Screening: `mof_read_database` for CoRE MOF and QMOF directories,
+  `mof_screen` for a resumable descriptor/Henry table with MOFkeys and
+  `mof_deduplicate` (MOFkey first, structure matcher for ties).
+- CLI `mof` subcommands (`check`, `solvent-remove`, `disorder-resolve`,
+  `charge-balance`, `deconstruct`, `mofid`, `open-metal-sites`,
+  `descriptors`, `pores`, `adsorption`, `modify`, `database`), Python
+  functions and WASM JSON exports. `docs/api/mof.md`,
+  `docs/guide/mof-workflows.md` and two new algorithm pages document the
+  phase; the parity matrix gains 23 rows.
+- `P1Atom` disorder groups, the MOF host-guest data files and the new
+  `mof-data` feature flag.
+
+### Fixed
+
+- The MOF checker does not report a charge imbalance for a metal-free
+  covalent framework; charge balance is assessed only when metals are
+  present.
+
 ## [1.2.0] - 2026-11-11
 
 Phase 9 adds the core operations of a standard crystal library beyond the

@@ -270,27 +270,28 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.2.0` (release commit tagged after the local CI gate; `1.1.0`
-  was published 2026-11-11 on crates.io, PyPI, npm, the GitHub release and
-  GitHub Pages, and `1.0.0` followed the `1.0.0-rc.1` stabilization period on
-  2026-11-10). `1.2.0` is backward compatible: Phase 9 adds comparison,
-  edits, local environments, surfaces, defects, orderings, SQS, interfaces,
-  elasticity, EOS fits and convex hulls on all four surfaces.
+- Version: `1.3.0` (release commit tagged after the local CI gate; `1.2.0`
+  was published 2026-11-12 and `1.1.0` on 2026-11-11 on crates.io, PyPI, npm,
+  the GitHub release and GitHub Pages). `1.3.0` is backward compatible:
+  Phase 10 adds the MOF platform (checking, cleaning, deconstruction, MOFid,
+  descriptors, native porosity, adsorption, modification and screening).
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 10 — MOF platform
-  (`docs/roadmap/phase-10-mof.md`), the next step of the road to `2.0.0`
-  (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
-  Phase 9 — Core features (`docs/roadmap/phase-09-core-features.md`) is
-  complete and released as `1.2.0`: the structure matcher, RMSD/Kabsch,
-  equality classes, strain/deform, rattle, site editing, matched
-  interpolation, optimal supercells, Voronoi, coordination and shape
-  measures, BVS/oxidation states, RDF/fingerprints, unique Miller indices,
-  terminations, Wulff, adsorption sites, point defects, orderings, SQS,
-  interfaces, elastic tensors, EOS fits and convex hulls, with tests, the API
-  page, five algorithm pages and 29 parity rows. Task 9.7.2 (playground
-  panels and e2e references) is open.
+- Current phase: Phase 11 — Usability audit and 1.x polish
+  (`docs/roadmap/phase-11-usability.md`), the next step of the road to
+  `2.0.0` (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
+  Phase 10 — MOF platform (`docs/roadmap/phase-10-mof.md`) is complete and
+  released as `1.3.0`: the checker and cleaners, deconstruction, RCSR net,
+  MOFid/MOFkey, open metal sites, descriptors, native PLD/LCD/ASA,
+  UFF/EQeq-TraPPE host-guest fields, Widom, GCMC, energy grids, RASPA export,
+  PSM, defects, interpenetration, layer stacking, mixed frameworks, CoRE/QMOF
+  readers, screening and deduplication, with tests, the API page, two
+  algorithm pages, a guide and 23 parity rows. Tasks 10.5.7 (full PORMAKE
+  bundle), 10.6.4 (on-demand fetch), 10.7.3-10.7.5 (e2e and playground) remain
+  open. Phase 9 — Core features (`docs/roadmap/phase-09-core-features.md`) is
+  complete and released as `1.2.0`; Task 9.7.2 (playground panels and e2e
+  references) remains open.
   Phases 0-8 are complete. Phase 8 — Agent and
   distribution (`docs/roadmap/phase-08-distribution.md`) delivered tasks
   8.1-8.7:

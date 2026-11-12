@@ -4,11 +4,12 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.2.0` published on 2026-11-11. Phases 0-9 are complete and the
+> Status: `1.3.0` published on 2026-11-12. Phases 0-10 are complete and the
 > public API is frozen; later changes follow the SemVer policy in
-> `docs/api/stability.md`. `1.2.0` adds the Phase 9 core features: structure
-> comparison, edits, local environments, surfaces, defects and disorder,
-> interfaces, elasticity, EOS fits and convex hulls. The known reference gaps are
+> `docs/api/stability.md`. `1.3.0` adds the MOF platform: CIF checking and
+> cleaning, deconstruction, MOFid/MOFkey, native PLD/LCD/ASA, host-guest
+> force fields, Widom/GCMC, post-synthetic modification and database
+> screening. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
@@ -26,6 +27,10 @@ parity with the Rust API.
 - Force fields and thermodynamics: native UFF/UFF4MOF, QEq/EQeq/EEQ charges,
   Ewald, FIRE/L-BFGS, scans, Gamma-point vibrations, IR, thermochemistry and
   quasi-harmonic free energies.
+- MOF platform: checker and solvent removal, deconstruction into nodes and
+  linkers, RCSR topology, MOFid/MOFkey, open metal sites, native pore
+  descriptors, UFF/EQeq-TraPPE adsorption, Widom/GCMC, PSM, defects,
+  interpenetration, CoRE MOF/QMOF readers and screening.
 - Core crystal features: structure matching and RMSD, strain and rattle,
   site editing and interpolation, Voronoi and coordination environments,
   bond-valence sums and oxidation states, RDF and fingerprints, unique Miller
@@ -46,9 +51,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.2.0
-pip install xtalforge==1.2.0
-npm install xtalforge-wasm@1.2.0
+cargo add xtalforge@1.3.0
+pip install xtalforge==1.3.0
+npm install xtalforge-wasm@1.3.0
 ```
 
 ## Goals
