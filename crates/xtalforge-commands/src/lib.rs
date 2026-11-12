@@ -14,7 +14,9 @@ pub mod groups;
 pub mod later;
 pub mod symmetry;
 
-pub use atoms::{AddSites, DeleteSites, MoveSites, SetElement, SetOccupancy};
+pub use atoms::{
+    AddSites, DeleteSites, MoveSites, ReplaceSpecies, SetElement, SetOccupancy, SortSites,
+};
 pub use bonds::{AddBond, RemoveBond, SetBondRules};
 pub use cell::{PositionPolicy, SetLattice, ShiftOrigin, Supercell, WrapIntoCell};
 pub use clipboard::{Fragment, PasteFragment, copy_selection};

@@ -317,3 +317,75 @@ fn remapped_structure(
     }
     builder.build()
 }
+
+/// Replaces species by a map, optionally on a fraction of the sites.
+#[derive(Debug, Clone)]
+pub struct ReplaceSpecies {
+    replacement: xtalforge_core::SpeciesReplacement,
+    description: String,
+}
+
+impl ReplaceSpecies {
+    /// Creates the command.
+    #[must_use]
+    pub fn new(replacement: xtalforge_core::SpeciesReplacement) -> Self {
+        let description = if replacement.fraction >= 1.0 {
+            "Replace species".to_owned()
+        } else {
+            format!(
+                "Replace species on {:.0}% of the sites",
+                replacement.fraction * 100.0
+            )
+        };
+        Self {
+            replacement,
+            description,
+        }
+    }
+
+    /// Replacement rules.
+    #[must_use]
+    pub fn replacement(&self) -> &xtalforge_core::SpeciesReplacement {
+        &self.replacement
+    }
+}
+
+impl Command for ReplaceSpecies {
+    fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        xtalforge_core::replace_species(structure, &self.replacement)
+    }
+
+    fn description(&self) -> String {
+        self.description.clone()
+    }
+}
+
+/// Sorts the sites deterministically.
+#[derive(Debug, Clone)]
+pub struct SortSites {
+    sort: xtalforge_core::SiteSort,
+}
+
+impl SortSites {
+    /// Creates the command.
+    #[must_use]
+    pub fn new(sort: xtalforge_core::SiteSort) -> Self {
+        Self { sort }
+    }
+
+    /// Ordering key.
+    #[must_use]
+    pub fn sort(&self) -> xtalforge_core::SiteSort {
+        self.sort
+    }
+}
+
+impl Command for SortSites {
+    fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        xtalforge_core::sort_sites(structure, self.sort)
+    }
+
+    fn description(&self) -> String {
+        "Sort sites".to_owned()
+    }
+}
