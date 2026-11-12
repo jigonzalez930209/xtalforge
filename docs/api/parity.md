@@ -107,6 +107,29 @@ compares this table with the symbols each surface actually exports.
 | `elastic_tensor` | 9 | done | done | done | done | Stress finite differences, Voigt-Reuss-Hill moduli (Task 9.6.1) |
 | `eos_fit` | 9 | done | done | done | done | Birch-Murnaghan, Vinet and Murnaghan fits (Task 9.6.2); Rust `fit_eos`, CLI `features eos` |
 | `convex_hull` | 9 | done | done | done | done | Formation energies and hull distances (Task 9.6.3) |
+| `mof_check` | 10 | done | done | done | done | MOF quality checker (Task 10.1.1); CLI `mof check` |
+| `mof_solvent_remove` | 10 | done | done | done | done | Solvent/counter-ion removal (Task 10.1.2); CLI `mof solvent-remove` |
+| `mof_disorder` | 10 | done | done | done | done | Disorder resolution (Task 10.1.3); CLI `mof disorder-resolve` |
+| `mof_charge_balance` | 10 | done | done | done | done | Metal states and charge balance (Task 10.1.4); CLI `mof charge-balance` |
+| `mof_deconstruct` | 10 | done | done | done | done | Building-unit deconstruction and contracted net (Task 10.2.1-10.2.2); CLI `mof deconstruct` |
+| `mof_mofid` | 10 | done | done | done | done | MOFid and MOFkey (Task 10.2.3); CLI `mof mofid` |
+| `mof_open_metal_sites` | 10 | done | done | done | done | Open metal sites (Task 10.2.4); CLI `mof open-metal-sites` |
+| `mof_descriptors` | 10 | done | done | done | done | Linker/node/framework descriptors (Task 10.2.5); CLI `mof descriptors` |
+| `mof_pores` | 10 | done | done | done | done | Native PLD, LCD, ASA, AV and channel dimension (Task 10.3.1-10.3.3); CLI `mof pores` |
+| `mof_guests` | 10 | done | done | done | done | TraPPE guest table (Task 10.4.1); CLI `mof adsorption guests` |
+| `mof_forcefield` | 10 | done | done | done | done | Host UFF/EQeq and guest mixing (Task 10.4.1); CLI `mof adsorption force-field` |
+| `mof_widom` | 10 | done | done | done | done | Widom insertion and Henry coefficient (Task 10.4.2); CLI `mof adsorption widom` |
+| `mof_gcmc` | 10 | done | done | done | done | Single-component GCMC isotherm (Task 10.4.3); CLI `mof adsorption gcmc` |
+| `mof_energy_grid` | 10 | done | done | done | done | Guest energy grid (Task 10.4.4); CLI `mof adsorption grid` |
+| `mof_raspa` | 10 | done | done | done | done | RASPA input export (Task 10.4.5); CLI `mof adsorption raspa` |
+| `mof_functionalize` | 10 | done | done | done | done | Post-synthetic functionalisation (Task 10.5.3); CLI `mof modify functionalize` |
+| `mof_defects` | 10 | done | done | done | done | Missing linker/cluster defects (Task 10.5.4); CLI `mof modify defects` |
+| `mof_interpenetrate` | 10 | done | done | done | done | Interpenetrated variants (Task 10.5.5); CLI `mof modify interpenetrate` |
+| `mof_stack_layers` | 10 | done | done | done | done | Layered variants (Task 10.5.5); CLI `mof modify stack-layers` |
+| `mof_mixed` | 10 | done | done | done | done | Mixed-metal/linker frameworks (Task 10.5.6); CLI `mof modify mixed` |
+| `mof_read_database` | 10 | done | done | done | n/a | CoRE MOF/QMOF directory readers (Task 10.6.1); no filesystem in WASM |
+| `mof_screen` | 10 | done | done | done | n/a | Screening pipeline (Task 10.6.2); no filesystem in WASM |
+| `mof_deduplicate` | 10 | done | done | done | n/a | MOFkey + matcher deduplication (Task 10.6.3); no filesystem in the browser |
 
 ## Recorded exceptions
 

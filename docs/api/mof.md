@@ -60,10 +60,98 @@ The crate also exposes documented geometric helpers:
 ## Deliberate limits
 
 - Six topologies and eight blocks, not the full PORMAKE catalogue.
-- No RMSD locator and no automatic SBU recognition; the linker/node choice is
+- The global RMSD/Kabsch locator is implemented (`align`); the full PORMAKE
+  data drop is still the `mof-data` feature gap, and the linker/node choice is
   explicit in the request.
 - Rods, layers, merged nets and decoration are the simplified helpers above,
   not full PORMAKE net manipulations.
 - Blocks are not relaxed; the builder is geometric.
 - The full MOF and RCSR bundles are external data (`data-YYYY.MM.DD`), not
   part of this crate.
+
+
+## MOF platform (Phase 10)
+
+### Cleaning and validation
+
+- `mof_check(text, format_hint=None)`: overlaps, unbound atoms and fragments,
+  impossible valences, hypervalent carbon, missing hydrogens, disorder, metal
+  coordination and charge balance. Each finding carries a severity, the P1
+  atoms and a `fix` verb. In Rust the function is `check_mof`; the CLI is
+  `xtalforge mof check`.
+- `mof_solvent_remove(text, remove_ions=False)`: removes free solvent from
+  the embedded H2O/DMF/EtOH table and small organic fragments; counter-ions
+  are kept unless `remove_ions` is set. Rust `remove_solvent`, CLI
+  `mof solvent-remove`.
+- `mof_disorder(text)`: picks the lowest-energy ordered decoration from the
+  partial-occupancy groups. Rust `resolve_disorder`, CLI `mof disorder-resolve`.
+- `mof_charge_balance(text)`: metal states from BVS, deprotonated carboxylate
+  charge and the neutral/charged verdict. Rust `charge_balance`, CLI
+  `mof charge-balance`.
+
+### Deconstruction and identity
+
+- `mof_deconstruct(text)`: metal nodes (all-node rule), organic linkers,
+  solvent units, connection points, the contracted net and its RCSR names;
+  `interpenetration` counts the framework components. Rust `deconstruct`,
+  CLI `mof deconstruct`.
+- `mof_mofid(text)`: canonical SMILES of the distinct nodes and linkers plus
+  the topology and interpenetration in a deterministic `MOFid`; `mofkey` is
+  the SHA-256 of that string. Rust `mofid`, CLI `mof mofid`.
+- `mof_open_metal_sites(text)`: metals below their typical coordination with
+  a free direction and a probe clearance. Rust `open_metal_sites`, CLI
+  `mof open-metal-sites`.
+- `mof_descriptors(text)`: formula, density, metals, node nuclearity and
+  connectivity, linker span and functional groups. Rust
+  `framework_descriptors`, CLI `mof descriptors`.
+
+### Porosity
+
+- `mof_pores(text, spacing=0.8, probe=1.2)`: native PLD by periodic
+  union-find percolation, LCD, accessible surface area in m2/g and m2/cm3,
+  accessible volume, void fraction and channel dimensionality, plus the
+  geometric pore-size distribution. Rust `pore_descriptors`, CLI `mof pores`.
+
+### Adsorption
+
+- `mof_guests()`: the embedded TraPPE CO2, N2, CH4, H2 and H2O models.
+- `mof_forcefield(text)`: UFF host parameters, EQeq framework charges and
+  Lorentz-Berthelot mixing.
+- `mof_widom(text, guest="CO2", temperature=298, samples=1000, seed=0)`:
+  deterministic Widom insertion, dimensionless Henry coefficient, mean
+  interaction energy and heat of adsorption.
+- `mof_gcmc(text, guest="CO2", temperature=298, pressures=[1,5], steps=1000,
+  seed=0)`: single-component isotherm with ideal-gas chemical potential.
+- `mof_energy_grid(text, guest="CO2", spacing=1.0)`: guest energy grid
+  summary for binding-site inspection.
+- `mof_raspa(text, guest="CO2", temperature=298, pressure=1)`: RASPA
+  `simulation.input`, CIF, force-field and mixing files.
+- Rust names are `guests`, `force_field`, `widom_insertion`,
+  `gcmc_isotherm`, `energy_grid` and `raspa_input`; CLI commands live under
+  `mof adsorption`.
+
+### Modification and variants
+
+- `mof_functionalize(text, group="amino", positions=[], fraction=1, seed=0)`:
+  -NH2, -OH, -CH3 and -F at chosen or all eligible linker carbons.
+- `mof_defects(text, linker_fraction=0, cluster_fraction=0, cap="formate",
+  seed=0)`: missing linkers and clusters with formate, water or hydroxide
+  capping.
+- `mof_interpenetrate(text, folds=2)`: n-fold interpenetration.
+- `mof_stack_layers(text, layers=2, offset=(0.5,0.5))`: AA/AB layered
+  variants.
+- `mof_mixed(text, replacements, ordered=True, fraction=1, seed=0)`:
+  ordered symmetry-orbit or seeded random mixed-metal/linker frameworks.
+- Rust names are `functionalize`, `missing_defects`, `interpenetrate`,
+  `stack_layers` and `mixed_framework`; CLI commands live under `mof modify`.
+
+### Databases and screening
+
+- `mof_read_database(path, kind="core")`: CoRE MOF or QMOF directory reader
+  with property CSV support and license/citation metadata. Rust
+  `read_core_mof` / `read_qmof`, CLI `mof database read`.
+- `mof_screen(path, guest="CO2", spacing=0.8, samples=100, limit=0)`: cleans,
+  deconstructs and computes descriptors, pores and Henry coefficients for a
+  database. Rust `screen_database`, CLI `mof database screen`.
+- `mof_deduplicate(structures)`: MOFkey first, structure matcher for ties.
+  Rust `deduplicate`, CLI `mof database deduplicate`.
