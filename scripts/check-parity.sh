@@ -83,6 +83,16 @@ check_rust() {
     mof_read_database) name=read_core_mof ;;
     mof_screen) name=screen_database ;;
     mof_deduplicate) name=deduplicate ;;
+    read) name=read ;;
+    write) name=write ;;
+    set_threads) name=set_global_threads ;;
+    error_category) name=category ;;
+    molecule_from_smiles) name=parse_smiles ;;
+    sketch_roundtrip) name=from_smiles ;;
+    fragment_library) name=fragments ;;
+    fragment_structure) name=find_fragment ;;
+    substitute_structure) name=substitute ;;
+    place_guest_structure) name=place_guest ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -147,6 +157,10 @@ check_wasm() {
     porosity) name=porosity_info ;;
     net_invariants) name=net_invariants_info ;;
     zeo_parse) name=zeo_parse_info ;;
+    fragment_library) name=fragment_library_info ;;
+    fragment_structure) name=fragment_info ;;
+    substitute_structure) name=substitute_info ;;
+    place_guest_structure) name=place_guest_info ;;
   esac
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
@@ -187,6 +201,14 @@ check_cli() {
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
     mof_check|mof_solvent_remove|mof_disorder|mof_charge_balance|mof_deconstruct|mof_mofid|mof_open_metal_sites|mof_descriptors|mof_pores|mof_guests|mof_forcefield|mof_widom|mof_gcmc|mof_energy_grid|mof_raspa|mof_functionalize|mof_defects|mof_interpenetrate|mof_stack_layers|mof_mixed|mof_read_database|mof_screen|mof_deduplicate) command=mof ;;
+    read) command=info ;;
+    write) command=convert ;;
+    set_threads|error_category) command=doctor ;;
+    molecule_from_smiles) command=molecule ;;
+    sketch_roundtrip) command=sketch ;;
+    fragment_library|fragment_structure) command=fragment ;;
+    substitute_structure) command=substitute ;;
+    place_guest_structure) command=guest ;;
     match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
     deform) command=deform ;;
     rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;

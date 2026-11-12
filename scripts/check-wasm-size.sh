@@ -16,7 +16,7 @@
 #
 # 5120 KiB since 1.3.0: the MOF platform checker, deconstruction, MOFid,
 # native percolation, TraPPE host-guest fields, Widom/GCMC/grids and
-# modification (4936 KiB measured).
+# modification (4964 KiB measured).
 #
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
