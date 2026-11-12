@@ -25,6 +25,9 @@ pub struct P1Atom {
     pub op_idx: usize,
     /// Integer lattice shift applied after the operation.
     pub tau: [i32; 3],
+    /// Disorder group inherited from the parent site, when present.
+    #[serde(default)]
+    pub disorder_group: Option<u32>,
 }
 
 /// The expanded P1 cell.
@@ -104,6 +107,7 @@ impl P1Cell {
                     site_idx,
                     op_idx,
                     tau,
+                    disorder_group: site.disorder_group(),
                 });
                 grid.insert(site.element(), frac, atom_index);
             }
