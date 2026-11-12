@@ -130,6 +130,17 @@ compares this table with the symbols each surface actually exports.
 | `mof_read_database` | 10 | done | done | done | n/a | CoRE MOF/QMOF directory readers (Task 10.6.1); no filesystem in WASM |
 | `mof_screen` | 10 | done | done | done | n/a | Screening pipeline (Task 10.6.2); no filesystem in WASM |
 | `mof_deduplicate` | 10 | done | done | done | n/a | MOFkey + matcher deduplication (Task 10.6.3); no filesystem in the browser |
+| `read` | 11 | done | done | done | n/a | One-call IO (Task 11.2.3); WASM has no filesystem, use `read(text, hint)` |
+| `write` | 11 | done | done | done | n/a | Atomic writer (Task 11.2.3); no filesystem in WASM |
+| `set_threads` | 11 | done | done | done | n/a | Process-wide worker pool (Task 11.1.2); WASM threads need cross-origin isolation |
+| `error_category` | 11 | done | done | done | done | Error categories in JSON objects (Task 11.1.3) |
+| `deprecation_warning` | 11 | done | n/a | done | done | Deprecation mechanism (Task 11.4.2); the CLI uses `warn_deprecated` |
+| `molecule_from_smiles` | 11 | done | done | done | done | SMILES parse and embed (Task 11.3.1); CLI `molecule` |
+| `sketch_roundtrip` | 11 | done | done | done | done | Sketch round trip (Task 11.3.2); CLI `sketch` |
+| `fragment_library` | 11 | done | done | done | done | Fragment lookup (Task 11.3.3); CLI `fragment`, WASM `fragment_library_info` |
+| `fragment_structure` | 11 | done | done | done | done | Embed a fragment (Task 11.3.3); CLI `fragment NAME` |
+| `substitute_structure` | 11 | done | done | done | done | Substitution with clearance (Task 11.3.4); CLI `substitute` |
+| `place_guest_structure` | 11 | done | done | done | done | Guest placement with clearance (Task 11.3.5); CLI `guest` |
 
 ## Recorded exceptions
 
