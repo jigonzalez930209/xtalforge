@@ -13,72 +13,7 @@ use crate::symmetry::SymmetryAction;
 
 use crate::build_structures;
 
-#[derive(Debug, Subcommand)]
-pub(crate) enum ProjectAction {
-    /// Pack a structure into a `.xtalproj` archive.
-    Pack {
-        /// Input structure path.
-        path: String,
-        /// Output archive path.
-        out: String,
-    },
-    /// Print the parts of a project archive.
-    Info {
-        /// Archive path.
-        path: String,
-    },
-    /// Extract a project into a directory.
-    Extract {
-        /// Archive path.
-        path: String,
-        /// Destination directory.
-        dir: String,
-    },
-}
-
-/// Model cache actions.
-#[derive(Debug, Subcommand)]
-pub(crate) enum ModelAction {
-    /// List the catalogue and the cache state.
-    List,
-    /// Download a model into the cache and record its checksum.
-    Fetch {
-        /// Catalogue name: mace-mp-0, orb-v3 or mattersim.
-        name: String,
-        /// Artifact URL chosen by the user.
-        #[arg(long)]
-        url: String,
-    },
-    /// Recompute the checksum of a cached model.
-    Verify {
-        /// Catalogue name.
-        name: String,
-    },
-    /// Remove a cached model and its metadata.
-    Remove {
-        /// Catalogue name.
-        name: String,
-    },
-}
-
-/// Skill document actions.
-#[derive(Debug, Subcommand)]
-pub(crate) enum SkillAction {
-    /// Print the default install directory.
-    Path,
-    /// List the embedded documents.
-    List,
-    /// Print one document.
-    Show {
-        /// Path or base name, for example `SKILL` or `references/api.md`.
-        name: String,
-    },
-    /// Write every document into a directory.
-    Install {
-        /// Destination; defaults to the user data directory.
-        dir: Option<String>,
-    },
-}
+pub(crate) use crate::actions::{ModelAction, ProjectAction, SkillAction};
 
 #[derive(Debug, Subcommand)]
 pub(crate) enum Command {
@@ -86,6 +21,11 @@ pub(crate) enum Command {
     Version,
     /// Report the features, engines, data bundles and verbs of this installation.
     Capabilities,
+    /// Diagnose the installation and optionally one structure.
+    Doctor {
+        /// Structure to check, when one is supplied.
+        path: Option<String>,
+    },
     /// Draw a structure to SVG or PNG.
     Render {
         /// Input path, or `-` for standard input.
@@ -283,7 +223,7 @@ pub(crate) enum Command {
         /// Angle gamma in degrees.
         gamma: f64,
     },
-    /// Convert a structure between CIF, POSCAR and XYZ.
+    /// Convert a structure between the registered formats: cif, poscar, xyz, pmg-json, cssr, gen, lammps-data, shelx and pdb.
     Convert {
         /// Input path, or `-` for standard input.
         path: String,
@@ -311,7 +251,76 @@ pub(crate) enum Command {
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
     },
-    /// Build graphene or a nanotube.
+    /// Parse a SMILES string and embed it in 3D.
+    Molecule {
+        /// SMILES string.
+        #[arg(long)]
+        smiles: String,
+        /// Deterministic embedder seed.
+        #[arg(long, default_value_t = 7)]
+        seed: u64,
+        /// Embedder gradient steps.
+        #[arg(long, default_value_t = 1500)]
+        iterations: usize,
+        /// Output path; defaults to standard output.
+        #[arg(long)]
+        out: Option<String>,
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// List the fragment library or embed one entry.
+    Fragment {
+        /// Fragment name; omit to list the library.
+        name: Option<String>,
+        /// Output path for an embedded fragment.
+        #[arg(long)]
+        out: Option<String>,
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Round-trip a SMILES through the sketch model.
+    Sketch {
+        /// SMILES string.
+        smiles: String,
+    },
+    /// Replace one site after a clearance check.
+    Substitute {
+        /// Input structure.
+        path: String,
+        /// Asymmetric-unit site index.
+        index: usize,
+        /// New element.
+        element: String,
+        /// Output path.
+        #[arg(long)]
+        out: Option<String>,
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Place a guest molecule after a clearance check.
+    Guest {
+        /// Host structure.
+        host: String,
+        /// Guest SMILES string.
+        #[arg(long)]
+        smiles: String,
+        /// Cartesian offset x,y,z.
+        #[arg(long, default_value = "0,0,0")]
+        offset: String,
+        /// Minimum host-guest clearance in Angstrom.
+        #[arg(long, default_value_t = 1.0)]
+        clearance: f64,
+        /// Output path.
+        #[arg(long)]
+        out: Option<String>,
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Build graphene, nanotube, C20, C60, twisted bilayer, nanoribbon, ZTC, schwarzite, disordered carbon or polymer.
     Build {
         #[command(subcommand)]
         action: build_structures::BuildAction,

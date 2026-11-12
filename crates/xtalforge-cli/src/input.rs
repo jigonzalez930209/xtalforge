@@ -1,6 +1,19 @@
 //! Reads structures from files, standard input or text with a format hint.
 
+use std::sync::OnceLock;
+
 use xtalforge::core::{Error, Structure, StructureDocument};
+
+static SPACEGROUP_OVERRIDE: OnceLock<Option<String>> = OnceLock::new();
+
+/// Installs the `--spacegroup` override for every structure read afterwards.
+pub(crate) fn set_spacegroup_override(symbol: Option<String>) {
+    let _ = SPACEGROUP_OVERRIDE.set(symbol);
+}
+
+fn spacegroup_override() -> Option<&'static str> {
+    SPACEGROUP_OVERRIDE.get().and_then(|value| value.as_deref())
+}
 use xtalforge::io::{decode_text, read_cif, read_poscar, read_xyz};
 
 /// A format reader with a uniform signature.
@@ -23,13 +36,28 @@ pub(crate) fn read_structure_path(path: &str) -> Result<Structure, Error> {
 ///
 /// Returns the reader errors or [`Error::InvalidInput`] for an unknown format.
 pub(crate) fn structure_from_text(text: &str, path: &str) -> Result<Structure, Error> {
-    if path == "-" {
-        return detect(text);
-    }
-    match extension(path) {
-        None => detect(text),
-        Some(extension) => read_format(text, &extension),
-    }
+    let structure = if path == "-" {
+        detect(text)?
+    } else {
+        match extension(path) {
+            None => detect(text)?,
+            Some(extension) => read_format(text, &extension)?,
+        }
+    };
+    apply_spacegroup_override(structure)
+}
+
+fn apply_spacegroup_override(structure: Structure) -> Result<Structure, Error> {
+    let Some(symbol) = spacegroup_override() else {
+        return Ok(structure);
+    };
+    let group = xtalforge::symmetry::SpaceGroup::parse(symbol)?;
+    let report = xtalforge::symmetry::set_space_group(
+        &structure,
+        &group,
+        xtalforge::symmetry::SetMode::Reinterpret,
+    )?;
+    Ok(report.structure)
 }
 
 /// Reads a path, or standard input when `path` is `-`, as decoded text.

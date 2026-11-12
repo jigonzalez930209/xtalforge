@@ -20,13 +20,13 @@ pub(crate) fn info(cli: &Cli, path: &str) -> Result<(), CliError> {
             // The P1 atom count, as in the Python and WASM summaries.
             n_atoms = Some(structure.p1()?.n_atoms());
             if !cli.quiet {
-                for key in ["symmetry_warning", "coincident_atoms_warning"] {
-                    if let Some(message) = structure
-                        .metadata()
-                        .get(key)
-                        .and_then(serde_json::Value::as_str)
-                    {
-                        eprintln!("warning: {message}");
+                for warning in structure.warnings() {
+                    match &warning.hint {
+                        Some(hint) => eprintln!(
+                            "warning[{}]: {} (hint: {hint})",
+                            warning.code, warning.message
+                        ),
+                        None => eprintln!("warning[{}]: {}", warning.code, warning.message),
                     }
                 }
             }

@@ -2,9 +2,9 @@
 
 use crate::{
     Cli, CliError, agent_commands, analysis_commands, analyze, args, args::Command, basic, build,
-    build_structures, commands_extra, convert, docs_commands, feature_commands, ff_commands,
-    measure, mesh, model_commands, mof_commands, powder_commands, pxrd, spacegroup, symmetry,
-    symmetry::SymmetryAction, symmetry_analysis,
+    build_structures, commands_extra, convert, docs_commands, doctor, feature_commands,
+    ff_commands, measure, mesh, model_commands, mof_commands, molecule_commands, powder_commands,
+    pxrd, spacegroup, symmetry, symmetry::SymmetryAction, symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -15,6 +15,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
     }
     match &cli.command {
         Command::Capabilities => agent_commands::capabilities(cli),
+        Command::Doctor { path } => doctor::run(cli, path.as_deref()),
         Command::Render {
             path,
             out,
@@ -120,6 +121,40 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             step,
             out,
         } => pxrd::run(cli, path, radiation, *max_two_theta, *step, out.as_deref()),
+        Command::Molecule {
+            smiles,
+            seed,
+            iterations,
+            out,
+            format,
+        } => molecule_commands::molecule(cli, smiles, *seed, *iterations, out.as_deref(), *format),
+        Command::Fragment { name, out, format } => {
+            molecule_commands::fragment(cli, name.as_deref(), out.as_deref(), *format)
+        }
+        Command::Sketch { smiles } => molecule_commands::sketch(cli, smiles),
+        Command::Substitute {
+            path,
+            index,
+            element,
+            out,
+            format,
+        } => molecule_commands::substitute(cli, path, *index, element, out.as_deref(), *format),
+        Command::Guest {
+            host,
+            smiles,
+            offset,
+            clearance,
+            out,
+            format,
+        } => molecule_commands::guest(
+            cli,
+            host,
+            smiles,
+            offset,
+            *clearance,
+            out.as_deref(),
+            *format,
+        ),
         Command::Build { action } => match action {
             build_structures::BuildAction::Graphene {
                 nx,
@@ -399,6 +434,7 @@ pub(crate) fn report_error(cli: &Cli, error: &CliError) {
         let payload = serde_json::json!({
             "error": {
                 "code": error.code,
+                "category": error.category,
                 "message": error.message,
             }
         });

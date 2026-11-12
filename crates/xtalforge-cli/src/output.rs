@@ -33,6 +33,15 @@ pub(crate) fn emit_structure(
 ) -> Result<(), CliError> {
     let format = resolve_format(out, explicit);
     let text = write_structure(structure, format.name()).map_err(CliError::core)?;
+    if out == Some("-") {
+        // `--out -` always emits the versioned structure document, so a
+        // pipeline can consume it without guessing the text format.
+        println!(
+            "{}",
+            structure.to_document().to_json().map_err(CliError::core)?
+        );
+        return Ok(());
+    }
     let destination = out.filter(|path| *path != "-");
     if let Some(path) = destination {
         write_destination(path, &text)?;

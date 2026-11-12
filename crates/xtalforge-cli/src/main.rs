@@ -5,6 +5,7 @@
 //! flags, emits one JSON value in `--json` mode and reports runtime failures
 //! with exit code 3.
 
+mod actions;
 mod agent_commands;
 mod analysis_commands;
 mod analyze;
@@ -16,6 +17,7 @@ mod commands_extra;
 mod convert;
 mod dispatch;
 mod docs_commands;
+mod doctor;
 mod engine_commands;
 mod feature_args;
 mod feature_commands;
@@ -34,6 +36,7 @@ mod model_commands;
 mod mof_adsorption_commands;
 mod mof_commands;
 mod mof_platform_commands;
+mod molecule_commands;
 mod output;
 mod powder_commands;
 mod pxrd;
@@ -67,12 +70,15 @@ struct Cli {
     /// Turn loss warnings into errors.
     #[arg(long, global = true)]
     strict: bool,
-    /// Worker threads (reserved for the parallel algorithms).
+    /// Worker threads for the algorithms that have a parallel path.
     #[arg(long, global = true, value_name = "N")]
     threads: Option<usize>,
     /// Limit policy used by the size checks.
     #[arg(long, global = true, value_enum, default_value_t = Limits::Standard)]
     limits: Limits,
+    /// Override the space-group symbol read from every input structure.
+    #[arg(long, global = true, value_name = "SYMBOL")]
+    spacegroup: Option<String>,
     #[command(subcommand)]
     command: Command,
 }
@@ -80,6 +86,7 @@ struct Cli {
 #[derive(Debug)]
 pub(crate) struct CliError {
     pub(crate) code: &'static str,
+    pub(crate) category: &'static str,
     pub(crate) message: String,
 }
 
@@ -87,28 +94,45 @@ impl CliError {
     pub(crate) fn new(code: &'static str, message: impl Into<String>) -> Self {
         Self {
             code,
+            category: "internal",
             message: message.into(),
         }
     }
 
     pub(crate) fn input(message: impl Into<String>) -> Self {
-        Self::new("invalid_input", message)
+        Self {
+            code: "invalid_input",
+            category: "input",
+            message: message.into(),
+        }
     }
 
     pub(crate) fn core(error: xtalforge::core::Error) -> Self {
-        Self::new(error.code(), error.message())
+        Self {
+            code: error.code(),
+            category: error.category(),
+            message: error.message(),
+        }
     }
 
     pub(crate) fn ff(error: xtalforge::ff::Error) -> Self {
-        Self::new(error.code(), error.message())
+        Self {
+            code: error.code(),
+            category: error.category(),
+            message: error.message(),
+        }
     }
 
     pub(crate) fn analysis(error: xtalforge::analysis::Error) -> Self {
-        Self::new(error.code(), error.message())
+        Self::core(error)
     }
 
     pub(crate) fn mof(error: xtalforge::mof::Error) -> Self {
-        Self::new(error.code(), error.message())
+        Self {
+            code: error.code(),
+            category: error.category(),
+            message: error.message(),
+        }
     }
 }
 
@@ -139,7 +163,12 @@ fn install_broken_pipe_hook() {
 fn main() -> ExitCode {
     install_broken_pipe_hook();
     let cli = Cli::parse();
-    match dispatch::run(&cli) {
+    input::set_spacegroup_override(cli.spacegroup.clone());
+    let options = xtalforge::core::ParallelOptions::new(cli.threads);
+    let result = options
+        .install(|| dispatch::run(&cli))
+        .unwrap_or_else(|message| Err(CliError::new("thread_pool", message)));
+    match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
             dispatch::report_error(&cli, &error);
