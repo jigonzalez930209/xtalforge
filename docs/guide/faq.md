@@ -57,7 +57,7 @@ a solver.
 
 Yes, through `xtalforge-wasm`. The browser has no filesystem and no
 subprocesses: string in, string/JSON out, and the in-process methods only. The
-release package is about 3771 KiB (budget 3840 KiB; `scripts/check-wasm-size.sh` is the source of truth). The parity matrix records every
+release package is about 4603 KiB (budget 4736 KiB; `scripts/check-wasm-size.sh` is the source of truth). The parity matrix records every
 `n/a`.
 
 ## Are the results deterministic?

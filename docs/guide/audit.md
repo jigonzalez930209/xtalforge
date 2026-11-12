@@ -226,8 +226,9 @@ Angstrom).
   in the scene, the camera and the layout, not differences between browser
   GPUs; the numeric projection check is the platform-independent evidence for
   the 3D geometry.
-- The WASM bundle measures 3943 KiB against a 3968 KiB budget. The budget
-  was 3904 KiB after the scene and text exports and was raised by this audit
+- The WASM bundle measured 3943 KiB against a 3968 KiB budget at 1.1.0. The
+  Phase 9 release measures 4603 KiB against the 4736 KiB budget set by this
+  release; the earlier 3904 KiB budget was raised by the 2026-11-11 audit
   for the fixes listed above; any further surface helper needs a deliberate
   size review.
 - The CLI, Python and WASM surfaces have their own integration suites; the
