@@ -15,6 +15,7 @@
 
 pub mod calculator;
 pub mod charges;
+pub mod elastic;
 pub mod external;
 pub mod optimize;
 pub mod prepare;
@@ -37,6 +38,7 @@ pub use charges::{
     ChargeOptions, Charges, EwaldOptions, EwaldResult, apply_charges, eeq_charges, eqeq_charges,
     ewald_energy, ewald_energy_forces, qeq_charges,
 };
+pub use elastic::{ElasticOptions, ElasticTensor, deformation_set, elastic_tensor};
 pub use external::{
     BOHR_TO_ANGSTROM, DftbCalculator, DftbOptions, EngineKind, EngineResult, EngineStatus,
     HARTREE_PER_BOHR_TO_EV_PER_ANGSTROM, HARTREE_PER_BOHR3_TO_GPA, HARTREE_TO_EV, OrcaOptions,
