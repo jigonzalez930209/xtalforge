@@ -65,6 +65,27 @@ pub(crate) fn fill_summary(object: &js_sys::Object, structure: &Structure) -> Re
         JsValue::from_f64(summary.total_charge),
     );
     set(object, "is_p1", JsValue::from_bool(summary.is_p1));
+    let warnings = js_sys::Array::new();
+    for warning in &summary.warnings {
+        let item = js_sys::Object::new();
+        set(&item, "code", JsValue::from_str(&warning.code));
+        set(&item, "message", JsValue::from_str(&warning.message));
+        let atoms = js_sys::Array::new();
+        for atom in &warning.atoms {
+            atoms.push(&JsValue::from_f64(*atom as f64));
+        }
+        set(&item, "atoms", atoms.into());
+        let fields = js_sys::Array::new();
+        for field in &warning.fields {
+            fields.push(&JsValue::from_str(field));
+        }
+        set(&item, "fields", fields.into());
+        if let Some(hint) = &warning.hint {
+            set(&item, "hint", JsValue::from_str(hint));
+        }
+        warnings.push(&item.into());
+    }
+    set(object, "warnings", warnings.into());
     Ok(())
 }
 
@@ -178,6 +199,11 @@ pub(crate) fn to_js_error(error: Error) -> JsValue {
         &js_error,
         &JsValue::from_str("code"),
         &JsValue::from_str(error.code()),
+    );
+    let _ = js_sys::Reflect::set(
+        &js_error,
+        &JsValue::from_str("category"),
+        &JsValue::from_str(error.category()),
     );
     js_error.into()
 }

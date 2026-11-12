@@ -25,6 +25,8 @@ mod mof_platform_export;
 #[cfg(target_arch = "wasm32")]
 mod phase1;
 #[cfg(target_arch = "wasm32")]
+mod phase11_export;
+#[cfg(target_arch = "wasm32")]
 mod phase3;
 #[cfg(target_arch = "wasm32")]
 mod phase6_export;
@@ -103,6 +105,11 @@ pub use phase9_local_export::{
 };
 #[cfg(target_arch = "wasm32")]
 pub use phase9_mechanics_export::{convex_hull, elastic_tensor, eos_fit};
+#[cfg(target_arch = "wasm32")]
+pub use phase11_export::{
+    deprecation_warning, error_category, fragment_info, fragment_library_info,
+    molecule_from_smiles, place_guest_info, read, sketch_roundtrip, substitute_info,
+};
 #[cfg(target_arch = "wasm32")]
 pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
