@@ -39,7 +39,7 @@ parallel = [
 sci-form = ["xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
 ml = []
 external = []
-mof-data = []
+mof-data = ["xtalforge-mof/mof-data"]
 
 [lints]
 workspace = true
