@@ -15,7 +15,57 @@ BondDict = dict[str, object]
 GroupDict = dict[str, object]
 NeighborDict = dict[str, object]
 
+from ._agent_session import AgentSession as AgentSession
+from ._ml import MlCalculator as MlCalculator
+from ._builders import (
+    build_graphene as build_graphene,
+    build_nanotube as build_nanotube,
+    build_c60 as build_c60,
+    build_c20 as build_c20,
+    twist as twist,
+    ribbon as ribbon,
+    build_ztc as build_ztc,
+    build_schwarzite as build_schwarzite,
+    build_carbon as build_carbon,
+    build_polymer as build_polymer,
+)
+
 __version__: Final[str]
+
+from ._phase9 import (
+    match_structures as match_structures,
+    periodic_rmsd as periodic_rmsd,
+    kabsch_alignment as kabsch_alignment,
+    group_structures as group_structures,
+    deform as deform,
+    rattle as rattle,
+    edit_structure as edit_structure,
+    interpolate as interpolate,
+    interpolate_structures as interpolate_structures,
+    optimal_supercell as optimal_supercell,
+    voronoi as voronoi,
+    coordination as coordination,
+    bond_valence_sums as bond_valence_sums,
+    oxidation_states as oxidation_states,
+    radial_distribution as radial_distribution,
+    structure_fingerprint as structure_fingerprint,
+    fingerprint_similarity as fingerprint_similarity,
+    unique_miller_indices as unique_miller_indices,
+    slab_terminations as slab_terminations,
+    wulff as wulff,
+    adsorption_sites as adsorption_sites,
+    place_molecule as place_molecule,
+    vacancies as vacancies,
+    substitutions as substitutions,
+    interstitials as interstitials,
+    orderings as orderings,
+    special_quasirandom as special_quasirandom,
+    lattice_matches as lattice_matches,
+    stack_slabs as stack_slabs,
+    elastic_tensor as elastic_tensor,
+    eos_fit as eos_fit,
+    convex_hull as convex_hull,
+)
 
 def version() -> str: ...
 
@@ -28,21 +78,8 @@ def agent_verbs() -> str:
 def agent_run(script_json: str) -> str:
     """Runs a JSON script against a fresh session and returns the answers."""
 
-class AgentSession:
-    def __init__(self) -> None: ...
-    def run(self, verb: str, arguments_json: str) -> str: ...
-    def documents_json(self) -> str: ...
-    def structure_json(self, name: str | None = None) -> str: ...
-    def active_name(self) -> str | None: ...
-
 def ml_backends() -> str:
     """Availability and versions of torch, ase, mace, orb_models and mattersim as JSON."""
-
-class MlCalculator:
-    def __init__(self, calculator: Any, periodic: bool = True) -> None: ...
-    def name(self) -> str: ...
-    def energy(self, structure_json: str) -> float: ...
-    def energy_forces(self, structure_json: str) -> str: ...
 
 class Plugins:
     def __init__(self) -> None: ...
@@ -315,22 +352,6 @@ def pxrd(
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
 
-def build_graphene(
-    nx: int,
-    ny: int,
-    layers: int = 1,
-    interlayer: float = 3.35,
-    vacuum: float = 15.0,
-) -> StructureDict: ...
-def build_nanotube(
-    n: int,
-    m: int,
-    length: int = 1,
-    vacuum: float = 10.0,
-) -> StructureDict: ...
-def build_c60() -> StructureDict: ...
-
-
 class Document:
     def __init__(self, text: str, format_hint: str | None = None) -> None: ...
     def move_sites(self, sites: list[int], delta: list[float]) -> None: ...
@@ -474,27 +495,3 @@ def powder_refine(
 def powder_cells(number: int) -> dict[str, object]: ...
 def powder_supported_groups() -> list[int]: ...
 def rietx() -> dict[str, object]: ...
-
-def build_c20() -> StructureDict: ...
-def twist(n: int, m: int, theta: float, layers: int = 2) -> StructureDict: ...
-def ribbon(width: int, length: int, vacuum: float = 12.0) -> StructureDict: ...
-def build_ztc(
-    samples: int = 16, cell: float = 12.0, isovalue: float = 0.0
-) -> StructureDict: ...
-def build_schwarzite(
-    samples: int = 16, cell: float = 12.0, isovalue: float = 0.0
-) -> StructureDict: ...
-def build_carbon(
-    net: str = "dia",
-    repeat: tuple[int, int, int] = (1, 1, 1),
-    density: float = 0.42,
-    radius_ratio: float = 0.25,
-    coverage: float = 0.38,
-    seed: int = 0,
-    hydrogen: float = 0.07,
-    fluorine: float = 0.29,
-    oxygen: float = 0.044,
-) -> StructureDict: ...
-def build_polymer(
-    smiles: str, monomers: int, density: float = 1.0
-) -> StructureDict: ...
