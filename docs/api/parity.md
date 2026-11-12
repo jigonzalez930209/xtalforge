@@ -78,6 +78,35 @@ compares this table with the symbols each surface actually exports.
 | `agent_run` | 8 | done | done | done | done | Batch session over a JSON script (Task 8.1.2); Rust `run_verbs`, CLI `agent` |
 | `ml_backends` | 8 | n/a | done | done | n/a | The ML bridge is Python-only by the Task 4.11 decision; the CLI `models` command lists the catalogue (Task 8.4) |
 | `models` | 8 | done | done | n/a | n/a | Model cache with SHA-256 and license (Task 8.4.2); Rust `fetch`, CLI `models` |
+| `match_structures` | 9 | done | done | done | done | Structure matcher (Task 9.1.1); Rust `match_structures`, CLI `compare` |
+| `periodic_rmsd` | 9 | done | done | done | done | Periodic RMSD under a mapping (Task 9.1.2) |
+| `kabsch_alignment` | 9 | done | done | done | done | Kabsch alignment (Task 9.1.2) |
+| `group_structures` | 9 | done | done | done | done | Equality classes (Task 9.1.3); CLI `group` |
+| `deform` | 9 | done | done | done | done | Strain, gradient, volume and density (Task 9.2.1); CLI `deform` |
+| `rattle` | 9 | done | done | done | done | Seeded displacements (Task 9.2.2) |
+| `edit_structure` | 9 | done | done | done | done | Site edits and species maps (Task 9.2.3); Rust `replace_species` and the site helpers, Python `edit_structure` |
+| `interpolate` | 9 | done | done | done | done | Matched interpolation (Task 9.2.4); Python `interpolate_structures` |
+| `optimal_supercell` | 9 | done | done | done | done | Cube-like supercell (Task 9.2.5) |
+| `voronoi` | 9 | done | done | done | done | Periodic Voronoi cells (Task 9.3.1) |
+| `coordination` | 9 | done | done | done | done | Coordination shells and shape measures (Task 9.3.2) |
+| `bond_valence_sums` | 9 | done | done | done | done | Bond-valence sums (Task 9.3.3) |
+| `oxidation_states` | 9 | done | done | done | done | Oxidation-state estimation (Task 9.3.3) |
+| `radial_distribution` | 9 | done | done | done | done | Total and partial RDF (Task 9.3.4) |
+| `structure_fingerprint` | 9 | done | done | done | done | Composition, cell and RDF fingerprint (Task 9.3.4); Rust `fingerprint`, Python `structure_fingerprint` |
+| `unique_miller_indices` | 9 | done | done | done | done | Symmetry-unique Miller indices (Task 9.4.1) |
+| `slab_terminations` | 9 | done | done | done | done | All slab terminations (Task 9.4.2) |
+| `wulff` | 9 | done | done | done | done | Wulff construction (Task 9.4.3) |
+| `adsorption_sites` | 9 | done | done | done | done | Top, bridge and hollow sites (Task 9.4.4) |
+| `vacancies` | 9 | done | done | done | done | Symmetry-unique vacancies (Task 9.5.1) |
+| `substitutions` | 9 | done | done | done | done | Symmetry-unique substitutions (Task 9.5.1) |
+| `interstitials` | 9 | done | done | done | done | Interstitial candidates (Task 9.5.1) |
+| `orderings` | 9 | done | done | done | done | Ordered decorations ranked by Ewald energy (Task 9.5.2) |
+| `special_quasirandom` | 9 | done | done | done | done | SQS generation with pair and triplet correlations (Task 9.5.3) |
+| `lattice_matches` | 9 | done | done | done | done | Zur-McGill 2D lattice matching (Task 9.5.4) |
+| `stack_slabs` | 9 | done | done | done | done | Heterostructure stacking (Task 9.5.4) |
+| `elastic_tensor` | 9 | done | done | done | done | Stress finite differences, Voigt-Reuss-Hill moduli (Task 9.6.1) |
+| `eos_fit` | 9 | done | done | done | done | Birch-Murnaghan, Vinet and Murnaghan fits (Task 9.6.2); Rust `fit_eos`, CLI `features eos` |
+| `convex_hull` | 9 | done | done | done | done | Formation energies and hull distances (Task 9.6.3) |
 
 ## Recorded exceptions
 
