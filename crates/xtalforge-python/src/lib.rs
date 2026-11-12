@@ -15,6 +15,7 @@ mod analysis;
 mod classes;
 mod lebail;
 mod ml;
+mod phase10;
 mod phase3;
 mod phase4;
 mod phase5;
@@ -63,6 +64,12 @@ use phase9_analysis::{
 use phase9_local::{
     bond_valence_sums, coordination, fingerprint_similarity, oxidation_states, radial_distribution,
     structure_fingerprint, voronoi,
+};
+use phase10::{
+    mof_charge_balance, mof_check, mof_deconstruct, mof_deduplicate, mof_defects, mof_descriptors,
+    mof_disorder, mof_energy_grid, mof_forcefield, mof_functionalize, mof_gcmc, mof_guests,
+    mof_interpenetrate, mof_mixed, mof_mofid, mof_open_metal_sites, mof_pores, mof_raspa,
+    mof_read_database, mof_screen, mof_solvent_remove, mof_stack_layers, mof_widom,
 };
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
@@ -397,6 +404,29 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(elastic_tensor, module)?)?;
     module.add_function(wrap_pyfunction!(eos_fit, module)?)?;
     module.add_function(wrap_pyfunction!(convex_hull, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_check, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_solvent_remove, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_disorder, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_charge_balance, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_deconstruct, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_mofid, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_open_metal_sites, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_descriptors, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_pores, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_guests, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_forcefield, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_widom, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_gcmc, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_energy_grid, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_raspa, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_functionalize, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_defects, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_interpenetrate, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_stack_layers, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_mixed, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_read_database, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_screen, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_deduplicate, module)?)?;
     agent::register(module)?;
     plugins::register(module)?;
     ml::register(module)?;
