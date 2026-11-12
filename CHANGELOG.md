@@ -5,13 +5,54 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
-## [Unreleased]
+## [1.2.0] - 2026-11-11
+
+Phase 9 adds the core operations of a standard crystal library beyond the
+Crystal-Builder parity of `1.1.0`. Every capability is available in the Rust
+API, the CLI, Python and WebAssembly, and the public API is additive.
 
 ### Added
 
+- Structure comparison: `match_structures` (Niggli reduction, integer lattice
+  mapping, supercell matching, species comparators), `periodic_rmsd`,
+  `kabsch_alignment` and `group_structures`. CLI `compare` and `group`.
+- Structure edits: `deform` (Voigt strain, deformation gradient, target volume
+  and density), seeded `rattle`, `edit_structure` (add, remove, replace, move,
+  species maps, partial replacement, sort and wrap) with undoable commands,
+  matched `interpolate` and `optimal_supercell` (ASE
+  `find_optimal_cell_shape` objective).
+- Local environments: periodic `voronoi` with exact half-space clipping and
+  solid angles, `coordination` with cutoff/Voronoi/CrystalNN strategies and
+  continuous shape measures, `bond_valence_sums`, `oxidation_states` (ICSD
+  MAP search with charge balance), `radial_distribution` (total and partial
+  RDF/PDF, running coordination), bond-angle distributions and
+  `structure_fingerprint`.
+- Surfaces: `unique_miller_indices` under the detected point group,
+  `slab_terminations` (symmetric slabs, dipole and polar report, minimal
+  slab), the `wulff` construction and `adsorption_sites` with
+  `place_molecule`.
+- Defects and disorder: symmetry-unique `vacancies`, `substitutions` and
+  `interstitials` with minimum-image supercells, `orderings` ranked by an
+  in-process Ewald sum, `special_quasirandom` with pair/triplet correlation
+  reports, `lattice_matches` and `stack_slabs` heterostructures.
+- Mechanical and thermodynamic basics: `elastic_tensor` from analytic stress
+  finite differences with Voigt-Reuss-Hill moduli and a stability flag,
+  `eos_fit` (Birch-Murnaghan, Vinet, Murnaghan with errors) and
+  `convex_hull` (formation energies and a two-phase simplex hull distance).
+- The CLI gains `compare`, `group`, `deform` and the `features` command group;
+  Python gains the corresponding functions; WASM gains JSON-returning
+  exports for every operation.
+- Documentation: `docs/api/features.md`, algorithm pages for comparison,
+  local environments, surfaces, defects and mechanics, and a parity matrix
+  with 29 new rows.
 - Roadmap to `2.0.0`: Phases 9-17, focused on MOFs (core features beyond
   Crystal-Builder parity, the MOF platform, usability audit and 1.x polish, native bindings, ecosystem interoperability, scientific completeness, performance,
   workflows and the 2.0 redesign), with the 2026-11-11 usability findings.
+
+### Fixed
+
+- `P1Atom` carries the disorder group of its parent site, so orderings and
+  SQS generation can find partial occupancies after the P1 expansion.
 
 ## [1.1.0] - 2026-11-11
 

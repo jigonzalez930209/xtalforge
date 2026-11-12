@@ -270,17 +270,27 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.1.0` (published 2026-11-11 on crates.io, PyPI, npm, the GitHub
-  release and GitHub Pages; `1.0.0` followed the `1.0.0-rc.1` stabilization
-  period on 2026-11-10; `0.0.3` was the last pre-1.0 release, and `v0.0.1`
-  was the first on 2026-11-09). `1.1.0` is backward compatible: the 3D
-  playground, the audit fixes and additive WASM/JSON fields.
+- Version: `1.2.0` (release commit tagged after the local CI gate; `1.1.0`
+  was published 2026-11-11 on crates.io, PyPI, npm, the GitHub release and
+  GitHub Pages, and `1.0.0` followed the `1.0.0-rc.1` stabilization period on
+  2026-11-10). `1.2.0` is backward compatible: Phase 9 adds comparison,
+  edits, local environments, surfaces, defects, orderings, SQS, interfaces,
+  elasticity, EOS fits and convex hulls on all four surfaces.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 9 — Core features of a standard crystal
-  library (`docs/roadmap/phase-09-core-features.md`), the first step of the
-  road to `2.0.0` (Phases 9-17, focused on MOFs: Phase 10 is the MOF platform, planned 2026-11-11; see `docs/roadmap/index.md`).
+- Current phase: Phase 10 — MOF platform
+  (`docs/roadmap/phase-10-mof.md`), the next step of the road to `2.0.0`
+  (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
+  Phase 9 — Core features (`docs/roadmap/phase-09-core-features.md`) is
+  complete and released as `1.2.0`: the structure matcher, RMSD/Kabsch,
+  equality classes, strain/deform, rattle, site editing, matched
+  interpolation, optimal supercells, Voronoi, coordination and shape
+  measures, BVS/oxidation states, RDF/fingerprints, unique Miller indices,
+  terminations, Wulff, adsorption sites, point defects, orderings, SQS,
+  interfaces, elastic tensors, EOS fits and convex hulls, with tests, the API
+  page, five algorithm pages and 29 parity rows. Task 9.7.2 (playground
+  panels and e2e references) is open.
   Phases 0-8 are complete. Phase 8 — Agent and
   distribution (`docs/roadmap/phase-08-distribution.md`) delivered tasks
   8.1-8.7:
