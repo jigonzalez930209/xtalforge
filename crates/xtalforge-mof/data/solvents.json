@@ -1,0 +1,25 @@
+{
+  "license": "Common solvent and counter-ion formulas used by the CoRE MOF FSR/ASR protocols; factual chemical formulas.",
+  "solvents": [
+    {"name": "water", "formula": "H2O"},
+    {"name": "methanol", "formula": "CH4O"},
+    {"name": "ethanol", "formula": "C2H6O"},
+    {"name": "propanol", "formula": "C3H8O"},
+    {"name": "dmf", "formula": "C3H7NO"},
+    {"name": "def", "formula": "C4H9NO"},
+    {"name": "dma", "formula": "C2H7NO"},
+    {"name": "dmso", "formula": "C2H6OS"},
+    {"name": "acetonitrile", "formula": "C2H3N"},
+    {"name": "acetone", "formula": "C3H6O"},
+    {"name": "thf", "formula": "C4H8O"},
+    {"name": "diethyl_ether", "formula": "C4H10O"},
+    {"name": "chloroform", "formula": "CHCl3"},
+    {"name": "dichloromethane", "formula": "CH2Cl2"},
+    {"name": "benzene", "formula": "C6H6"},
+    {"name": "toluene", "formula": "C7H8"},
+    {"name": "hexane", "formula": "C6H14"},
+    {"name": "cyclohexane", "formula": "C6H12"}
+  ],
+  "cations": ["Li", "Na", "K", "Rb", "Cs", "Mg", "Ca", "Sr", "Ba", "Zn", "Cu", "Co", "Ni", "Fe", "Mn", "Al"],
+  "anions": ["F", "Cl", "Br", "I", "NO3", "SO4", "ClO4", "PF6", "BF4"]
+}
