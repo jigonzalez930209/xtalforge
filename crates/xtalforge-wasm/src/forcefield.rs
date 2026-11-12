@@ -279,6 +279,7 @@ fn ff_error(error: xtalforge::ff::Error) -> JsValue {
 ///
 /// Returns a JavaScript `Error` for invalid text or a failed step.
 #[wasm_bindgen]
+#[allow(clippy::too_many_arguments)] // one JavaScript argument per prepare option
 pub fn ff_prepare_info(
     text: &str,
     minimize: bool,

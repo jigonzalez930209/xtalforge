@@ -21,6 +21,8 @@ mod lebail_export;
 #[cfg(target_arch = "wasm32")]
 mod mof_export;
 #[cfg(target_arch = "wasm32")]
+mod mof_platform_export;
+#[cfg(target_arch = "wasm32")]
 mod phase1;
 #[cfg(target_arch = "wasm32")]
 mod phase3;
@@ -61,6 +63,13 @@ pub use forcefield::{
 pub use lebail_export::powder_lebail_info;
 #[cfg(target_arch = "wasm32")]
 pub use mof_export::{build_mof_info, mof_blocks_info, mof_topologies_info};
+#[cfg(target_arch = "wasm32")]
+pub use mof_platform_export::{
+    mof_charge_balance, mof_check, mof_deconstruct, mof_defects, mof_descriptors, mof_disorder,
+    mof_energy_grid, mof_forcefield, mof_functionalize, mof_gcmc, mof_guests, mof_interpenetrate,
+    mof_mixed, mof_mofid, mof_open_metal_sites, mof_pores, mof_raspa, mof_solvent_remove,
+    mof_stack_layers, mof_widom,
+};
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
     bonds, build_c60_info, build_graphene_info, build_nanotube_info, convert_structure, groups,

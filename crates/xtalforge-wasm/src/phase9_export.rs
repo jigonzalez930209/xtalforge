@@ -1,3 +1,5 @@
+#![allow(clippy::indexing_slicing)] // fixed three-coordinate chunks
+
 //! WebAssembly exports for comparison, edits and local environments
 //! (Tasks 9.1-9.3).
 
@@ -122,7 +124,7 @@ pub fn kabsch_alignment(points: Vec<f64>, reference: Vec<f64>) -> Result<String,
 }
 
 fn flat_points(values: &[f64]) -> Result<Vec<[f64; 3]>, JsValue> {
-    if values.len() % 3 != 0 {
+    if !values.len().is_multiple_of(3) {
         return Err(JsValue::from_str("points need three coordinates per atom"));
     }
     Ok(values
