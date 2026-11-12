@@ -129,4 +129,20 @@ impl Error {
     pub fn message(&self) -> String {
         self.to_string()
     }
+
+    /// Stable machine-readable category for the JSON error object.
+    #[must_use]
+    pub fn category(&self) -> &'static str {
+        match self {
+            Self::InvalidInput(_)
+            | Self::Typing(_)
+            | Self::UnknownElement(_)
+            | Self::UnknownType(_)
+            | Self::Topology(_)
+            | Self::UnknownCalculator(_) => "input",
+            Self::Data(_) | Self::Json(_) => "internal",
+            Self::Quantum(_) => "engine",
+            Self::Core(error) => error.category(),
+        }
+    }
 }
