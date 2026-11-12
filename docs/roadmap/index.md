@@ -36,17 +36,22 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-11)
 
-- Phases 0-8 are complete and pushed; the Rust API, CLI, Python and WASM
-  surfaces build and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`,
-  `v1.0.0-rc.1`, the stable `v1.0.0` and `v1.1.0` are published on crates.io,
-  PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub
-  Pages. `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the
-  npm package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
-  playground and the end-to-end audit battery.
+- Phases 0-9 are complete; the Rust API, CLI, Python and WASM surfaces build
+  and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
+  stable `v1.0.0`, `v1.1.0` and `v1.2.0` are published on crates.io, PyPI
+  (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub Pages.
+  `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
+  package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
+  playground and the end-to-end audit battery; `v1.2.0` (2026-11-11) releases
+  Phase 9, the core features of a standard crystal library.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
-  tutorials and the API freeze. The stable API follows the SemVer policy and
-  the known subsets below are the only documented reference gaps.
+  tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
+  environments, surfaces, defects and disorder, interfaces, elasticity, EOS
+  fits and convex hulls on all four surfaces, with five algorithm pages. Task
+  9.7.2 (playground panels and e2e references) remains open. The stable API
+  follows the SemVer policy and the known subsets below are the only
+  documented reference gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
   manual docs workflows were removed by maintainer decision (2026-11-08) to
   avoid runner cost. The release runs on a version tag: three CLI packages,
@@ -103,6 +108,24 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   exposed.
 - 6.x: the MOF builder uses a curated topology/block subset and a greedy
   orientation instead of PORMAKE's global RMSD fit.
+- 9.1: the matcher works on Niggli-reduced input cells and accepts supercell
+  relationships; it does not call the standardized primitive-cell path (which
+  is a separate API and is being audited), so a conventional/primitive pair is
+  matched by expanding the smaller cell.
+- 9.3: the Voronoi cutoff must contain every face of the cell (twice the
+  longest nearest-neighbour distance is safe); shape measures cover the
+  common polyhedra up to 12 vertices; the CrystalNN strategy is a documented
+  solid-angle/distance approximation, not pymatgen's full bond-order model.
+- 9.4: terminations use midpoint cuts between atomic layers, so cuts inside a
+  layer are not generated; adsorption sites are top/bridge/hollow on the
+  uppermost layer only.
+- 9.5: point defects use Voronoi vertices as interstitial candidates; the
+  ordering search caps the decorations (`max_orderings`) and ranks them with
+  the in-process Ewald sum; SQS is binary and reports pair/triplet
+  correlations, not a full cluster expansion.
+- 9.6: the elastic tensor uses the stress finite differences of the native UFF
+  calculator (any `Calculator` with stress works), and the EOS/hull fits are
+  point estimates with parameter errors, without a global optimizer audit.
 - 8.x: every library error exits the CLI with code 3 and Python raises
   `XtalforgeError` (`InputError` for invalid input); the `code` string is the
   discriminator.
@@ -122,7 +145,7 @@ Version rules are defined in `AGENTS.md` section 5. In short:
 - **v1.0.0** — Phase 8 complete: API frozen, parity matrix closed,
   documentation complete.
 - **v1.2.0** — Phase 9 complete: the core features of a standard crystal
-  library beyond Crystal-Builder parity.
+  library beyond Crystal-Builder parity (released 2026-11-11).
 - **v1.3.0** — Phase 10 complete: the MOF platform (focus of the 2.0 road).
 - **v1.4.0 … v1.9.0** — Phases 11 to 16, one MINOR release per completed
   phase; every change is backward compatible and anything to be removed is
