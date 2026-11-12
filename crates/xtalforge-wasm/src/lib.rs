@@ -27,6 +27,14 @@ mod phase3;
 #[cfg(target_arch = "wasm32")]
 mod phase6_export;
 #[cfg(target_arch = "wasm32")]
+mod phase9_analysis_export;
+#[cfg(target_arch = "wasm32")]
+mod phase9_export;
+#[cfg(target_arch = "wasm32")]
+mod phase9_local_export;
+#[cfg(target_arch = "wasm32")]
+mod phase9_mechanics_export;
+#[cfg(target_arch = "wasm32")]
 mod powder_export;
 #[cfg(target_arch = "wasm32")]
 mod scene_export;
@@ -69,6 +77,23 @@ pub use phase6_export::{
     build_c20_info, build_carbon_recipe_info, polymer_info, ribbon_info, schwarzite_info,
     twist_info, ztc_info,
 };
+#[cfg(target_arch = "wasm32")]
+pub use phase9_analysis_export::{
+    adsorption_sites, interstitials, lattice_matches, orderings, place_molecule, slab_terminations,
+    special_quasirandom, stack_slabs, substitutions, unique_miller_indices, vacancies, wulff,
+};
+#[cfg(target_arch = "wasm32")]
+pub use phase9_export::{
+    deform, edit_structure, group_structures, interpolate, kabsch_alignment, match_structures,
+    optimal_supercell, periodic_rmsd, rattle,
+};
+#[cfg(target_arch = "wasm32")]
+pub use phase9_local_export::{
+    bond_valence_sums, coordination, fingerprint_similarity, oxidation_states, radial_distribution,
+    structure_fingerprint, voronoi,
+};
+#[cfg(target_arch = "wasm32")]
+pub use phase9_mechanics_export::{convex_hull, elastic_tensor, eos_fit};
 #[cfg(target_arch = "wasm32")]
 pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
