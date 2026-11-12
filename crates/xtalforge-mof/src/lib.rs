@@ -27,6 +27,7 @@ pub mod build;
 pub mod error;
 mod fit;
 pub mod orient;
+pub mod platform;
 pub mod topology;
 
 pub use advanced::{
@@ -40,4 +41,5 @@ pub use build::{
 };
 pub use error::Error;
 pub use orient::node_oriented;
+pub use platform::*;
 pub use topology::{Topology, find_topology, topologies};
