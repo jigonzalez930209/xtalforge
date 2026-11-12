@@ -17,6 +17,31 @@ NeighborDict = dict[str, object]
 
 from ._agent_session import AgentSession as AgentSession
 from ._ml import MlCalculator as MlCalculator
+from ._mof import (
+    mof_check as mof_check,
+    mof_solvent_remove as mof_solvent_remove,
+    mof_disorder as mof_disorder,
+    mof_charge_balance as mof_charge_balance,
+    mof_deconstruct as mof_deconstruct,
+    mof_mofid as mof_mofid,
+    mof_open_metal_sites as mof_open_metal_sites,
+    mof_descriptors as mof_descriptors,
+    mof_pores as mof_pores,
+    mof_guests as mof_guests,
+    mof_forcefield as mof_forcefield,
+    mof_widom as mof_widom,
+    mof_gcmc as mof_gcmc,
+    mof_energy_grid as mof_energy_grid,
+    mof_raspa as mof_raspa,
+    mof_functionalize as mof_functionalize,
+    mof_defects as mof_defects,
+    mof_interpenetrate as mof_interpenetrate,
+    mof_stack_layers as mof_stack_layers,
+    mof_mixed as mof_mixed,
+    mof_read_database as mof_read_database,
+    mof_screen as mof_screen,
+    mof_deduplicate as mof_deduplicate,
+)
 from ._builders import (
     build_graphene as build_graphene,
     build_nanotube as build_nanotube,
@@ -32,40 +57,7 @@ from ._builders import (
 
 __version__: Final[str]
 
-from ._phase9 import (
-    match_structures as match_structures,
-    periodic_rmsd as periodic_rmsd,
-    kabsch_alignment as kabsch_alignment,
-    group_structures as group_structures,
-    deform as deform,
-    rattle as rattle,
-    edit_structure as edit_structure,
-    interpolate as interpolate,
-    interpolate_structures as interpolate_structures,
-    optimal_supercell as optimal_supercell,
-    voronoi as voronoi,
-    coordination as coordination,
-    bond_valence_sums as bond_valence_sums,
-    oxidation_states as oxidation_states,
-    radial_distribution as radial_distribution,
-    structure_fingerprint as structure_fingerprint,
-    fingerprint_similarity as fingerprint_similarity,
-    unique_miller_indices as unique_miller_indices,
-    slab_terminations as slab_terminations,
-    wulff as wulff,
-    adsorption_sites as adsorption_sites,
-    place_molecule as place_molecule,
-    vacancies as vacancies,
-    substitutions as substitutions,
-    interstitials as interstitials,
-    orderings as orderings,
-    special_quasirandom as special_quasirandom,
-    lattice_matches as lattice_matches,
-    stack_slabs as stack_slabs,
-    elastic_tensor as elastic_tensor,
-    eos_fit as eos_fit,
-    convex_hull as convex_hull,
-)
+from ._phase9 import *  # noqa: F403
 
 def version() -> str: ...
 
