@@ -36,22 +36,27 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-11)
 
-- Phases 0-9 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-10 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
-  stable `v1.0.0`, `v1.1.0` and `v1.2.0` are published on crates.io, PyPI
-  (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub Pages.
+  stable `v1.0.0`, `v1.1.0`, `v1.2.0` and `v1.3.0` are published on crates.io,
+  PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub
+  Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
   playground and the end-to-end audit battery; `v1.2.0` (2026-11-11) releases
-  Phase 9, the core features of a standard crystal library.
+  Phase 9, the core features of a standard crystal library; `v1.3.0`
+  (2026-11-12) releases the MOF platform.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
   environments, surfaces, defects and disorder, interfaces, elasticity, EOS
-  fits and convex hulls on all four surfaces, with five algorithm pages. Task
-  9.7.2 (playground panels and e2e references) remains open. The stable API
-  follows the SemVer policy and the known subsets below are the only
-  documented reference gaps.
+  fits and convex hulls on all four surfaces, with five algorithm pages.
+  Phase 10 is complete: MOF checking and cleaning, deconstruction, MOFid,
+  descriptors, native PLD/LCD/ASA, host-guest force fields, Widom, GCMC,
+  RASPA export, PSM, defects, variants, databases and screening. Tasks 9.7.2,
+  10.5.7, 10.6.4 and 10.7.3-10.7.5 remain open. The stable API follows the
+  SemVer policy and the known subsets below are the only documented reference
+  gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
   manual docs workflows were removed by maintainer decision (2026-11-08) to
   avoid runner cost. The release runs on a version tag: three CLI packages,
@@ -123,6 +128,19 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   ordering search caps the decorations (`max_orderings`) and ranks them with
   the in-process Ewald sum; SQS is binary and reports pair/triplet
   correlations, not a full cluster expansion.
+- 10.x: the curated six-topology/eight-block builder subset remains until the
+  licensed PORMAKE data drop (Task 10.5.7); database readers work on an
+  extracted directory, not a zip, and on-demand fetch is Task 10.6.4.
+- 10.2: deconstruction uses the all-node rule with metal-adjacent non-carbon
+  atoms in the node; MOFid is a deterministic subset of the published syntax
+  (unit graphs, topology, interpenetration) and MOFkey is its SHA-256.
+- 10.3: PLD/channel dimension are voxelized union-find results from the
+  distance grid; they converge with the spacing and are not bit-identical to
+  Zeo++.
+- 10.4: GCMC is single-component with rigid host/guest and an ideal-gas
+  chemical potential; guest-guest interactions and Peng-Robinson fugacity are
+  left to the RASPA export. Widom uses direct host-guest sums with a 15 A
+  cutoff.
 - 9.6: the elastic tensor uses the stress finite differences of the native UFF
   calculator (any `Calculator` with stress works), and the EOS/hull fits are
   point estimates with parameter errors, without a global optimizer audit.
@@ -146,7 +164,8 @@ Version rules are defined in `AGENTS.md` section 5. In short:
   documentation complete.
 - **v1.2.0** — Phase 9 complete: the core features of a standard crystal
   library beyond Crystal-Builder parity (released 2026-11-11).
-- **v1.3.0** — Phase 10 complete: the MOF platform (focus of the 2.0 road).
+- **v1.3.0** — Phase 10 complete: the MOF platform (focus of the 2.0 road;
+  released 2026-11-12).
 - **v1.4.0 … v1.9.0** — Phases 11 to 16, one MINOR release per completed
   phase; every change is backward compatible and anything to be removed is
   deprecated first (Task 11.4.2).
