@@ -41,7 +41,8 @@ cargo build -p xtalforge --all-features
    813 KiB, and the Phase 3-7 surfaces (including the polymer/embedding code)
    and the agent session took the release package to 3943 KiB at 1.1.0.
    The Phase 9 core features took it to 4603 KiB at 1.2.0 and the MOF
-   platform to 4936 KiB at 1.3.0, inside the 5120 KiB budget.
+   platform plus usability work to 4964 KiB at 1.4.0, inside the 5120 KiB
+   budget.
 
 ## Threaded WebAssembly
 
