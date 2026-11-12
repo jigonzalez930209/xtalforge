@@ -109,4 +109,19 @@ impl Error {
             Self::Json(_) => "json",
         }
     }
+
+    /// Stable machine-readable category for the JSON error object.
+    #[must_use]
+    pub fn category(&self) -> &'static str {
+        match self {
+            Self::UnknownVerb(_)
+            | Self::Argument { .. }
+            | Self::UnknownDocument(_)
+            | Self::NoDocument
+            | Self::Io(_) => "input",
+            Self::Core(error) => error.category(),
+            Self::Analysis(_) | Self::Json(_) => "internal",
+            Self::ForceField(error) => error.category(),
+        }
+    }
 }
