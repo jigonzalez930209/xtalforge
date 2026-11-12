@@ -2,8 +2,8 @@
 
 use crate::{
     Cli, CliError, agent_commands, analysis_commands, analyze, args, args::Command, basic, build,
-    build_structures, commands_extra, convert, docs_commands, ff_commands, measure, mesh,
-    model_commands, mof_commands, powder_commands, pxrd, spacegroup, symmetry,
+    build_structures, commands_extra, convert, docs_commands, feature_commands, ff_commands,
+    measure, mesh, model_commands, mof_commands, powder_commands, pxrd, spacegroup, symmetry,
     symmetry::SymmetryAction, symmetry_analysis,
 };
 
@@ -360,6 +360,36 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
                 format,
             } => symmetry::lower(cli, path, *subgroup, *tolerance, out.as_deref(), *format),
         },
+        Command::Compare {
+            first,
+            second,
+            ltol,
+            stol,
+            angle_tol,
+            no_supercell,
+        } => {
+            feature_commands::compare(cli, first, second, *ltol, *stol, *angle_tol, !*no_supercell)
+        }
+        Command::Group { paths, ltol, stol } => feature_commands::group(cli, paths, *ltol, *stol),
+        Command::Deform {
+            path,
+            voigt,
+            gradient,
+            volume,
+            density,
+            out,
+            format,
+        } => feature_commands::deform(
+            cli,
+            path,
+            voigt.as_deref(),
+            gradient.as_deref(),
+            *volume,
+            *density,
+            out.as_deref(),
+            *format,
+        ),
+        Command::Features { action } => feature_commands::features(cli, action),
         Command::Torsion { path, i, j, k, l } => measure::torsion(cli, path, *i, *j, *k, *l),
     }
 }

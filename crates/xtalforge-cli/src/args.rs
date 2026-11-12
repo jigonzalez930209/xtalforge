@@ -3,6 +3,7 @@
 use clap::Subcommand;
 
 use crate::analysis_commands::AnalysisAction;
+use crate::feature_args::FeatureAction;
 use crate::ff_commands::FfAction;
 use crate::format::StructureFormat;
 use crate::mof_commands::MofAction;
@@ -186,6 +187,65 @@ pub(crate) enum Command {
         /// Output format; defaults to the output extension or CIF.
         #[arg(long, value_enum)]
         format: Option<StructureFormat>,
+    },
+    /// Decide whether two structures are the same.
+    Compare {
+        /// First structure.
+        first: String,
+        /// Second structure.
+        second: String,
+        /// Fractional length tolerance.
+        #[arg(long, default_value_t = 0.2)]
+        ltol: f64,
+        /// Site tolerance in Angstrom.
+        #[arg(long, default_value_t = 0.3)]
+        stol: f64,
+        /// Angle tolerance in degrees.
+        #[arg(long, default_value_t = 5.0)]
+        angle_tol: f64,
+        /// Do not accept a supercell relationship.
+        #[arg(long)]
+        no_supercell: bool,
+    },
+    /// Group structures into equality classes.
+    Group {
+        /// Structure paths.
+        paths: Vec<String>,
+        /// Fractional length tolerance.
+        #[arg(long, default_value_t = 0.2)]
+        ltol: f64,
+        /// Site tolerance in Angstrom.
+        #[arg(long, default_value_t = 0.3)]
+        stol: f64,
+    },
+    /// Apply a strain, deformation gradient, volume or density.
+    Deform {
+        /// Input structure.
+        path: String,
+        /// Six engineering Voigt components: xx,yy,zz,yz,xz,xy.
+        #[arg(long)]
+        voigt: Option<String>,
+        /// Nine deformation-gradient components.
+        #[arg(long)]
+        gradient: Option<String>,
+        /// Target cell volume in cubic Angstrom.
+        #[arg(long)]
+        volume: Option<f64>,
+        /// Target density in g/cm3.
+        #[arg(long)]
+        density: Option<f64>,
+        /// Output path.
+        #[arg(long)]
+        out: Option<String>,
+        /// Output format.
+        #[arg(long, value_enum)]
+        format: Option<StructureFormat>,
+    },
+    /// Core crystal features: matcher edits, local environments, surfaces,
+    /// defects, orderings, SQS, interfaces, elasticity and thermodynamics.
+    Features {
+        #[command(subcommand)]
+        action: FeatureAction,
     },
     /// Apply a JSON command list to a structure.
     Script {
