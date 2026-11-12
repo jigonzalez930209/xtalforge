@@ -5,6 +5,44 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.4.0] - 2026-11-12
+
+Phase 11 closes the 2026-11-11 usability audit. The public API is additive:
+the CLI gains accurate help, a real thread option, error categories,
+structured warnings, pipelines, `doctor`, molecules, sketches, fragments,
+substitution and guests; the facade gains current docs, one-call IO and a
+wider prelude; SMILES/sketch/fragment/substitution/guest now exist on all
+surfaces.
+
+### Added
+
+- CLI `doctor`, accurate `convert`/`build` help generated from the registered
+  lists, `--threads` wired to a scoped Rayon pool, `--spacegroup` overrides,
+  `--out -` JSON pipelines and `molecule`, `sketch`, `fragment`, `substitute`
+  and `guest` commands.
+- `Error::category()` on every crate error and `category` in the CLI/WASM JSON
+  error objects; Python `error_category(code)`.
+- Structured `StructureWarning` entries (`code`, `message`, `atoms`, `fields`,
+  `hint`) in the structure summary, CLI, Python and WASM.
+- Facade `read`, `read_str` and `write`, `ReadResult`, and a wider `prelude`.
+- Python `read`/`write`, `set_threads`, `deprecation_warning`,
+  `molecule_from_smiles`, `sketch_roundtrip`, `fragment_library`,
+  `fragment_structure`, `substitute_structure` and `place_guest_structure`;
+  the `pxrd` function accepts `threads=`.
+- WASM `read`, `molecule_from_smiles`, `sketch_roundtrip`,
+  `fragment_library_info`, `fragment_info`, `substitute_info`,
+  `place_guest_info` and `deprecation_warning`.
+- `docs/api/usability.md`, `docs/api/naming.md`, `docs/guide/deprecation.md`
+  and `docs/guide/recipes.md` with 30 task-oriented recipes; 11 new parity
+  rows.
+
+### Fixed
+
+- The CLI no longer claims three formats or two builders; the help lists every
+  registered format and builder.
+- `--out -` always emits the versioned structure document, so the documented
+  stdin/stdout pipeline works without temporary files.
+
 ## [1.3.0] - 2026-11-12
 
 Phase 10 makes xtalforge a MOF platform: experimental CIFs can be checked and
