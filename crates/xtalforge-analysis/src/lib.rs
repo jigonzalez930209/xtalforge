@@ -6,16 +6,21 @@
 //! and never panics on user input.
 
 pub mod automatic;
+pub mod bvs;
 pub mod cells;
+pub mod defects;
+pub mod ewald;
 pub mod extinction;
 pub mod fit;
 pub mod grid;
 pub mod indexing;
 pub mod instrument;
+pub mod interfaces;
 pub mod isosurface;
 pub mod lebail;
 pub mod merge;
 pub mod nets;
+pub mod orderings;
 pub mod overlay;
 pub mod pareto;
 pub mod pawley;
@@ -26,14 +31,22 @@ pub mod rcsr;
 pub mod refine;
 pub mod rietveld;
 pub mod rietx;
+pub mod sqs;
+pub mod surfaces;
 pub mod topology;
 pub mod zeo;
 
 pub use automatic::{AutomaticOptions, AutomaticResult, LeadingCell, run_automatic};
+pub use bvs::{
+    BondValenceReport, BondValenceSite, BvsOptions, OxidationReport, OxidationSite,
+    bond_valence_sums, oxidation_states,
+};
 pub use cells::{
     CELL_PARAMETER_NAMES, TrigonalSetting, extinction_symbol, free_cell_parameters,
     free_cell_parameters_with_setting,
 };
+pub use defects::{DefectKind, PointDefect, interstitials, substitutions, vacancies};
+pub use ewald::{EwaldOptions, ewald_energy};
 pub use extinction::{
     ExtinctionClass, MAX_CANDIDATES as MAX_SPACE_GROUP_CANDIDATES, SpaceGroupMatch,
     extinction_classes, is_systematically_absent, space_group_candidates,
@@ -46,10 +59,14 @@ pub use indexing::{
     peak_q, predict_reflections, two_theta_of_q,
 };
 pub use instrument::{Geometry, Instrument, doublet, doublet_checked};
+pub use interfaces::{
+    Heterostructure, InterfaceMatch, InterfaceOptions, lattice_matches, stack_slabs,
+};
 pub use isosurface::{TriangleMesh, isosurface};
 pub use lebail::{LebailOptions, LebailResult, le_bail, pawley};
 pub use merge::merge_nets;
 pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, interpenetrate, quotient_graph};
+pub use orderings::{Ordering, OrderingOptions, orderings};
 pub use overlay::{Overlay, OverlaySet, OverlayStyle, overlay_net};
 pub use pareto::pareto_front;
 pub use pawley::{PawleyOptions, PawleyReflection, PawleyResult, pawley_refine};
@@ -62,6 +79,11 @@ pub use rietveld::{RietveldOptions, RietveldPhase, fit_phase};
 pub use rietx::{
     ACCEPTANCE_MAX_POSITION_ERROR, ACCEPTANCE_MAX_RWP, AcceptanceMetrics, RIETX_LICENSE_NOTE,
     RietxBridge, check_acceptance, rietx_inventory,
+};
+pub use sqs::{SqsOptions, SqsResult, SqsShell, special_quasirandom};
+pub use surfaces::{
+    MillerIndex, Termination, TerminationReport, minimal_slab, slab_terminations,
+    unique_miller_indices,
 };
 pub use topology::{DEPTH, MAX_RING, NetFingerprint, fingerprint};
 pub use xtalforge_core::Error;
