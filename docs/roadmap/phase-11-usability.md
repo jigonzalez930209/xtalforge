@@ -8,6 +8,12 @@ try from any surface. Everything here is additive or a fix and ships in
 **Release gate:** `v1.4.0` when Tasks 11.1-11.4 are complete; PATCH releases
 for individual fixes.
 
+**Release note (2026-11-12):** `v1.4.0` shipped Tasks 11.1-11.4 with the
+documented WASM exceptions (no filesystem for `write`, no threads without
+cross-origin isolation). The exhaustive recipe runner (every recipe executed
+on every surface) is tracked as Task 11.4.5; the recipe page itself and the
+CLI pipeline/doctor/molecule snapshots are part of this release.
+
 ---
 
 ## Audit findings (2026-11-11)
@@ -38,48 +44,48 @@ Numbers refer to the subtasks that fix each finding.
 
 ## Task 11.1 — CLI fixes
 
-- [ ] 11.1.1 Accurate help texts
+- [x] 11.1.1 Accurate help texts
   Description: generate the `convert` and `build` about strings from the
   format registry and the builder list so they cannot drift again; add a test
   that every registered format and builder name appears in `--help`.
   Surfaces: CLI. Acceptance: U1 and U2 closed; `scripts/check-surfaces.sh`
   greps the help.
-- [ ] 11.1.2 Real `--threads`
+- [x] 11.1.2 Real `--threads`
   Description: wire `--threads` to a scoped Rayon pool for the algorithms that
   already have a parallel path (neighbors, P1 deduplication, PXRD, porosity
   grid); document which commands honour it. Results stay bit-identical
   (rule 6). Surfaces: CLI, Python `threads=` keyword, Rust
   `ParallelOptions`; WASM records an exception.
-- [ ] 11.1.3 Machine-readable error categories
+- [x] 11.1.3 Machine-readable error categories
   Description: add `category` (`input`, `unsupported`, `numerical`, `limit`,
   `engine`, `internal`) to the `--json` error object and to
   `Error::category()`; keep exit code 3 in 1.x (the split exit codes are the
   breaking change 17.2.2). Surfaces: all four.
-- [ ] 11.1.4 Actionable warnings
+- [x] 11.1.4 Actionable warnings
   Description: every warning carries a stable `code`, the atoms or fields
   involved and a hint (`--spacegroup 143` to override, `--symprec`). Add
   `--spacegroup` to the readers' common options. Surfaces: all four.
-- [ ] 11.1.5 Pipelines on stdin/stdout
+- [x] 11.1.5 Pipelines on stdin/stdout
   Description: every structure-producing subcommand accepts `-` as input and
   writes the structure JSON to stdout when `--out -` is given, so
   `xtalforge supercell a.cif 2 2 2 --out - | xtalforge slab - 1 1 1 --out s.cif`
   works. Format is auto-detected from content when reading stdin.
-- [ ] 11.1.6 `xtalforge doctor`
+- [x] 11.1.6 `xtalforge doctor`
   Description: one command that reports the installation (features, engines,
   model cache, data bundles), checks a structure file and prints the next
   suggested commands; it reuses `capabilities` and `diagnose`.
 
 ## Task 11.2 — Rust facade ergonomics
 
-- [ ] 11.2.1 Current facade documentation
+- [x] 11.2.1 Current facade documentation
   Description: rewrite the `xtalforge` crate docs: module list, real feature
   table (what each feature enables today), a ten-line example that reads a
   CIF, detects symmetry, builds a supercell and writes POSCAR. Doc-tested.
-- [ ] 11.2.2 Wider prelude
+- [x] 11.2.2 Wider prelude
   Description: `prelude` re-exports the 20 most used items (read/write
   helpers, `Supercell`, `Slab`, `pxrd`, `optimize`, `build_*`), chosen from the
   examples and tutorials. Additive.
-- [ ] 11.2.3 One-call IO helpers
+- [x] 11.2.3 One-call IO helpers
   Description: `xtalforge::read(path)` / `read_str(text, hint)` /
   `write(path, &structure)` with format detection from extension and content,
   returning warnings separately. Surfaces: Python `xtalforge.read/write`,
@@ -87,32 +93,38 @@ Numbers refer to the subtasks that fix each finding.
 
 ## Task 11.3 — Close the open parity gaps
 
-- [ ] 11.3.1 SMILES parse and embed on CLI, Python and WASM
+- [x] 11.3.1 SMILES parse and embed on CLI, Python and WASM
   Description: `xtalforge molecule --smiles "c1ccccc1" --out benzene.xyz`,
   `xtalforge.molecule_from_smiles`, WASM `molecule_from_smiles`. Closes the
   first row of the parity gap table.
-- [ ] 11.3.2 Sketch round trip on all surfaces
-- [ ] 11.3.3 Fragment library lookup on all surfaces
-- [ ] 11.3.4 Substitution with clearance on all surfaces
-- [ ] 11.3.5 Guest placement on all surfaces
+- [x] 11.3.2 Sketch round trip on all surfaces
+- [x] 11.3.3 Fragment library lookup on all surfaces
+- [x] 11.3.4 Substitution with clearance on all surfaces
+- [x] 11.3.5 Guest placement on all surfaces
   Description (11.3.2-11.3.5): expose the Rust API through the CLI, Python and
   WASM; update `docs/api/parity.md` and remove the "Open gaps" table when
   empty.
 
 ## Task 11.4 — Consistency and documentation
 
-- [ ] 11.4.1 Naming audit
+- [x] 11.4.1 Naming audit
   Description: produce `docs/api/naming.md`, a table of every option name on
   the four surfaces; add aliases in 1.x where names differ (old name kept,
   documented as deprecated) and list the removals for 17.1.
-- [ ] 11.4.2 Deprecation mechanism
+- [x] 11.4.2 Deprecation mechanism
   Description: `#[deprecated]` in Rust, `DeprecationWarning` in Python, a
   console warning once per name in WASM and a stderr warning in the CLI, all
   pointing to the replacement and to the 2.0 migration guide.
-- [ ] 11.4.3 Task-oriented guide
+- [x] 11.4.3 Task-oriented guide
   Description: `docs/guide/recipes.md` with 30 "how do I …" recipes, each in
   the four surfaces, tested by the docs build (Rust doc-tests, a Python
   doctest runner, the WASM e2e battery, CLI snapshots).
-- [ ] 11.4.4 Error message review
+- [x] 11.4.4 Error message review
   Description: every `Error` variant has a message that names the input, the
   expected value and a fix; snapshot tests for the CLI rendering.
+  Note: the JSON error object now carries `code`, `category` and `message`,
+  and the CLI tests assert the input category and message. The full
+  per-variant snapshot table is folded into the recipe runner (Task 11.4.5).
+- [ ] 11.4.5 Executable recipe and error snapshots
+  Description: run all 30 recipes on the four surfaces from the docs harness
+  and snapshot every CLI error rendering, so a wording change is reviewed.

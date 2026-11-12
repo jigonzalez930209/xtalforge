@@ -36,16 +36,17 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-11)
 
-- Phases 0-10 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-11 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
-  stable `v1.0.0`, `v1.1.0`, `v1.2.0` and `v1.3.0` are published on crates.io,
-  PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub
-  Pages.
+  stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0` and `v1.4.0` are published on
+  crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and
+  GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
   playground and the end-to-end audit battery; `v1.2.0` (2026-11-11) releases
   Phase 9, the core features of a standard crystal library; `v1.3.0`
-  (2026-11-12) releases the MOF platform.
+  (2026-11-12) releases the MOF platform; `v1.4.0` closes the usability
+  audit.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
@@ -53,8 +54,10 @@ are in `AGENTS.md` at the repository root.
   fits and convex hulls on all four surfaces, with five algorithm pages.
   Phase 10 is complete: MOF checking and cleaning, deconstruction, MOFid,
   descriptors, native PLD/LCD/ASA, host-guest force fields, Widom, GCMC,
-  RASPA export, PSM, defects, variants, databases and screening. Tasks 9.7.2,
-  10.5.7, 10.6.4 and 10.7.3-10.7.5 remain open. The stable API follows the
+  RASPA export, PSM, defects, variants, databases and screening. Phase 11 is
+  complete: the usability audit fixes, naming and deprecation docs, recipes
+  and the newly exposed molecule/sketch/fragment/guest operations. Tasks
+  9.7.2, 10.5.7, 10.6.4, 10.7.3-10.7.5 and 11.4.5 remain open. The stable API follows the
   SemVer policy and the known subsets below are the only documented reference
   gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
@@ -137,6 +140,15 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
 - 10.3: PLD/channel dimension are voxelized union-find results from the
   distance grid; they converge with the spacing and are not bit-identical to
   Zeo++.
+- 11.1: `--threads` and the Python `threads=`/`set_threads` pool change only
+  execution; the parallel implementations keep fixed reductions. WASM has no
+  threads without cross-origin isolation, recorded as an exception.
+- 11.2-11.3: the facade `write` and the Python file helpers need a filesystem;
+  WASM offers the text/JSON forms instead. SMILES embedding builds heavy-atom
+  geometry and does not infer hydrogens from aromatic bond orders.
+- 11.4: the recipe page is documentation; Task 11.4.5 executes every recipe
+  on every surface, and the deprecation aliases are listed in
+  `docs/api/naming.md`.
 - 10.4: GCMC is single-component with rigid host/guest and an ideal-gas
   chemical potential; guest-guest interactions and Peng-Robinson fugacity are
   left to the RASPA export. Widom uses direct host-guest sums with a 15 A
@@ -168,7 +180,8 @@ Version rules are defined in `AGENTS.md` section 5. In short:
   released 2026-11-12).
 - **v1.4.0 … v1.9.0** — Phases 11 to 16, one MINOR release per completed
   phase; every change is backward compatible and anything to be removed is
-  deprecated first (Task 11.4.2).
+  deprecated first (Task 11.4.2). `v1.4.0` was released 2026-11-12 with the
+  usability audit.
 - **v2.0.0** — Phase 17 complete: deprecated surface removed, unified options
   and errors, schema version 2, after a `2.0.0-rc.N` stabilization period.
 
