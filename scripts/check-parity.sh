@@ -12,7 +12,7 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$ROOT" || exit 1
 
 MATRIX="docs/api/parity.md"
-PY_STUB="crates/xtalforge-python/python/xtalforge/__init__.pyi"
+PY_STUB="crates/xtalforge-python/python/xtalforge"
 WASM_TS="crates/xtalforge-wasm/pkg/xtalforge_wasm.d.ts"
 WASM_SRC="crates/xtalforge-wasm/src/lib.rs"
 status=0
@@ -57,6 +57,9 @@ check_rust() {
     agent_verbs) name=catalogue ;;
     agent_run) name=run_verbs ;;
     models) name=fetch ;;
+    edit_structure) name=replace_species ;;
+    structure_fingerprint) name=fingerprint ;;
+    eos_fit) name=fit_eos ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -71,7 +74,7 @@ check_python() {
     powder_pawley) name=powder_pawley ;;
     refine_phase) name=powder_refine ;;
   esac
-  grep -q "def $name(" "$PY_STUB"
+  grep -Rq --include='*.pyi' "def $name(" "$PY_STUB"
 }
 
 check_wasm() {
@@ -160,6 +163,9 @@ check_cli() {
     agent_capabilities|agent_verbs) command=capabilities ;;
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
+    match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
+    deform) command=deform ;;
+    rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;
   esac
   printf '%s\n' "$cli_help" | grep -q -- "$command"
 }

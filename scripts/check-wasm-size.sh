@@ -10,6 +10,10 @@
 # angle term, the carbon relaxation, the remeshed ZTC/Schwarz P dual, the
 # Le Bail/Pawley background and the MOF quaternion fit (3943 KiB measured).
 #
+# 4736 KiB since 1.2.0: the Phase 9 matcher, Voronoi/shape kernels, bond
+# valence data, surface and defect generators, ordering/SQS search and
+# elasticity/EOS/hull fits (4603 KiB measured).
+#
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
 set -u
@@ -17,7 +21,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=3968
+BUDGET_KIB=4736
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
