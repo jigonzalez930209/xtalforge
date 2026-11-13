@@ -64,3 +64,26 @@ def test_error_category_and_threads() -> None:
     assert xtalforge.error_category("invalid_input") == "input"
     assert xtalforge.error_category("limit_exceeded") == "limit"
     assert xtalforge.set_threads(1) is True
+
+
+def test_object_api_numpy_and_batch() -> None:
+    structure = xtalforge.Structure(CIF)
+    assert structure.formula == "Si8"
+    assert len(structure.positions) == 8
+    assert len(structure.frac_positions) == 8
+    assert len(structure.cell) == 3
+    assert len(structure.numbers) == 8
+    rebuilt = xtalforge.Structure.from_arrays(
+        structure.cell, [int(z) for z in structure.numbers], frac=structure.frac_positions
+    )
+    assert rebuilt.formula == "Si8"
+    moved = structure.set_positions(structure.frac_positions)
+    assert moved.n_sites == 8
+    dataset = xtalforge.detect_symmetry(structure)
+    assert isinstance(dataset, xtalforge.SymmetryDataset)
+    assert dataset["number"] == 227
+    supercell = xtalforge.supercell(structure, 2, 1, 1)
+    assert supercell["formula"] == "Si16"
+    batch = __import__("xtalforge.batch", fromlist=["detect_symmetry", "pxrd"])
+    assert len(batch.detect_symmetry([CIF])) == 1
+    assert len(batch.pxrd([CIF])) == 1
