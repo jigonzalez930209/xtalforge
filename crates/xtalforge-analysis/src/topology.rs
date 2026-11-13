@@ -226,7 +226,7 @@ pub fn point_symbol(
         .join(".")
 }
 
-fn smallest_ring(
+pub(crate) fn smallest_ring(
     adjacency: &[Vec<(usize, [i32; 3])>],
     origin: (usize, [i32; 3]),
     first: (usize, [i32; 3]),

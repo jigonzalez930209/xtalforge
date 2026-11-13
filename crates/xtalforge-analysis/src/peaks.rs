@@ -10,8 +10,12 @@
 #![allow(clippy::indexing_slicing)] // local window indices are bounded
 
 mod background;
+mod whole;
 
 pub use background::background_envelope;
+pub use whole::{
+    WholeRangeFit, WholeRangeOptions, refine_whole_range, refine_whole_range_with_control,
+};
 
 use serde::{Deserialize, Serialize};
 use xtalforge_core::Error;

@@ -35,6 +35,10 @@
 mod cell;
 mod esd;
 
+pub mod profile;
+
+pub use profile::{PawleyProfileOptions, PawleyProfileResult, pawley_refine_profile};
+
 use serde::{Deserialize, Serialize};
 use xtalforge_core::{Error, Structure};
 use xtalforge_io::xy::PatternPoint;

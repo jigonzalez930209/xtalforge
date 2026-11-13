@@ -115,6 +115,57 @@ impl QuotientGraph {
         }
     }
 
+    /// The subgraph induced by `nodes`, renumbered in the given order.
+    ///
+    /// Edges with an endpoint outside `nodes` are dropped. Repeated nodes
+    /// make the result empty rather than silently duplicating a vertex.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for a node index outside the graph or
+    /// a repeated node.
+    pub fn subgraph(&self, nodes: &[usize]) -> Result<Self, Error> {
+        let mut renumber = BTreeMap::new();
+        for (position, node) in nodes.iter().enumerate() {
+            if *node >= self.nodes.len() || renumber.insert(*node, position).is_some() {
+                return Err(Error::InvalidInput(
+                    "a subgraph node is outside the graph or repeated".to_owned(),
+                ));
+            }
+        }
+        let mut sub_nodes = Vec::with_capacity(nodes.len());
+        let mut labels = Vec::with_capacity(nodes.len());
+        for node in nodes {
+            let frac = self.nodes.get(*node).ok_or_else(|| {
+                Error::InvalidInput("a subgraph node is outside the graph".to_owned())
+            })?;
+            sub_nodes.push(*frac);
+            labels.push(
+                self.labels
+                    .get(*node)
+                    .cloned()
+                    .unwrap_or_else(|| format!("N{node}")),
+            );
+        }
+        let mut edges = Vec::new();
+        for edge in &self.edges {
+            let (Some(&a), Some(&b)) = (renumber.get(&edge.a), renumber.get(&edge.b)) else {
+                continue;
+            };
+            edges.push(NetEdge {
+                a,
+                b,
+                shift: edge.shift,
+            });
+        }
+        edges.sort();
+        Ok(Self {
+            nodes: sub_nodes,
+            edges,
+            labels,
+        })
+    }
+
     /// Lattice shifts per edge, keyed by node pair.
     #[must_use]
     pub fn shift_map(&self) -> BTreeMap<(usize, usize), Vec<[i32; 3]>> {

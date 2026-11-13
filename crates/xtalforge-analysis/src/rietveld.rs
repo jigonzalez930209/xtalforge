@@ -1,11 +1,16 @@
 //! A minimal Rietveld phase model (Task 7.8).
 
+pub mod profile;
+
+pub use profile::{RietveldProfileOptions, RietveldProfileResult, fit_phase_profile};
+
 use serde::{Deserialize, Serialize};
 use xtalforge_core::{Error, Structure};
 use xtalforge_io::xy::PatternPoint;
 
+use crate::instrument::RadiationKind;
 use crate::profiles::{Background, Profile, ProfileKind};
-use crate::pxrd::{PxrdOptions, Radiation, calculate_pxrd};
+use crate::pxrd::{Radiation, enumerate};
 
 /// Options for the phase simulation and scale fit.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -71,19 +76,18 @@ pub fn fit_phase(
             "Rietveld needs at least three observed points".to_owned(),
         ));
     }
-    let calculated = calculate_pxrd(
+    let calculated = enumerate(
         structure,
-        &PxrdOptions {
-            radiation: options.radiation,
-            two_theta_range: options.two_theta_range,
-            step: options.step,
-            fwhm: options.fwhm,
-        },
+        options.radiation.wavelength()?,
+        RadiationKind::XRay,
+        options.two_theta_range,
+        0.5,
+        true,
     )?;
     let mut unit = vec![0.0; observed.len()];
     for (slot, point) in unit.iter_mut().zip(observed.iter()) {
         let mut value = 0.0;
-        for reflection in &calculated.reflections {
+        for reflection in &calculated {
             value += Profile {
                 kind: options.kind,
                 center: reflection.two_theta,

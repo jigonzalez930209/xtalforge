@@ -29,8 +29,10 @@
 //!   `RietveldOptions::kind` is accepted but does not change the curve here.
 //!   With [`RefineOptions::doublet`] the copper K alpha 1/K alpha 2 pair is
 //!   placed from the K alpha 1 position with the 0.5 intensity ratio.
-//! * The ADP is one global multiplier on every site's `U_iso`; a free `U_ij`
-//!   per site is not implemented.
+//! * The ADP is one global multiplier applied to every site's `U_iso` or, when
+//!   the site carries anisotropic parameters, to all six `U_ij`; a free `U_ij`
+//!   per site is not a refinement parameter (Task 14.1.2 applies the input
+//!   `U_ij` in the forward model).
 //! * [`RefineOptions::combined_energy`] is the weight `w` of the combined
 //!   objective. This signature has no force-field calculator, so the energy
 //!   term is a constant zero during the fit.

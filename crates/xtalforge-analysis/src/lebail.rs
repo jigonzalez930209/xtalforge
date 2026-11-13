@@ -12,6 +12,10 @@ use xtalforge_core::Structure;
 
 mod esd;
 
+pub mod profile;
+
+pub use profile::{LebailProfileOptions, LebailProfileResult, le_bail_profile};
+
 use self::esd::{intensity_esds, solve, statistics, weights};
 
 /// Options for the Le Bail iteration.

@@ -26,11 +26,27 @@
 //! # Approximations
 //!
 //! * No axial divergence, specimen transparency, flat-plate illumination or
-//!   receiving-slit correction is modelled; those are separate profile terms.
+//!   receiving-slit correction is modelled here; those are profile terms of
+//!   [`InstrumentProfile`] (Task 14.1.1).
 //! * The K alpha doublet is placed by Bragg's law from the K alpha 1 position
 //!   and its intensity ratio, not by a full two-wavelength convolution.
-//! * Polarisation is stored and validated here; the PXRD profile module applies
-//!   its own Lorentz-polarisation factor and does not read this field yet.
+//! * Polarisation is stored and validated here and is propagated to the
+//!   profile by [`Instrument::profile`]; the profile applies it to the
+//!   Lorentz-polarisation factor.
+
+pub mod presets;
+pub mod profile;
+
+mod width;
+
+pub use presets::{
+    INSTRUMENT_PRESET_COUNT, INSTRUMENT_PRESET_NAMES, InstrumentPreset, instrument_presets,
+    preset_by_name, tch_preset_by_name,
+};
+pub use profile::{
+    Caglioti, FcjAsymmetry, InstrumentProfile, LineShape, Monochromator, RadiationKind,
+    RadiationSource, Tch, electron_wavelength,
+};
 
 use serde::{Deserialize, Serialize};
 use xtalforge_core::Error;
@@ -150,6 +166,29 @@ impl Instrument {
     ) -> Result<Vec<(f64, f64)>, Error> {
         self.validate()?;
         doublet_checked(two_theta, wavelength_ka1, wavelength_ka2, self.ka2_ratio)
+    }
+
+    /// Builds the profile half of the instrument model.
+    ///
+    /// The profile carries the radiation, a pseudo-Voigt line shape with a
+    /// constant `0.1` degree FWHM as its seed, and the polarisation fraction of
+    /// this instrument. Callers replace the width law, shape, `eta` or
+    /// asymmetry with the values of their diffractometer.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] when the instrument or the radiation is
+    /// invalid.
+    pub fn profile(&self, radiation: RadiationSource) -> Result<InstrumentProfile, Error> {
+        self.validate()?;
+        radiation.validate()?;
+        Ok(InstrumentProfile {
+            radiation,
+            monochromator: Monochromator {
+                polarization: self.polarization,
+            },
+            ..InstrumentProfile::default()
+        })
     }
 }
 
