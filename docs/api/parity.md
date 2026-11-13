@@ -141,6 +141,13 @@ compares this table with the symbols each surface actually exports.
 | `fragment_structure` | 11 | done | done | done | done | Embed a fragment (Task 11.3.3); CLI `fragment NAME` |
 | `substitute_structure` | 11 | done | done | done | done | Substitution with clearance (Task 11.3.4); CLI `substitute` |
 | `place_guest_structure` | 11 | done | done | done | done | Guest placement with clearance (Task 11.3.5); CLI `guest` |
+| `structure_handle` | 12 | done | n/a | done | done | Parsed structure handle (Task 12.1.1/12.3.1); CLI has no long-lived handle |
+| `structure_from_arrays` | 12 | n/a | n/a | done | done | NumPy/typed-array input (Task 12.2.2); WASM `setPositions` |
+| `typed_results` | 12 | n/a | n/a | done | done | Typed result classes/interfaces (Task 12.1.2/12.3.2); legacy text API keeps loose types |
+| `typed_arrays` | 12 | n/a | n/a | done | done | Positions, cell, scene, PXRD and mesh buffers (Task 12.2.1/12.3.3); Python lists/NumPy |
+| `batch_api` | 12 | n/a | n/a | done | n/a | Python batch helpers (Task 12.2.3); the browser has no filesystem |
+| `wasm_worker` | 12 | n/a | n/a | n/a | done | Optional Web Worker wrapper (Task 12.3.4) |
+| `node_entry` | 12 | n/a | n/a | n/a | done | Node file helpers (Task 12.3.4) |
 
 ## Recorded exceptions
 
