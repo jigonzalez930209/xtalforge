@@ -91,7 +91,8 @@ fn rules_are_validated() {
             &structure,
             BondRules {
                 scale: 0.0,
-                minimum_distance: 0.4
+                minimum_distance: 0.4,
+                ..BondRules::default()
             }
         )
         .is_err()
@@ -101,7 +102,8 @@ fn rules_are_validated() {
             &structure,
             BondRules {
                 scale: 1.2,
-                minimum_distance: -1.0
+                minimum_distance: -1.0,
+                ..BondRules::default()
             }
         )
         .is_err()
