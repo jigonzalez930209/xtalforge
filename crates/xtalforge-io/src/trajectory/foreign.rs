@@ -134,6 +134,8 @@ pub fn read_lammps_dump_with_types(text: &str, types: &[&str]) -> Result<Traject
             energy: None,
             step: Some(step),
             info: BTreeMap::new(),
+            forces: None,
+            stress: None,
         });
     }
     if frames.is_empty() {
@@ -171,6 +173,8 @@ pub fn read_geo_end(text: &str) -> Result<Trajectory, Error> {
             energy: None,
             step: None,
             info: BTreeMap::new(),
+            forces: None,
+            stress: None,
         };
         return Ok(Trajectory {
             elements: p1.atoms.iter().map(|atom| atom.element.clone()).collect(),

@@ -286,6 +286,8 @@ pub fn read_xdatcar(text: &str) -> Result<Trajectory, Error> {
             energy: None,
             step: None,
             info: BTreeMap::new(),
+            forces: None,
+            stress: None,
         });
     }
     Ok(Trajectory {
@@ -295,12 +297,19 @@ pub fn read_xdatcar(text: &str) -> Result<Trajectory, Error> {
     })
 }
 
-/// Detects LAMMPS dump, extended XYZ, DFTB+ `geo_end` or XDATCAR.
+/// Detects LAMMPS dump, VASP `OUTCAR`/`vasprun.xml`, extended XYZ, DFTB+
+/// `geo_end` or XDATCAR.
 ///
 /// # Errors
 ///
 /// Returns the error of the selected reader.
 pub fn read_trajectory(text: &str) -> Result<Trajectory, Error> {
+    if crate::vasp::looks_like_vasprun(text) {
+        return crate::vasp::read_vasprun(text);
+    }
+    if crate::vasp::looks_like_outcar(text) {
+        return crate::vasp::read_outcar(text);
+    }
     let first = text
         .lines()
         .find(|line| !line.trim().is_empty())
