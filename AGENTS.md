@@ -246,9 +246,11 @@ publishes, and runs no tests. Never create a tag before this gate passes.
    RUSTDOCFLAGS="-D warnings" cargo doc --workspace --no-deps
    cargo deny check
    cargo check -p xtalforge-wasm --target wasm32-unknown-unknown
-   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
+   scripts/build-wasm-packages.sh
    scripts/check-wasm-size.sh
    (cd crates/xtalforge-wasm && wasm-pack test --node --release)
+   scripts/check-cli-start.sh
+   scripts/check-bench.sh
    scripts/check-surfaces.sh
    (cd crates/xtalforge-python && maturin build --release)
    python -m mypy --strict crates/xtalforge-python/python/xtalforge
@@ -270,17 +272,20 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.7.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.6.0` and earlier
-  releases shipped on 2026-11-13/12). `1.7.0` completes Phase 14: diffraction
-  profiles and single-crystal factors, cell freedom and MD, slab bond carrying
-  and undoable commands, OBJ/glTF meshes and HTML/JSON reports.
+- Version: `1.8.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.7.0` and earlier
+  shipped on 2026-11-13/12). `1.8.0` completes Phase 15: the benchmark contract,
+  SoA/lazy/streaming/parallel scale paths, split WASM packages, lazy data
+  bundles and the CLI cold-start measurement.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 15 — Performance and scale
-  (`docs/roadmap/phase-15-performance.md`), the next step of the road to
+- Current phase: Phase 16 — Workflows, provenance and high throughput
+  (`docs/roadmap/phase-16-workflows.md`), the next step of the road to
   `2.0.0` (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
+  Phase 15 — Performance and scale shipped as `1.8.0`. Streaming writers,
+  download-on-first-use WASM data and publishing the split npm tiers remain
+  open and documented.
   Phase 14 — Scientific completeness shipped as `1.7.0` with the diffraction,
   force-field, structure-operation, mesh and report work. Task 14.1.5
   (indexing-engine agreement and powder demo) and Task 14.2.6 (real DFTB+/xTB

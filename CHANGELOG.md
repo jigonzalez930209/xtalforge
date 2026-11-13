@@ -5,6 +5,36 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.8.0] - 2026-11-13
+
+Phase 15 makes performance and scale a tested contract.
+
+### Added
+
+- Comparative benchmark suite (`benches/compare/`) against gemmi, spglib, ASE
+  and pymatgen, a committed baseline, `scripts/check-bench.sh` with a 10 %
+  regression gate, and the reproducible performance page.
+- Structure-of-arrays `P1Arrays`/`NeighborArrays`, lazy symmetry expansion,
+  streaming XYZ/LAMMPS/CIF readers, a parallel UFF energy/force path with a
+  fixed-order reduction, and the `huge` limits preset.
+- Split WASM packages (`core`, `symmetry`, `analysis`, `build`) with per-package
+  budgets, gzip/lazy loading for the UFF, RCSR, ICSD and k-path bundles, and
+  `scripts/check-cli-start.sh` (cold `info` median around 5 ms).
+- One-million-atom supercell benchmark and a regression test for the corrected
+  repeat bound.
+
+### Changed
+
+- The facade now has optional `analysis`, `build`, `ff`, `mof`, `modules` and
+  `agent` features; the default `full` keeps the previous surface. Disabling
+  default features now selects the base tier (core/io/symmetry/view/commands).
+- Several embedded data files are stored as gzip and decompressed on first use.
+
+### Fixed
+
+- `Structure::supercell` no longer truncates repeats above about four
+  (50 x 50 x 50 now builds 1,000,000 atoms).
+
 ## [1.7.0] - 2026-11-13
 
 Phase 14 closes the scientific subsets that were still simplified in `1.6.0`.

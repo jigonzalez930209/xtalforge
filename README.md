@@ -8,11 +8,11 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.7.0` published on 2026-11-13. Phases 0-14 are complete; Phase 15
+> Status: `1.8.0` published on 2026-11-13. Phases 0-15 are complete; Phase 16
 > is next. The public API is frozen; later changes follow the SemVer policy in
-> `docs/api/stability.md`. `1.7.0` adds the diffraction profile model,
-> single-crystal factors, cell freedom and MD, slab bond carrying, undoable
-> commands, OBJ/glTF meshes and HTML/JSON reports. The known reference gaps are
+> `docs/api/stability.md`. `1.8.0` adds the comparative benchmark contract,
+> SoA/lazy/streaming/parallel scale paths, split WASM packages, lazy data
+> bundles and a measurable CLI cold start. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
@@ -58,9 +58,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.7.0
-pip install xtalforge==1.7.0
-npm install xtalforge-wasm@1.7.0
+cargo add xtalforge@1.8.0
+pip install xtalforge==1.8.0
+npm install xtalforge-wasm@1.8.0
 ```
 
 ## Goals
