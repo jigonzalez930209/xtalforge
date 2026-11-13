@@ -135,7 +135,7 @@ pub fn write_stl(triangles: &[Triangle], name: &str) -> String {
     out
 }
 
-fn subtract(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
+pub(crate) fn subtract(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
     [
         first[0] - second[0],
         first[1] - second[1],
@@ -155,7 +155,7 @@ fn scale(vector: [f64; 3], factor: f64) -> [f64; 3] {
     [vector[0] * factor, vector[1] * factor, vector[2] * factor]
 }
 
-fn cross(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
+pub(crate) fn cross(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
     [
         first[1] * second[2] - first[2] * second[1],
         first[2] * second[0] - first[0] * second[2],
@@ -163,11 +163,11 @@ fn cross(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
     ]
 }
 
-fn norm(vector: [f64; 3]) -> f64 {
+pub(crate) fn norm(vector: [f64; 3]) -> f64 {
     (vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]).sqrt()
 }
 
-fn normalize(vector: [f64; 3]) -> [f64; 3] {
+pub(crate) fn normalize(vector: [f64; 3]) -> [f64; 3] {
     let length = norm(vector);
     if length < 1e-12 {
         [0.0, 0.0, 0.0]
