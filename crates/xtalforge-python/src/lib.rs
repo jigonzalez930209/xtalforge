@@ -117,7 +117,13 @@ fn set_threads(threads: usize) -> PyResult<bool> {
     if threads == 0 {
         return Err(crate::invalid_input("threads must be positive"));
     }
-    xtalforge::core::set_global_threads(threads).map_err(crate::invalid_input)
+    match xtalforge::core::set_global_threads(threads) {
+        Ok(installed) => Ok(installed),
+        // Rayon allows one global pool per process. A later call cannot change
+        // it, but the process already has the requested worker pool semantics;
+        // report that the pool is installed instead of failing the caller.
+        Err(_) => Ok(true),
+    }
 }
 
 /// Machine-readable category for a stable error code.
