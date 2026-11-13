@@ -8,8 +8,9 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.9.0` published on 2026-11-13. Phases 0-16 are complete; Phase 17
-> is the final 2.0 redesign. The public API is frozen; later changes follow the
+> Status: `1.9.0` published on 2026-11-13. Phases 0-16 are complete; Phases 17-21
+> (consolidation, simulation engines, magnetism and spectroscopy, structure
+> generation, ML) lead to the 2.0 redesign in Phase 22. The public API is frozen; later changes follow the
 > SemVer policy in `docs/api/stability.md`. `1.9.0` adds declarative JSON
 > workflows, provenance records, JSON Lines datasets, deduplication and ML
 > descriptors. The known reference gaps are

@@ -116,7 +116,7 @@ free on 2026-11-08. Reserve them early (Task 0.6.5).
 ## 3. Roadmap workflow
 
 The roadmap lives in `docs/roadmap/`, one file per phase plus `index.md`:
-`phase-00-foundations.md` … `phase-17-v2.md`.
+`phase-00-foundations.md` … `phase-22-v2.md`.
 
 Structure: **Phase → Task (`N.M`) → Subtask (`N.M.K`, with a checkbox)**.
 
@@ -190,7 +190,7 @@ a timer.
 | Early | `0.0.1`, `0.0.2`, … | Phase 1 complete **and** Task 2.1 merged → tag `v0.0.1` | Every release bumps PATCH, whatever it contains. Breaking changes are allowed but listed under `### Breaking` in the changelog. |
 | Pre-stable | `0.1.0` … `0.y.z` | Phase 4 complete (force fields and optimizers usable) → tag `v0.1.0` | MINOR (`0.y`) for any breaking change on any surface, and when a phase completes. PATCH (`0.y.z`) for backward-compatible features, fixes, docs, data updates. |
 | Stable | `1.0.0` and later | Phase 8 complete (API freeze, Task 8.8) | Strict SemVer: MAJOR for breaking changes on any surface, MINOR for new backward-compatible capabilities, PATCH for fixes only. |
-| Stable 2 | `2.0.0` and later | Phase 17 complete (Task 17.4) | Same SemVer rules; 1.x items removed in 2.0 must have been deprecated in a 1.x release first. |
+| Stable 2 | `2.0.0` and later | Phase 22 complete (Task 22.4) | Same SemVer rules; 1.x items removed in 2.0 must have been deprecated in a 1.x release first. |
 
 Release candidates (`X.Y.Z-rc.N`) are used only before `1.0.0` and before any
 later MAJOR release.
@@ -280,8 +280,11 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 17 — 2.0 redesign and freeze
-  (`docs/roadmap/phase-17-v2.md`), the final step of the road to `2.0.0`.
+- Current phase: Phase 17 — Consolidation and trust
+  (`docs/roadmap/phase-17-consolidation.md`, target `1.10.0`). Phases 18-21
+  (engines, magnetism/spectroscopy, generation, ML; `1.11.0`-`1.14.0`) widen
+  the scope before Phase 22 — 2.0 redesign and freeze
+  (`docs/roadmap/phase-22-v2.md`), renumbered from 17 on 2026-11-13.
   Phase 16 — Workflows, provenance and high throughput shipped as `1.9.0`.
   JSON-only workflows (no YAML parser), WASM workflow execution (filesystem)
   and the Parquet/Arrow dataset option remain documented follow-ups.
