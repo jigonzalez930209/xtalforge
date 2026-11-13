@@ -1,12 +1,16 @@
 //! Undoable symmetry operations (Task 3.10.4).
 
-use xtalforge_core::{Error, Structure};
+use std::collections::BTreeMap;
+
+use serde_json::json;
+use xtalforge_core::{Error, Site, Structure};
 use xtalforge_symmetry::{
-    SetMode, SpaceGroup, SymmetryOptions, asymmetrize, primitive_cell, set_space_group,
-    standardize, to_p1,
+    SetMode, SpaceGroup, SymmetryOptions, WyckoffAssignment, asymmetrize, lower_to_subgroup,
+    primitive_cell, set_space_group, standardize, to_p1, wyckoff_assignments,
 };
 
 use crate::command::Command;
+use crate::edit::rebuild_with;
 
 /// Expands every orbit and discards the space group.
 #[derive(Debug, Clone, Copy)]
@@ -174,5 +178,212 @@ impl Command for Standardize {
         } else {
             "Standardize cell".to_owned()
         }
+    }
+}
+
+/// Keys written by [`AssignWyckoff`].
+pub const WYCKOFF_KEYS: [&str; 4] = [
+    "wyckoff",
+    "wyckoff_letter",
+    "wyckoff_multiplicity",
+    "site_symmetry",
+];
+
+/// Fills in the Wyckoff letter of every site (Task 14.3.3).
+///
+/// The assignment is informational: no coordinate moves. The letter and
+/// multiplicity are stored as site props (`wyckoff` as `4a`,
+/// `wyckoff_letter`, `wyckoff_multiplicity` and `site_symmetry`) so they travel
+/// with the site through a save and can be cleared by undoing the command.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct AssignWyckoff {
+    options: SymmetryOptions,
+}
+
+impl AssignWyckoff {
+    /// Creates the command with the default detection tolerance.
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Creates the command with explicit detection options.
+    #[must_use]
+    pub fn with_options(options: SymmetryOptions) -> Self {
+        Self { options }
+    }
+
+    /// Creates the command with a position tolerance in Angstrom.
+    #[must_use]
+    pub fn with_tolerance(symprec: f64) -> Self {
+        Self {
+            options: SymmetryOptions {
+                symprec,
+                ..SymmetryOptions::default()
+            },
+        }
+    }
+
+    /// Detection options.
+    #[must_use]
+    pub fn options(&self) -> SymmetryOptions {
+        self.options
+    }
+}
+
+impl Command for AssignWyckoff {
+    fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        let assignments = wyckoff_assignments(structure, self.options)?;
+        let p1 = structure.p1()?;
+        let mut by_site: BTreeMap<usize, &WyckoffAssignment> = BTreeMap::new();
+        for assignment in &assignments {
+            let Some(atom) = p1.atoms.get(assignment.atom) else {
+                continue;
+            };
+            by_site.entry(atom.site_idx).or_insert(assignment);
+        }
+        let mut sites: Vec<Site> = Vec::with_capacity(structure.sites().len());
+        for (index, site) in structure.sites().iter().enumerate() {
+            let mut updated = site.clone();
+            for key in WYCKOFF_KEYS {
+                updated = updated.without_prop(key);
+            }
+            if let Some(assignment) = by_site.get(&index) {
+                updated = updated
+                    .with_prop(
+                        "wyckoff",
+                        json!(format!("{}{}", assignment.multiplicity, assignment.letter)),
+                    )
+                    .with_prop("wyckoff_letter", json!(assignment.letter.to_string()))
+                    .with_prop("wyckoff_multiplicity", json!(assignment.multiplicity))
+                    .with_prop("site_symmetry", json!(assignment.site_symmetry));
+            }
+            sites.push(updated);
+        }
+        rebuild_with(
+            structure,
+            sites,
+            *structure.lattice(),
+            structure.hall(),
+            structure.operations(),
+        )
+    }
+
+    fn description(&self) -> String {
+        "Assign Wyckoff letters".to_owned()
+    }
+}
+
+/// The same crystal in the other hand (Task 14.3.3).
+///
+/// A centrosymmetric structure is already its own enantiomer and comes back
+/// unchanged. A chiral setting that cannot describe the inverted coordinates is
+/// expanded to P1; see [`xtalforge_core::invert()`].
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Invert;
+
+impl Command for Invert {
+    fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        xtalforge_core::invert(structure)
+    }
+
+    fn description(&self) -> String {
+        "Invert the structure".to_owned()
+    }
+}
+
+/// Drops to a subgroup so that an orbit splits (Task 14.3.3).
+///
+/// The subgroup operations are taken in the default setting of
+/// `subgroup_number`, the cell is left alone, and the result is P1.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct DescendToSubgroup {
+    subgroup_number: u32,
+    tolerance: f64,
+}
+
+impl DescendToSubgroup {
+    /// Creates the command with a 0.05 Angstrom matching tolerance.
+    #[must_use]
+    pub fn new(subgroup_number: u32) -> Self {
+        Self {
+            subgroup_number,
+            tolerance: 0.05,
+        }
+    }
+
+    /// Sets the matching tolerance in Angstrom.
+    #[must_use]
+    pub fn with_tolerance(mut self, tolerance: f64) -> Self {
+        self.tolerance = tolerance;
+        self
+    }
+
+    /// ITA number of the target subgroup.
+    #[must_use]
+    pub fn subgroup_number(&self) -> u32 {
+        self.subgroup_number
+    }
+
+    /// Matching tolerance in Angstrom.
+    #[must_use]
+    pub fn tolerance(&self) -> f64 {
+        self.tolerance
+    }
+}
+
+impl Command for DescendToSubgroup {
+    fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        lower_to_subgroup(structure, self.subgroup_number, self.tolerance)
+    }
+
+    fn description(&self) -> String {
+        format!("Descend to subgroup {}", self.subgroup_number)
+    }
+}
+
+/// Merges same-element sites that sit on the same position (Task 14.3.3).
+///
+/// The result is P1, because a duplicate is judged over the whole cell; run
+/// [`FindSymmetry`] afterwards to re-impose a group.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MergeDuplicates {
+    tolerance: f64,
+}
+
+impl MergeDuplicates {
+    /// Creates the command with the reference 0.05 Angstrom tolerance.
+    #[must_use]
+    pub fn new() -> Self {
+        Self { tolerance: 0.05 }
+    }
+
+    /// Sets the merge tolerance in Angstrom.
+    #[must_use]
+    pub fn with_tolerance(mut self, tolerance: f64) -> Self {
+        self.tolerance = tolerance;
+        self
+    }
+
+    /// Merge tolerance in Angstrom.
+    #[must_use]
+    pub fn tolerance(&self) -> f64 {
+        self.tolerance
+    }
+}
+
+impl Default for MergeDuplicates {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Command for MergeDuplicates {
+    fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
+        xtalforge_core::merge_duplicates(structure, self.tolerance)
+    }
+
+    fn description(&self) -> String {
+        "Merge duplicate sites".to_owned()
     }
 }

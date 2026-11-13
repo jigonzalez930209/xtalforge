@@ -10,6 +10,7 @@ pub mod clipboard;
 pub mod command;
 pub mod document;
 mod edit;
+pub mod ff;
 pub mod groups;
 pub mod later;
 pub mod symmetry;
@@ -18,12 +19,18 @@ pub use atoms::{
     AddSites, DeleteSites, MoveSites, ReplaceSpecies, SetElement, SetOccupancy, SortSites,
 };
 pub use bonds::{AddBond, RemoveBond, SetBondRules};
-pub use cell::{PositionPolicy, SetLattice, ShiftOrigin, Supercell, WrapIntoCell};
-pub use clipboard::{Fragment, PasteFragment, copy_selection};
+pub use cell::{
+    MakeSlab, PositionPolicy, SetLattice, ShiftOrigin, Supercell, TransformCell, WrapIntoCell,
+};
+pub use clipboard::{Fragment, InsertMolecules, PasteFragment, copy_selection};
 pub use command::{
     Command, CommandRecord, CommandStack, MacroCommand, Origin, ReplaceStructure, SnapshotEdit,
     StructureOperation,
 };
 pub use document::Document;
+pub use ff::{
+    ATOM_TYPE_KEY, AddHydrogens, ApplyOptimizedGeometry, Prepare, PrepareStep, SetAtomTypes,
+};
 pub use groups::{AtomGroup, GroupStore};
 pub use later::{Interpenetrate, MarkConnectionPoints, SetCharges};
+pub use symmetry::{AssignWyckoff, DescendToSubgroup, Invert, MergeDuplicates};

@@ -1,7 +1,6 @@
 //! Undoable bond edits and perception rules (Task 3.10.2).
 
-use serde_json::json;
-use xtalforge_core::{Error, ExplicitBond, Structure};
+use xtalforge_core::{BondRules, Error, ExplicitBond, Structure};
 
 use crate::command::Command;
 use crate::edit::{check_index, metadata_with, rebuild_explicit, rebuild_metadata};
@@ -142,50 +141,45 @@ impl Command for RemoveBond {
 }
 
 /// Changes the distance criteria stored with the structure.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SetBondRules {
-    scale: f64,
-    minimum_distance: f64,
+    rules: BondRules,
 }
 
 impl SetBondRules {
-    /// Creates the command.
+    /// Creates the command from the global scale and minimum distance.
     #[must_use]
     pub fn new(scale: f64, minimum_distance: f64) -> Self {
         Self {
-            scale,
-            minimum_distance,
+            rules: BondRules::new(scale, minimum_distance),
         }
+    }
+
+    /// Creates the command from a complete rule set, including pair-specific
+    /// ranges and the metal-metal switch.
+    #[must_use]
+    pub fn from_rules(rules: BondRules) -> Self {
+        Self { rules }
+    }
+
+    /// Rules the command installs.
+    #[must_use]
+    pub fn rules(&self) -> &BondRules {
+        &self.rules
     }
 }
 
 impl Command for SetBondRules {
     fn apply(&self, structure: &Structure) -> Result<Structure, Error> {
-        if !self.scale.is_finite() || self.scale <= 0.0 {
-            return Err(Error::InvalidInput(
-                "bond scale must be positive and finite".to_owned(),
-            ));
-        }
-        if !self.minimum_distance.is_finite() || self.minimum_distance < 0.0 {
-            return Err(Error::InvalidInput(
-                "bond minimum distance must be non-negative and finite".to_owned(),
-            ));
-        }
-        let metadata = metadata_with(
-            structure,
-            "bond_rules",
-            json!({
-                "scale": self.scale,
-                "minimum_distance": self.minimum_distance,
-            }),
-        );
+        self.rules.validate()?;
+        let metadata = metadata_with(structure, "bond_rules", self.rules.to_json());
         rebuild_metadata(structure, structure.sites().to_vec(), &metadata)
     }
 
     fn description(&self) -> String {
         format!(
             "Set bond rules (scale {}, minimum {})",
-            self.scale, self.minimum_distance
+            self.rules.scale, self.rules.minimum_distance
         )
     }
 }
