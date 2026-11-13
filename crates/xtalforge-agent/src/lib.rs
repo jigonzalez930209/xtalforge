@@ -43,6 +43,7 @@ mod run;
 pub mod session;
 pub mod skill;
 pub mod verbs;
+pub mod workflow;
 
 pub use answers::Answer;
 pub use batch::run_verbs;
@@ -91,6 +92,9 @@ pub enum Error {
     /// A JSON value could not be encoded or decoded.
     #[error("json: {0}")]
     Json(String),
+    /// A workflow could not be parsed, validated or run.
+    #[error(transparent)]
+    Workflow(#[from] crate::workflow::WorkflowError),
 }
 
 impl Error {
@@ -107,6 +111,7 @@ impl Error {
             Self::Analysis(_) => "analysis",
             Self::ForceField(error) => error.code(),
             Self::Json(_) => "json",
+            Self::Workflow(error) => error.code(),
         }
     }
 
@@ -122,6 +127,7 @@ impl Error {
             Self::Core(error) => error.category(),
             Self::Analysis(_) | Self::Json(_) => "internal",
             Self::ForceField(error) => error.category(),
+            Self::Workflow(error) => error.category(),
         }
     }
 }

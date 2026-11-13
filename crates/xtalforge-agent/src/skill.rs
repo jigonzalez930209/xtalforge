@@ -52,6 +52,7 @@ pub const DOCUMENTS: &[SkillDocument] = &[
         "references/workspace.md",
         "Reference: documents and history"
     ),
+    document!("references/workflows.md", "Reference: workflows"),
 ];
 
 /// Looks up a document by path or by base name without extension.

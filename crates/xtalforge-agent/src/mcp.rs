@@ -59,6 +59,9 @@ fn parameter_schema(parameter: &ParameterInfo) -> Value {
 /// JSON Schema for one verb's arguments.
 #[must_use]
 pub fn input_schema(verb: &VerbInfo) -> Value {
+    if let Some(schema) = crate::workflow::tool_schema(verb.name) {
+        return schema;
+    }
     let mut properties = serde_json::Map::new();
     let mut required = Vec::new();
     for parameter in verb.parameters {

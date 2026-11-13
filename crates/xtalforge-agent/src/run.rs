@@ -41,6 +41,9 @@ pub(crate) fn run(session: &mut Session, verb: &str, arguments: &Value) -> Resul
         "history" => crate::ops::history(session, arguments),
         "changes" => crate::ops::changes(session, arguments),
         "close" => crate::ops::close(session, arguments),
+        "workflow_schema" => crate::workflow::schema_answer(session, arguments),
+        "workflow_validate" => crate::workflow::validate_answer(session, arguments),
+        "workflow_run" => crate::workflow::run_answer(session, arguments),
         _ => Err(Error::UnknownVerb(verb.to_owned())),
     }
 }

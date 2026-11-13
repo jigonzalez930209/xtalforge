@@ -30,6 +30,10 @@ Typical workflow:
 5. `render` draws SVG or PNG; `save` writes a file in a registered format.
 6. `changes` lists the assistant's edits in bursts; `undo` and `redo` move
    through the history.
+7. For many files, build a workflow document and run it with `workflow_run`;
+   `workflow_schema` returns the JSON Schema and `workflow_validate` checks a
+   document before it runs. The first step is a `read`, the middle steps name
+   catalogue verbs, and `write` saves each result.
 
 Every tool takes one JSON object and returns one JSON object with a `kind`
 field. Errors carry a stable `code` (`unknown_verb`, `invalid_argument`,

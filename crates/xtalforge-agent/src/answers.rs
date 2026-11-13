@@ -289,6 +289,27 @@ pub enum Answer {
         /// Bursts of agent edits.
         bursts: Vec<ChangeBurst>,
     },
+    /// `workflow_schema`.
+    WorkflowSchema {
+        /// Workflow model version the schema describes.
+        workflow_version: u32,
+        /// The JSON Schema.
+        schema: Value,
+    },
+    /// `workflow_validate`.
+    WorkflowValidated {
+        /// Whether the document is valid.
+        valid: bool,
+        /// Effective summary when valid.
+        summary: Option<crate::workflow::WorkflowSummary>,
+        /// The first problem when invalid.
+        problem: Option<crate::workflow::Problem>,
+    },
+    /// `workflow_run`.
+    WorkflowRun {
+        /// The run report, in deterministic input order.
+        report: crate::workflow::WorkflowReport,
+    },
 }
 
 impl Answer {
@@ -322,6 +343,9 @@ impl Answer {
             Self::Picture { .. } => "picture",
             Self::History { .. } => "history",
             Self::Changes { .. } => "changes",
+            Self::WorkflowSchema { .. } => "workflow_schema",
+            Self::WorkflowValidated { .. } => "workflow_validation",
+            Self::WorkflowRun { .. } => "workflow_run",
         }
     }
 }

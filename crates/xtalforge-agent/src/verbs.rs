@@ -5,73 +5,13 @@
 //! capability is declared once. `capabilities` reports what the current
 //! installation can actually run; this table declares what the layer offers.
 
-use serde::Serialize;
+mod types;
 
-/// JSON type of one verb parameter.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ParameterKind {
-    /// A JSON string.
-    String,
-    /// A JSON integer.
-    Integer,
-    /// A JSON number.
-    Number,
-    /// A JSON boolean.
-    Boolean,
-    /// A JSON array.
-    Array,
-    /// A JSON object.
-    Object,
-}
+pub use types::{ParameterInfo, ParameterKind, VerbInfo};
 
-/// One parameter of a verb.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct ParameterInfo {
-    /// Argument name.
-    pub name: &'static str,
-    /// JSON type.
-    pub kind: ParameterKind,
-    /// Whether the caller must provide it.
-    pub required: bool,
-    /// One-line description.
-    pub summary: &'static str,
-    /// Default rendered as a JSON literal, when there is one.
-    pub default: Option<&'static str>,
-}
+use types::param;
 
-/// One verb an assistant can call.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-pub struct VerbInfo {
-    /// Verb name as used by `run`.
-    pub name: &'static str,
-    /// One-line description.
-    pub summary: &'static str,
-    /// Parameters in call order.
-    pub parameters: &'static [ParameterInfo],
-    /// Result type returned by the verb.
-    pub result: &'static str,
-    /// A complete JSON argument example.
-    pub example: &'static str,
-    /// Whether the verb mutates the active document.
-    pub mutation: bool,
-}
-
-const fn param(
-    name: &'static str,
-    kind: ParameterKind,
-    required: bool,
-    summary: &'static str,
-    default: Option<&'static str>,
-) -> ParameterInfo {
-    ParameterInfo {
-        name,
-        kind,
-        required,
-        summary,
-        default,
-    }
-}
+use ParameterKind::{Array, Boolean, Integer, Object, String as Text};
 
 const DOCUMENT: ParameterInfo = param(
     "document",
@@ -80,6 +20,28 @@ const DOCUMENT: ParameterInfo = param(
     "Document name; defaults to the active document",
     Some("\"active\""),
 );
+
+const PARAM_WORKFLOW: ParameterInfo = param("workflow", Object, false, "Document object", None);
+const PARAM_TEXT: ParameterInfo = param("text", Text, false, "Document text", None);
+const PARAM_PATH: ParameterInfo = param("path", Text, false, "Workflow file", None);
+const PARAM_INPUTS: ParameterInfo = param("inputs", Array, true, "Inputs to process", None);
+const PARAM_JOBS: ParameterInfo = param("jobs", Integer, false, "Items at once", Some("1"));
+const PARAM_CHECKPOINT: ParameterInfo = param("checkpoint", Text, false, "Checkpoint file", None);
+const PARAM_RESUME: ParameterInfo = param("resume", Boolean, false, "Resume the checkpoint", None);
+
+/// Source arguments shared by `workflow_validate` and `workflow_run`.
+const WORKFLOW_SOURCE: &[ParameterInfo] = &[PARAM_WORKFLOW, PARAM_TEXT, PARAM_PATH];
+
+/// Arguments of `workflow_run`.
+const WORKFLOW_RUN_PARAMETERS: &[ParameterInfo] = &[
+    PARAM_WORKFLOW,
+    PARAM_TEXT,
+    PARAM_PATH,
+    PARAM_INPUTS,
+    PARAM_JOBS,
+    PARAM_CHECKPOINT,
+    PARAM_RESUME,
+];
 
 /// Every verb, in the order the skill document presents them.
 pub const VERBS: &[VerbInfo] = &[
@@ -424,6 +386,30 @@ pub const VERBS: &[VerbInfo] = &[
         parameters: &[DOCUMENT],
         result: "documents",
         example: "{}",
+        mutation: false,
+    },
+    VerbInfo {
+        name: "workflow_schema",
+        summary: "Return the JSON Schema of a workflow document",
+        parameters: &[],
+        result: "workflow_schema",
+        example: "{}",
+        mutation: false,
+    },
+    VerbInfo {
+        name: "workflow_validate",
+        summary: "Parse and validate a workflow document without running it",
+        parameters: WORKFLOW_SOURCE,
+        result: "workflow_validation",
+        example: r#"{"path": "wf.json"}"#,
+        mutation: false,
+    },
+    VerbInfo {
+        name: "workflow_run",
+        summary: "Run a workflow over input files, directories or glob patterns",
+        parameters: WORKFLOW_RUN_PARAMETERS,
+        result: "workflow_run",
+        example: r#"{"path": "wf.json", "inputs": ["structures/*.cif"], "jobs": 4}"#,
         mutation: false,
     },
 ];

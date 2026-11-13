@@ -49,6 +49,8 @@ pub struct Capabilities {
     pub verbs: Vec<String>,
     /// Readable and writable formats.
     pub formats: Vec<FormatAvailability>,
+    /// Version of the declarative workflow model this build reads.
+    pub workflow_version: u32,
 }
 
 /// One registered format and the directions it supports.
@@ -130,5 +132,6 @@ pub fn capability_report() -> Capabilities {
             .map(|name| (*name).to_owned())
             .collect(),
         formats,
+        workflow_version: crate::workflow::WORKFLOW_VERSION,
     }
 }
