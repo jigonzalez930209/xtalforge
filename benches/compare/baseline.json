@@ -1,0 +1,88 @@
+{
+  "benchmarks": {
+    "cif_read/xtalforge": {
+      "max_ms": 0.7438,
+      "median_ms": 0.617,
+      "min_ms": 0.5933,
+      "output": {
+        "atoms": 114
+      },
+      "repetitions": 15
+    },
+    "neighbors/xtalforge": {
+      "max_ms": 5.1429,
+      "median_ms": 4.6284,
+      "min_ms": 4.4407,
+      "output": {
+        "pairs": 1592
+      },
+      "repetitions": 9
+    },
+    "p1/xtalforge": {
+      "max_ms": 5.1114,
+      "median_ms": 4.7592,
+      "min_ms": 4.5381,
+      "output": {
+        "atoms": 424
+      },
+      "repetitions": 9
+    },
+    "porosity/xtalforge": {
+      "max_ms": 2890.1975,
+      "median_ms": 2889.1092,
+      "min_ms": 2882.1234,
+      "output": {
+        "accessible_volume": 9452.402672
+      },
+      "repetitions": 5
+    },
+    "pxrd/xtalforge": {
+      "max_ms": 306.4709,
+      "median_ms": 303.7224,
+      "min_ms": 303.4416,
+      "output": {
+        "reflections": 314
+      },
+      "repetitions": 5
+    },
+    "supercell/xtalforge": {
+      "max_ms": 2296.326,
+      "median_ms": 2242.409,
+      "min_ms": 2223.369,
+      "output": {
+        "atoms": 1000000
+      },
+      "repetitions": 5
+    },
+    "symmetry/xtalforge": {
+      "max_ms": 67.9322,
+      "median_ms": 66.9846,
+      "min_ms": 66.055,
+      "output": {
+        "space_group": 225
+      },
+      "repetitions": 9
+    }
+  },
+  "environment": {
+    "cpu_model": "AMD Ryzen 9 6900HX with Radeon Graphics",
+    "cpu_threads": 16,
+    "memory_gib": 26.68,
+    "os": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "versions": {
+      "ase": "3.29.0",
+      "gemmi": "0.7.5",
+      "numpy": "2.5.4",
+      "pymatgen": "2026.10.24",
+      "python": "3.14.4",
+      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "spglib": "2.8.0",
+      "xtalforge": "1.7.0",
+      "xtalforge_cli": "1.7.0"
+    }
+  },
+  "release": "1.8.0",
+  "schema_version": 1,
+  "suite": "xtalforge-compare",
+  "threshold_percent": 10.0
+}
