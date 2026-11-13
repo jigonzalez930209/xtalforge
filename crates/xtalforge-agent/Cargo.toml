@@ -31,7 +31,7 @@ thiserror = { workspace = true }
 [features]
 default = []
 # Forwards to the optional Rayon paths of the domain crates.
-parallel = ["xtalforge-core/parallel"]
+parallel = ["xtalforge-core/parallel", "xtalforge-ff/parallel"]
 # Forwards to the optional in-process GFN0/GFN1/GFN2 methods of `xtalforge-ff`.
 sci-form = ["xtalforge-ff/sci-form"]
 # Mirrors the reserved `ml` feature of the facade (Task 8.4).
