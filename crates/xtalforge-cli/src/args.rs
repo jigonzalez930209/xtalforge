@@ -4,6 +4,7 @@ use clap::Subcommand;
 
 use crate::analysis_commands::AnalysisAction;
 use crate::feature_args::FeatureAction;
+use crate::fetch_commands::FetchAction;
 use crate::ff_commands::FfAction;
 use crate::format::StructureFormat;
 use crate::mof_commands::MofAction;
@@ -101,6 +102,11 @@ pub(crate) enum Command {
     Ff {
         #[command(subcommand)]
         action: FfAction,
+    },
+    /// Fetch a structure from OPTIMADE, COD or the Materials Project.
+    Fetch {
+        #[command(subcommand)]
+        action: FetchAction,
     },
     /// List the format registry.
     Formats,

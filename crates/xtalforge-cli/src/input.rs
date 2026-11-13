@@ -14,10 +14,7 @@ pub(crate) fn set_spacegroup_override(symbol: Option<String>) {
 fn spacegroup_override() -> Option<&'static str> {
     SPACEGROUP_OVERRIDE.get().and_then(|value| value.as_deref())
 }
-use xtalforge::io::{decode_text, read_cif, read_poscar, read_xyz};
-
-/// A format reader with a uniform signature.
-type Reader = fn(&str) -> Result<Structure, Error>;
+use xtalforge::io::decode_text;
 
 /// Reads a path, or standard input when `path` is `-`, as a structure.
 ///
@@ -39,7 +36,7 @@ pub(crate) fn structure_from_text(text: &str, path: &str) -> Result<Structure, E
     let structure = if path == "-" {
         detect(text)?
     } else {
-        match extension(path) {
+        match format_hint(path) {
             None => detect(text)?,
             Some(extension) => read_format(text, &extension)?,
         }
@@ -92,6 +89,17 @@ pub(crate) fn structure_from_json(text: &str) -> Result<Structure, Error> {
     }
 }
 
+fn format_hint(path: &str) -> Option<String> {
+    let lower = path.to_ascii_lowercase();
+    if lower.ends_with("geometry.in") {
+        return Some("fhi-aims".to_owned());
+    }
+    if lower.ends_with("vasprun.xml") {
+        return Some("vasprun".to_owned());
+    }
+    extension(path)
+}
+
 fn extension(path: &str) -> Option<String> {
     std::path::Path::new(path)
         .extension()
@@ -100,31 +108,15 @@ fn extension(path: &str) -> Option<String> {
 }
 
 fn read_format(text: &str, format: &str) -> Result<Structure, Error> {
-    match format {
-        "json" => structure_from_json(text),
-        "cif" => read_cif(text),
-        "poscar" | "contcar" | "vasp" => read_poscar(text),
-        "xyz" => read_xyz(text),
-        other => Err(Error::InvalidInput(format!(
-            "unknown structure format: {other}; expected CIF, POSCAR or XYZ"
-        ))),
+    if format == "json" {
+        return structure_from_json(text);
     }
+    xtalforge::io::read_structure(text, format)
 }
 
 fn detect(text: &str) -> Result<Structure, Error> {
     if text.trim_start().starts_with('{') {
         return structure_from_json(text);
     }
-    let readers: [Reader; 3] = [read_cif, read_poscar, read_xyz];
-    let mut last = None;
-    for reader in readers {
-        match reader(text) {
-            Ok(structure) => return Ok(structure),
-            Err(error) => last = Some(error),
-        }
-    }
-    Err(Error::InvalidInput(format!(
-        "could not detect the structure format; expected CIF, POSCAR or XYZ ({})",
-        last.map_or_else(|| "no reader was tried".to_owned(), |error| error.message())
-    )))
+    xtalforge::io::read_structure(text, "")
 }

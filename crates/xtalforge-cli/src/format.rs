@@ -7,6 +7,8 @@ use clap::ValueEnum;
 pub(crate) enum StructureFormat {
     /// Crystallographic Information File.
     Cif,
+    /// mmCIF/PDBx.
+    Mmcif,
     /// VASP POSCAR/CONTCAR.
     Poscar,
     /// Plain or extended XYZ.
@@ -21,8 +23,32 @@ pub(crate) enum StructureFormat {
     Lammps,
     /// SHELX .res/.ins.
     Shelx,
-    /// PDB, write-only.
+    /// PDB.
     Pdb,
+    /// Extended XYZ with arbitrary properties.
+    Extxyz,
+    /// Quantum ESPRESSO pw.x input or output.
+    Pwscf,
+    /// CASTEP .cell.
+    Castep,
+    /// FHI-aims geometry.in.
+    FhiAims,
+    /// CP2K input.
+    Cp2k,
+    /// ABINIT input.
+    Abinit,
+    /// CRYSTAL input.
+    Crystal,
+    /// Tripos MOL2.
+    Mol2,
+    /// SDF/MOL.
+    Sdf,
+    /// VASP OUTCAR.
+    Outcar,
+    /// VASP vasprun.xml.
+    Vasprun,
+    /// OPTIMADE structures entry.
+    Optimade,
 }
 
 impl StructureFormat {
@@ -30,6 +56,7 @@ impl StructureFormat {
     pub(crate) const fn name(self) -> &'static str {
         match self {
             Self::Cif => "cif",
+            Self::Mmcif => "mmcif",
             Self::Poscar => "poscar",
             Self::Xyz => "xyz",
             Self::PmgJson => "pmg-json",
@@ -38,6 +65,18 @@ impl StructureFormat {
             Self::Lammps => "lammps-data",
             Self::Shelx => "shelx",
             Self::Pdb => "pdb",
+            Self::Extxyz => "extxyz",
+            Self::Pwscf => "pwscf",
+            Self::Castep => "castep",
+            Self::FhiAims => "fhi-aims",
+            Self::Cp2k => "cp2k",
+            Self::Abinit => "abinit",
+            Self::Crystal => "crystal",
+            Self::Mol2 => "mol2",
+            Self::Sdf => "sdf",
+            Self::Outcar => "outcar",
+            Self::Vasprun => "vasprun",
+            Self::Optimade => "optimade",
         }
     }
 
@@ -49,14 +88,27 @@ impl StructureFormat {
             .to_ascii_lowercase();
         match extension.as_str() {
             "cif" => Some(Self::Cif),
+            "mmcif" | "pdbx" => Some(Self::Mmcif),
             "poscar" | "contcar" | "vasp" => Some(Self::Poscar),
-            "xyz" | "extxyz" => Some(Self::Xyz),
+            "xyz" => Some(Self::Xyz),
+            "extxyz" => Some(Self::Extxyz),
             "json" => Some(Self::PmgJson),
             "cssr" => Some(Self::Cssr),
             "gen" => Some(Self::Gen),
             "data" | "lmp" => Some(Self::Lammps),
             "res" | "ins" => Some(Self::Shelx),
-            "pdb" => Some(Self::Pdb),
+            "pdb" | "ent" => Some(Self::Pdb),
+            "pwi" | "pwo" | "pwscf" => Some(Self::Pwscf),
+            "cell" => Some(Self::Castep),
+            "aims" | "in" => Some(Self::FhiAims),
+            "cp2k" | "inp" => Some(Self::Cp2k),
+            "abi" | "abinit" => Some(Self::Abinit),
+            "crystal" | "d12" => Some(Self::Crystal),
+            "mol2" => Some(Self::Mol2),
+            "sdf" | "mol" | "mdl" => Some(Self::Sdf),
+            "outcar" => Some(Self::Outcar),
+            "vasprun" | "xml" => Some(Self::Vasprun),
+            "optimade" => Some(Self::Optimade),
             _ => None,
         }
     }

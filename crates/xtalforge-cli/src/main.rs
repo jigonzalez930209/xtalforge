@@ -26,6 +26,7 @@ mod feature_edits;
 mod feature_local;
 mod feature_mechanics;
 mod feature_surfaces;
+mod fetch_commands;
 mod ff_commands;
 mod format;
 mod input;
