@@ -1,8 +1,22 @@
 # RCSR facts (Task 14.4.2)
 
-`rcsr_facts.tsv` is the searchable half of the RCSR catalogue: periodicity,
+`rcsr_facts.tsv.gz` is the searchable half of the RCSR catalogue: periodicity,
 coordination numbers, the Hermann-Mauguin group the RCSR writes the net in,
 and the Blatov transitivity `p q r s` (kinds of vertex, edge, face and tile).
+
+## Compression (Task 15.3.2)
+
+The crate embeds the gzip file and decompresses it on first use, after
+verifying its SHA-256 checksum:
+
+```bash
+gzip -dc rcsr_facts.tsv.gz | sha256sum
+```
+
+The manifest constant lives in `../src/netsearch.rs`. `icsd_bv.json.gz` and
+`rcsr_index.bin.gz` use the same scheme; the smaller `bvparam_1991.json`,
+`it92.json` and `neutron.json` stay embedded uncompressed because gzip would
+save less than 4 KiB in total.
 
 ## Provenance
 
