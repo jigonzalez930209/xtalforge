@@ -18,6 +18,25 @@ pub struct ModuleInfo {
     pub parameters: Vec<String>,
 }
 
+/// Description of one module, as reported by a listing.
+///
+/// It extends [`ModuleInfo`] with the availability probe, so a CLI, a front
+/// end or a JSON client can show which modules can run in this build without
+/// instantiating them.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ModuleListing {
+    /// Stable name.
+    pub name: String,
+    /// One-line description.
+    pub description: String,
+    /// Version of the module implementation.
+    pub version: String,
+    /// Parameter names it accepts.
+    pub parameters: Vec<String>,
+    /// Whether the module can run in this build and environment.
+    pub available: bool,
+}
+
 /// A module that can be registered.
 pub trait Module: std::fmt::Debug + Send + Sync {
     /// Description.
@@ -95,5 +114,38 @@ impl ModuleRegistry {
     #[must_use]
     pub fn list(&self) -> Vec<ModuleInfo> {
         self.modules.values().map(|module| module.info()).collect()
+    }
+
+    /// Lists every module with its availability, sorted by name.
+    ///
+    /// The registry is keyed by a [`BTreeMap`], so the order is stable across
+    /// runs and platforms. Each entry calls [`Module::available`], which is
+    /// expected to be a cheap probe.
+    #[must_use]
+    pub fn listing(&self) -> Vec<ModuleListing> {
+        self.modules
+            .values()
+            .map(|module| {
+                let info = module.info();
+                ModuleListing {
+                    name: info.name,
+                    description: info.description,
+                    version: info.version,
+                    parameters: info.parameters,
+                    available: module.available(),
+                }
+            })
+            .collect()
+    }
+
+    /// Serializes [`ModuleRegistry::listing`] as pretty JSON.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] when serialization fails.
+    pub fn listing_json(&self) -> Result<String, Error> {
+        serde_json::to_string_pretty(&self.listing()).map_err(|error| {
+            Error::InvalidInput(format!("could not serialize the module listing: {error}"))
+        })
     }
 }
