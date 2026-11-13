@@ -298,6 +298,9 @@ def mesh_stl(
     format_hint: str | None = None,
 ) -> str: ...
 
+def mesh_obj(text: str, style: str = "ball-stick", scale: float = 1.0, format_hint: str | None = None) -> str: ...
+def mesh_gltf(text: str, style: str = "ball-stick", scale: float = 1.0, format_hint: str | None = None) -> str: ...
+
 def pxrd(
     text: str,
     radiation: str = "cu-ka",
