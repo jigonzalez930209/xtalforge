@@ -363,7 +363,16 @@ fn make_structure(
     if let Some(scale) = adp_scale {
         for (index, site) in sites.iter_mut().enumerate() {
             let base_u = base_u.get(index).copied().unwrap_or(DEFAULT_U_ISO);
-            *site = site.clone().with_u_iso((base_u * scale).max(0.0))?;
+            if let Some(aniso) = site.u_aniso() {
+                // Anisotropic parameters take precedence in the scattering
+                // engine, so the global multiplier scales all six components
+                // and leaves `U_iso` alone.
+                *site = site
+                    .clone()
+                    .with_u_aniso(aniso.map(|value| value * scale))?;
+            } else {
+                *site = site.clone().with_u_iso((base_u * scale).max(0.0))?;
+            }
         }
     }
     if cell_changed {
