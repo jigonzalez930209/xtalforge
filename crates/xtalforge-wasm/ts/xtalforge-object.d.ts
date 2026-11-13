@@ -77,3 +77,6 @@ export function meshBuffers(text: string, formatHint: string): MeshBuffers;
 
 export function fetch_optimade(url: string): Promise<string>;
 export function fetch_cod(id: string): Promise<string>;
+
+export function mesh_obj(text: string, style: string, scale: number): string;
+export function mesh_gltf(text: string, style: string, scale: number): string;
