@@ -24,7 +24,7 @@ clap_complete = { workspace = true }
 clap_mangen = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
-xtalforge = { workspace = true }
+xtalforge = { workspace = true, features = ["net"] }
 
 [lints]
 workspace = true
