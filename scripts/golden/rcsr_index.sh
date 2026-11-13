@@ -14,4 +14,4 @@ trap 'rm -f "$json"' EXIT
 gzip -dc "$root/data/rcsr/rcsr-2019-06-01.json.gz" > "$json"
 cargo run --release --manifest-path "$root/Cargo.toml" \
   -p xtalforge-analysis --example build_rcsr_index -- \
-  "$json" "$root/crates/xtalforge-analysis/data/rcsr_index.bin"
+  "$json" "$root/crates/xtalforge-analysis/data/rcsr_index.bin.gz"
