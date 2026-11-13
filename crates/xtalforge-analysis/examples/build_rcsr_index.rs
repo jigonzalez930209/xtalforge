@@ -2,7 +2,10 @@
 //!
 //! Input is the decompressed Crystal-Builder `rcsr-2019-06-01.json`
 //! (`gzip -dc rcsr-2019-06-01.json.gz > /tmp/rcsr.json`); output is the
-//! compact binary in `crates/xtalforge-analysis/data/rcsr_index.bin`.
+//! compact gzip binary in
+//! `crates/xtalforge-analysis/data/rcsr_index.bin.gz` (Task 15.3.2). The
+//! program prints the SHA-256 of the decompressed payload, which is the
+//! manifest constant in `src/rcsr.rs`.
 //!
 //! Every keyed catalogue entry is rebuilt from its canonical key and its
 //! fingerprint is compared with the row before the entry is written. The
@@ -10,6 +13,7 @@
 //! data it describes.
 
 use std::collections::BTreeMap;
+use std::io::Write;
 use std::path::PathBuf;
 
 use xtalforge_analysis::{NetFingerprint, QuotientGraph, fingerprint};
@@ -24,7 +28,7 @@ fn main() -> Result<(), Failure> {
         .next()
         .map_or_else(|| PathBuf::from("/tmp/rcsr.json"), PathBuf::from);
     let output = arguments.next().map_or_else(
-        || PathBuf::from("crates/xtalforge-analysis/data/rcsr_index.bin"),
+        || PathBuf::from("crates/xtalforge-analysis/data/rcsr_index.bin.gz"),
         PathBuf::from,
     );
     let text = std::fs::read_to_string(&input)?;
@@ -132,16 +136,26 @@ fn main() -> Result<(), Failure> {
         }
         bytes.extend_from_slice(&hash.to_le_bytes());
     }
-    std::fs::write(&output, &bytes)?;
+    let mut encoder = flate2::write::GzEncoder::new(Vec::new(), flate2::Compression::best());
+    encoder.write_all(&bytes)?;
+    let compressed = encoder.finish()?;
+    std::fs::write(&output, &compressed)?;
+    use sha2::{Digest, Sha256};
+    let digest: String = Sha256::digest(&bytes)
+        .iter()
+        .map(|byte| format!("{byte:02x}"))
+        .collect();
     println!(
-        "wrote {} entries ({} keyed, {} unkeyed, {} shared hashes, salt {}) to {} ({} bytes)",
+        "wrote {} entries ({} keyed, {} unkeyed, {} shared hashes, salt {}) to {} ({} -> {} bytes)",
         entries.len(),
         keyed,
         entries.len() - keyed,
         entries.len() - hashes.len(),
         salt,
         output.display(),
-        bytes.len()
+        bytes.len(),
+        compressed.len()
     );
+    println!("decompressed sha256: {digest}");
     Ok(())
 }
