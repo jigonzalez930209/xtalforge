@@ -24,6 +24,7 @@
 //! | `sci-form` | no | Links the published `sci-form` crate for in-process GFN0/GFN1/GFN2. |
 //! | `ml` | no | Reserved for the Python machine-learning bridge (Task 8.4). |
 //! | `external` | no | Reserved for the subprocess engines (Task 4.9). |
+//! | `net` | no | Blocking HTTP for OPTIMADE, COD and Materials Project fetches (Task 13.3). |
 //! | `mof-data` | no | Reserved for the complete PORMAKE bundle (Task 10.5.7). |
 //!
 //! Disable default features with `default-features = false` to build without
@@ -55,6 +56,8 @@ pub use xtalforge_modules as modules;
 pub use xtalforge_mof as mof;
 pub use xtalforge_symmetry as symmetry;
 pub use xtalforge_view as view;
+
+pub mod remote;
 
 /// A structure read from disk or text together with its warnings.
 #[derive(Debug, Clone, PartialEq)]
