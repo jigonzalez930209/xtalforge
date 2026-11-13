@@ -21,6 +21,10 @@ xtalforge-symmetry = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 
+[dev-dependencies]
+flate2 = { workspace = true }
+sha2 = { workspace = true }
+
 [lints]
 workspace = true
 
