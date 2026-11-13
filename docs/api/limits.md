@@ -8,6 +8,7 @@ operation is refused and the message says what would fit.
 |---|---|---|
 | `standard` | table value | table value |
 | `generous` | 2x | 2x |
+| `huge` | million-atom work | 64 GB class, per-operation budgets |
 | `warn_only` | table value | never refuses |
 
 The table (Standard) is: drawn 100,000 / 400,000; supercell 50,000 / 200,000;
@@ -71,6 +72,6 @@ matching budget.
 
 ## Surfaces
 
-The CLI has the global `--limits {standard,generous,warn-only}` flag. Python
+The CLI has the global `--limits {standard,generous,huge,warn-only}` flag. Python
 takes `limits_check(profile, budget, estimate)`; WASM takes the same and
 returns an object. WASM defaults to `standard` because browser memory is small.
