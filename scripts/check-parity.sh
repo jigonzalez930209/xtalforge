@@ -103,6 +103,11 @@ check_rust() {
     cod_fetch) name=cod_fetch ;;
     materials_project_fetch) name=materials_project_fetch ;;
     interop_formats) grep -Rq 'name: "castep"' crates/xtalforge-io/src; return ;;
+    diffraction_profiles) name=calculate_pxrd_profile ;;
+    md) name=molecular_dynamics ;;
+    net_contraction) name=contract ;;
+    mesh_export) name=write_obj ;;
+    report_renderers) name=to_html ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -122,6 +127,7 @@ check_python() {
     get_symmetry_dataset) grep -Rq --include='*.pyi' "def get_symmetry_dataset" "$PY_STUB"; return ;;
     python_plugins) test -f "$PY_STUB/plugins.py"; return ;;
     interop_formats) grep -q "def read(" "$PY_STUB/__init__.pyi"; return ;;
+    mesh_export) grep -Rq --include='*.pyi' "def mesh_obj" "$PY_STUB"; return ;;
   esac
   case "$name" in
     prepare) name=ff_prepare ;;
@@ -146,6 +152,7 @@ check_wasm() {
     optimade_fetch) grep -q "pub async fn fetch_optimade" "$ROOT/crates/xtalforge-wasm/src/remote_export.rs"; return ;;
     cod_fetch) grep -q "pub async fn fetch_cod" "$ROOT/crates/xtalforge-wasm/src/remote_export.rs"; return ;;
     interop_formats) grep -q "function read(" "$WASM_TS"; return ;;
+    mesh_export) grep -q "function mesh_obj(" "$WASM_TS"; return ;;
   esac
   case "$name" in
     supercell) name=supercell_info ;;
@@ -247,6 +254,8 @@ check_cli() {
     structure_handle|structure_from_arrays|typed_results|typed_arrays|batch_api|wasm_worker|node_entry) command=version ;;
     optimade_fetch|cod_fetch|materials_project_fetch) command=fetch ;;
     interop_formats) command=convert ;;
+    diffraction_profiles) command=pxrd ;;
+    mesh_export) command=mesh ;;
     match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
     deform) command=deform ;;
     rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;

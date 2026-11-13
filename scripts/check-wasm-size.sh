@@ -22,6 +22,9 @@
 # trajectories, extxyz properties and browser remote fetchers (5301 KiB
 # measured).
 #
+# 5504 KiB since 1.7.0: the diffraction profile model, MD/scan control, mesh
+# export and net contraction (5398 KiB measured).
+#
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
 set -u
@@ -29,7 +32,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=5376
+BUDGET_KIB=5504
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
