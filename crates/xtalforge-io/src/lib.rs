@@ -28,6 +28,7 @@ pub mod pdb;
 pub mod pmg;
 pub mod poscar;
 pub mod project;
+pub mod provenance;
 pub mod pwscf;
 pub mod registry;
 pub mod sdf;
@@ -62,6 +63,10 @@ pub use pdb::{read_pdb, write_pdb};
 pub use pmg::{read_pmg_json, write_pmg_json};
 pub use poscar::{read_poscar, write_poscar};
 pub use project::{FORMAT_VERSION, ProjectParts, read_project, write_project};
+pub use provenance::{
+    CIF_PROVENANCE_COMMENT, CIF_PROVENANCE_TAG, PROJECT_PROVENANCE_KEY, ProvenanceSource,
+    XYZ_PROVENANCE_KEY, provenance,
+};
 pub use pwscf::{read_pwscf, write_pwscf};
 pub use sdf::{read_sdf, read_sdf_all, write_sdf};
 pub use shelx::{read_shelx, write_shelx};

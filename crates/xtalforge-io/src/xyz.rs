@@ -11,9 +11,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use serde_json::Value;
-use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder};
+use xtalforge_core::{
+    Error, Lattice, PROVENANCE_METADATA_KEY, Provenance, Site, Structure, StructureBuilder,
+};
 
 use crate::molecule::{MoleculeAtom, molecule_box};
+use crate::provenance::{XYZ_PROVENANCE_KEY, provenance_from_xyz_info, xyz_provenance_pair};
 use crate::trajectory::parse_info;
 
 mod properties;
@@ -59,15 +62,29 @@ pub fn read_xyz(text: &str) -> Result<Structure, Error> {
                 let site = Site::new(label, &record.element, lattice.to_frac(record.cart))?;
                 builder = builder.site(properties::decorate(site, record));
             }
-            for (key, value) in &info {
-                if key != "Lattice" && key != "Properties" {
-                    builder = builder.metadata(key.clone(), Value::String(value.clone()));
-                }
-            }
+            let builder = apply_info(builder, &info)?;
             builder.build()
         }
         None => molecule_from_records(name, &records, &info),
     }
+}
+
+/// Copies comment pairs into metadata and attaches an embedded provenance
+/// record.
+fn apply_info(
+    mut builder: StructureBuilder,
+    info: &BTreeMap<String, String>,
+) -> Result<StructureBuilder, Error> {
+    for (key, value) in info {
+        if key == "Lattice" || key == "Properties" || key == XYZ_PROVENANCE_KEY {
+            continue;
+        }
+        builder = builder.metadata(key.clone(), Value::String(value.clone()));
+    }
+    if let Some(record) = provenance_from_xyz_info(info)? {
+        builder = builder.metadata(PROVENANCE_METADATA_KEY, Value::String(record.to_json()?));
+    }
+    Ok(builder)
 }
 
 fn molecule_from_records(
@@ -92,19 +109,17 @@ fn molecule_from_records(
     for (site, record) in base.sites().iter().zip(records) {
         builder = builder.site(properties::decorate(site.clone(), record));
     }
-    for (key, value) in info {
-        if key != "Lattice" && key != "Properties" {
-            builder = builder.metadata(key.clone(), Value::String(value.clone()));
-        }
-    }
+    let builder = apply_info(builder, info)?;
     builder.build()
 }
 
 /// Writes an extended XYZ with `Lattice`, `Properties` and scalar metadata.
 ///
 /// Per-atom properties shared by every site become extra `Properties` columns.
-/// Scalar structure metadata becomes comment pairs. A structure with no extra
-/// properties writes the historical `species:S:1:pos:R:3` header.
+/// Scalar structure metadata becomes comment pairs. A structure carrying a
+/// [`Provenance`] record writes it as the base64 `xtalforge_provenance` pair.
+/// A structure with no extra properties writes the historical
+/// `species:S:1:pos:R:3` header.
 ///
 /// # Errors
 ///
@@ -126,8 +141,17 @@ pub fn write_xyz(structure: &Structure) -> Result<String, Error> {
         declaration.push_str(&format!(":{}:{}:{}", column.key, column.kind, column.count));
     }
     header.push_str(&format!(" Properties={declaration}"));
+    if let Some(record) = Provenance::from_structure(structure)? {
+        header.push(' ');
+        header.push_str(&xyz_provenance_pair(&record)?);
+    }
     for (key, value) in structure.metadata() {
-        if key.contains("warning") || !is_scalar(value) || key == "extxyz_info" {
+        if key.contains("warning")
+            || !is_scalar(value)
+            || key == "extxyz_info"
+            || key == PROVENANCE_METADATA_KEY
+            || key == XYZ_PROVENANCE_KEY
+        {
             continue;
         }
         let Some(text) = scalar_text(value) else {

@@ -189,7 +189,7 @@ pub fn write_trajectory_xyz(trajectory: &Trajectory) -> Result<String, Error> {
     Ok(out)
 }
 
-pub(super) fn parse_info(comment: &str) -> BTreeMap<String, String> {
+pub(crate) fn parse_info(comment: &str) -> BTreeMap<String, String> {
     let mut info = BTreeMap::new();
     let mut tokens = Vec::new();
     let mut current = String::new();

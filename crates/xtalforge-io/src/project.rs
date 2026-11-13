@@ -11,10 +11,11 @@
 use std::io::{Cursor, Read, Write};
 
 use serde_json::Value;
-use xtalforge_core::{Error, Structure};
+use xtalforge_core::{Error, Provenance, Structure};
 use zip::write::SimpleFileOptions;
 
 use crate::cif::{read_cif, write_cif};
+use crate::provenance::PROJECT_PROVENANCE_KEY;
 
 /// Current project format version, independent of the crate version.
 pub const FORMAT_VERSION: u32 = 1;
@@ -67,6 +68,49 @@ impl ProjectParts {
     /// Returns the errors of the CIF reader.
     pub fn structure(&self) -> Result<Structure, Error> {
         read_cif(&self.structure_cif)
+    }
+
+    /// Stores a provenance record in the `provenance` key of `session.json`.
+    ///
+    /// An existing record is replaced and every other session entry is kept.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] when the record is invalid, the session
+    /// part is present but not a JSON object, or the record cannot be
+    /// serialized.
+    pub fn with_provenance(mut self, record: &Provenance) -> Result<Self, Error> {
+        record.validate()?;
+        let value = serde_json::to_value(record).map_err(|error| {
+            Error::InvalidInput(format!("provenance: could not serialize record: {error}"))
+        })?;
+        let mut session = match self.session.take() {
+            Some(Value::Object(session)) => session,
+            Some(_) => {
+                return Err(Error::InvalidInput(
+                    "project session part is not a JSON object".to_owned(),
+                ));
+            }
+            None => serde_json::Map::new(),
+        };
+        session.insert(PROJECT_PROVENANCE_KEY.to_owned(), value);
+        self.session = Some(Value::Object(session));
+        Ok(self)
+    }
+
+    /// Reads the provenance record stored in `session.json`, if any.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] when the record is present but invalid.
+    pub fn provenance(&self) -> Result<Option<Provenance>, Error> {
+        let Some(session) = &self.session else {
+            return Ok(None);
+        };
+        let Some(value) = session.get(PROJECT_PROVENANCE_KEY) else {
+            return Ok(None);
+        };
+        Provenance::from_value(value).map(Some)
     }
 }
 
