@@ -9,6 +9,11 @@ use crate::structures::load_structure;
 
 /// Detects the space group, operations, orbits and Wyckoff letters.
 ///
+/// Also reports the standardized elements, the primitive standardized
+/// lattice and positions, the input-to-standard linear map, the Hall symbol,
+/// the setting description and the point group, so the adapter can build a
+/// spglib-shaped dataset without a second search.
+///
 /// Parameters
 /// ----------
 /// text:
@@ -94,6 +99,29 @@ pub(crate) fn detect_symmetry<'py>(
             .map(|row| row.to_vec())
             .collect::<Vec<_>>(),
     )?;
+    dict.set_item(
+        "std_linear",
+        dataset
+            .std_linear
+            .iter()
+            .map(|row| row.to_vec())
+            .collect::<Vec<_>>(),
+    )?;
+    dict.set_item("std_elements", &dataset.std_elements)?;
+    dict.set_item(
+        "prim_std_lattice",
+        dataset
+            .prim_std_lattice
+            .iter()
+            .map(|row| row.to_vec())
+            .collect::<Vec<_>>(),
+    )?;
+    dict.set_item("mapping_to_primitive", &dataset.mapping_std_prim)?;
+    let group = xtalforge::symmetry::SpaceGroup::from_hall_number(dataset.hall_number)
+        .map_err(crate::map_error)?;
+    dict.set_item("hall_symbol", &group.hall_symbol)?;
+    dict.set_item("setting", &group.setting)?;
+    dict.set_item("point_group", &group.point_group)?;
     Ok(dict)
 }
 

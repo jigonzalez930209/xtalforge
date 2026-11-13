@@ -9,6 +9,11 @@ use crate::classes::{Lattice, P1Cell, Site, numpy_array1, numpy_array2, triple};
 
 type RingPath = Vec<Vec<(usize, (i32, i32, i32))>>;
 
+/// Looks up one public function of the pure-Python adapter module.
+fn adapter_function<'py>(py: Python<'py>, name: &str) -> PyResult<Bound<'py, PyAny>> {
+    py.import("xtalforge.adapters")?.getattr(name)
+}
+
 /// A crystal structure: lattice, Hall symbol and asymmetric sites.
 #[pyclass(name = "Structure", module = "xtalforge")]
 #[derive(Clone)]
@@ -343,6 +348,105 @@ impl Structure {
 
     fn to_json(&self) -> PyResult<String> {
         self.inner.to_document().to_json().map_err(crate::map_error)
+    }
+
+    /// A padded P1 box around a finite molecule (adapter support).
+    #[staticmethod]
+    #[pyo3(signature = (name, points, padding = 10.0))]
+    fn _molecule(name: &str, points: Vec<(String, Vec<f64>)>, padding: f64) -> PyResult<Self> {
+        let mut converted = Vec::with_capacity(points.len());
+        for (element, point) in &points {
+            converted.push((element.clone(), crate::classes::triple(point)?));
+        }
+        Ok(Self {
+            inner: CoreStructure::molecule(name, &converted, padding).map_err(crate::map_error)?,
+        })
+    }
+
+    /// Builds a structure from a core JSON document or a bare structure object.
+    #[staticmethod]
+    fn _from_json(text: &str) -> PyResult<Self> {
+        Ok(Self {
+            inner: crate::structures::load_structure(text, None)?,
+        })
+    }
+
+    /// The explicit P1 cell as a versioned structure JSON document.
+    fn _p1_json(&self) -> PyResult<String> {
+        self.inner
+            .as_p1()
+            .map_err(crate::map_error)?
+            .to_document()
+            .to_json()
+            .map_err(crate::map_error)
+    }
+
+    /// UFF energy in eV and forces in eV/Angstrom over the P1 atoms.
+    fn _ff_energy_forces(&self) -> PyResult<(f64, Vec<Vec<f64>>)> {
+        let calculator =
+            xtalforge::ff::UffCalculator::new(xtalforge::ff::CalculatorOptions::default())
+                .map_err(crate::map_ff_error)?;
+        let (energy, forces) = xtalforge::ff::Calculator::energy_forces(&calculator, &self.inner)
+            .map_err(crate::map_ff_error)?;
+        Ok((
+            energy,
+            forces.into_iter().map(|force| force.to_vec()).collect(),
+        ))
+    }
+
+    /// Converts an ASE ``Atoms`` object into a P1 structure (Task 13.1.1).
+    #[staticmethod]
+    fn from_ase(py: Python<'_>, atoms: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let text: String = adapter_function(py, "ase_to_structure_json")?
+            .call1((atoms,))?
+            .extract()?;
+        Self::_from_json(&text)
+    }
+
+    /// Converts this structure into an ASE ``Atoms`` object (Task 13.1.1).
+    fn to_ase(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        Ok(adapter_function(py, "structure_to_ase")?
+            .call1((self._p1_json()?,))?
+            .unbind())
+    }
+
+    /// Converts a pymatgen ``Structure`` or ``Molecule`` (Task 13.1.2).
+    #[staticmethod]
+    fn from_pymatgen(py: Python<'_>, structure_or_molecule: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let text: String = adapter_function(py, "pymatgen_to_structure_json")?
+            .call1((structure_or_molecule,))?
+            .extract()?;
+        Self::_from_json(&text)
+    }
+
+    /// Converts this structure into a pymatgen ``Structure`` or ``Molecule``.
+    fn to_pymatgen(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        Ok(adapter_function(py, "structure_to_pymatgen")?
+            .call1((self._p1_json()?,))?
+            .unbind())
+    }
+
+    /// Converts this structure into a phonopy ``PhonopyAtoms`` (Task 13.1.3).
+    fn to_phonopy_atoms(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        Ok(adapter_function(py, "structure_to_phonopy_atoms")?
+            .call1((self._p1_json()?,))?
+            .unbind())
+    }
+
+    /// Converts an RDKit ``Mol`` with a conformer into a P1 structure.
+    #[staticmethod]
+    fn from_rdkit(py: Python<'_>, mol: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let text: String = adapter_function(py, "rdkit_to_structure_json")?
+            .call1((mol,))?
+            .extract()?;
+        Self::_from_json(&text)
+    }
+
+    /// Converts this structure into an RDKit ``Mol`` with a conformer.
+    fn to_rdkit(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        Ok(adapter_function(py, "structure_to_rdkit")?
+            .call1((self._p1_json()?,))?
+            .unbind())
     }
 
     fn __repr__(&self) -> String {
