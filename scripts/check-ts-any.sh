@@ -12,7 +12,7 @@ if grep -nE '\bany\b' "$TS" >/dev/null; then
   status=1
 fi
 if [ -f "$DTS" ]; then
-  for symbol in "class Structure" "scene_buffers" "pxrd_buffers" "mesh_buffers"; do
+  for symbol in "class Structure" "scene_buffers" "pxrd_buffers" "mesh_buffers" "fetch_optimade" "fetch_cod"; do
     grep -q "$symbol" "$DTS" || { echo "FAIL: $DTS is missing $symbol" >&2; status=1; }
   done
 fi

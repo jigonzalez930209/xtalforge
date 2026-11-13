@@ -99,6 +99,10 @@ check_rust() {
     typed_arrays) name=radial_distribution ;;
     batch_api) name=read ;;
     wasm_worker) name=build_scene ;;
+    optimade_fetch) name=optimade_query ;;
+    cod_fetch) name=cod_fetch ;;
+    materials_project_fetch) name=materials_project_fetch ;;
+    interop_formats) grep -Rq 'name: "castep"' crates/xtalforge-io/src; return ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -111,6 +115,13 @@ check_python() {
     typed_results) grep -Rq --include='*.pyi' "class SymmetryDataset" "$PY_STUB"; return ;;
     typed_arrays) grep -Rq --include='*.pyi' "positions: list" "$PY_STUB"; return ;;
     batch_api) grep -q "def read(" "$ROOT/crates/xtalforge-python/python/xtalforge/batch.pyi"; return ;;
+    ase_adapter) grep -Rq --include='*.pyi' "def from_ase" "$PY_STUB"; return ;;
+    pymatgen_adapter) grep -Rq --include='*.pyi' "def from_pymatgen" "$PY_STUB"; return ;;
+    phonopy_adapter) grep -Rq --include='*.pyi' "def to_phonopy_atoms" "$PY_STUB"; return ;;
+    rdkit_adapter) grep -Rq --include='*.pyi' "def from_rdkit" "$PY_STUB"; return ;;
+    get_symmetry_dataset) grep -Rq --include='*.pyi' "def get_symmetry_dataset" "$PY_STUB"; return ;;
+    python_plugins) test -f "$PY_STUB/plugins.py"; return ;;
+    interop_formats) grep -q "def read(" "$PY_STUB/__init__.pyi"; return ;;
   esac
   case "$name" in
     prepare) name=ff_prepare ;;
@@ -132,6 +143,9 @@ check_wasm() {
     typed_arrays) grep -q "function scene_buffers(" "$WASM_TS"; return ;;
     wasm_worker) test -f "$ROOT/crates/xtalforge-wasm/js/worker.js"; return ;;
     node_entry) test -f "$ROOT/crates/xtalforge-wasm/js/node.js"; return ;;
+    optimade_fetch) grep -q "pub async fn fetch_optimade" "$ROOT/crates/xtalforge-wasm/src/remote_export.rs"; return ;;
+    cod_fetch) grep -q "pub async fn fetch_cod" "$ROOT/crates/xtalforge-wasm/src/remote_export.rs"; return ;;
+    interop_formats) grep -q "function read(" "$WASM_TS"; return ;;
   esac
   case "$name" in
     supercell) name=supercell_info ;;
@@ -231,6 +245,8 @@ check_cli() {
     substitute_structure) command=substitute ;;
     place_guest_structure) command=guest ;;
     structure_handle|structure_from_arrays|typed_results|typed_arrays|batch_api|wasm_worker|node_entry) command=version ;;
+    optimade_fetch|cod_fetch|materials_project_fetch) command=fetch ;;
+    interop_formats) command=convert ;;
     match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
     deform) command=deform ;;
     rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;
