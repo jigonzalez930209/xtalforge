@@ -5,6 +5,38 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.6.0] - 2026-11-13
+
+Phase 13 makes xtalforge interoperable with the objects and files users
+already work with. The public API is additive.
+
+### Added
+
+- Python object adapters: `Structure.from_ase`/`to_ase`, `from_pymatgen`/
+  `to_pymatgen`, `to_phonopy_atoms`, `from_rdkit`/`to_rdkit`, the
+  spglib-shaped `get_symmetry_dataset` and the native `AseCalculator`.
+  Optional packages are imported only when an adapter is called.
+- File formats: Quantum ESPRESSO `pw.x` input/output, CASTEP `.cell`,
+  FHI-aims `geometry.in`, CP2K, ABINIT, CRYSTAL, mmCIF/PDBx, a PDB reader,
+  OUTCAR, `vasprun.xml`, MOL2, SDF/MOL and extxyz properties.
+- Remote data: `net`-gated OPTIMADE, COD and Materials Project fetchers with
+  a deterministic cache, `optimade_export`, CLI `fetch`, and browser
+  `fetch_optimade`/`fetch_cod` in the WASM package.
+- Python entry-point plugins in `xtalforge.plugins`, an installable template
+  in `examples/python-plugin`, and the plugin guide.
+- Migration guides from ASE, pymatgen and spglib; the interoperability API
+  page and 10 parity rows.
+
+### Changed
+
+- The CLI reads and writes through the complete format registry instead of
+  the original CIF/POSCAR/XYZ switch.
+
+### Fixed
+
+- PDB is now readable as well as writable, and CIF/mmCIF accepts Cartesian
+  `_atom_site` coordinates.
+
 ## [1.5.1] - 2026-11-13
 
 ### Added

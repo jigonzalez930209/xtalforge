@@ -8,14 +8,11 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.5.1` published on 2026-11-13. Phases 0-11 are complete and the
-> Phase 12 binding work shipped in `1.5.0`; Tasks 12.1.4 (progress and
-> cancellation), 12.3.5 (optional threads) and 12.4.1 (tutorial, playground
-> and benchmark) remain open. The public API is frozen; later changes follow
-> the SemVer policy in `docs/api/stability.md`. `1.5.0` added the
-> object-oriented Python and WASM APIs, NumPy/typed arrays, typed result
-> classes, batch helpers and the typed TypeScript interface; `1.5.1` is the
-> icon and package-metadata patch. The known reference gaps are
+> Status: `1.6.0` published on 2026-11-13. Phases 0-13 are complete; Phase 14
+> is next. The public API is frozen; later changes follow the SemVer policy in
+> `docs/api/stability.md`. `1.6.0` adds the ASE, pymatgen, phonopy/spglib and
+> RDKit adapters, the extended format registry, OPTIMADE/COD/Materials
+> Project fetching and Python entry-point plugins. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
@@ -27,9 +24,11 @@ parity with the Rust API.
 - Symmetry: space-group detection, Wyckoff positions, standard and primitive
   cells, lattice reduction, subgroups, layer and magnetic groups, molecular
   point groups, Brillouin zones and band paths.
-- Formats and editing: CIF, POSCAR, XYZ, pymatgen JSON, CSSR, GEN, LAMMPS,
-  SHELX and PDB; atomic writes, project archives, undo/redo documents,
-  selections, workspace runs and scene data.
+- Formats and editing: CIF, mmCIF/PDBx, POSCAR, XYZ/extxyz, pymatgen JSON,
+  CSSR, GEN, LAMMPS, SHELX, PDB, Quantum ESPRESSO, CASTEP, FHI-aims, CP2K,
+  ABINIT, CRYSTAL, OUTCAR, vasprun.xml, MOL2 and SDF/MOL; atomic writes,
+  project archives, undo/redo documents, selections, workspace runs and scene
+  data.
 - Force fields and thermodynamics: native UFF/UFF4MOF, QEq/EQeq/EEQ charges,
   Ewald, FIRE/L-BFGS, scans, Gamma-point vibrations, IR, thermochemistry and
   quasi-harmonic free energies.
@@ -49,6 +48,8 @@ parity with the Rust API.
   MCP over stdio and skill documents; open extension registries.
 - Machine learning: the Python ASE bridge for MACE, ORB-v3 and MatterSim, with
   a checksum-verified model cache.
+- Interoperability: ASE, pymatgen, phonopy/spglib and RDKit object adapters;
+  OPTIMADE, COD and Materials Project fetching; Python entry-point plugins.
 - Four surfaces at parity, with documented exceptions for the filesystem,
   subprocesses and threads in WASM. See `docs/api/parity.md`.
 
@@ -57,9 +58,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.5.1
-pip install xtalforge==1.5.1
-npm install xtalforge-wasm@1.5.1
+cargo add xtalforge@1.6.0
+pip install xtalforge==1.6.0
+npm install xtalforge-wasm@1.6.0
 ```
 
 ## Goals

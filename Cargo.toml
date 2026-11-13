@@ -21,7 +21,7 @@ members = [
 ]
 
 [workspace.package]
-version = "1.5.1"
+version = "1.6.0"
 edition = "2024"
 rust-version = "1.89"
 license = "MIT OR Apache-2.0"
@@ -34,18 +34,18 @@ categories = ["science", "simulation"]
 
 [workspace.dependencies]
 # Internal crates. `scripts/sync-version.sh` rewrites the pinned versions.
-xtalforge = { version = "=1.5.1", path = "crates/xtalforge" }
-xtalforge-agent = { version = "=1.5.1", path = "crates/xtalforge-agent" }
-xtalforge-core = { version = "=1.5.1", path = "crates/xtalforge-core" }
-xtalforge-ff = { version = "=1.5.1", path = "crates/xtalforge-ff" }
-xtalforge-io = { version = "=1.5.1", path = "crates/xtalforge-io" }
-xtalforge-mof = { version = "=1.5.1", path = "crates/xtalforge-mof" }
-xtalforge-modules = { version = "=1.5.1", path = "crates/xtalforge-modules" }
-xtalforge-analysis = { version = "=1.5.1", path = "crates/xtalforge-analysis" }
-xtalforge-build = { version = "=1.5.1", path = "crates/xtalforge-build" }
-xtalforge-commands = { version = "=1.5.1", path = "crates/xtalforge-commands" }
-xtalforge-symmetry = { version = "=1.5.1", path = "crates/xtalforge-symmetry" }
-xtalforge-view = { version = "=1.5.1", path = "crates/xtalforge-view" }
+xtalforge = { version = "=1.6.0", path = "crates/xtalforge" }
+xtalforge-agent = { version = "=1.6.0", path = "crates/xtalforge-agent" }
+xtalforge-core = { version = "=1.6.0", path = "crates/xtalforge-core" }
+xtalforge-ff = { version = "=1.6.0", path = "crates/xtalforge-ff" }
+xtalforge-io = { version = "=1.6.0", path = "crates/xtalforge-io" }
+xtalforge-mof = { version = "=1.6.0", path = "crates/xtalforge-mof" }
+xtalforge-modules = { version = "=1.6.0", path = "crates/xtalforge-modules" }
+xtalforge-analysis = { version = "=1.6.0", path = "crates/xtalforge-analysis" }
+xtalforge-build = { version = "=1.6.0", path = "crates/xtalforge-build" }
+xtalforge-commands = { version = "=1.6.0", path = "crates/xtalforge-commands" }
+xtalforge-symmetry = { version = "=1.6.0", path = "crates/xtalforge-symmetry" }
+xtalforge-view = { version = "=1.6.0", path = "crates/xtalforge-view" }
 
 # External crates shared by more than one crate.
 nalgebra = { version = "0.35", default-features = false, features = ["std"] }
@@ -57,6 +57,7 @@ clap_complete = "4"
 clap_mangen = "0.2"
 pyo3 = { version = "0.30", features = ["abi3-py39"] }
 wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
 wasm-bindgen-test = "0.3"
 js-sys = "0.3"
 console_error_panic_hook = "0.1"
@@ -65,6 +66,7 @@ moyo = "0.22"
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 zip = { version = "9", default-features = false, features = ["deflate"] }
 sha2 = "0.10"
+ureq = { version = "2.12", default-features = false, features = ["tls"] }
 
 [workspace.lints.rust]
 # `deny` rather than `forbid`: binding crates relax it locally for the pyo3

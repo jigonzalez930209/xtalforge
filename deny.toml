@@ -28,6 +28,8 @@ allow = [
   "BSD-3-Clause",
   "Unicode-3.0",
   "Zlib",
+  "ISC",
+  "CDLA-Permissive-2.0",
 ]
 confidence-threshold = 0.93
 
@@ -40,11 +42,13 @@ highlight = "all"
 workspace-default-features = "allow"
 external-default-features = "allow"
 deny = [
-  { crate = "cc", wrappers = ["minicov"], reason = "C toolchains stay test-only (minicov is a wasm-bindgen-test build dependency)" },
+  { crate = "cc", wrappers = ["minicov", "ring"], reason = "ring builds its constant-time primitives for the optional net feature; minicov is a wasm-bindgen-test build dependency" },
   { crate = "cmake", reason = "native builds must stay behind optional features (AGENTS.md rule 3)" },
 ]
 skip = [
   { crate = "syn", reason = "proc-macro build-time duplicate: moyo needs syn 2, clap/pyo3/serde need syn 3" },
+  { crate = "getrandom", reason = "ring pins getrandom 0.2; the rest of the graph already uses 0.4" },
+  { crate = "windows-sys", reason = "ring pins windows-sys 0.52; the rest of the graph uses 0.61" },
 ]
 skip-tree = []
 
