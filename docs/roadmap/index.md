@@ -36,12 +36,11 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-13)
 
-- Phases 0-11 are complete and the Phase 12 binding work shipped in `v1.5.0`;
-  the Rust API, CLI, Python and WASM surfaces build and pass their checks.
-  `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the stable `v1.0.0`,
-  `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0` and `v1.5.1` are published
-  on crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release
-  and GitHub Pages.
+- Phases 0-13 are complete; the Rust API, CLI, Python and WASM surfaces build
+  and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
+  stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`
+  and `v1.6.0` are published on crates.io, PyPI (`xtalforge`), npm
+  (`xtalforge-wasm`), the GitHub release and GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
   playground and the end-to-end audit battery; `v1.2.0` (2026-11-11) releases
@@ -50,7 +49,9 @@ are in `AGENTS.md` at the repository root.
   audit; `v1.5.0` (2026-11-13) releases the object API, NumPy and typed
   arrays, typed result classes, batch helpers and the typed JavaScript
   interface with the same 13-crate, 7-wheel plus sdist and npm payload;
-  `v1.5.1` (2026-11-13) is the icon and package-metadata patch.
+  `v1.5.1` (2026-11-13) is the icon and package-metadata patch; `v1.6.0`
+  (2026-11-13) releases Phase 13, the ecosystem adapters, formats and remote
+data.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
@@ -64,8 +65,12 @@ are in `AGENTS.md` at the repository root.
   is shipped: the Python `Structure` object API, typed result classes,
   no-`Any` stubs, NumPy input/output, batch helpers, the WASM `Structure`
   handle, typed scene/PXRD/mesh buffers, the typed TS interface and the
-  worker/Node helpers. Tasks 9.7.2, 10.5.7, 10.6.4, 10.7.3-10.7.5, 11.4.5,
-  12.1.4, 12.3.5 and 12.4.1 remain open. The stable API follows the
+  worker/Node helpers. Phase 13 is complete: the ASE, pymatgen,
+  phonopy/spglib and RDKit adapters, the extended format registry, OPTIMADE,
+  COD and Materials Project fetchers, Python entry-point plugins, the
+  migration guides and the interoperability API page. Tasks 9.7.2, 10.5.7,
+  10.6.4, 10.7.3-10.7.5, 11.4.5, 12.1.4, 12.3.5 and 12.4.1 remain open. The
+  stable API follows the
   SemVer policy and the known subsets below are the only documented reference
   gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
