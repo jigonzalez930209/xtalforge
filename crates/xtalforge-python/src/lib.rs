@@ -90,7 +90,7 @@ use symmetry_analysis::{
     diagnose, molecular_point_group, primitive_cell, reduce_structure, standardize,
     tolerance_ladder, wyckoff_assignments,
 };
-use view::{mesh_stl, scene_data, scene_summary};
+use view::{mesh_gltf, mesh_obj, mesh_stl, scene_data, scene_summary};
 
 create_exception!(
     _xtalforge,
@@ -357,6 +357,8 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(scene_summary, module)?)?;
     module.add_function(wrap_pyfunction!(scene_data, module)?)?;
     module.add_function(wrap_pyfunction!(mesh_stl, module)?)?;
+    module.add_function(wrap_pyfunction!(mesh_obj, module)?)?;
+    module.add_function(wrap_pyfunction!(mesh_gltf, module)?)?;
     module.add_function(wrap_pyfunction!(molecular_point_group, module)?)?;
     module.add_class::<Lattice>()?;
     module.add_class::<Site>()?;

@@ -3,7 +3,9 @@
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
-use xtalforge::view::{DrawStyle, ViewSettings, build_mesh, build_scene, write_stl};
+use xtalforge::view::{
+    DrawStyle, ViewSettings, build_mesh, build_scene, write_gltf, write_obj, write_stl,
+};
 
 use crate::structures::load_structure;
 
@@ -150,4 +152,42 @@ pub(crate) fn mesh_stl(
     };
     let scene = build_scene(&structure, &settings).map_err(crate::map_error)?;
     Ok(write_stl(&build_mesh(&scene), structure.name()))
+}
+
+/// Builds a Wavefront OBJ string.
+#[pyfunction]
+#[pyo3(signature = (text, style = "ball-stick".to_string(), scale = 1.0, format_hint = None))]
+pub(crate) fn mesh_obj(
+    text: &str,
+    style: String,
+    scale: f64,
+    format_hint: Option<&str>,
+) -> PyResult<String> {
+    let structure = load_structure(text, format_hint)?;
+    let settings = ViewSettings {
+        style: self::style(&style)?,
+        atom_scale: scale,
+        ..ViewSettings::default()
+    };
+    let scene = build_scene(&structure, &settings).map_err(crate::map_error)?;
+    Ok(write_obj(&build_mesh(&scene), structure.name()))
+}
+
+/// Builds a glTF 2.0 JSON string.
+#[pyfunction]
+#[pyo3(signature = (text, style = "ball-stick".to_string(), scale = 1.0, format_hint = None))]
+pub(crate) fn mesh_gltf(
+    text: &str,
+    style: String,
+    scale: f64,
+    format_hint: Option<&str>,
+) -> PyResult<String> {
+    let structure = load_structure(text, format_hint)?;
+    let settings = ViewSettings {
+        style: self::style(&style)?,
+        atom_scale: scale,
+        ..ViewSettings::default()
+    };
+    let scene = build_scene(&structure, &settings).map_err(crate::map_error)?;
+    write_gltf(&build_mesh(&scene), structure.name()).map_err(crate::map_error)
 }
