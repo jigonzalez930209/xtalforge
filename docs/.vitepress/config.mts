@@ -91,6 +91,7 @@ export default defineConfig({
           items: [
             { text: 'Introduction', link: '/guide/' },
             { text: 'Quick start', link: '/guide/quickstart' },
+            { text: 'Performance', link: '/guide/performance' },
             { text: 'Concepts', link: '/guide/concepts' },
             { text: 'File formats', link: '/guide/formats' },
             { text: 'From ASE', link: '/guide/from-ase' },
