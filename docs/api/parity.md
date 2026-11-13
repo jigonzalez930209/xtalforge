@@ -148,6 +148,16 @@ compares this table with the symbols each surface actually exports.
 | `batch_api` | 12 | n/a | n/a | done | n/a | Python batch helpers (Task 12.2.3); the browser has no filesystem |
 | `wasm_worker` | 12 | n/a | n/a | n/a | done | Optional Web Worker wrapper (Task 12.3.4) |
 | `node_entry` | 12 | n/a | n/a | n/a | done | Node file helpers (Task 12.3.4) |
+| `ase_adapter` | 13 | n/a | n/a | done | n/a | ASE Atoms round trip and UFF calculator (Task 13.1.1); Python-only optional package |
+| `pymatgen_adapter` | 13 | n/a | n/a | done | n/a | pymatgen Structure/Molecule round trip (Task 13.1.2); Python-only optional package |
+| `phonopy_adapter` | 13 | n/a | n/a | done | n/a | PhonopyAtoms export (Task 13.1.3); Python-only optional package |
+| `rdkit_adapter` | 13 | n/a | n/a | done | n/a | RDKit molecule exchange (Task 13.1.4); Python-only optional package |
+| `get_symmetry_dataset` | 13 | n/a | n/a | done | n/a | spglib-shaped symmetry dict (Task 13.1.3); Python-only adapter |
+| `interop_formats` | 13 | done | done | done | done | QE, CASTEP, FHI-aims, CP2K, ABINIT, CRYSTAL, mmCIF/PDBx, PDB, OUTCAR, vasprun.xml, MOL2, SDF/MOL and extxyz (Task 13.2) |
+| `optimade_fetch` | 13 | done | done | n/a | done | OPTIMADE query, parse and export (Tasks 13.3.1/13.3.3); CLI `fetch optimade`, WASM `fetch_optimade` |
+| `cod_fetch` | 13 | done | done | n/a | done | COD CIF fetch (Task 13.3.2); CLI `fetch cod`, WASM `fetch_cod` |
+| `materials_project_fetch` | 13 | done | done | n/a | n/a | Materials Project fetch (Task 13.3.2); API-key handling is host-side |
+| `python_plugins` | 13 | n/a | n/a | done | n/a | `xtalforge.plugins` entry points (Task 13.4.1); Rust registries cover the CLI and agent |
 
 ## Recorded exceptions
 
@@ -165,6 +175,9 @@ compares this table with the symbols each surface actually exports.
 | Full MOF topology bundle | WASM | Package size | The builder carries the curated six-topology/eight-block subset (Tasks 6.11-6.16); the RCSR fingerprint index (35 KB) is embedded on every surface |
 | lattice_minimum_image, limits_bounds, limits_check | CLI | The CLI exposes geometry through `cell` and the global `--limits` flag | Use `cell` and `--limits` |
 | workspace_archive | CLI | The CLI has no `modules`/`run` command; the workspace is a library API | Rust `Workspace` and Python `workspace_*`; `project` for archives |
+| ASE, pymatgen, phonopy and RDKit adapters | Rust, CLI, WASM | They wrap optional Python objects and optional third-party packages | Rust readers/writers and the typed structure model |
+| Materials Project fetch | WASM | The API key must not be embedded in a browser bundle | COD and OPTIMADE fetch from the browser; `xtalforge fetch mp` from the CLI |
+| Python entry-point plugins | Rust, CLI, WASM | Entry points are discovered by the Python interpreter; a browser or the Rust binary cannot import them | Rust plugin registries are visible to the CLI and the agent; Python plugins stay in-process |
 
 ## Open gaps: Rust-only capabilities
 

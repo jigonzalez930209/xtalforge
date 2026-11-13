@@ -76,3 +76,10 @@ A handle owns the parsed Rust value; repeated calls (supercell, slab, PXRD,
 symmetry) do not tokenize or parse the CIF again. The measured benchmark and
 the playground migration are tracked by Task 12.4.1; the text API keeps the
 old behaviour for compatibility.
+
+## Ecosystem adapters
+
+`Structure.from_ase`, `from_pymatgen`, `from_rdkit`, `to_ase`,
+`to_pymatgen`, `to_rdkit`, `to_phonopy_atoms` and
+`xtalforge.get_symmetry_dataset` are documented in the
+[interoperability page](./interop.md).

@@ -92,3 +92,20 @@ A Python plugin is visible to the Python code that owns the `Plugins` object.
 It is not inserted into the Rust registries, so the CLI, MCP and the optimizer
 do not see it. A plugin that must be visible there is a Rust crate; this is a
 deliberate boundary, not a missing feature.
+
+## Python entry points
+
+`xtalforge.plugins` discovers the `xtalforge.plugins` entry-point group. Each
+entry point returns a `Plugins` registry, a callable that fills one, or a
+mapping with `modules`, `calculators` and `formats`:
+
+```python
+import xtalforge.plugins
+
+registry = xtalforge.plugins.default()
+print(registry.names_json())
+```
+
+The repository includes the installable template in `examples/python-plugin`;
+see [Python plugins](../guide/plugins.md) for the package layout. The entry
+points remain in-process: the CLI and agent use the Rust registries above.

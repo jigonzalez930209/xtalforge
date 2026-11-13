@@ -31,9 +31,32 @@ name, extensions, reader/writer and `Capabilities`. `find("cif")`,
 occupancy, ADPs, charges, bonds, labels, frames), and `losses(from, to)` names
 the data a conversion drops.
 
-Built-in formats: CIF, POSCAR, XYZ, pymatgen JSON (`.json`), CSSR (`.cssr`),
-DFTB+ GEN (`.gen`), LAMMPS data (`.data`, `.lmp`), SHELX (`.res`, `.ins`) and
-write-only PDB (`.pdb`).
+Built-in formats: CIF, mmCIF/PDBx (`_atom_site_Cartn_*` and fractional
+sites; read-only), POSCAR, XYZ and extxyz, pymatgen JSON (`.json`), CSSR (`.cssr`),
+DFTB+ GEN (`.gen`), LAMMPS data (`.data`, `.lmp`), SHELX (`.res`, `.ins`),
+PDB, Quantum ESPRESSO `pw.x` input/output, CASTEP `.cell`, FHI-aims
+`geometry.in`, CP2K, ABINIT, CRYSTAL, OUTCAR, `vasprun.xml`, MOL2 and
+SDF/MOL, and the OPTIMADE writer. Each entry declares its read/write support
+and its `Capabilities`, so a cross-format conversion reports the fields it
+drops.
+
+## Electronic-structure inputs and outputs
+
+`read_pwscf`/`write_pwscf` cover the `pw.x` `&SYSTEM`, `ATOMIC_SPECIES`,
+`CELL_PARAMETERS` and `ATOMIC_POSITIONS` blocks; `read_pwscf_output` extracts
+the final cell and positions from a `pw.x` run. CASTEP `%BLOCK LATTICE_*` and
+`POSITIONS_*`, FHI-aims `lattice_vector`/`atom`, CP2K `&CELL`/`&COORD`, ABINIT
+`acell`/`rprim`/`xred` and CRYSTAL cell/atom blocks use the same structure
+model. Every writer produces a P1 cell, because the text formats carry no
+space-group operations.
+
+## Trajectories and molecules
+
+`read_outcar` and `read_vasprun` return the `Trajectory` model with positions,
+cell, energy and forces/stress metadata. MOL2 and SDF/MOL V2000 preserve atoms,
+Cartesian coordinates and explicit bonds; SDF V3000 is a documented read
+subset. The extended XYZ reader keeps arbitrary `Properties` columns and
+per-frame comment keys in structure/trajectory metadata.
 
 ## pymatgen JSON
 
@@ -92,3 +115,10 @@ form. `read_lammps_dump` reads a text dump with an `element` column (and
 and `x/y/z`, `xu/yu/zu` or `xs/ys/zs` coordinates. `read_geo_end` reads a
 DFTB+ `geo_end.xyz` (plain XYZ frames are boxed with 5 A of vacuum) or a final
 `geo_end.gen`. `read_trajectory` detects LAMMPS, XYZ, `geo_end` and XDATCAR.
+
+## OPTIMADE export
+
+`write_structure(structure, "optimade")` emits one OPTIMADE `structures`
+entry with `lattice_vectors`, `cartesian_site_positions`, `species_at_sites`,
+`nsites` and `elements`. The same encoder is `remote::optimade_export` and the
+CLI format name `optimade`.
