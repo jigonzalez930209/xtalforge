@@ -32,6 +32,7 @@ mod structures;
 mod symmetry;
 mod symmetry_analysis;
 mod view;
+mod workflow_py;
 
 use analysis::{angle, bonds, distance, groups, neighbors, pxrd, ring_paths, rings, torsion};
 use classes::{Lattice, P1Cell, Site};
@@ -479,6 +480,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(substitute_structure, module)?)?;
     module.add_function(wrap_pyfunction!(place_guest_structure, module)?)?;
     agent::register(module)?;
+    workflow_py::register(module)?;
     plugins::register(module)?;
     ml::register(module)?;
     Ok(())
