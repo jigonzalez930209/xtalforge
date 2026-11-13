@@ -93,12 +93,25 @@ check_rust() {
     fragment_structure) name=find_fragment ;;
     substitute_structure) name=substitute ;;
     place_guest_structure) name=place_guest ;;
+    structure_handle) name=structure_info ;;
+    structure_from_arrays) name=add_sites ;;
+    typed_results) name=structure_info ;;
+    typed_arrays) name=radial_distribution ;;
+    batch_api) name=read ;;
+    wasm_worker) name=build_scene ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
 
 check_python() {
   local name=$1
+  case "$name" in
+    structure_handle) grep -Rq --include='*.pyi' "class Structure" "$PY_STUB"; return ;;
+    structure_from_arrays) grep -Rq --include='*.pyi' "def from_arrays" "$PY_STUB"; return ;;
+    typed_results) grep -Rq --include='*.pyi' "class SymmetryDataset" "$PY_STUB"; return ;;
+    typed_arrays) grep -Rq --include='*.pyi' "positions: list" "$PY_STUB"; return ;;
+    batch_api) grep -q "def read(" "$ROOT/crates/xtalforge-python/python/xtalforge/batch.pyi"; return ;;
+  esac
   case "$name" in
     prepare) name=ff_prepare ;;
     ring_paths) name=ring_paths ;;
@@ -112,6 +125,14 @@ check_python() {
 
 check_wasm() {
   local name=$1
+  case "$name" in
+    structure_handle) grep -q "class Structure" "$WASM_TS"; return ;;
+    structure_from_arrays) grep -q "set_positions(" "$WASM_TS"; return ;;
+    typed_results) grep -q "toSummary(" "$WASM_TS"; return ;;
+    typed_arrays) grep -q "function scene_buffers(" "$WASM_TS"; return ;;
+    wasm_worker) test -f "$ROOT/crates/xtalforge-wasm/js/worker.js"; return ;;
+    node_entry) test -f "$ROOT/crates/xtalforge-wasm/js/node.js"; return ;;
+  esac
   case "$name" in
     supercell) name=supercell_info ;;
     slab) name=slab_info ;;
@@ -209,6 +230,7 @@ check_cli() {
     fragment_library|fragment_structure) command=fragment ;;
     substitute_structure) command=substitute ;;
     place_guest_structure) command=guest ;;
+    structure_handle|structure_from_arrays|typed_results|typed_arrays|batch_api|wasm_worker|node_entry) command=version ;;
     match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
     deform) command=deform ;;
     rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;
