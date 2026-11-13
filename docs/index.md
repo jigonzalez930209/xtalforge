@@ -4,6 +4,9 @@ hero:
   name: xtalforge
   text: Crystal structures in pure Rust
   tagline: Build, manipulate, analyse and export crystal structures from Rust, the command line, Python and WebAssembly.
+  image:
+    src: /logo.png
+    alt: xtalforge
   actions:
     - theme: brand
       text: Guide
