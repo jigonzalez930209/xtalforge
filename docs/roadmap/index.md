@@ -32,7 +32,12 @@ are in `AGENTS.md` at the repository root.
 | 14 | [Scientific completeness](./phase-14-completeness.md) | Close every known subset; instrument model, MD, full topology | v1.7.0 |
 | 15 | [Performance and scale](./phase-15-performance.md) | Comparative benchmarks, million-atom structures, streaming IO, split WASM | v1.8.0 |
 | 16 | [Workflows and provenance](./phase-16-workflows.md) | Declarative workflows, provenance, datasets, deduplication, ML descriptors | v1.9.0 |
-| 17 | [2.0 redesign and freeze](./phase-17-v2.md) | Remove deprecations, unified options and errors, schema v2, migration guide | **v2.0.0** |
+| 17 | [Consolidation and trust](./phase-17-consolidation.md) | Close open subtasks and known subsets, Rust-only gaps on every surface, porosity completeness, YAML workflows, local quality gate | v1.10.0 |
+| 18 | [Simulation engine bridge](./phase-18-engines.md) | Input sets (VASP, QE, CP2K, LAMMPS, GULP), output parsers, bands and DOS, scheduler jobs | v1.11.0 |
+| 19 | [Magnetism, disorder and spectroscopy](./phase-19-magnetism-spectroscopy.md) | Magnetic groups and mCIF, orderings, occupancies, derivative enumeration, neutron/electron diffraction, IR/Raman | v1.12.0 |
+| 20 | [Structure generation and search](./phase-20-generation.md) | Wyckoff-constrained random crystals, AIRSS and evolutionary search, prototypes, hypothetical MOFs | v1.13.0 |
+| 21 | [ML-ready data and inference](./phase-21-ml.md) | Crystal graphs, exact SOAP/ACSF/MBTR, Parquet datasets and splits, ONNX inference, active learning, Jupyter widget | v1.14.0 |
+| 22 | [2.0 redesign and freeze](./phase-22-v2.md) | Remove deprecations, unified options and errors, schema v2, migration guide | **v2.0.0** |
 
 ## Current status (2026-11-13)
 
@@ -190,11 +195,11 @@ Version rules are defined in `AGENTS.md` section 5. In short:
   library beyond Crystal-Builder parity (released 2026-11-11).
 - **v1.3.0** — Phase 10 complete: the MOF platform (focus of the 2.0 road;
   released 2026-11-12).
-- **v1.4.0 … v1.9.0** — Phases 11 to 16, one MINOR release per completed
+- **v1.4.0 … v1.14.0** — Phases 11 to 21, one MINOR release per completed
   phase; every change is backward compatible and anything to be removed is
   deprecated first (Task 11.4.2). `v1.4.0` was released 2026-11-12 with the
   usability audit.
-- **v2.0.0** — Phase 17 complete: deprecated surface removed, unified options
+- **v2.0.0** — Phase 22 complete: deprecated surface removed, unified options
   and errors, schema version 2, after a `2.0.0-rc.N` stabilization period.
 
 ### Road to 2.0.0 (started 2026-11-11)
@@ -205,10 +210,12 @@ gap check and usability audit of 2026-11-11 and orders the work by user
 impact. **Focus: metal-organic frameworks** (decided 2026-11-11): first the
 missing core operations (Phase 9), then the MOF platform (Phase 10), then
 remove friction (Phases 11-12), then meet users where they are (Phase 13),
-then close the science gaps (Phase 14), then scale (Phases 15-16), and only
-then break the API once (Phase 17). No other capability is dropped: the MOF
+then close the science gaps (Phase 14), then scale (Phases 15-16), then
+consolidate (Phase 17) and widen the scope (Phases 18-21: simulation engines,
+magnetism and spectroscopy, structure generation, ML), and only then break
+the API once (Phase 22). The scope extension was decided on 2026-11-13. No other capability is dropped: the MOF
 focus sets priorities inside each phase (table at the end of Phase 10).
-Phases 9-16 may overlap; Phase 17 starts when they are
+Phases 9-21 may overlap; Phase 22 starts when they are
 complete or explicitly descoped with a `Note:`.
 
 ## Cross-cutting requirements (apply to every phase)
