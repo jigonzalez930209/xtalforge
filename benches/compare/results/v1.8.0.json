@@ -1,0 +1,716 @@
+{
+  "environment": {
+    "cpu_model": "AMD Ryzen 9 6900HX with Radeon Graphics",
+    "cpu_threads": 16,
+    "import_errors": {},
+    "machine": "x86_64",
+    "memory_gib": 26.68,
+    "os": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "versions": {
+      "ase": "3.29.0",
+      "gemmi": "0.7.5",
+      "numpy": "2.5.4",
+      "pymatgen": "2026.10.24",
+      "python": "3.14.4",
+      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "spglib": "2.8.0",
+      "xtalforge": "1.7.0",
+      "xtalforge_cli": "1.7.0"
+    }
+  },
+  "methodology": {
+    "input": "the same in-memory CIF text is parsed by every library inside the timed region",
+    "notes": [
+      "The reference numbers are end-to-end from CIF text and include that library's parser.",
+      "xtalforge returns each periodic pair once; ASE and pymatgen return both directions.",
+      "pymatgen's PXRD calculator returns merged peaks, xtalforge returns reflections.",
+      "No installed reference package provides grid-based porosity; that row is xtalforge only."
+    ],
+    "repetitions": {
+      "cif_read": 15,
+      "neighbors": 9,
+      "p1": 9,
+      "porosity": 5,
+      "pxrd": 5,
+      "supercell": 5,
+      "symmetry": 9
+    },
+    "statistic": "median",
+    "supercell": "in-memory build; the 10^6-atom xtalforge case invokes the release core benchmark",
+    "timer": "time.perf_counter_ns in the same process",
+    "warmups": 1
+  },
+  "release": "1.8.0",
+  "results": [
+    {
+      "library": "xtalforge",
+      "max_ms": 0.9479,
+      "median_ms": 0.6161,
+      "min_ms": 0.5881,
+      "output": {
+        "atoms": 114
+      },
+      "repetitions": 15,
+      "samples_ms": [
+        0.636,
+        0.6028,
+        0.6161,
+        0.6138,
+        0.5881,
+        0.631,
+        0.5938,
+        0.596,
+        0.6642,
+        0.7398,
+        0.9479,
+        0.7359,
+        0.6654,
+        0.5986,
+        0.6041
+      ],
+      "task": "cif_read",
+      "warmups": 1
+    },
+    {
+      "library": "gemmi",
+      "max_ms": 0.1083,
+      "median_ms": 0.0923,
+      "min_ms": 0.0746,
+      "output": {
+        "atoms": 114
+      },
+      "repetitions": 15,
+      "samples_ms": [
+        0.1062,
+        0.0973,
+        0.0941,
+        0.0929,
+        0.1083,
+        0.0944,
+        0.0935,
+        0.092,
+        0.0917,
+        0.0923,
+        0.0915,
+        0.0917,
+        0.0919,
+        0.0821,
+        0.0746
+      ],
+      "task": "cif_read",
+      "warmups": 1
+    },
+    {
+      "library": "ase",
+      "max_ms": 52.595,
+      "median_ms": 48.3428,
+      "min_ms": 46.5196,
+      "output": {
+        "atoms": 114
+      },
+      "repetitions": 15,
+      "samples_ms": [
+        47.369,
+        48.6619,
+        48.3428,
+        48.2477,
+        48.9107,
+        46.5196,
+        50.0748,
+        47.9775,
+        47.0843,
+        47.2696,
+        49.8027,
+        52.595,
+        48.3641,
+        47.2636,
+        49.1389
+      ],
+      "task": "cif_read",
+      "warmups": 1
+    },
+    {
+      "library": "pymatgen",
+      "max_ms": 17.8466,
+      "median_ms": 11.5331,
+      "min_ms": 10.8452,
+      "output": {
+        "atoms": 114
+      },
+      "repetitions": 15,
+      "samples_ms": [
+        11.313,
+        11.2143,
+        12.2163,
+        17.8466,
+        11.5331,
+        11.5434,
+        11.3901,
+        10.9751,
+        12.2402,
+        11.5396,
+        11.7309,
+        11.0572,
+        11.56,
+        11.4526,
+        10.8452
+      ],
+      "task": "cif_read",
+      "warmups": 1
+    },
+    {
+      "library": "xtalforge",
+      "max_ms": 5.4181,
+      "median_ms": 4.7785,
+      "min_ms": 4.3897,
+      "output": {
+        "atoms": 424
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        4.5293,
+        5.4181,
+        5.3102,
+        4.4473,
+        4.7785,
+        4.5381,
+        5.0687,
+        4.8771,
+        4.3897
+      ],
+      "task": "p1",
+      "warmups": 1
+    },
+    {
+      "library": "gemmi",
+      "max_ms": 0.5337,
+      "median_ms": 0.5046,
+      "min_ms": 0.4344,
+      "output": {
+        "atoms": 424
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        0.5337,
+        0.529,
+        0.5111,
+        0.5197,
+        0.4975,
+        0.5046,
+        0.4978,
+        0.5013,
+        0.4344
+      ],
+      "task": "p1",
+      "warmups": 1
+    },
+    {
+      "library": "ase",
+      "max_ms": 50.1104,
+      "median_ms": 49.4132,
+      "min_ms": 46.9957,
+      "output": {
+        "atoms": 424
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        49.935,
+        49.3844,
+        48.3606,
+        49.6905,
+        49.4132,
+        50.1104,
+        46.9957,
+        48.6525,
+        49.9656
+      ],
+      "task": "p1",
+      "warmups": 1
+    },
+    {
+      "library": "pymatgen",
+      "max_ms": 17.8835,
+      "median_ms": 17.0486,
+      "min_ms": 15.378,
+      "output": {
+        "atoms": 424
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        17.5244,
+        16.808,
+        17.8835,
+        16.5227,
+        15.378,
+        17.0486,
+        17.4777,
+        17.3709,
+        16.8483
+      ],
+      "task": "p1",
+      "warmups": 1
+    },
+    {
+      "library": "xtalforge",
+      "max_ms": 96.8622,
+      "median_ms": 69.6541,
+      "min_ms": 66.1009,
+      "output": {
+        "space_group": 225
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        67.9256,
+        66.7117,
+        66.1009,
+        67.415,
+        69.6541,
+        76.9164,
+        94.8941,
+        91.633,
+        96.8622
+      ],
+      "task": "symmetry",
+      "warmups": 1
+    },
+    {
+      "library": "spglib",
+      "max_ms": 33.3747,
+      "median_ms": 25.7226,
+      "min_ms": 23.8608,
+      "output": {
+        "space_group": 225
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        25.43,
+        25.7705,
+        27.1621,
+        27.0476,
+        24.9605,
+        25.7226,
+        25.3191,
+        23.8608,
+        33.3747
+      ],
+      "task": "symmetry",
+      "warmups": 1
+    },
+    {
+      "library": "pymatgen",
+      "max_ms": 38.5813,
+      "median_ms": 37.0705,
+      "min_ms": 35.1017,
+      "output": {
+        "space_group": 225
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        37.0949,
+        37.8367,
+        37.6001,
+        38.5813,
+        36.117,
+        35.8535,
+        35.1017,
+        37.0705,
+        35.8619
+      ],
+      "task": "symmetry",
+      "warmups": 1
+    },
+    {
+      "library": "xtalforge",
+      "max_ms": 18.6274,
+      "median_ms": 9.6034,
+      "min_ms": 9.3239,
+      "output": {
+        "pairs": 1592
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        18.6274,
+        15.7368,
+        9.6034,
+        9.3239,
+        9.6104,
+        9.4361,
+        9.4494,
+        9.8307,
+        9.4903
+      ],
+      "task": "neighbors",
+      "warmups": 1
+    },
+    {
+      "library": "ase",
+      "max_ms": 57.4654,
+      "median_ms": 55.8739,
+      "min_ms": 54.7722,
+      "output": {
+        "pairs": 3184
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        57.4654,
+        56.0033,
+        55.9979,
+        55.0253,
+        55.8739,
+        54.7722,
+        55.9548,
+        55.1149,
+        54.9527
+      ],
+      "task": "neighbors",
+      "warmups": 1
+    },
+    {
+      "library": "pymatgen",
+      "max_ms": 125.4486,
+      "median_ms": 123.0009,
+      "min_ms": 122.1544,
+      "output": {
+        "pairs": 3184
+      },
+      "repetitions": 9,
+      "samples_ms": [
+        122.1544,
+        122.9463,
+        122.7743,
+        123.4506,
+        122.6383,
+        123.0009,
+        124.6058,
+        123.9393,
+        125.4486
+      ],
+      "task": "neighbors",
+      "warmups": 1
+    },
+    {
+      "library": "xtalforge",
+      "max_ms": 584.8978,
+      "median_ms": 407.7038,
+      "min_ms": 301.3444,
+      "output": {
+        "reflections": 314
+      },
+      "repetitions": 5,
+      "samples_ms": [
+        301.3444,
+        380.1946,
+        473.1284,
+        407.7038,
+        584.8978
+      ],
+      "task": "pxrd",
+      "warmups": 1
+    },
+    {
+      "library": "pymatgen",
+      "max_ms": 1430.8908,
+      "median_ms": 1105.4952,
+      "min_ms": 1004.4378,
+      "output": {
+        "peaks": 152
+      },
+      "repetitions": 5,
+      "samples_ms": [
+        1105.4952,
+        1032.4982,
+        1221.4625,
+        1430.8908,
+        1004.4378
+      ],
+      "task": "pxrd",
+      "warmups": 1
+    },
+    {
+      "library": "xtalforge",
+      "max_ms": 3194.316,
+      "median_ms": 3078.773,
+      "min_ms": 2986.961,
+      "output": {
+        "atoms": 1000000
+      },
+      "repetitions": 5,
+      "samples_ms": [
+        2986.961,
+        2987.551,
+        3078.773,
+        3167.331,
+        3194.316
+      ],
+      "source": "rust-bench",
+      "task": "supercell",
+      "warmups": 1
+    },
+    {
+      "library": "ase",
+      "max_ms": 707.0148,
+      "median_ms": 462.3782,
+      "min_ms": 449.3155,
+      "output": {
+        "atoms": 1000000
+      },
+      "repetitions": 5,
+      "samples_ms": [
+        462.3782,
+        449.3155,
+        707.0148,
+        559.9885,
+        452.7745
+      ],
+      "task": "supercell",
+      "warmups": 1
+    },
+    {
+      "library": "pymatgen",
+      "max_ms": 16677.9845,
+      "median_ms": 13230.3216,
+      "min_ms": 11458.7468,
+      "output": {
+        "atoms": 1000000
+      },
+      "repetitions": 5,
+      "samples_ms": [
+        11778.1955,
+        16677.9845,
+        14581.6213,
+        11458.7468,
+        13230.3216
+      ],
+      "task": "supercell",
+      "warmups": 1
+    },
+    {
+      "library": "xtalforge",
+      "max_ms": 4630.8728,
+      "median_ms": 3914.0055,
+      "min_ms": 3758.4485,
+      "output": {
+        "accessible_volume": 9452.402672
+      },
+      "repetitions": 5,
+      "samples_ms": [
+        3914.0055,
+        3758.4485,
+        3906.9199,
+        4031.3988,
+        4630.8728
+      ],
+      "task": "porosity",
+      "warmups": 1
+    }
+  ],
+  "schema_version": 1,
+  "skipped": [
+    {
+      "library": "spglib",
+      "reason": "spglib has no structure-file reader",
+      "task": "cif_read"
+    },
+    {
+      "library": "spglib",
+      "reason": "spglib does not expand asymmetric units",
+      "task": "p1"
+    },
+    {
+      "library": "gemmi",
+      "reason": "gemmi has no atom-position space-group finder",
+      "task": "symmetry"
+    },
+    {
+      "library": "ase",
+      "reason": "ASE has no symmetry detector",
+      "task": "symmetry"
+    },
+    {
+      "library": "gemmi",
+      "reason": "the gemmi NeighborSearch API targets macromolecular models",
+      "task": "neighbors"
+    },
+    {
+      "library": "spglib",
+      "reason": "spglib has no neighbor search",
+      "task": "neighbors"
+    },
+    {
+      "library": "gemmi",
+      "reason": "gemmi has no PXRD calculator",
+      "task": "pxrd"
+    },
+    {
+      "library": "ase",
+      "reason": "ASE has no PXRD calculator",
+      "task": "pxrd"
+    },
+    {
+      "library": "spglib",
+      "reason": "spglib has no PXRD calculator",
+      "task": "pxrd"
+    },
+    {
+      "library": "gemmi",
+      "reason": "gemmi has no supercell builder",
+      "task": "supercell"
+    },
+    {
+      "library": "spglib",
+      "reason": "spglib has no supercell builder",
+      "task": "supercell"
+    },
+    {
+      "library": "gemmi",
+      "reason": "no geometric porosity implementation",
+      "task": "porosity"
+    },
+    {
+      "library": "spglib",
+      "reason": "no geometric porosity implementation",
+      "task": "porosity"
+    },
+    {
+      "library": "ase",
+      "reason": "no geometric porosity implementation",
+      "task": "porosity"
+    },
+    {
+      "library": "pymatgen",
+      "reason": "no geometric porosity implementation",
+      "task": "porosity"
+    }
+  ],
+  "suite": "xtalforge-compare",
+  "tasks": {
+    "cif_read": {
+      "description": "Parse a P1 CIF into a usable structure object.",
+      "input": "tests/corpus/prepared/UiO-66.cif (114 P1 atoms)",
+      "references": [
+        "gemmi",
+        "ase",
+        "pymatgen"
+      ],
+      "timed": "file text in memory to a parsed structure; the atom count is returned",
+      "title": "CIF read",
+      "unavailable": {
+        "spglib": "spglib has no structure-file reader"
+      }
+    },
+    "neighbors": {
+      "description": "List periodic atom pairs inside a cutoff.",
+      "input": "tests/corpus/cod/MOF-5.cif, cutoff 3.0 A",
+      "references": [
+        "ase",
+        "pymatgen"
+      ],
+      "timed": "CIF text to the complete neighbor list",
+      "title": "Periodic neighbors",
+      "unavailable": {
+        "gemmi": "the gemmi NeighborSearch API targets macromolecular models",
+        "spglib": "spglib has no neighbor search"
+      }
+    },
+    "p1": {
+      "description": "Apply the space-group operations and return the 424-atom P1 cell.",
+      "input": "tests/corpus/cod/MOF-5.cif (7 asymmetric sites)",
+      "references": [
+        "gemmi",
+        "ase",
+        "pymatgen"
+      ],
+      "timed": "CIF text to the P1 cell; parsers are inside the timed region for every library",
+      "title": "P1 expansion",
+      "unavailable": {
+        "spglib": "spglib does not expand asymmetric units"
+      }
+    },
+    "porosity": {
+      "description": "Compute geometric pore volume, accessible volume and surface area.",
+      "input": "tests/corpus/cod/MOF-5.cif, 0.8 A grid, 1.2 A probe",
+      "references": [],
+      "timed": "CIF text to the porosity report",
+      "title": "Porosity",
+      "unavailable": {
+        "ase": "no geometric porosity implementation",
+        "gemmi": "no geometric porosity implementation",
+        "pymatgen": "no geometric porosity implementation",
+        "spglib": "no geometric porosity implementation"
+      }
+    },
+    "pxrd": {
+      "description": "Calculate the powder diffraction peak list.",
+      "input": "tests/corpus/cod/MOF-5.cif, Cu K-alpha, 2-theta 5-80 deg",
+      "references": [
+        "pymatgen"
+      ],
+      "timed": "CIF text to the peak list",
+      "title": "PXRD pattern",
+      "unavailable": {
+        "ase": "ASE has no PXRD calculator",
+        "gemmi": "gemmi has no PXRD calculator",
+        "spglib": "spglib has no PXRD calculator"
+      }
+    },
+    "supercell": {
+      "description": "Expand the eight-atom cubic cell into one million atoms.",
+      "input": "tests/corpus/simple/Si.cif, 50 x 50 x 50 (1,000,000 atoms)",
+      "references": [
+        "ase",
+        "pymatgen"
+      ],
+      "timed": "in-memory build only; xtalforge uses the core benchmark, references use their Python supercell operator",
+      "title": "Supercell",
+      "unavailable": {
+        "gemmi": "gemmi has no supercell builder",
+        "spglib": "spglib has no supercell builder"
+      }
+    },
+    "symmetry": {
+      "description": "Find the space-group number from the atomic coordinates.",
+      "input": "tests/corpus/cod/MOF-5.cif",
+      "references": [
+        "spglib",
+        "pymatgen"
+      ],
+      "timed": "CIF text to the detected international number at symprec 0.001 A",
+      "title": "Symmetry detection",
+      "unavailable": {
+        "ase": "ASE has no symmetry detector",
+        "gemmi": "gemmi has no atom-position space-group finder"
+      }
+    }
+  },
+  "unavailable_references": {
+    "cif_read": {
+      "spglib": "spglib has no structure-file reader"
+    },
+    "neighbors": {
+      "gemmi": "the gemmi NeighborSearch API targets macromolecular models",
+      "spglib": "spglib has no neighbor search"
+    },
+    "p1": {
+      "spglib": "spglib does not expand asymmetric units"
+    },
+    "porosity": {
+      "ase": "no geometric porosity implementation",
+      "gemmi": "no geometric porosity implementation",
+      "pymatgen": "no geometric porosity implementation",
+      "spglib": "no geometric porosity implementation"
+    },
+    "pxrd": {
+      "ase": "ASE has no PXRD calculator",
+      "gemmi": "gemmi has no PXRD calculator",
+      "spglib": "spglib has no PXRD calculator"
+    },
+    "supercell": {
+      "gemmi": "gemmi has no supercell builder",
+      "spglib": "spglib has no supercell builder"
+    },
+    "symmetry": {
+      "ase": "ASE has no symmetry detector",
+      "gemmi": "gemmi has no atom-position space-group finder"
+    }
+  }
+}
