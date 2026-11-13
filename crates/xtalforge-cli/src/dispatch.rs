@@ -4,8 +4,8 @@ use crate::{
     Cli, CliError, agent_commands, analysis_commands, analyze, args, args::Command, basic, build,
     build_structures, commands_extra, convert, docs_commands, doctor, feature_commands,
     fetch_commands, ff_commands, measure, mesh, model_commands, module_commands, mof_commands,
-    molecule_commands, powder_commands, pxrd, spacegroup, symmetry, symmetry::SymmetryAction,
-    symmetry_analysis,
+    molecule_commands, powder_commands, provenance_commands, pxrd, spacegroup, symmetry,
+    symmetry::SymmetryAction, symmetry_analysis, workflow_commands,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -25,6 +25,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             height,
         } => agent_commands::render(cli, path, out.as_deref(), *format, *width, *height),
         Command::Agent { path } => agent_commands::session(cli, path),
+        Command::Run(args) => workflow_commands::run(cli, args),
         Command::Mcp => agent_commands::mcp(),
         Command::Skill { action } => agent_commands::skill(cli, action),
         Command::Models { action } => model_commands::run(cli, action),
@@ -41,6 +42,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Analysis { action } => analysis_commands::run(cli, action),
         Command::Ff { action } => ff_commands::run(cli, action),
         Command::Fetch { action } => fetch_commands::run(cli, action),
+        Command::Provenance { path } => provenance_commands::run(cli, path),
         Command::Modules => module_commands::run(cli),
         Command::Formats => commands_extra::formats(cli),
         Command::Params { name } => commands_extra::params(cli, name.as_deref()),

@@ -41,10 +41,12 @@ mod mof_platform_commands;
 mod molecule_commands;
 mod output;
 mod powder_commands;
+mod provenance_commands;
 mod pxrd;
 mod spacegroup;
 mod symmetry;
 mod symmetry_analysis;
+mod workflow_commands;
 
 use clap::Parser;
 use std::process::ExitCode;

@@ -49,6 +49,8 @@ pub(crate) enum Command {
         /// Script path, or `-` for standard input.
         path: String,
     },
+    /// Run a declarative workflow over many inputs.
+    Run(crate::workflow_commands::RunArgs),
     /// Serve the Model Context Protocol over standard input and output.
     Mcp,
     /// Skill documents for an assistant: path, list, show or install.
@@ -107,6 +109,11 @@ pub(crate) enum Command {
     Fetch {
         #[command(subcommand)]
         action: FetchAction,
+    },
+    /// Print the xtalforge provenance embedded in a file.
+    Provenance {
+        /// Input path, or `-` for standard input.
+        path: String,
     },
     /// List the module registry.
     Modules,

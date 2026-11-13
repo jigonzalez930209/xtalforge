@@ -45,6 +45,7 @@ pub(crate) fn capabilities(cli: &Cli) -> Result<(), CliError> {
     }
     println!("formats: {}", report.formats.len());
     println!("verbs: {}", report.verbs.len());
+    println!("workflows: version {}", report.workflow_version);
     Ok(())
 }
 
