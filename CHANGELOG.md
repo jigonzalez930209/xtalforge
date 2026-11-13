@@ -5,6 +5,14 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [Unreleased]
+
+### Changed
+
+- Refresh the documentation after `1.5.0`: roadmap status and release list,
+  API index with the object API page and the split Python/TypeScript stub
+  sources, and the open Phase 12 follow-ups in `README.md` and `AGENTS.md`.
+
 ## [1.5.0] - 2026-11-13
 
 Phase 12 makes the Python and JavaScript surfaces object-oriented and

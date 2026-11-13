@@ -4,11 +4,13 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.5.0` published on 2026-11-13. Phases 0-12 are complete and the
-> public API is frozen; later changes follow the SemVer policy in
-> `docs/api/stability.md`. `1.5.0` adds the object-oriented Python and WASM
-> APIs, NumPy/typed arrays, typed result classes, batch helpers and the
-> typed TypeScript interface. The known reference gaps are
+> Status: `1.5.0` published on 2026-11-13. Phases 0-11 are complete and the
+> Phase 12 binding work shipped in `1.5.0`; Tasks 12.1.4 (progress and
+> cancellation), 12.3.5 (optional threads) and 12.4.1 (tutorial, playground
+> and benchmark) remain open. The public API is frozen; later changes follow
+> the SemVer policy in `docs/api/stability.md`. `1.5.0` adds the
+> object-oriented Python and WASM APIs, NumPy/typed arrays, typed result
+> classes, batch helpers and the typed TypeScript interface. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).

@@ -270,9 +270,9 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.5.0` (release commit tagged after the local CI gate; `1.4.0`
-  and `1.3.0` were published on 2026-11-12/13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages). `1.5.0` is backward compatible:
+- Version: `1.5.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.4.0` and
+  `1.3.0` were published on 2026-11-12/13). `1.5.0` is backward compatible:
   Phase 12 adds the object-oriented Python/WASM APIs, NumPy and typed arrays,
   typed result classes, batch helpers and the typed JavaScript interface.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
