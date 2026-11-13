@@ -18,6 +18,10 @@
 # native percolation, TraPPE host-guest fields, Widom/GCMC/grids and
 # modification (4964 KiB measured).
 #
+# 5376 KiB since 1.6.0: the Phase 13 formats, PDB/mmCIF readers, VASP
+# trajectories, extxyz properties and browser remote fetchers (5301 KiB
+# measured).
+#
 # Build first:
 #   (cd crates/xtalforge-wasm && wasm-pack build --release --target web)
 set -u
@@ -25,7 +29,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 WASM="$ROOT/crates/xtalforge-wasm/pkg/xtalforge_wasm_bg.wasm"
-BUDGET_KIB=5120
+BUDGET_KIB=5376
 
 if [ ! -f "$WASM" ]; then
   echo "check-wasm-size: build the package first: $WASM" >&2
