@@ -7,7 +7,9 @@
     clippy::indexing_slicing
 )]
 
-use xtalforge_commands::cell::{PositionPolicy, SetLattice, ShiftOrigin, Supercell, WrapIntoCell};
+use xtalforge_commands::cell::{
+    MakeSlab, PositionPolicy, SetLattice, ShiftOrigin, Supercell, TransformCell, WrapIntoCell,
+};
 use xtalforge_commands::command::{Command, CommandStack, Origin};
 use xtalforge_core::{Lattice, Site, Structure, StructureBuilder, SymOp};
 
@@ -150,4 +152,69 @@ fn wrap_into_cell_folds_sites_and_undoes() {
     assert_frac(&structure, 0, [0.2, 0.8, 0.5]);
     assert!(stack.undo(&mut structure));
     assert_frac(&structure, 0, [1.2, -0.2, 0.5]);
+}
+
+#[test]
+fn transform_cell_uses_the_determinant_and_undoes() {
+    let mut structure = base();
+    let mut stack = CommandStack::new();
+    let command = TransformCell::new([[2, 0, 0], [0, 1, 0], [0, 0, 1]]);
+    assert_eq!(command.determinant(), 2);
+    assert_eq!(command.matrix(), [[2, 0, 0], [0, 1, 0], [0, 0, 1]]);
+    stack
+        .push(&mut structure, Box::new(command), Origin::User)
+        .unwrap();
+    assert_eq!(structure.sites().len(), 4);
+    assert!(structure.is_p1());
+    assert_lengths(&structure, 8.0);
+
+    assert!(stack.undo(&mut structure));
+    assert_eq!(structure.sites().len(), 2);
+    assert_lengths(&structure, 4.0);
+    assert!(stack.redo(&mut structure));
+    assert_eq!(structure.sites().len(), 4);
+
+    let flipped = TransformCell::new([[-1, 0, 0], [0, 1, 0], [0, 0, 1]]);
+    assert_eq!(flipped.determinant(), -1);
+    assert!(flipped.apply(&structure).is_err());
+    assert_eq!(
+        TransformCell::new([[1, 0, 0], [1, 1, 0], [0, 0, 1]]).determinant(),
+        1
+    );
+}
+
+#[test]
+fn make_slab_reports_severed_bonds_and_undoes() {
+    let structure = StructureBuilder::new("chain", Lattice::orthorhombic(2.0, 2.0, 2.4).unwrap())
+        .site(Site::new("C1", "C", [0.0, 0.0, 0.0]).unwrap())
+        .site(Site::new("C2", "C", [0.0, 0.0, 1.4 / 2.4]).unwrap())
+        .build()
+        .unwrap();
+    let command = MakeSlab::new([0, 0, 1], 2, 5.0, 0.0);
+    assert_eq!(command.hkl(), [0, 0, 1]);
+    assert_eq!(command.layers(), 2);
+    assert!((command.vacuum() - 5.0).abs() < 1e-12);
+    assert!(command.shift().abs() < 1e-12);
+    assert_eq!(command.description(), "Slab (0 0 1)");
+    let slab = command.make(&structure).unwrap();
+    assert_eq!(slab.cut, 2);
+    assert_eq!(slab.structure.explicit_bonds().len(), 3);
+
+    let mut structure = structure;
+    let mut stack = CommandStack::new();
+    stack
+        .push(&mut structure, Box::new(command), Origin::Script)
+        .unwrap();
+    assert_eq!(structure.sites().len(), 4);
+    assert_eq!(structure.explicit_bonds().len(), 3);
+    assert!(stack.undo(&mut structure));
+    assert_eq!(structure.sites().len(), 2);
+    assert!(structure.explicit_bonds().is_empty());
+
+    assert!(MakeSlab::with_defaults([0, 0, 0]).make(&structure).is_err());
+    assert!(
+        MakeSlab::new([0, 0, 1], 0, 5.0, 0.0)
+            .apply(&structure)
+            .is_err()
+    );
 }

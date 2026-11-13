@@ -9,7 +9,7 @@
 
 use xtalforge_commands::bonds::{AddBond, RemoveBond, SetBondRules};
 use xtalforge_commands::command::{Command, CommandStack, Origin};
-use xtalforge_core::{ExplicitBond, Lattice, Site, Structure, StructureBuilder};
+use xtalforge_core::{BondRules, ExplicitBond, Lattice, Site, Structure, StructureBuilder};
 
 fn base() -> Structure {
     StructureBuilder::new("bonds", Lattice::cubic(4.0).unwrap())
@@ -124,4 +124,34 @@ fn remove_bond_range_is_validated() {
     assert_eq!(command.j(), 9);
     let error = command.apply(&structure).unwrap_err();
     assert_eq!(error.code(), "invalid_input");
+}
+
+#[test]
+fn set_bond_rules_stores_pair_ranges_and_the_metal_switch() {
+    let mut structure = base();
+    let mut stack = CommandStack::new();
+    let rules = BondRules::default()
+        .with_pair_range("Cu", "O", 1.7, 2.3)
+        .with_metal_metal(true);
+    let command = SetBondRules::from_rules(rules.clone());
+    assert_eq!(command.rules(), &rules);
+    stack
+        .push(&mut structure, Box::new(command), Origin::User)
+        .unwrap();
+    let stored = BondRules::from_structure(&structure).unwrap();
+    assert_eq!(stored, rules);
+    assert_eq!(
+        stored.range("O", "Cu").unwrap(),
+        (1.7, 2.3),
+        "the stored pair is order-independent"
+    );
+    assert!(stored.allows("Cu", "Cu").unwrap());
+
+    assert!(stack.undo(&mut structure));
+    assert!(!structure.metadata().contains_key("bond_rules"));
+    assert!(
+        SetBondRules::from_rules(BondRules::new(0.0, 0.4))
+            .apply(&structure)
+            .is_err()
+    );
 }
