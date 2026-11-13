@@ -276,8 +276,9 @@ fn registry_lists_the_new_formats_and_capabilities() {
     assert_eq!(find(".ins").unwrap().name, "shelx");
     assert_eq!(find("shelx").unwrap().name, "shelx");
     assert_eq!(find(".pdb").unwrap().name, "pdb");
-    assert!(find("pdb").unwrap().read.is_none());
+    assert!(find("pdb").unwrap().read.is_some());
     assert!(find("pdb").unwrap().write.is_some());
+    assert!(find("pdb").unwrap().capabilities.cell);
     assert!(read_with("", "pdb").is_err());
 
     let lammps = find("lammps-data").unwrap().capabilities;
@@ -287,6 +288,6 @@ fn registry_lists_the_new_formats_and_capabilities() {
     assert!(shelx.cell && shelx.occupancy && shelx.labels);
     assert!(!shelx.symmetry && !shelx.anisotropic_adp && !shelx.bonds);
     let pdb = find("pdb").unwrap().capabilities;
-    assert!(pdb.bonds && pdb.labels);
-    assert!(!pdb.cell && !pdb.symmetry && !pdb.anisotropic_adp);
+    assert!(pdb.cell && pdb.symmetry && pdb.bonds && pdb.labels);
+    assert!(!pdb.anisotropic_adp);
 }
