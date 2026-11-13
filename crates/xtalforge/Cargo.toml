@@ -26,6 +26,8 @@ xtalforge-commands = { workspace = true }
 xtalforge-ff = { workspace = true }
 xtalforge-mof = { workspace = true }
 xtalforge-modules = { workspace = true }
+ureq = { workspace = true, optional = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }
@@ -40,6 +42,7 @@ parallel = [
 sci-form = ["xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
 ml = []
 external = []
+net = ["dep:ureq"]
 mof-data = ["xtalforge-mof/mof-data"]
 
 [lints]
