@@ -124,7 +124,7 @@ pub use powder_export::{
 #[cfg(target_arch = "wasm32")]
 pub use remote_export::{fetch_cod, fetch_optimade};
 #[cfg(target_arch = "wasm32")]
-pub use scene_export::scene_data;
+pub use scene_export::{mesh_gltf, mesh_obj, scene_data};
 #[cfg(target_arch = "wasm32")]
 pub use structure_object::Structure;
 #[cfg(target_arch = "wasm32")]

@@ -9,7 +9,7 @@
 use wasm_bindgen::prelude::*;
 
 use xtalforge::core::Error;
-use xtalforge::view::{DrawStyle, ViewSettings, build_scene};
+use xtalforge::view::{DrawStyle, ViewSettings, build_mesh, build_scene, write_gltf, write_obj};
 
 use crate::common::{array3, parse_any, set, to_js_error};
 
@@ -121,4 +121,32 @@ pub fn scene_data(text: &str, style: &str, scale: f64) -> Result<JsValue, JsValu
     set(&object, "cell_edges", cell_edges.into());
     set(&object, "settings", settings.into());
     Ok(object.into())
+}
+
+fn mesh_text(text: &str, style: &str, scale: f64, gltf: bool) -> Result<String, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let settings = ViewSettings {
+        style: draw_style(style)?,
+        atom_scale: scale,
+        ..ViewSettings::default()
+    };
+    let scene = build_scene(&structure, &settings).map_err(to_js_error)?;
+    let mesh = build_mesh(&scene);
+    if gltf {
+        write_gltf(&mesh, structure.name()).map_err(to_js_error)
+    } else {
+        Ok(write_obj(&mesh, structure.name()))
+    }
+}
+
+/// Builds a Wavefront OBJ mesh.
+#[wasm_bindgen]
+pub fn mesh_obj(text: &str, style: &str, scale: f64) -> Result<String, JsValue> {
+    mesh_text(text, style, scale, false)
+}
+
+/// Builds a glTF 2.0 JSON mesh.
+#[wasm_bindgen]
+pub fn mesh_gltf(text: &str, style: &str, scale: f64) -> Result<String, JsValue> {
+    mesh_text(text, style, scale, true)
 }
