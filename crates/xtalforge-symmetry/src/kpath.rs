@@ -1,13 +1,14 @@
 //! Bravais classification and band paths (Task 2.10.2-2.10.4).
 //!
 //! The special points and path segments are generated from ASE 3.29 and stored
-//! in `data/kpaths.json`. Coordinates are fractional in the reciprocal basis
-//! of the user's cell and are converted to Cartesian `1/Angstrom` (with
-//! `2 pi`) on request.
+//! in `data/kpaths.json.gz`; the table is decompressed and parsed on first use.
+//! Coordinates are fractional in the reciprocal basis of the user's cell and
+//! are converted to Cartesian `1/Angstrom` (with `2 pi`) on request.
 
 use std::collections::BTreeMap;
 
 use serde::Deserialize;
+use xtalforge_core::data::{EmbeddedBundle, JsonBundle};
 use xtalforge_core::{Error, Lattice, Structure};
 
 use crate::dataset::{SymmetryOptions, detect_symmetry};
@@ -24,6 +25,14 @@ struct Entry {
 struct Database {
     lattices: BTreeMap<String, Entry>,
 }
+
+/// The gzip path table is decompressed, checksum-verified and parsed on first
+/// use (Task 15.3.2); earlier code parsed it on every call.
+static DATABASE: JsonBundle<Database> = JsonBundle::new(EmbeddedBundle::new(
+    "xtalforge-symmetry/kpaths.json.gz",
+    include_bytes!("../data/kpaths.json.gz"),
+    "c36354ee1946693dc8bcdd587b296b9a96418ca84a6dad64d60b04f596b85676",
+));
 
 /// A band path in the user's reciprocal basis.
 #[derive(Debug, Clone, PartialEq)]
@@ -119,8 +128,7 @@ pub fn band_path_for_structure(
 }
 
 fn band_path_for_bravais(bravais: &str) -> Result<KPath, Error> {
-    let database: Database = serde_json::from_str(include_str!("../data/kpaths.json"))
-        .map_err(|error| Error::InvalidInput(format!("k-path data: {error}")))?;
+    let database = DATABASE.get()?;
     let entry = database.lattices.get(bravais).ok_or_else(|| {
         Error::InvalidInput(format!("no k-path entry for Bravais type {bravais}"))
     })?;
