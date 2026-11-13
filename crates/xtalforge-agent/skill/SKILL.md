@@ -45,7 +45,8 @@ is a useful review unit.
 Every answer is one JSON object with a `kind` field: `capabilities`,
 `documents`, `loaded`, `saved`, `info`, `diagnostics`, `structure`, `symmetry`,
 `bonds`, `rings`, `pxrd`, `porosity`, `energy`, `optimization`, `picture`,
-`history` or `changes`.
+`history`, `changes`, `workflow_schema`, `workflow_validation` or
+`workflow_run`.
 
 Numbers are Angstrom, degrees, eV, eV/Angstrom and GPa at the boundary. PXRD
 intensities are normalized to 100; the untouched profile values are not part of
@@ -90,3 +91,4 @@ says the run did not converge.
 - `prompts/`: worked sequences for a MOF build, a porosity report and a
   deposited CIF.
 - `references/`: one page per area, with the verbs, options and caveats.
+- `references/workflows.md`: the declarative workflow document and its runner.
