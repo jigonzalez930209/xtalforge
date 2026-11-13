@@ -12,7 +12,9 @@
 
 use std::time::{Duration, Instant};
 
-use xtalforge_core::{Lattice, Site, Structure, StructureBuilder, neighbors};
+use xtalforge_core::{
+    Lattice, P1Arrays, Site, Structure, StructureBuilder, neighbors, neighbors_arrays,
+};
 
 fn main() {
     for atoms in [1_000_usize, 10_000, 100_000] {
@@ -21,10 +23,26 @@ fn main() {
             let found = neighbors(&structure, 3.0).unwrap();
             std::hint::black_box(found);
         });
+        let count = neighbors(&structure, 3.0).unwrap().len();
         println!(
-            "{atoms:>7} atoms  cutoff 3.0 A  {:.1} ms  ({} neighbors)",
-            median.as_secs_f64() * 1e3,
-            neighbors(&structure, 3.0).unwrap().len()
+            "{atoms:>7} atoms  cutoff 3.0 A  {:.1} ms  ({count} neighbors)",
+            median.as_secs_f64() * 1e3
+        );
+        let arrays = median_time(|| {
+            let found = neighbors_arrays(&structure, 3.0).unwrap();
+            std::hint::black_box(found);
+        });
+        println!(
+            "{atoms:>7} atoms  structure-of-arrays  {:.1} ms",
+            arrays.as_secs_f64() * 1e3
+        );
+        let view = median_time(|| {
+            let view = P1Arrays::from_structure_default(&structure).unwrap();
+            std::hint::black_box(view);
+        });
+        println!(
+            "{atoms:>7} atoms  P1 columns          {:.1} ms",
+            view.as_secs_f64() * 1e3
         );
     }
 }
