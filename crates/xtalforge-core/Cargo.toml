@@ -29,6 +29,10 @@ parallel = ["dep:rayon"]
 name = "neighbors"
 harness = false
 
+[[bench]]
+name = "supercell"
+harness = false
+
 [lints]
 workspace = true
 
