@@ -369,6 +369,12 @@ pub(crate) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
         builder = builder.site(site);
     }
     builder = builder.metadata("cif_block", serde_json::Value::String(block.name.clone()));
+    if let Some(payload) = block.item(crate::provenance::CIF_PROVENANCE_TAG) {
+        builder = builder.metadata(
+            xtalforge_core::PROVENANCE_METADATA_KEY,
+            serde_json::Value::String(payload.trim().to_owned()),
+        );
+    }
     if let Some(formula) = block
         .item("_chemical_formula_sum")
         .or_else(|| block.item("_chemical_formula_structural"))

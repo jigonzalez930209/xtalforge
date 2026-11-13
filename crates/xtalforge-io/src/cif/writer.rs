@@ -2,16 +2,29 @@
 //! charges and the program's explicit-bond loop.
 
 use serde_json::Value;
-use xtalforge_core::{Error, Structure};
+use xtalforge_core::{Error, Provenance, Structure};
+
+use crate::provenance::CIF_PROVENANCE_TAG;
 
 /// Writes a structure as a CIF data block.
 ///
+/// A structure carrying a [`Provenance`] record in its metadata also writes
+/// the `_xtalforge_provenance` tag as a semicolon text block.
+///
 /// # Errors
 ///
-/// Returns [`Error::InvalidInput`] if a site has no usable label.
+/// Returns [`Error::InvalidInput`] if a site has no usable label or the
+/// attached provenance record is invalid.
 pub fn write_cif(structure: &Structure) -> Result<String, Error> {
     let mut out = String::new();
     out.push_str(&format!("data_{}\n", sanitize_name(structure.name())));
+    if let Some(record) = Provenance::from_structure(structure)? {
+        out.push_str(CIF_PROVENANCE_TAG);
+        out.push('\n');
+        out.push(';');
+        out.push_str(&record.to_json()?);
+        out.push_str("\n;\n");
+    }
     let [a, b, c, alpha, beta, gamma] = structure.lattice().parameters();
     for (tag, value) in [
         ("_cell_length_a", a),
