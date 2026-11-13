@@ -34,7 +34,7 @@ is validated.
 
 ## RCSR catalogue
 
-`crates/xtalforge-analysis/data/rcsr_index.bin` holds a 35 KB FNV-1a hash per
+`crates/xtalforge-analysis/data/rcsr_index.bin.gz` holds a 35 KB FNV-1a hash per
 catalogue entry: the periodicity, the distinct coordination numbers and the
 fingerprint hash, for all 2,931 nets of the 2019-06-01 snapshot. The full snapshots and their checksums live in
 `data/rcsr/` at the repository root.
@@ -84,7 +84,7 @@ net. `NetNodeRule::{Drawn, Atoms, MetalClusters}` selects the nodes; the
 the RCSR fingerprint and `vertex_symbols(max_ring)` reports the shortest ring
 through every pair of edges at a node.
 
-`RcsrFactsIndex::from_embedded` reads `data/rcsr_facts.tsv` (2,931 nets) and
+`RcsrFactsIndex::from_embedded` reads `data/rcsr_facts.tsv.gz` (2,931 nets) and
 answers `search(&NetQuery)` by name, coordination, group symbol, space-group
 number or range, transitivity and periodicity. A 2-D net uses its plane-group
 number (1-17); `plane_group_number` disambiguates symbols shared with the

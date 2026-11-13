@@ -1,7 +1,7 @@
 # UFF and UFF4MOF
 
 `xtalforge-ff` implements the Universal Force Field natively. The parameter
-table is `data/uff.json`: 218 rows ported from Crystal-Builder
+table is `data/uff.json.gz`: 218 rows ported from Crystal-Builder
 `xtal/ff/uff/params.py` (Rappé 1992, Addicoat 2014, Coupry 2016), with the
 reference units (Angstrom, degrees, kcal/mol). The public boundary converts to
 eV and eV/Angstrom.

@@ -63,6 +63,8 @@ Pages are added with the feature that introduces them:
 - [sci-form reuse](./sci-form-reuse) (Task 0.4)
 - [Disordered carbons](./carbon) (Task 6.8)
 - [Dependency replacement map](./dependency-map) (Task 0.10)
+- [Benchmarks](./benchmarks) and the [1.8.0 performance page](../guide/performance)
+  (Task 15.1, 15.4)
 
 The neighbor-search page records the linked-cell index and the scaling
 benchmark in Phase 1.

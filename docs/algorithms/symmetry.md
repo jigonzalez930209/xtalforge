@@ -85,7 +85,7 @@ sweep is `#[ignore]` and run manually before a release.
 ## Band paths
 
 The 14 Bravais entries and their special points come from ASE 3.29
-(`data/kpaths.json`). A conventional cell alone cannot reveal centering, so
+(`data/kpaths.json.gz`). A conventional cell alone cannot reveal centering, so
 `band_path_for_structure` uses the detected space group's Bravais class. The
 points are fractional reciprocal coordinates; multiplying by the user's
 reciprocal basis (with `2 pi`) gives the Cartesian `k` axis, and the cumulative

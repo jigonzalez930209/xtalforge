@@ -5,6 +5,13 @@ xtalforge-cli`) of the Phase 1 CLI. Each row is the median of ten runs of the
 whole process (startup, read, work, print) with output discarded; the minimum
 is shown to indicate noise. Wall-clock values are rounded to 0.1 ms.
 
+The 1.8.0 comparative suite is separate: it runs the same CIF read, P1,
+symmetry, neighbor, PXRD, supercell and porosity tasks through the Python
+wheel and the reference libraries. Its methodology, hardware and numbers live
+on the [performance page](../guide/performance); the raw document is
+[`benches/compare/results/v1.8.0.json`](https://github.com/jigonzalez930209/xtalforge/blob/main/benches/compare/results/v1.8.0.json).
+The tables on this page remain the process-level CLI record from Phase 1.
+
 | Structure | Command | Median | Minimum |
 |---|---|---|---|
 | Si (8 P1 atoms) | `info` | 2.6 ms | 2.2 ms |
