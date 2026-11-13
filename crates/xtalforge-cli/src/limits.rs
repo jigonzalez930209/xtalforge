@@ -7,6 +7,7 @@ pub(crate) enum Limits {
     Standard,
     Generous,
     WarnOnly,
+    Huge,
 }
 
 impl Limits {
@@ -15,6 +16,7 @@ impl Limits {
             Self::Standard => xtalforge::core::Profile::Standard,
             Self::Generous => xtalforge::core::Profile::Generous,
             Self::WarnOnly => xtalforge::core::Profile::WarnOnly,
+            Self::Huge => xtalforge::core::Profile::Huge,
         }
     }
 }
