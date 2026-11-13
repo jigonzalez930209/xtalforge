@@ -11,10 +11,13 @@ use std::collections::BTreeMap;
 use xtalforge_core::{Error, Structure};
 
 mod coincident;
+mod stream;
+mod stream_atoms;
 mod structure;
 mod values;
 mod writer;
 
+pub use stream::read_cif_stream;
 use structure::structure_from_block as extract_structure;
 pub use writer::write_cif;
 

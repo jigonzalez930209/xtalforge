@@ -32,6 +32,7 @@ pub mod pwscf;
 pub mod registry;
 pub mod sdf;
 pub mod shelx;
+pub mod stream;
 pub mod text;
 pub mod trajectory;
 pub mod vasp;
@@ -42,7 +43,10 @@ pub use abinit::{read_abinit, write_abinit};
 pub use aims::{read_aims, write_aims};
 pub use castep::{read_castep, write_castep};
 pub use cgd::{CgdEntry, CgdFile, CgdNode, read_cgd, write_cgd};
-pub use cif::{CifBlock, CifDocument, CifLoop, read_cif, read_cif_all, read_cif_block, write_cif};
+pub use cif::{
+    CifBlock, CifDocument, CifLoop, read_cif, read_cif_all, read_cif_block, read_cif_stream,
+    write_cif,
+};
 pub use cp2k::{read_cp2k, write_cp2k};
 pub use crystal::{read_crystal, write_crystal};
 pub use cssr::{read_cssr, write_cssr};
@@ -61,6 +65,7 @@ pub use project::{FORMAT_VERSION, ProjectParts, read_project, write_project};
 pub use pwscf::{read_pwscf, write_pwscf};
 pub use sdf::{read_sdf, read_sdf_all, write_sdf};
 pub use shelx::{read_shelx, write_shelx};
+pub use stream::{LammpsStream, StreamFrame, XyzStream};
 pub use text::{decode_text, read_text};
 pub use trajectory::{
     Frame, Trajectory, XyzIndex, read_geo_end, read_lammps_dump, read_lammps_dump_with_types,
