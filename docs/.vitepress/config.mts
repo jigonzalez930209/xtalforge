@@ -24,7 +24,12 @@ const roadmapItems = [
   { text: 'Phase 14 — Scientific completeness', link: '/roadmap/phase-14-completeness' },
   { text: 'Phase 15 — Performance and scale', link: '/roadmap/phase-15-performance' },
   { text: 'Phase 16 — Workflows and provenance', link: '/roadmap/phase-16-workflows' },
-  { text: 'Phase 17 — 2.0 redesign and freeze', link: '/roadmap/phase-17-v2' },
+  { text: 'Phase 17 — Consolidation and trust', link: '/roadmap/phase-17-consolidation' },
+  { text: 'Phase 18 — Simulation engine bridge', link: '/roadmap/phase-18-engines' },
+  { text: 'Phase 19 — Magnetism, disorder and spectroscopy', link: '/roadmap/phase-19-magnetism-spectroscopy' },
+  { text: 'Phase 20 — Structure generation and search', link: '/roadmap/phase-20-generation' },
+  { text: 'Phase 21 — ML-ready data and inference', link: '/roadmap/phase-21-ml' },
+  { text: 'Phase 22 — 2.0 redesign and freeze', link: '/roadmap/phase-22-v2' },
 ]
 
 export default defineConfig({
