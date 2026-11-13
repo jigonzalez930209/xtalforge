@@ -74,3 +74,6 @@ export interface StructureConstructor {
 export function sceneBuffers(text: string, formatHint: string): SceneBuffers;
 export function pxrdBuffers(text: string, formatHint: string): PxrdBuffers;
 export function meshBuffers(text: string, formatHint: string): MeshBuffers;
+
+export function fetch_optimade(url: string): Promise<string>;
+export function fetch_cod(id: string): Promise<string>;
