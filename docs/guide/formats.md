@@ -33,6 +33,8 @@ capabilities of every format and the data a conversion drops. Project archives
 
 ```bash
 xtalforge convert structure.cif --format poscar --out structure.vasp
+xtalforge convert OUTCAR --format cif --out final.cif
+xtalforge convert geometry.in --format extxyz --out geometry.xyz
 xtalforge --json info structure.xyz
 ```
 
