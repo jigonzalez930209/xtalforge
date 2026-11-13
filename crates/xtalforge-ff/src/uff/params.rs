@@ -3,9 +3,9 @@
 //! Ported from Crystal-Builder `xtal/ff/uff/params.py`, which transcribes
 //! Table 1 of Rappe et al., *J. Am. Chem. Soc.* **1992**, 114, 10024, plus
 //! the UFF4MOF rows of Addicoat et al., *JCTC* **2014**, 10, 880 and Coupry
-//! et al., *JCTC* **2016**, 12, 5215. The rows live in `data/uff.json` so a
-//! published crate carries them without a large Rust literal; the column
-//! order and units are the reference ones.
+//! et al., *JCTC* **2016**, 12, 5215. The rows live in `data/uff.json.gz` so a
+//! published crate carries them without a large Rust literal and decompresses
+//! them only on first use; the column order and units are the reference ones.
 //!
 //! Units: Angstrom, degrees, kcal/mol and electron charge. The public
 //! calculator converts energy to eV only at the boundary.
@@ -15,6 +15,8 @@ use std::str::FromStr;
 use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
+
+use xtalforge_core::data::{EmbeddedBundle, JsonBundle};
 
 use crate::Error;
 
@@ -29,7 +31,7 @@ pub const KCAL_PER_MOL_TO_EV: f64 = 0.043_364_1;
 /// Conversion from kcal/mol/Angstrom^3 to GPa.
 pub const KCAL_PER_MOL_A3_TO_GPA: f64 = 6.947_695_457;
 
-const TABLE_PATH: &str = "crates/xtalforge-ff/data/uff.json";
+const TABLE_PATH: &str = "crates/xtalforge-ff/data/uff.json.gz";
 const SCHEMA_VERSION: u32 = 1;
 
 /// Which parameters a UFF calculation may use.
@@ -183,9 +185,18 @@ struct UffTable {
 
 static TABLE: OnceLock<Result<UffTable, String>> = OnceLock::new();
 
+/// The gzip table is decompressed, checksum-verified and parsed on first use
+/// (Task 15.3.2); later calls reuse the decoded document.
+static DOCUMENT: JsonBundle<UffDocument> = JsonBundle::new(EmbeddedBundle::new(
+    "xtalforge-ff/uff.json.gz",
+    include_bytes!("../../data/uff.json.gz"),
+    "593bcf48417afd9dc6f5f64ed20b469dddfa5d145ff59761c28c7cf3f18a1398",
+));
+
 fn load() -> Result<UffTable, Error> {
-    let document: UffDocument = serde_json::from_str(include_str!("../../data/uff.json"))
-        .map_err(|error| Error::Data(format!("could not parse {TABLE_PATH}: {error}")))?;
+    let document = DOCUMENT
+        .get()
+        .map_err(|error| Error::Data(format!("could not read {TABLE_PATH}: {error}")))?;
     if document.schema_version != SCHEMA_VERSION {
         return Err(Error::Data(format!(
             "unsupported UFF table schema {}, expected {SCHEMA_VERSION}",
@@ -220,9 +231,9 @@ fn load() -> Result<UffTable, Error> {
     }
     Ok(UffTable {
         schema_version: document.schema_version,
-        source: document.source,
-        units: document.units,
-        params: document.types,
+        source: document.source.clone(),
+        units: document.units.clone(),
+        params: document.types.clone(),
         by_name,
         by_element,
     })

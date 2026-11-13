@@ -62,33 +62,49 @@ impl Topology {
         positions: &[[f64; 3]],
         matrix: [[f64; 3]; 3],
         virial: Option<&mut [[f64; 3]; 3]>,
+        parallel: bool,
     ) -> Result<(f64, Vec<[f64; 3]>), Error> {
         let mut gradient = vec![[0.0; 3]; positions.len()];
         let mut virial_local = [[0.0; 3]; 3];
         let mut energy = 0.0;
-        let (part, part_gradient) =
-            self.bonds
-                .energy_and_gradient(positions, matrix, Some(&mut virial_local))?;
+        let (part, part_gradient) = self.bonds.energy_and_gradient_with(
+            positions,
+            matrix,
+            Some(&mut virial_local),
+            parallel,
+        )?;
         energy += part;
         add_gradient(&mut gradient, &part_gradient)?;
-        let (part, part_gradient) =
-            self.angles
-                .energy_and_gradient(positions, matrix, Some(&mut virial_local))?;
+        let (part, part_gradient) = self.angles.energy_and_gradient_with(
+            positions,
+            matrix,
+            Some(&mut virial_local),
+            parallel,
+        )?;
         energy += part;
         add_gradient(&mut gradient, &part_gradient)?;
-        let (part, part_gradient) =
-            self.torsions
-                .energy_and_gradient(positions, matrix, Some(&mut virial_local))?;
+        let (part, part_gradient) = self.torsions.energy_and_gradient_with(
+            positions,
+            matrix,
+            Some(&mut virial_local),
+            parallel,
+        )?;
         energy += part;
         add_gradient(&mut gradient, &part_gradient)?;
-        let (part, part_gradient) =
-            self.inversions
-                .energy_and_gradient(positions, matrix, Some(&mut virial_local))?;
+        let (part, part_gradient) = self.inversions.energy_and_gradient_with(
+            positions,
+            matrix,
+            Some(&mut virial_local),
+            parallel,
+        )?;
         energy += part;
         add_gradient(&mut gradient, &part_gradient)?;
-        let (part, part_gradient) =
-            self.vdw
-                .energy_and_gradient(positions, matrix, Some(&mut virial_local))?;
+        let (part, part_gradient) = self.vdw.energy_and_gradient_with(
+            positions,
+            matrix,
+            Some(&mut virial_local),
+            parallel,
+        )?;
         energy += part;
         add_gradient(&mut gradient, &part_gradient)?;
         if let Some(target) = virial {

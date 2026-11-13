@@ -177,7 +177,7 @@ impl UffModel {
     /// Returns [`Error::InvalidInput`] when the position count does not match
     /// the model, or a topology error from a term.
     pub fn energy_at(&self, positions: &[[f64; 3]]) -> Result<f64, Error> {
-        let (energy, _) = self.raw(positions, None)?;
+        let (energy, _) = self.raw(positions, None, true)?;
         Ok(energy)
     }
 
@@ -200,7 +200,41 @@ impl UffModel {
     /// Returns [`Error::InvalidInput`] when the position count does not match
     /// the model, or a topology error from a term.
     pub fn energy_forces_at(&self, positions: &[[f64; 3]]) -> Result<(f64, Vec<[f64; 3]>), Error> {
-        let (energy, gradient) = self.raw(positions, None)?;
+        self.energy_forces_with(positions, true)
+    }
+
+    /// Energy and forces evaluated without worker threads.
+    ///
+    /// This is the sequential reference of [`UffModel::energy_forces`]. The
+    /// parallel path uses the same term order and the same block reduction,
+    /// so the two results are bit-identical. Useful for validating a new
+    /// platform and for reproducible golden data.
+    ///
+    /// # Errors
+    ///
+    /// Returns the errors of [`UffModel::energy_forces_at`].
+    pub fn energy_forces_sequential(&self) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        self.energy_forces_with(&self.view.positions, false)
+    }
+
+    /// Energy and forces at these positions without worker threads.
+    ///
+    /// # Errors
+    ///
+    /// Returns the errors of [`UffModel::energy_forces_at`].
+    pub fn energy_forces_at_sequential(
+        &self,
+        positions: &[[f64; 3]],
+    ) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        self.energy_forces_with(positions, false)
+    }
+
+    fn energy_forces_with(
+        &self,
+        positions: &[[f64; 3]],
+        parallel: bool,
+    ) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        let (energy, gradient) = self.raw(positions, None, parallel)?;
         let forces: Vec<[f64; 3]> = gradient
             .iter()
             .map(|value| {
@@ -237,7 +271,7 @@ impl UffModel {
             ));
         }
         let mut virial = [[0.0; 3]; 3];
-        let _ = self.raw(positions, Some(&mut virial))?;
+        let _ = self.raw(positions, Some(&mut virial), true)?;
         Ok(virial_to_stress(virial, self.volume))
     }
 
@@ -245,6 +279,7 @@ impl UffModel {
         &self,
         positions: &[[f64; 3]],
         virial: Option<&mut [[f64; 3]; 3]>,
+        parallel: bool,
     ) -> Result<(f64, Vec<[f64; 3]>), Error> {
         if positions.len() != self.view.n_atoms() {
             return Err(Error::InvalidInput(format!(
@@ -255,7 +290,7 @@ impl UffModel {
         }
         let (energy, gradient) =
             self.topology
-                .energy_and_gradient(positions, self.view.matrix, virial)?;
+                .energy_and_gradient(positions, self.view.matrix, virial, parallel)?;
         Ok((energy * KCAL_PER_MOL_TO_EV, gradient))
     }
 }

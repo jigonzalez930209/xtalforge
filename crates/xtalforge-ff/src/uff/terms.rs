@@ -11,9 +11,8 @@
 //! kcal/mol/Angstrom. The calculator converts at its boundary.
 
 use crate::Error;
-use crate::uff::math::{
-    EPS, add, add_virial, dot, negate, norm, scale, scatter, shift_vector, sub,
-};
+use crate::uff::math::{EPS, add, dot, merge_virial, negate, norm, scale, shift_vector, sub};
+use crate::uff::parallel::{Part, evaluate};
 use crate::uff::params::{FORCE_CONSTANT, LAMBDA, get};
 
 /// The angle expansion UFF uses for one equilibrium angle.
@@ -197,51 +196,63 @@ impl BondTerm {
         matrix: [[f64; 3]; 3],
         virial: Option<&mut [[f64; 3]; 3]>,
     ) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        self.energy_and_gradient_with(positions, matrix, virial, true)
+    }
+
+    pub(crate) fn energy_and_gradient_with(
+        &self,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+        virial: Option<&mut [[f64; 3]; 3]>,
+        parallel: bool,
+    ) -> Result<(f64, Vec<[f64; 3]>), Error> {
         let mut gradient = vec![[0.0; 3]; positions.len()];
-        if self.is_empty() {
-            return Ok((0.0, gradient));
-        }
         let mut energy = 0.0;
         let mut virial_local = [[0.0; 3]; 3];
-        for index in 0..self.len() {
-            let (Some(atom_i), Some(atom_j), Some(shift), Some(r0), Some(k)) = (
-                self.i.get(index),
-                self.j.get(index),
-                self.shift.get(index),
-                self.r0.get(index),
-                self.k.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "bond term arrays have inconsistent lengths".to_owned(),
-                ));
-            };
-            let displacement = vector(positions, *atom_i, *atom_j, *shift, matrix)?;
-            let distance = norm(displacement);
-            if distance <= EPS {
-                continue;
-            }
-            let delta = distance - r0;
-            energy += 0.5 * k * delta * delta;
-            let gradient_vector = scale(displacement, k * delta / distance);
-            add_virial(&mut virial_local, displacement, gradient_vector);
-            scatter(&mut gradient, *atom_j, gradient_vector);
-            scatter(&mut gradient, *atom_i, negate(gradient_vector));
-        }
+        evaluate(
+            self.len(),
+            parallel,
+            |index| self.part(index, positions, matrix),
+            &mut energy,
+            &mut gradient,
+            &mut virial_local,
+        )?;
         if let Some(target) = virial {
-            for row in 0..3 {
-                for column in 0..3 {
-                    if let (Some(slot), Some(value)) = (
-                        target
-                            .get_mut(row)
-                            .and_then(|values| values.get_mut(column)),
-                        virial_local.get(row).and_then(|values| values.get(column)),
-                    ) {
-                        *slot += value;
-                    }
-                }
-            }
+            merge_virial(target, virial_local);
         }
         Ok((energy, gradient))
+    }
+
+    fn part(
+        &self,
+        index: usize,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+    ) -> Result<Part, Error> {
+        let mut part = Part::zero();
+        let (Some(atom_i), Some(atom_j), Some(shift), Some(r0), Some(k)) = (
+            self.i.get(index),
+            self.j.get(index),
+            self.shift.get(index),
+            self.r0.get(index),
+            self.k.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "bond term arrays have inconsistent lengths".to_owned(),
+            ));
+        };
+        let displacement = vector(positions, *atom_i, *atom_j, *shift, matrix)?;
+        let distance = norm(displacement);
+        if distance <= EPS {
+            return Ok(part);
+        }
+        let delta = distance - r0;
+        part.energy = 0.5 * k * delta * delta;
+        let gradient_vector = scale(displacement, k * delta / distance);
+        part.push_virial(displacement, gradient_vector);
+        part.push_scatter(*atom_j, gradient_vector);
+        part.push_scatter(*atom_i, negate(gradient_vector));
+        Ok(part)
     }
 }
 
@@ -314,70 +325,82 @@ impl AngleTerm {
         matrix: [[f64; 3]; 3],
         virial: Option<&mut [[f64; 3]; 3]>,
     ) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        self.energy_and_gradient_with(positions, matrix, virial, true)
+    }
+
+    pub(crate) fn energy_and_gradient_with(
+        &self,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+        virial: Option<&mut [[f64; 3]; 3]>,
+        parallel: bool,
+    ) -> Result<(f64, Vec<[f64; 3]>), Error> {
         let mut gradient = vec![[0.0; 3]; positions.len()];
-        if self.is_empty() {
-            return Ok((0.0, gradient));
-        }
         let mut energy = 0.0;
         let mut virial_local = [[0.0; 3]; 3];
-        for index in 0..self.len() {
-            let (Some(atom_i), Some(atom_j), Some(atom_k), Some(shift_i), Some(shift_k)) = (
-                self.i.get(index),
-                self.j.get(index),
-                self.k.get(index),
-                self.shift_i.get(index),
-                self.shift_k.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "angle term arrays have inconsistent lengths".to_owned(),
-                ));
-            };
-            let (Some(force), Some(c0), Some(c1), Some(c2), Some(form)) = (
-                self.force.get(index),
-                self.c0.get(index),
-                self.c1.get(index),
-                self.c2.get(index),
-                self.form.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "angle term parameters have inconsistent lengths".to_owned(),
-                ));
-            };
-            let u = vector(positions, *atom_j, *atom_i, *shift_i, matrix)?;
-            let v = vector(positions, *atom_j, *atom_k, *shift_k, matrix)?;
-            let nu = norm(u);
-            let nv = norm(v);
-            if nu <= EPS || nv <= EPS {
-                continue;
-            }
-            let cos = (dot(u, v) / (nu * nv)).clamp(-1.0, 1.0);
-            let (energy_of_cos, dcos) = Self::energy_of_cos(*form, cos, *c0, *c1, *c2);
-            energy += force * energy_of_cos;
-            let dcos = force * dcos;
-            let du = sub(scale(v, 1.0 / (nu * nv)), scale(u, cos / (nu * nu)));
-            let dv = sub(scale(u, 1.0 / (nu * nv)), scale(v, cos / (nv * nv)));
-            let gradient_i = scale(du, dcos);
-            let gradient_k = scale(dv, dcos);
-            add_virial(&mut virial_local, u, gradient_i);
-            add_virial(&mut virial_local, v, gradient_k);
-            scatter(&mut gradient, *atom_i, gradient_i);
-            scatter(&mut gradient, *atom_k, gradient_k);
-            scatter(&mut gradient, *atom_j, negate(add(gradient_i, gradient_k)));
-        }
+        evaluate(
+            self.len(),
+            parallel,
+            |index| self.part(index, positions, matrix),
+            &mut energy,
+            &mut gradient,
+            &mut virial_local,
+        )?;
         if let Some(target) = virial {
-            for row in 0..3 {
-                for column in 0..3 {
-                    if let (Some(slot), Some(value)) = (
-                        target
-                            .get_mut(row)
-                            .and_then(|values| values.get_mut(column)),
-                        virial_local.get(row).and_then(|values| values.get(column)),
-                    ) {
-                        *slot += value;
-                    }
-                }
-            }
+            merge_virial(target, virial_local);
         }
         Ok((energy, gradient))
+    }
+
+    fn part(
+        &self,
+        index: usize,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+    ) -> Result<Part, Error> {
+        let mut part = Part::zero();
+        let (Some(atom_i), Some(atom_j), Some(atom_k), Some(shift_i), Some(shift_k)) = (
+            self.i.get(index),
+            self.j.get(index),
+            self.k.get(index),
+            self.shift_i.get(index),
+            self.shift_k.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "angle term arrays have inconsistent lengths".to_owned(),
+            ));
+        };
+        let (Some(force), Some(c0), Some(c1), Some(c2), Some(form)) = (
+            self.force.get(index),
+            self.c0.get(index),
+            self.c1.get(index),
+            self.c2.get(index),
+            self.form.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "angle term parameters have inconsistent lengths".to_owned(),
+            ));
+        };
+        let u = vector(positions, *atom_j, *atom_i, *shift_i, matrix)?;
+        let v = vector(positions, *atom_j, *atom_k, *shift_k, matrix)?;
+        let nu = norm(u);
+        let nv = norm(v);
+        if nu <= EPS || nv <= EPS {
+            return Ok(part);
+        }
+        let cos = (dot(u, v) / (nu * nv)).clamp(-1.0, 1.0);
+        let (energy_of_cos, dcos) = Self::energy_of_cos(*form, cos, *c0, *c1, *c2);
+        part.energy = force * energy_of_cos;
+        let dcos = force * dcos;
+        let du = sub(scale(v, 1.0 / (nu * nv)), scale(u, cos / (nu * nu)));
+        let dv = sub(scale(u, 1.0 / (nu * nv)), scale(v, cos / (nv * nv)));
+        let gradient_i = scale(du, dcos);
+        let gradient_k = scale(dv, dcos);
+        part.push_virial(u, gradient_i);
+        part.push_virial(v, gradient_k);
+        part.push_scatter(*atom_i, gradient_i);
+        part.push_scatter(*atom_k, gradient_k);
+        part.push_scatter(*atom_j, negate(add(gradient_i, gradient_k)));
+        Ok(part)
     }
 }

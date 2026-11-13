@@ -22,6 +22,7 @@ pub mod vdw;
 pub(crate) mod coordination;
 pub(crate) mod geometry;
 pub(crate) mod math;
+pub(crate) mod parallel;
 pub(crate) mod perception;
 pub(crate) mod rules;
 pub(crate) mod topology;

@@ -8,9 +8,10 @@
 
 use crate::Error;
 use crate::uff::math::{
-    MIN_SINE, add, add_virial, cross, dot, merge_virial, negate, norm, scale, scatter,
-    shift_vector, sine_from_cross, sub,
+    MIN_SINE, add, cross, dot, merge_virial, negate, norm, scale, shift_vector, sine_from_cross,
+    sub,
 };
+use crate::uff::parallel::{Part, evaluate};
 use crate::uff::params::get;
 
 const GROUP_16_BARRIER_HEAVY: f64 = 6.8;
@@ -211,84 +212,110 @@ impl TorsionTerm {
         matrix: [[f64; 3]; 3],
         virial: Option<&mut [[f64; 3]; 3]>,
     ) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        self.energy_and_gradient_with(positions, matrix, virial, true)
+    }
+
+    pub(crate) fn energy_and_gradient_with(
+        &self,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+        virial: Option<&mut [[f64; 3]; 3]>,
+        parallel: bool,
+    ) -> Result<(f64, Vec<[f64; 3]>), Error> {
         let mut gradient = vec![[0.0; 3]; positions.len()];
         let mut energy = 0.0;
         let mut virial_local = [[0.0; 3]; 3];
-        for index in 0..self.len() {
-            let (Some(atom_i), Some(atom_j), Some(atom_k), Some(atom_l)) = (
-                self.i.get(index),
-                self.j.get(index),
-                self.k.get(index),
-                self.l.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "torsion term arrays have inconsistent lengths".to_owned(),
-                ));
-            };
-            let (Some(shift_i), Some(shift_k), Some(shift_l)) = (
-                self.shift_i.get(index),
-                self.shift_k.get(index),
-                self.shift_l.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "torsion shifts have inconsistent lengths".to_owned(),
-                ));
-            };
-            let (Some(barrier), Some(periodicity), Some(cos_n_phi0)) = (
-                self.barrier.get(index),
-                self.periodicity.get(index),
-                self.cos_n_phi0.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "torsion parameters have inconsistent lengths".to_owned(),
-                ));
-            };
-            let position_i = term_vector(positions, *atom_i, *shift_i, matrix)?;
-            let position_j = term_vector(positions, *atom_j, [0, 0, 0], matrix)?;
-            let position_k = term_vector(positions, *atom_k, *shift_k, matrix)?;
-            let position_l = term_vector(positions, *atom_l, *shift_l, matrix)?;
-            let b1 = sub(position_j, position_i);
-            let b2 = sub(position_k, position_j);
-            let b3 = sub(position_l, position_k);
-
-            let n1 = cross(b1, b2);
-            let n2 = cross(b2, b3);
-            let m1 = norm(n1);
-            let m2 = norm(n2);
-            if sine_from_cross(m1, b1, b2) <= MIN_SINE || sine_from_cross(m2, b2, b3) <= MIN_SINE {
-                continue;
-            }
-            let cos = (dot(n1, n2) / (m1 * m2)).clamp(-1.0, 1.0);
-            let Some((value, slope)) = chebyshev(cos, *periodicity) else {
-                return Err(Error::Topology(format!(
-                    "unsupported torsion periodicity {periodicity}"
-                )));
-            };
-            let amplitude = 0.5 * barrier * cos_n_phi0;
-            energy += 0.5 * barrier - amplitude * value;
-            let dcos = -amplitude * slope;
-
-            let w1 = sub(scale(n2, 1.0 / (m1 * m2)), scale(n1, cos / (m1 * m1)));
-            let w2 = sub(scale(n1, 1.0 / (m1 * m2)), scale(n2, cos / (m2 * m2)));
-            let db1 = cross(b2, w1);
-            let db2 = add(cross(w1, b1), cross(b3, w2));
-            let db3 = cross(w2, b2);
-
-            let gradient_i = scale(db1, -dcos);
-            let gradient_j = scale(sub(db1, db2), dcos);
-            let gradient_k = scale(sub(db2, db3), dcos);
-            let gradient_l = scale(db3, dcos);
-            add_virial(&mut virial_local, b1, negate(gradient_i));
-            add_virial(&mut virial_local, b2, scale(db2, dcos));
-            add_virial(&mut virial_local, b3, gradient_l);
-            scatter(&mut gradient, *atom_i, gradient_i);
-            scatter(&mut gradient, *atom_j, gradient_j);
-            scatter(&mut gradient, *atom_k, gradient_k);
-            scatter(&mut gradient, *atom_l, gradient_l);
-        }
+        evaluate(
+            self.len(),
+            parallel,
+            |index| self.part(index, positions, matrix),
+            &mut energy,
+            &mut gradient,
+            &mut virial_local,
+        )?;
         if let Some(target) = virial {
             merge_virial(target, virial_local);
         }
         Ok((energy, gradient))
+    }
+
+    fn part(
+        &self,
+        index: usize,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+    ) -> Result<Part, Error> {
+        let mut part = Part::zero();
+        let (Some(atom_i), Some(atom_j), Some(atom_k), Some(atom_l)) = (
+            self.i.get(index),
+            self.j.get(index),
+            self.k.get(index),
+            self.l.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "torsion term arrays have inconsistent lengths".to_owned(),
+            ));
+        };
+        let (Some(shift_i), Some(shift_k), Some(shift_l)) = (
+            self.shift_i.get(index),
+            self.shift_k.get(index),
+            self.shift_l.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "torsion shifts have inconsistent lengths".to_owned(),
+            ));
+        };
+        let (Some(barrier), Some(periodicity), Some(cos_n_phi0)) = (
+            self.barrier.get(index),
+            self.periodicity.get(index),
+            self.cos_n_phi0.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "torsion parameters have inconsistent lengths".to_owned(),
+            ));
+        };
+        let position_i = term_vector(positions, *atom_i, *shift_i, matrix)?;
+        let position_j = term_vector(positions, *atom_j, [0, 0, 0], matrix)?;
+        let position_k = term_vector(positions, *atom_k, *shift_k, matrix)?;
+        let position_l = term_vector(positions, *atom_l, *shift_l, matrix)?;
+        let b1 = sub(position_j, position_i);
+        let b2 = sub(position_k, position_j);
+        let b3 = sub(position_l, position_k);
+
+        let n1 = cross(b1, b2);
+        let n2 = cross(b2, b3);
+        let m1 = norm(n1);
+        let m2 = norm(n2);
+        if sine_from_cross(m1, b1, b2) <= MIN_SINE || sine_from_cross(m2, b2, b3) <= MIN_SINE {
+            return Ok(part);
+        }
+        let cos = (dot(n1, n2) / (m1 * m2)).clamp(-1.0, 1.0);
+        let Some((value, slope)) = chebyshev(cos, *periodicity) else {
+            return Err(Error::Topology(format!(
+                "unsupported torsion periodicity {periodicity}"
+            )));
+        };
+        let amplitude = 0.5 * barrier * cos_n_phi0;
+        part.energy = 0.5 * barrier - amplitude * value;
+        let dcos = -amplitude * slope;
+
+        let w1 = sub(scale(n2, 1.0 / (m1 * m2)), scale(n1, cos / (m1 * m1)));
+        let w2 = sub(scale(n1, 1.0 / (m1 * m2)), scale(n2, cos / (m2 * m2)));
+        let db1 = cross(b2, w1);
+        let db2 = add(cross(w1, b1), cross(b3, w2));
+        let db3 = cross(w2, b2);
+
+        let gradient_i = scale(db1, -dcos);
+        let gradient_j = scale(sub(db1, db2), dcos);
+        let gradient_k = scale(sub(db2, db3), dcos);
+        let gradient_l = scale(db3, dcos);
+        part.push_virial(b1, negate(gradient_i));
+        part.push_virial(b2, scale(db2, dcos));
+        part.push_virial(b3, gradient_l);
+        part.push_scatter(*atom_i, gradient_i);
+        part.push_scatter(*atom_j, gradient_j);
+        part.push_scatter(*atom_k, gradient_k);
+        part.push_scatter(*atom_l, gradient_l);
+        Ok(part)
     }
 }

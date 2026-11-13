@@ -7,9 +7,10 @@
 
 use crate::Error;
 use crate::uff::math::{
-    EPS, MIN_SINE, add, add_virial, cross, dot, merge_virial, negate, norm, scale, scatter,
-    shift_vector, sine_from_cross, sub,
+    EPS, MIN_SINE, add, cross, dot, merge_virial, negate, norm, scale, shift_vector,
+    sine_from_cross, sub,
 };
+use crate::uff::parallel::{Part, evaluate};
 
 /// sp2 centres: total barrier shared by the three inversions at the atom.
 const SP2_INVERSION: f64 = 6.0;
@@ -151,92 +152,117 @@ impl InversionTerm {
         matrix: [[f64; 3]; 3],
         virial: Option<&mut [[f64; 3]; 3]>,
     ) -> Result<(f64, Vec<[f64; 3]>), Error> {
+        self.energy_and_gradient_with(positions, matrix, virial, true)
+    }
+
+    pub(crate) fn energy_and_gradient_with(
+        &self,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+        virial: Option<&mut [[f64; 3]; 3]>,
+        parallel: bool,
+    ) -> Result<(f64, Vec<[f64; 3]>), Error> {
         let mut gradient = vec![[0.0; 3]; positions.len()];
         let mut energy = 0.0;
         let mut virial_local = [[0.0; 3]; 3];
-        for index in 0..self.len() {
-            let (Some(centre), Some(atom_j), Some(atom_k), Some(atom_l)) = (
-                self.centre.get(index),
-                self.j.get(index),
-                self.k.get(index),
-                self.l.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "inversion term arrays have inconsistent lengths".to_owned(),
-                ));
-            };
-            let (Some(shift_j), Some(shift_k), Some(shift_l)) = (
-                self.shift_j.get(index),
-                self.shift_k.get(index),
-                self.shift_l.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "inversion shifts have inconsistent lengths".to_owned(),
-                ));
-            };
-            let (Some(force), Some(c0), Some(c1), Some(c2)) = (
-                self.force.get(index),
-                self.c0.get(index),
-                self.c1.get(index),
-                self.c2.get(index),
-            ) else {
-                return Err(Error::Topology(
-                    "inversion parameters have inconsistent lengths".to_owned(),
-                ));
-            };
-            let origin = *positions
-                .get(*centre)
-                .ok_or_else(|| Error::Topology("inversion centre out of range".to_owned()))?;
-            let a = sub(
-                image_position(positions, *atom_j, *shift_j, matrix)?,
-                origin,
-            );
-            let b = sub(
-                image_position(positions, *atom_k, *shift_k, matrix)?,
-                origin,
-            );
-            let c = sub(
-                image_position(positions, *atom_l, *shift_l, matrix)?,
-                origin,
-            );
-
-            let normal = cross(a, b);
-            let nn = norm(normal);
-            let nc = norm(c);
-            if sine_from_cross(nn, a, b) <= MIN_SINE || nc <= EPS {
-                continue;
-            }
-            let sin = (dot(normal, c) / (nn * nc)).clamp(-1.0, 1.0);
-            let cos2 = (1.0 - sin * sin).clamp(0.0, 1.0);
-            let cos = cos2.sqrt();
-            energy += force * (c0 + c1 * cos + c2 * (2.0 * cos2 - 1.0));
-            if cos <= EPS {
-                continue;
-            }
-            let dsin = force * (-c1 * sin / cos - 4.0 * c2 * sin);
-
-            let dn = sub(scale(c, 1.0 / (nn * nc)), scale(normal, sin / (nn * nn)));
-            let dc = sub(scale(normal, 1.0 / (nn * nc)), scale(c, sin / (nc * nc)));
-            let da = cross(b, dn);
-            let db = cross(dn, a);
-            let gradient_a = scale(da, dsin);
-            let gradient_b = scale(db, dsin);
-            let gradient_c = scale(dc, dsin);
-            add_virial(&mut virial_local, a, gradient_a);
-            add_virial(&mut virial_local, b, gradient_b);
-            add_virial(&mut virial_local, c, gradient_c);
-            scatter(&mut gradient, *atom_j, gradient_a);
-            scatter(&mut gradient, *atom_k, gradient_b);
-            scatter(&mut gradient, *atom_l, gradient_c);
-            scatter(
-                &mut gradient,
-                *centre,
-                negate(add(add(gradient_a, gradient_b), gradient_c)),
-            );
-        }
+        evaluate(
+            self.len(),
+            parallel,
+            |index| self.part(index, positions, matrix),
+            &mut energy,
+            &mut gradient,
+            &mut virial_local,
+        )?;
         if let Some(target) = virial {
             merge_virial(target, virial_local);
         }
         Ok((energy, gradient))
+    }
+
+    fn part(
+        &self,
+        index: usize,
+        positions: &[[f64; 3]],
+        matrix: [[f64; 3]; 3],
+    ) -> Result<Part, Error> {
+        let mut part = Part::zero();
+        let (Some(centre), Some(atom_j), Some(atom_k), Some(atom_l)) = (
+            self.centre.get(index),
+            self.j.get(index),
+            self.k.get(index),
+            self.l.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "inversion term arrays have inconsistent lengths".to_owned(),
+            ));
+        };
+        let (Some(shift_j), Some(shift_k), Some(shift_l)) = (
+            self.shift_j.get(index),
+            self.shift_k.get(index),
+            self.shift_l.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "inversion shifts have inconsistent lengths".to_owned(),
+            ));
+        };
+        let (Some(force), Some(c0), Some(c1), Some(c2)) = (
+            self.force.get(index),
+            self.c0.get(index),
+            self.c1.get(index),
+            self.c2.get(index),
+        ) else {
+            return Err(Error::Topology(
+                "inversion parameters have inconsistent lengths".to_owned(),
+            ));
+        };
+        let origin = *positions
+            .get(*centre)
+            .ok_or_else(|| Error::Topology("inversion centre out of range".to_owned()))?;
+        let a = sub(
+            image_position(positions, *atom_j, *shift_j, matrix)?,
+            origin,
+        );
+        let b = sub(
+            image_position(positions, *atom_k, *shift_k, matrix)?,
+            origin,
+        );
+        let c = sub(
+            image_position(positions, *atom_l, *shift_l, matrix)?,
+            origin,
+        );
+
+        let normal = cross(a, b);
+        let nn = norm(normal);
+        let nc = norm(c);
+        if sine_from_cross(nn, a, b) <= MIN_SINE || nc <= EPS {
+            return Ok(part);
+        }
+        let sin = (dot(normal, c) / (nn * nc)).clamp(-1.0, 1.0);
+        let cos2 = (1.0 - sin * sin).clamp(0.0, 1.0);
+        let cos = cos2.sqrt();
+        part.energy = force * (c0 + c1 * cos + c2 * (2.0 * cos2 - 1.0));
+        if cos <= EPS {
+            return Ok(part);
+        }
+        let dsin = force * (-c1 * sin / cos - 4.0 * c2 * sin);
+
+        let dn = sub(scale(c, 1.0 / (nn * nc)), scale(normal, sin / (nn * nn)));
+        let dc = sub(scale(normal, 1.0 / (nn * nc)), scale(c, sin / (nc * nc)));
+        let da = cross(b, dn);
+        let db = cross(dn, a);
+        let gradient_a = scale(da, dsin);
+        let gradient_b = scale(db, dsin);
+        let gradient_c = scale(dc, dsin);
+        part.push_virial(a, gradient_a);
+        part.push_virial(b, gradient_b);
+        part.push_virial(c, gradient_c);
+        part.push_scatter(*atom_j, gradient_a);
+        part.push_scatter(*atom_k, gradient_b);
+        part.push_scatter(*atom_l, gradient_c);
+        part.push_scatter(
+            *centre,
+            negate(add(add(gradient_a, gradient_b), gradient_c)),
+        );
+        Ok(part)
     }
 }

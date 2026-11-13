@@ -104,13 +104,6 @@ pub(crate) fn merge_virial(target: &mut [[f64; 3]; 3], source: [[f64; 3]; 3]) {
     }
 }
 
-/// `grad[indices] += values`, accumulating repeated indices.
-pub(crate) fn scatter(forces: &mut [[f64; 3]], index: usize, value: [f64; 3]) {
-    if let Some(slot) = forces.get_mut(index) {
-        *slot = add(*slot, value);
-    }
-}
-
 /// Symmetrised stress from a virial in kcal/mol/Angstrom^3.
 pub(crate) fn virial_to_stress(virial: [[f64; 3]; 3], volume: f64) -> [[f64; 3]; 3] {
     let mut stress = [[0.0; 3]; 3];
