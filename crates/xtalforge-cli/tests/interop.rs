@@ -71,3 +71,32 @@ fn convert_writes_an_optimade_entry() {
     assert!(value["attributes"]["lattice_vectors"].is_array());
     std::fs::remove_dir_all(directory).unwrap();
 }
+
+#[test]
+fn mesh_writes_obj_and_gltf() {
+    let cif = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../tests/corpus/simple/Si.cif"
+    );
+    let obj = run(&["mesh", cif, "--mesh-format", "obj"]);
+    assert!(obj.status.success());
+    let text = String::from_utf8(obj.stdout).unwrap();
+    assert!(text.contains("v "));
+    assert!(text.contains("vn "));
+    assert!(text.contains("f "));
+
+    let gltf = run(&["mesh", cif, "--mesh-format", "gltf"]);
+    assert!(gltf.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&gltf.stdout).unwrap();
+    assert_eq!(value["asset"]["version"], "2.0");
+    assert!(value["meshes"].is_array());
+}
+
+#[test]
+fn modules_lists_the_builtin_registry() {
+    let output = run(&["--json", "modules"]);
+    assert!(output.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let items = value.as_array().unwrap();
+    assert!(items.iter().any(|item| item["name"] == "version"));
+}
