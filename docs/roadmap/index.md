@@ -36,10 +36,10 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-13)
 
-- Phases 0-13 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-14 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
-  stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`
-  and `v1.6.0` are published on crates.io, PyPI (`xtalforge`), npm
+  stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`,
+  `v1.6.0` and `v1.7.0` are published on crates.io, PyPI (`xtalforge`), npm
   (`xtalforge-wasm`), the GitHub release and GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
@@ -51,7 +51,8 @@ are in `AGENTS.md` at the repository root.
   interface with the same 13-crate, 7-wheel plus sdist and npm payload;
   `v1.5.1` (2026-11-13) is the icon and package-metadata patch; `v1.6.0`
   (2026-11-13) releases Phase 13, the ecosystem adapters, formats and remote
-  data.
+  data; `v1.7.0` (2026-11-13) releases Phase 14, the diffraction, force-field,
+  structure-operation, mesh and report work.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
@@ -68,9 +69,11 @@ are in `AGENTS.md` at the repository root.
   worker/Node helpers. Phase 13 is complete: the ASE, pymatgen,
   phonopy/spglib and RDKit adapters, the extended format registry, OPTIMADE,
   COD and Materials Project fetchers, Python entry-point plugins, the
-  migration guides and the interoperability API page. Tasks 9.7.2, 10.5.7,
-  10.6.4, 10.7.3-10.7.5, 11.4.5, 12.1.4, 12.3.5 and 12.4.1 remain open. The
-  stable API follows the
+  migration guides and the interoperability API page. Phase 14 is complete:
+  profiles, anisotropic ADP, single-crystal factors, cell freedom, MD, slab
+  bond carrying, undoable commands, OBJ/glTF and HTML/JSON reports. Tasks
+  9.7.2, 10.5.7, 10.6.4, 10.7.3-10.7.5, 11.4.5, 12.1.4, 12.3.5, 12.4.1,
+  14.1.5 and 14.2.6 remain open. The stable API follows the
   SemVer policy and the known subsets below are the only documented reference
   gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
@@ -91,42 +94,17 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   GFN0/GFN1/GFN2 methods are available in-process through the `sci-form`
   feature. The external launchers still need a real binary, so a complete
   DFTB+/xTB run is not executed in CI; ORCA remains input-only by design.
-- 4.4: held cell lengths/volume (`CellFreedom`) and an external pressure term
-  are not implemented; `OptimizeOptions.cell` relaxes the point-group-averaged
-  strain only.
-- 5.1 and 7.2: the calculated PXRD uses one Gaussian per reflection and the
-  `Instrument` has no wavelength or Caglioti `U, V, W`; Rietveld ignores
-  `RietveldOptions::kind` (area-normalised Gaussian, K alpha doublet by ratio).
-- 5.x/7.x: the Pawley and Le Bail pseudo-Voigt mixing `eta` is a fixed option
-  (0.5 by default), not a refined parameter, so a Gaussian pattern fitted with
-  the default profile leaves a large Rwp (adding a refinable `eta` would change
-  the frozen `PawleyOptions` struct).
-- 3.10 and 4.4: `TransformCell`, `MakeSlab`, `AssignWyckoff`, `Invert`,
-  `DescendToSubgroup`, `MergeDuplicates`, `InsertMolecules`,
-  `ApplyOptimizedGeometry`, `AddHydrogens`, `Prepare` and `SetAtomTypes` are
-  not command types, and the Vinet equation of state is missing; the
-  functions behind most of them exist and apply through `ReplaceStructure`.
-- 5.1-5.4: the PXRD has no anisotropic Debye-Waller factors, no
-  pseudo-Voigt/Caglioti width, no monochromator option and a fixed radiation
-  set; the porosity grid has no channel percolation, probe-occupiable volume or
-  per-mass area; meshes have no normals or OBJ output.
-- 5.6-5.10: no structure-to-net contraction, vertex symbols, search by space
-  group or transitivity, Blatov interpenetration classes, or HTML/JSON report
-  renderers; the module registry has no CLI command.
+- 9.6: the Vinet equation of state is not in `EosForm`; the historical
+  Birch-Murnaghan and Murnaghan forms are unchanged (Task 9.6.2).
+- 5.3-5.4: the porosity grid still has no channel percolation,
+  probe-occupiable volume or per-mass area (MOF Tasks 10.3.1/10.3.2); meshes,
+  normals and OBJ/glTF are complete.
 - 6.1-6.4: SMILES parsing and embedding, sketches, the fragment library,
   substitution and guest placement are Rust-only (no CLI, Python or WASM
   surface), see the open gaps in `docs/api/parity.md`.
-- 7.x: no whole-range peak refinement, TCH/Caglioti/FCJ profiles, persistent
-  powder parameter sets, Pareto sweep or knee, `run` module steps, named
-  instrument presets, indexing engine agreement, cancellation or powder demo.
-- 4.4-4.5: no cancellation or progress callback in the optimizers, no
-  trajectory output, scan coordinates limited to atom-index distance, angle and
-  torsion, and scans that neither write points to disk nor resume.
-- 1.8: `Slab.cut` is always zero; severed bonds are not carried through the
-  cut.
-- 1.11: explicit bonds map to P1 indices and are not propagated to every
-  symmetry image; pair-specific bond ranges and a metal-metal switch are not
-  exposed.
+- 7.x: indexing-engine agreement and the powder demo remain open; whole-range
+  refinement, TCH/Caglioti/FCJ profiles, persistent parameter sets, Pareto
+  sweep/knee, named presets and cancellation are complete.
 - 6.x: the MOF builder uses a curated topology/block subset and a greedy
   orientation instead of PORMAKE's global RMSD fit.
 - 9.1: the matcher works on Niggli-reduced input cells and accepts supercell
