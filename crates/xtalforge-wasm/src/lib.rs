@@ -41,6 +41,8 @@ mod phase9_mechanics_export;
 #[cfg(target_arch = "wasm32")]
 mod powder_export;
 #[cfg(target_arch = "wasm32")]
+mod remote_export;
+#[cfg(target_arch = "wasm32")]
 mod scene_export;
 #[cfg(target_arch = "wasm32")]
 mod structure_object;
@@ -119,6 +121,8 @@ pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
     powder_pawley_width_info, powder_refine_info, rietx_inventory_info,
 };
+#[cfg(target_arch = "wasm32")]
+pub use remote_export::{fetch_cod, fetch_optimade};
 #[cfg(target_arch = "wasm32")]
 pub use scene_export::scene_data;
 #[cfg(target_arch = "wasm32")]
