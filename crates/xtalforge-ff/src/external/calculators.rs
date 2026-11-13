@@ -67,6 +67,16 @@ impl DftbCalculator {
         Arc::clone(&self.cancel)
     }
 
+    /// Uses a shared cancellation flag instead of the private one.
+    ///
+    /// A [`crate::CancelToken`] exposes its flag with
+    /// [`crate::CancelToken::shared`].
+    #[must_use]
+    pub fn with_cancel(mut self, cancel: Arc<AtomicBool>) -> Self {
+        self.cancel = cancel;
+        self
+    }
+
     /// Runs DFTB+ and parses `detailed.out`.
     ///
     /// # Errors
@@ -181,6 +191,16 @@ impl XtbCalculator {
     #[must_use]
     pub fn cancel_handle(&self) -> Arc<AtomicBool> {
         Arc::clone(&self.cancel)
+    }
+
+    /// Uses a shared cancellation flag instead of the private one.
+    ///
+    /// A [`crate::CancelToken`] exposes its flag with
+    /// [`crate::CancelToken::shared`].
+    #[must_use]
+    pub fn with_cancel(mut self, cancel: Arc<AtomicBool>) -> Self {
+        self.cancel = cancel;
+        self
     }
 
     /// Runs xTB and parses its standard output.
