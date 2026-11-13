@@ -5,6 +5,34 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.5.0] - 2026-11-13
+
+Phase 12 makes the Python and JavaScript surfaces object-oriented and
+array-native while keeping the 1.x text/dict API. The public API is additive.
+
+### Added
+
+- Python `Structure` object API: `to_dict`, `write`, `positions`,
+  `frac_positions`, `cell`, `numbers`, `from_arrays`, `set_positions`,
+  `ff_energy`, `add_hydrogens` and `_repr_html_`; the common free functions
+  accept a `Structure` as their text argument.
+- Typed result classes (`SymmetryDataset`, `PxrdPattern`, `PorosityReport`,
+  `OptimizeResult`) that remain dict-compatible, and `mypy --strict` stubs
+  without `Any` (`scripts/check-python-stubs.sh`).
+- Python batch helpers (`xtalforge.batch.read/detect_symmetry/pxrd`) with
+  input order preserved, and the `pxrd(..., threads=)` keyword.
+- WASM `Structure` handle (parse once, `fromText`/`fromCif`, supercell, slab,
+  P1, symmetry, PXRD, energy, hydrogens, positions/cell/numbers arrays) and
+  `scene_buffers`, `pxrd_buffers`, `mesh_buffers` typed-array exports.
+- `crates/xtalforge-wasm/ts/xtalforge-object.d.ts` typed interfaces checked by
+  `scripts/check-ts-any.sh`; `js/structure-registry.js`, `js/worker.js` and
+  `js/node.js` for finalization, Web Worker and Node workflows.
+- `docs/api/objects.md` and 7 parity rows.
+
+### Fixed
+
+- The `pxrd` Python function accepts a worker count without changing results.
+
 ## [1.4.0] - 2026-11-12
 
 Phase 11 closes the 2026-11-11 usability audit. The public API is additive:

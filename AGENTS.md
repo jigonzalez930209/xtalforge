@@ -270,27 +270,28 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.4.0` (release commit tagged after the local CI gate; `1.3.0`
-  and `1.2.0` were published on 2026-11-12 and `1.1.0` on 2026-11-11 on
-  crates.io, PyPI, npm, the GitHub release and GitHub Pages). `1.4.0` is
-  backward compatible: Phase 11 closes the usability audit (CLI help,
-  threads, error categories, warnings, pipelines, doctor, one-call IO, SMILES
-  and fragment surfaces, naming/deprecation docs and recipes).
+- Version: `1.5.0` (release commit tagged after the local CI gate; `1.4.0`
+  and `1.3.0` were published on 2026-11-12/13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages). `1.5.0` is backward compatible:
+  Phase 12 adds the object-oriented Python/WASM APIs, NumPy and typed arrays,
+  typed result classes, batch helpers and the typed JavaScript interface.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 12 — Native bindings
-  (`docs/roadmap/phase-12-native-api.md`), the next step of the road to
+- Current phase: Phase 13 — Ecosystem interoperability
+  (`docs/roadmap/phase-13-interop.md`), the next step of the road to
   `2.0.0` (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
-  Phase 11 — Usability audit (`docs/roadmap/phase-11-usability.md`) is
-  complete and released as `1.4.0`: accurate CLI help, real `--threads`,
-  error categories, structured warnings, stdin/stdout pipelines, `doctor`,
-  one-call IO, the wider prelude, SMILES/sketch/fragment/substitution/guest
-  on all surfaces, naming/deprecation/recipes docs and 11 new parity rows.
-  Task 11.4.5 (executable recipe and error snapshots) remains open.
-  Phase 10 — MOF platform is complete and released as `1.3.0`; Tasks 10.5.7,
-  10.6.4 and 10.7.3-10.7.5 remain open. Phase 9 is complete and released as
-  `1.2.0`; Task 9.7.2 remains open.
+  Phase 12 — Native bindings (`docs/roadmap/phase-12-native-api.md`) shipped
+  as `1.5.0`: the Python `Structure` object API, typed result classes,
+  no-`Any` stubs, NumPy input/output, batch helpers, the WASM `Structure`
+  handle, typed scene/PXRD/mesh buffers, typed TS interfaces and worker/Node
+  wrappers, with tests, docs and 7 parity rows. Tasks 12.1.4
+  (progress/cancellation), 12.3.5 (optional threads) and 12.4.1 (tutorial,
+  playground migration and measured parse-once benchmark) remain open and
+  are documented as exceptions. Phase 11 is complete and released
+  as `1.4.0`; Task 11.4.5 remains open. Phase 10 is complete and released as
+  `1.3.0`; Tasks 10.5.7, 10.6.4 and 10.7.3-10.7.5 remain open. Phase 9 is
+  complete and released as `1.2.0`; Task 9.7.2 remains open.
   Phases 0-8 are complete. Phase 8 — Agent and
   distribution (`docs/roadmap/phase-08-distribution.md`) delivered tasks
   8.1-8.7:
