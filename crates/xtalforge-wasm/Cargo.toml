@@ -12,6 +12,7 @@ keywords.workspace = true
 categories.workspace = true
 publish = false
 description = "WebAssembly bindings for xtalforge."
+readme = "README.md"
 
 [lib]
 name = "xtalforge_wasm"
