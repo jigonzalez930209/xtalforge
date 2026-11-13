@@ -19,6 +19,16 @@ fn median(mut samples: Vec<Duration>) -> Duration {
     samples[samples.len() / 2]
 }
 
+fn median_duration(mut run: impl FnMut()) -> Duration {
+    let mut samples = Vec::with_capacity(5);
+    for _ in 0..5 {
+        let start = Instant::now();
+        run();
+        samples.push(start.elapsed());
+    }
+    median(samples)
+}
+
 fn main() {
     let text = include_str!("../../../tests/corpus/cod/MOF-5.cif");
     let structure = read_cif(text).unwrap();
@@ -36,6 +46,56 @@ fn main() {
         structure.sites().len(),
         median(samples).as_secs_f64() * 1e3
     );
+
+    if let Ok(model) = UffModel::build(&structure, CalculatorOptions::default()) {
+        println!(
+            "{:>5} sites  UFF terms: {} bonds, {} angles, {} torsions, {} inversions, {} vdw pairs",
+            structure.sites().len(),
+            model.n_bonds(),
+            model.n_angles(),
+            model.n_torsions(),
+            model.n_inversions(),
+            model.n_vdw_pairs()
+        );
+        let parallel = median_duration(|| {
+            std::hint::black_box(model.energy_forces().unwrap());
+        });
+        let sequential = median_duration(|| {
+            std::hint::black_box(model.energy_forces_sequential().unwrap());
+        });
+        println!(
+            "{:>5} sites  UFF forces  default {:.1} ms  sequential {:.1} ms  (parallel feature: {})",
+            structure.sites().len(),
+            parallel.as_secs_f64() * 1e3,
+            sequential.as_secs_f64() * 1e3,
+            cfg!(feature = "parallel")
+        );
+    }
+    if let Ok(supercell) = structure.supercell(2, 2, 2)
+        && let Ok(model) = UffModel::build(&supercell, CalculatorOptions::default())
+    {
+        println!(
+            "{:>5} atoms  UFF terms: {} bonds, {} angles, {} torsions, {} inversions, {} vdw pairs",
+            supercell.sites().len(),
+            model.n_bonds(),
+            model.n_angles(),
+            model.n_torsions(),
+            model.n_inversions(),
+            model.n_vdw_pairs()
+        );
+        let parallel = median_duration(|| {
+            std::hint::black_box(model.energy_forces().unwrap());
+        });
+        let sequential = median_duration(|| {
+            std::hint::black_box(model.energy_forces_sequential().unwrap());
+        });
+        println!(
+            "{:>5} atoms  UFF forces  default {:.1} ms  sequential {:.1} ms",
+            supercell.sites().len(),
+            parallel.as_secs_f64() * 1e3,
+            sequential.as_secs_f64() * 1e3
+        );
+    }
 
     let methane = "5\nmethane\nC 0 0 0\nH 0.63 0.63 0.63\nH 0.63 -0.63 -0.63\nH -0.63 0.63 -0.63\nH -0.63 -0.63 0.63\n";
     let methane = xtalforge_io::read_xyz(methane).unwrap();
