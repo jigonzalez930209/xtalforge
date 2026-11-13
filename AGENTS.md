@@ -272,17 +272,19 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.8.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.7.0` and earlier
-  shipped on 2026-11-13/12). `1.8.0` completes Phase 15: the benchmark contract,
-  SoA/lazy/streaming/parallel scale paths, split WASM packages, lazy data
-  bundles and the CLI cold-start measurement.
+- Version: `1.9.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.8.0` and earlier
+  shipped on 2026-11-13/12). `1.9.0` completes Phase 16: declarative JSON
+  workflows and the runner, provenance records and embedding, JSON Lines
+  datasets, deduplication and ML descriptors.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 16 — Workflows, provenance and high throughput
-  (`docs/roadmap/phase-16-workflows.md`), the next step of the road to
-  `2.0.0` (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
+- Current phase: Phase 17 — 2.0 redesign and freeze
+  (`docs/roadmap/phase-17-v2.md`), the final step of the road to `2.0.0`.
+  Phase 16 — Workflows, provenance and high throughput shipped as `1.9.0`.
+  JSON-only workflows (no YAML parser), WASM workflow execution (filesystem)
+  and the Parquet/Arrow dataset option remain documented follow-ups.
   Phase 15 — Performance and scale shipped as `1.8.0`. Streaming writers,
   download-on-first-use WASM data and publishing the split npm tiers remain
   open and documented.

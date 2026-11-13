@@ -5,6 +5,33 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.9.0] - 2026-11-13
+
+Phase 16 makes high-throughput runs reproducible, inspectable and shareable.
+
+### Added
+
+- Versioned JSON workflows with `read`/`transform`/`analyse`/`compute`/`write`
+  steps, a published JSON Schema, deterministic input expansion, per-item
+  error isolation, checkpoints/resume, CLI `xtalforge run`, Python
+  `Workflow.run` and agent/MCP `workflow_*` tools.
+- `Provenance` records (version, options, input SHA-256, bundle versions, seed)
+  with structure-metadata helpers and embedding in CIF, extxyz and project
+  files; `xtalforge provenance` and Python `xtalforge.provenance`.
+- JSON Lines datasets with typed properties, structure deduplication using the
+  matcher plus a fingerprint prefilter, and composition/RDF/Coulomb/SOAP-like
+  descriptors; Python `xtalforge.Dataset` with pandas/polars views.
+- The high-throughput tutorial over a CoRE MOF subset, the workflow schema
+  asset, API pages and parity rows.
+
+### Notes
+
+- Workflows are JSON; `.yaml`/`.yml` files load only when their content is
+  JSON. A YAML parser is not a dependency in this release.
+- WASM exposes workflow metadata but cannot run workflows that read and write
+  files; the filesystem exception is recorded in the parity matrix.
+- The SOAP-like descriptor is a documented approximation, not exact SOAP.
+
 ## [1.8.0] - 2026-11-13
 
 Phase 15 makes performance and scale a tested contract.
