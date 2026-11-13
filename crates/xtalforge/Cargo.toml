@@ -19,13 +19,13 @@ xtalforge-core = { workspace = true }
 xtalforge-io = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 xtalforge-view = { workspace = true }
-xtalforge-agent = { workspace = true }
-xtalforge-analysis = { workspace = true }
-xtalforge-build = { workspace = true }
 xtalforge-commands = { workspace = true }
-xtalforge-ff = { workspace = true }
-xtalforge-mof = { workspace = true }
-xtalforge-modules = { workspace = true }
+xtalforge-agent = { workspace = true, optional = true }
+xtalforge-analysis = { workspace = true, optional = true }
+xtalforge-build = { workspace = true, optional = true }
+xtalforge-ff = { workspace = true, optional = true }
+xtalforge-mof = { workspace = true, optional = true }
+xtalforge-modules = { workspace = true, optional = true }
 ureq = { workspace = true, optional = true }
 serde_json = { workspace = true }
 
@@ -33,17 +33,29 @@ serde_json = { workspace = true }
 serde_json = { workspace = true }
 
 [features]
-default = ["parallel"]
+default = ["parallel", "full"]
 parallel = [
   "xtalforge-core/parallel",
   "xtalforge-io/parallel",
+  "xtalforge-ff/parallel",
   "xtalforge-symmetry/parallel",
 ]
-sci-form = ["xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
+# Surface tiers (Task 15.3.1). The base build always carries core, IO,
+# symmetry, view and commands; each feature adds one re-exported crate and
+# implies the tiers below it, so `build` implies `analysis`, `ff` implies
+# `build` and `mof` implies `ff`. `full` reproduces the 1.7.0 default.
+analysis = ["dep:xtalforge-analysis"]
+build = ["dep:xtalforge-build", "analysis"]
+ff = ["dep:xtalforge-ff", "build"]
+mof = ["dep:xtalforge-mof", "ff", "analysis"]
+modules = ["dep:xtalforge-modules"]
+agent = ["dep:xtalforge-agent", "analysis", "build", "ff", "mof", "modules"]
+full = ["analysis", "build", "ff", "mof", "modules", "agent"]
+sci-form = ["agent", "xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
 ml = []
 external = []
 net = ["dep:ureq"]
-mof-data = ["xtalforge-mof/mof-data"]
+mof-data = ["mof", "xtalforge-mof/mof-data"]
 
 [lints]
 workspace = true
