@@ -51,7 +51,7 @@ are in `AGENTS.md` at the repository root.
   interface with the same 13-crate, 7-wheel plus sdist and npm payload;
   `v1.5.1` (2026-11-13) is the icon and package-metadata patch; `v1.6.0`
   (2026-11-13) releases Phase 13, the ecosystem adapters, formats and remote
-data.
+  data.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
