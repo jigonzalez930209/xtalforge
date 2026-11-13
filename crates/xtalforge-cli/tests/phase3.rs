@@ -43,7 +43,7 @@ fn formats_lists_the_registry() {
     assert!(
         entries
             .iter()
-            .any(|entry| entry["name"] == "pdb" && entry["read"] == false)
+            .any(|entry| entry["name"] == "pdb" && entry["read"] == true)
     );
 }
 

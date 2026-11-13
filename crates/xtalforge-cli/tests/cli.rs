@@ -295,3 +295,13 @@ fn a_closed_output_pipe_is_not_a_panic() {
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(!stderr.contains("panicked"), "{stderr}");
 }
+
+#[test]
+fn fetch_help_lists_the_remote_providers() {
+    let output = run(&["fetch", "--help"]);
+    assert!(output.status.success());
+    let text = String::from_utf8(output.stdout).expect("stdout is UTF-8");
+    for provider in ["optimade", "cod", "mp"] {
+        assert!(text.contains(provider), "missing {provider} in fetch help");
+    }
+}
