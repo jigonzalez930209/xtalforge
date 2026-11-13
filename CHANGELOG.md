@@ -5,6 +5,43 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.7.0] - 2026-11-13
+
+Phase 14 closes the scientific subsets that were still simplified in `1.6.0`.
+
+### Added
+
+- Diffraction: Caglioti/pseudo-Voigt/TCH profiles, FCJ asymmetry,
+  monochromator polarisation, X-ray/neutron/electron radiation, anisotropic
+  `U_ij`, refinable `eta` and profile parameters, single-crystal structure
+  factors and HKL export, kinematic electron diffraction, whole-range peak
+  refinement, persistent parameter sets and Pareto sweeps.
+- Force fields: `CellFreedom`, external pressure, cancellation/progress and
+  trajectory output in optimizers, scans and MD; generic scan coordinates
+  (cell parameters and collective variables), resumable checkpoints, NVE,
+  Langevin, Nose-Hoover and NPT molecular dynamics with explicit seeds.
+- Structure operations: slab cuts carry severed bonds and report the real
+  `cut` count; explicit bonds propagate through symmetry images; pair-specific
+  bond ranges and the metal-metal switch; the remaining undoable command types.
+- Meshes: vertex normals, OBJ, glTF 2.0 and GLB export.
+- Reports: HTML and JSON renderers, module registry listings and the
+  `xtalforge modules` command.
+- Data: NIST neutron coherent scattering lengths and named instrument presets.
+
+### Changed
+
+- The calculated PXRD and Rietveld paths use the new profile model; the old
+  option structs and numbers remain available.
+- The slab `cut` count is no longer a placeholder.
+- The WASM package budget moves to 5376 KiB for the Phase 13 additions.
+
+### Notes
+
+- Real DFTB+/xTB execution still needs the corresponding binary (and DFTB+
+  Slater-Koster data) locally; the runner reports availability instead of
+  pretending the engine ran.
+- The indexing-engine agreement and powder demo remain open under 14.1.5.
+
 ## [1.6.0] - 2026-11-13
 
 Phase 13 makes xtalforge interoperable with the objects and files users

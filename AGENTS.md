@@ -270,21 +270,22 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.6.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.5.1`, `1.5.0`,
-  `1.4.0` and `1.3.0` were published on 2026-11-13/12). `1.6.0` completes
-  Phase 13: the ASE, pymatgen, phonopy/spglib and RDKit Python adapters, the
-  extended format registry, OPTIMADE/COD/Materials Project fetching, Python
-  entry-point plugins, and the migration/interoperability documentation.
+- Version: `1.7.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.6.0` and earlier
+  releases shipped on 2026-11-13/12). `1.7.0` completes Phase 14: diffraction
+  profiles and single-crystal factors, cell freedom and MD, slab bond carrying
+  and undoable commands, OBJ/glTF meshes and HTML/JSON reports.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 14 — Scientific completeness
-  (`docs/roadmap/phase-14-completeness.md`), the next step of the road to
+- Current phase: Phase 15 — Performance and scale
+  (`docs/roadmap/phase-15-performance.md`), the next step of the road to
   `2.0.0` (Phases 9-17, focused on MOFs; see `docs/roadmap/index.md`).
-  Phase 13 — Ecosystem interoperability (`docs/roadmap/phase-13-interop.md`)
-  shipped as `1.6.0`: the Python object adapters, the extended format
-  registry, the remote providers and the Python entry-point plugins.
+  Phase 14 — Scientific completeness shipped as `1.7.0` with the diffraction,
+  force-field, structure-operation, mesh and report work. Task 14.1.5
+  (indexing-engine agreement and powder demo) and Task 14.2.6 (real DFTB+/xTB
+  runs without local binaries/data) remain open and documented.
+  Phase 13 — Ecosystem interoperability shipped as `1.6.0`.
   Phase 12 — Native bindings (`docs/roadmap/phase-12-native-api.md`) shipped
   as `1.5.0`: the Python `Structure` object API, typed result classes,
   no-`Any` stubs, NumPy input/output, batch helpers, the WASM `Structure`
