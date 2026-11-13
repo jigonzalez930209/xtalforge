@@ -74,3 +74,25 @@ reads the bundled snapshot (2,931 entries, one known incomplete block,
   the expanded quotient cell and the `P1` form.
 - The 22 unkeyed catalogue entries and the two-periodic/zero-periodic entries
   are matched by the stored fingerprint, not by a rebuilt graph.
+
+## Structure contraction and search (Task 14.4.2)
+
+`contract(structure, &ContractionOptions)` maps a framework to its underlying
+net. `NetNodeRule::{Drawn, Atoms, MetalClusters}` selects the nodes; the
+`contract_degree_two` switch removes chains with two neighbours. The result is
+`ContractedNet { structure, net, nodes, edges, stripped }`; `identify()` uses
+the RCSR fingerprint and `vertex_symbols(max_ring)` reports the shortest ring
+through every pair of edges at a node.
+
+`RcsrFactsIndex::from_embedded` reads `data/rcsr_facts.tsv` (2,931 nets) and
+answers `search(&NetQuery)` by name, coordination, group symbol, space-group
+number or range, transitivity and periodicity. A 2-D net uses its plane-group
+number (1-17); `plane_group_number` disambiguates symbols shared with the
+three-dimensional groups.
+
+`classify(graph)` returns the Blatov class from the cycle voltages. When a bare
+net cannot distinguish Class II from Class III it returns
+`BlatovClass::Undetermined` and `needs_symmetry() == true`; call
+`classify_with_symmetry(graph, operations, tolerance)` to resolve it. The
+report always carries the component count, periodic frameworks, fold and the
+other-component count.
