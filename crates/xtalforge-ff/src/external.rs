@@ -17,6 +17,13 @@
 //!   molecule whole across cell faces by translating bonded images, then
 //!   shifts each connected component's centroid back into the cell.
 //! * [`orca_catalogue`] lists the functionals and bases offered by the UI.
+//! * [`try_run_engine`] is the opportunistic path: it probes first, skips a
+//!   missing binary and runs DFTB+ or xTB when one is installed (Task 14.2.6).
+//!   [`available_engines`] reports the probe result for every known engine.
+//!
+//! **Never required.**  No default build and no test needs an installed
+//! engine; the opportunistic path reports [`EngineRunStatus::Skipped`] instead
+//! of failing.
 //!
 //! **Units and documented assumptions.**  Energies leave this module in eV and
 //! forces in eV/Angstrom, like every other `Calculator` boundary in the crate;
@@ -34,6 +41,7 @@
 //! user's chosen parameter set must live there (or the `Prefix` in the written
 //! file must be edited).
 
+mod available;
 mod calculators;
 mod dftb;
 mod orca;
@@ -44,6 +52,9 @@ mod xtb;
 
 use serde::{Deserialize, Serialize};
 
+pub use available::{
+    EngineRunOptions, EngineRunStatus, PROBE_ENGINES, available_engines, try_run_engine,
+};
 pub use calculators::{DftbCalculator, XtbCalculator};
 pub use dftb::{DftbOptions, parse_dftb_output, write_dftb_hsd};
 pub use orca::{OrcaOptions, orca_catalogue, write_orca_input};

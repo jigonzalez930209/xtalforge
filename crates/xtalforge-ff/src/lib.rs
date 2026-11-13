@@ -1,4 +1,5 @@
-//! Force fields, charges, optimizers and thermochemistry for xtalforge.
+//! Force fields, charges, optimizers, dynamics and thermochemistry for
+//! xtalforge.
 //!
 //! Phase 4 starts with the energy-engine interface ([`Calculator`]) and the
 //! native Universal Force Field. The UFF implementation is ported from
@@ -12,16 +13,30 @@
 //! Gamma-point phonons, harmonic thermochemistry and a sampled-volume
 //! quasi-harmonic free energy.  Every approximation is named in the module
 //! that makes it.
+//!
+//! Task 14.2 adds the scientific-completeness layer on top of Phase 4:
+//! [`CellFreedom`] holds selected cell lengths, angles or the volume and
+//! `OptimizeOptions::pressure_gpa` adds the `P V` term; [`RunControl`] cancels
+//! a run and reports progress, and [`Trajectory`] records frames from every
+//! optimizer and scan; [`ScanCoordinate`] covers cell parameters and collective
+//! variables in addition to internal coordinates; [`ScanCheckpoint`] makes a
+//! relaxed scan resumable; and [`md`] provides NVE, NVT Langevin, NVT
+//! Nose-Hoover and NPT molecular dynamics with explicit deterministic seeds.
+//! [`try_run_engine`] is the opportunistic DFTB+/xTB path: it probes first and
+//! runs only when the binary is installed, so no build or test needs one.
 
 pub mod calculator;
 pub mod charges;
 pub mod elastic;
 pub mod external;
+pub mod md;
 pub mod optimize;
 pub mod prepare;
 pub mod quantum;
 pub mod registry;
+pub mod run;
 pub mod scan;
+pub mod trajectory;
 pub mod uff;
 pub mod vibrations;
 
@@ -40,23 +55,32 @@ pub use charges::{
 };
 pub use elastic::{ElasticOptions, ElasticTensor, deformation_set, elastic_tensor};
 pub use external::{
-    BOHR_TO_ANGSTROM, DftbCalculator, DftbOptions, EngineKind, EngineResult, EngineStatus,
-    HARTREE_PER_BOHR_TO_EV_PER_ANGSTROM, HARTREE_PER_BOHR3_TO_GPA, HARTREE_TO_EV, OrcaOptions,
-    RunOutcome, RunSpec, RunStatus, XtbCalculator, XtbOptions, orca_catalogue, parse_dftb_output,
-    parse_xtb_output, probe, probe_binary, run_in_scratch, write_dftb_hsd, write_orca_input,
+    BOHR_TO_ANGSTROM, DftbCalculator, DftbOptions, EngineKind, EngineResult, EngineRunOptions,
+    EngineRunStatus, EngineStatus, HARTREE_PER_BOHR_TO_EV_PER_ANGSTROM, HARTREE_PER_BOHR3_TO_GPA,
+    HARTREE_TO_EV, OrcaOptions, PROBE_ENGINES, RunOutcome, RunSpec, RunStatus, XtbCalculator,
+    XtbOptions, available_engines, orca_catalogue, parse_dftb_output, parse_xtb_output, probe,
+    probe_binary, run_in_scratch, try_run_engine, write_dftb_hsd, write_orca_input,
     write_xtb_input,
+};
+pub use md::{
+    AMU_TO_EV_FS2_PER_A2, Ensemble, KB_EV_PER_K, MdOptions, MdResult, MdSample, molecular_dynamics,
+    molecular_dynamics_with,
 };
 pub use models::{CATALOGUE as MODEL_CATALOGUE, ModelRecord, ModelSpec, ModelStatus};
 pub use optimize::{
-    EosFit, EosForm, Minimizer, OptimizationResult, OptimizeOptions, RelaxMode,
-    apply_optimized_geometry, birch_murnaghan, fire, fit_eos, lbfgs, minimize, murnaghan,
+    CellFreedom, EosFit, EosForm, Minimizer, OptimizationResult, OptimizeOptions, RelaxMode,
+    apply_optimized_geometry, birch_murnaghan, fire, fire_with, fit_eos, lbfgs, lbfgs_with,
+    minimize, minimize_with, murnaghan,
 };
 pub use prepare::{PrepareOptions, PrepareReport, PrepareStep, prepare};
 pub use quantum::{QuantumAdapter, QuantumCapabilities, QuantumMethod, adapter, capabilities};
 pub use registry::builtin_registry;
+pub use run::{CancelToken, ProgressEvent, RunControl};
 pub use scan::{
-    Constraint, ScanAxis, ScanCoordinate, ScanOptions, ScanPoint, ScanResult, relaxed_scan,
+    CellParameter, CollectiveVariable, Constraint, ScanAxis, ScanCheckpoint, ScanCoordinate,
+    ScanGeometry, ScanOptions, ScanPoint, ScanResult, relaxed_scan, relaxed_scan_with,
 };
+pub use trajectory::{Trajectory, TrajectoryFrame, TrajectoryOptions};
 pub use uff::calculator::UffCalculator;
 pub use uff::model::UffModel;
 pub use uff::params::{ParameterSet, UffParams};
