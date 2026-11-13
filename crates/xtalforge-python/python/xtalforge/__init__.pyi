@@ -26,6 +26,8 @@ from ._object_api import (
     SymmetryDataset as SymmetryDataset,
 )
 from ._agent_session import AgentSession as AgentSession
+from .workflow import Workflow as Workflow
+from .dataset import Dataset as Dataset
 from ._ml import MlCalculator as MlCalculator
 from ._mof import (
     mof_check as mof_check,
@@ -452,3 +454,5 @@ def powder_refine(
 def powder_cells(number: int) -> dict[str, object]: ...
 def powder_supported_groups() -> list[int]: ...
 def rietx() -> dict[str, object]: ...
+
+def provenance(text: str) -> dict[str, object] | None: ...

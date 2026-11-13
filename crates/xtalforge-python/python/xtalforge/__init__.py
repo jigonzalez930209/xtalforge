@@ -1,5 +1,7 @@
 """Python bindings for xtalforge."""
 
+import json
+
 from ._xtalforge import (
     AgentSession,
     Document,
@@ -108,6 +110,10 @@ from ._xtalforge import (
     place_guest_structure,
     read,
     write,
+    workflow_run,
+    workflow_schema,
+    workflow_validate,
+    provenance_json,
     workspace_archive,
     workspace_open,
     workspace_read_archive,
@@ -265,6 +271,14 @@ for _name in [
         globals()[_name] = _accepts_structure(globals()[_name])
 
 from . import plugins as plugins
+from .workflow import Workflow as Workflow
+from .dataset import Dataset as Dataset
+
+
+def provenance(text: str) -> dict[str, object] | None:
+    """Returns the embedded provenance record, when present."""
+    value = provenance_json(text)
+    return None if value is None else json.loads(value)
 
 __all__ = [
     "AgentSession",
@@ -381,6 +395,9 @@ __all__ = [
     "place_guest_structure",
     "read",
     "write",
+    "Workflow",
+    "Dataset",
+    "provenance",
     "workspace_archive",
     "workspace_open",
     "workspace_read_archive",
