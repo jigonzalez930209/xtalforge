@@ -359,6 +359,9 @@ pub(crate) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
             builder = builder.metadata("symmetry_warning", serde_json::Value::String(warning));
         }
     }
+    if !explicit.is_empty() && has_operations {
+        builder = builder.metadata("explicit_bonds_p1", serde_json::Value::Bool(true));
+    }
     for bond in explicit {
         builder = builder.explicit_bond(bond);
     }
