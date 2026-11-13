@@ -7,6 +7,13 @@ essential release, then `0.x.y`).
 
 ## [Unreleased]
 
+### Added
+
+- The xtalforge icon in the README, the docs favicon/logo/Open Graph image,
+  the PyPI and npm package READMEs, and every crates.io package page; the
+  repository also ships a 1280x640 social-preview image and the AppStream
+  metadata lists `1.5.0`.
+
 ### Changed
 
 - Refresh the documentation after `1.5.0`: roadmap status and release list,

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jigonzalez930209/xtalforge/main/assets/xtalforge.png" alt="xtalforge" width="128" height="128">
+</p>
+
 # xtalforge
 
 A pure Rust library for building, manipulating, analysing and exporting crystal
