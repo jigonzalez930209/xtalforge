@@ -1,4 +1,5 @@
-//! Geometry optimization over the asymmetric unit (Tasks 4.4.1 to 4.4.5).
+//! Geometry optimization over the asymmetric unit (Tasks 4.4.1 to 4.4.5,
+//! extended by Task 14.2).
 //!
 //! [`fire`] and [`lbfgs`] minimize any [`Calculator`] over the variables
 //! [`dof`](self) describes: the sites of the asymmetric unit, regenerated into
@@ -6,6 +7,16 @@
 //! `cell` is on.  Forces are carried back through the symmetry operations and
 //! projected onto each site's allowed displacement, so a special position
 //! stays special and a frozen site stays frozen.
+//!
+//! [`CellFreedom`] narrows the cell variables: held lengths, angles and volume
+//! are re-imposed after every cell update (Task 14.2.1).  `pressure_gpa` adds
+//! the `P V` term to the objective, so a variable-cell run at pressure
+//! minimizes the enthalpy while the result still reports the potential energy.
+//!
+//! [`OptimizeOptions::trajectory`] records frames, [`RunControl`] reports
+//! progress and stops the run, and the result carries both the frames and a
+//! `cancelled` flag (Task 14.2.2).  The older [`fire`], [`lbfgs`] and
+//! [`minimize`] entry points keep their signature and behave as before.
 //!
 //! The result contains a ready structure.  [`OptimizationResult::apply_to`]
 //! writes the optimized coordinates and cell back onto the input structure,
@@ -18,7 +29,10 @@
 
 mod dof;
 mod fire;
+mod freedom;
 mod lbfgs;
+mod problem;
+mod symmetry;
 mod tensor;
 
 pub mod eos;
@@ -28,13 +42,16 @@ use xtalforge_core::Structure;
 
 use crate::Error;
 use crate::calculator::Calculator;
+use crate::run::RunControl;
 use crate::structure_util::with_frac;
+use crate::trajectory::{Trajectory, TrajectoryOptions};
 
 pub use eos::{EosFit, EosForm, MINIMUM_EOS_POINTS, birch_murnaghan, fit_eos, murnaghan};
-pub use fire::fire;
-pub use lbfgs::lbfgs;
+pub use fire::{fire, fire_with};
+pub use freedom::CellFreedom;
+pub use lbfgs::{lbfgs, lbfgs_with};
 
-use dof::Dof;
+use problem::{Evaluation, Problem};
 
 /// `1 GPa` in `eV/Angstrom^3`.
 pub(crate) const GPA_TO_EV_PER_A3: f64 = 1.0 / 160.217_663_4;
@@ -67,6 +84,21 @@ pub struct OptimizeOptions {
     pub mode: RelaxMode,
     /// Largest Cartesian displacement of one site in one step, in Angstrom.
     pub max_step: f64,
+    /// Which cell lengths, angles and volume may change when `cell` is on.
+    ///
+    /// The default, [`CellFreedom::full`], reproduces the behaviour of earlier
+    /// releases exactly.
+    #[serde(default)]
+    pub cell_freedom: CellFreedom,
+    /// External pressure in GPa, applied as the `P V` term to the objective.
+    ///
+    /// Zero (the default) minimizes the potential energy.  The value is only
+    /// meaningful with `cell` on, because a fixed cell has a constant volume.
+    #[serde(default)]
+    pub pressure_gpa: f64,
+    /// Trajectory recording cadence; off by default.
+    #[serde(default)]
+    pub trajectory: TrajectoryOptions,
 }
 
 impl Default for OptimizeOptions {
@@ -79,6 +111,9 @@ impl Default for OptimizeOptions {
             fixed_atoms: Vec::new(),
             mode: RelaxMode::default(),
             max_step: 0.2,
+            cell_freedom: CellFreedom::default(),
+            pressure_gpa: 0.0,
+            trajectory: TrajectoryOptions::default(),
         }
     }
 }
@@ -89,7 +124,8 @@ impl OptimizeOptions {
     /// # Errors
     ///
     /// Returns [`Error::InvalidInput`] for a zero step limit, a non-positive
-    /// force or step tolerance, or a negative energy tolerance.
+    /// force or step tolerance, a negative energy tolerance, a non-finite
+    /// pressure, or a cell freedom that cannot drive a variable-cell run.
     pub fn validate(&self) -> Result<(), Error> {
         if self.max_steps == 0 {
             return Err(Error::InvalidInput(
@@ -114,6 +150,15 @@ impl OptimizeOptions {
                 self.max_step
             )));
         }
+        if !self.pressure_gpa.is_finite() {
+            return Err(Error::InvalidInput(format!(
+                "external pressure must be finite, got {}",
+                self.pressure_gpa
+            )));
+        }
+        if self.cell {
+            self.cell_freedom.validate()?;
+        }
         Ok(())
     }
 }
@@ -123,14 +168,22 @@ impl OptimizeOptions {
 pub struct OptimizationResult {
     /// Optimized structure, in the same representation as the input.
     pub structure: Structure,
-    /// Final energy in eV.
+    /// Final potential energy in eV.
     pub energy: f64,
+    /// Final optimization objective in eV, `energy + pressure * volume`.
+    ///
+    /// Equal to `energy` at the default zero pressure.
+    pub enthalpy: f64,
     /// Largest force on a free site in eV/Angstrom.
     pub max_force: f64,
     /// Number of outer iterations performed.
     pub steps: usize,
     /// Whether the force and energy criteria were met.
     pub converged: bool,
+    /// Whether the run stopped because a [`RunControl`] asked it to.
+    pub cancelled: bool,
+    /// Recorded frames, empty unless the options enabled a trajectory.
+    pub trajectory: Trajectory,
 }
 
 impl OptimizationResult {
@@ -193,9 +246,30 @@ pub fn minimize(
     options: &OptimizeOptions,
     minimizer: Minimizer,
 ) -> Result<OptimizationResult, Error> {
+    minimize_with(
+        calculator,
+        structure,
+        options,
+        minimizer,
+        &mut RunControl::new(),
+    )
+}
+
+/// Runs one minimizer with cancellation and progress reporting.
+///
+/// # Errors
+///
+/// Returns the errors of [`fire_with`] or [`lbfgs_with`].
+pub fn minimize_with(
+    calculator: &dyn Calculator,
+    structure: &Structure,
+    options: &OptimizeOptions,
+    minimizer: Minimizer,
+    control: &mut RunControl<'_>,
+) -> Result<OptimizationResult, Error> {
     match minimizer {
-        Minimizer::Fire => fire(calculator, structure, options),
-        Minimizer::Lbfgs => lbfgs(calculator, structure, options),
+        Minimizer::Fire => fire_with(calculator, structure, options, control),
+        Minimizer::Lbfgs => lbfgs_with(calculator, structure, options, control),
     }
 }
 
@@ -211,173 +285,25 @@ pub fn apply_optimized_geometry(
     result.apply_to(structure)
 }
 
-/// One energy and gradient evaluation in the optimizer's variables.
-#[derive(Debug, Clone)]
-pub(crate) struct Evaluation {
-    pub energy: f64,
-    pub gradient: Vec<f64>,
-    pub max_force: f64,
-    pub cell_force: f64,
-    pub structure: Structure,
-}
-
-/// The energy landscape the minimizers walk.
-pub(crate) struct Problem<'a> {
-    calculator: &'a dyn Calculator,
-    dof: Dof,
-}
-
-impl<'a> Problem<'a> {
-    pub(crate) fn new(
-        calculator: &'a dyn Calculator,
-        structure: &Structure,
-        options: &OptimizeOptions,
-    ) -> Result<Self, Error> {
-        options.validate()?;
-        let dof = Dof::new(structure, options.mode, options.cell, &options.fixed_atoms)?;
-        Ok(Self { calculator, dof })
-    }
-
-    pub(crate) fn start(&self) -> Vec<f64> {
-        self.dof.start()
-    }
-
-    pub(crate) fn project(&self, direction: &mut [f64]) {
-        self.dof.project_direction(direction);
-    }
-
-    pub(crate) fn evaluate(&mut self, variables: &[f64]) -> Result<Evaluation, Error> {
-        let structure = self.dof.structure_of(variables)?;
-        let (energy, forces) = self.calculator.energy_forces(&structure)?;
-        let site_gradient = self.dof.site_gradient(&forces)?;
-        let max_force = self.dof.max_force(&site_gradient);
-        let strain = if self.dof.cell() {
-            Some(self.strain_gradient(variables, &structure)?)
-        } else {
-            None
-        };
-        let gradient = self.dof.flatten(&site_gradient, strain);
-        let cell_force = cell_force(&gradient, self.dof.n_variables(), self.dof.cell());
-        Ok(Evaluation {
-            energy,
-            gradient,
-            max_force,
-            cell_force,
-            structure,
-        })
-    }
-
-    /// Strain gradient from the calculator's stress, or by central differences
-    /// when the engine does not provide one.
-    fn strain_gradient(
-        &mut self,
-        variables: &[f64],
-        structure: &Structure,
-    ) -> Result<[f64; 6], Error> {
-        if let Some(stress) = self.calculator.stress(structure)? {
-            let mut converted = [[0.0; 3]; 3];
-            for (row, values) in stress.iter().enumerate() {
-                for (column, value) in values.iter().enumerate() {
-                    if let Some(slot) = converted
-                        .get_mut(row)
-                        .and_then(|values| values.get_mut(column))
-                    {
-                        *slot = value * GPA_TO_EV_PER_A3;
-                    }
-                }
-            }
-            return Ok(self.dof.strain_gradient(variables, converted));
-        }
-        let base = self.dof.n_variables() - 6;
-        let step = 1e-4;
-        let mut gradient = [0.0; 6];
-        for (index, slot) in gradient.iter_mut().enumerate() {
-            let mut high = variables.to_vec();
-            let mut low = variables.to_vec();
-            if let Some(value) = high.get_mut(base + index) {
-                *value += step;
-            }
-            if let Some(value) = low.get_mut(base + index) {
-                *value -= step;
-            }
-            let energy_high = self.calculator.energy(&self.dof.structure_of(&high)?)?;
-            let energy_low = self.calculator.energy(&self.dof.structure_of(&low)?)?;
-            *slot = (energy_high - energy_low) / (2.0 * step);
-        }
-        Ok(gradient)
-    }
-
-    pub(crate) fn converged(
-        &self,
-        evaluation: &Evaluation,
-        previous_energy: Option<f64>,
-        options: &OptimizeOptions,
-    ) -> bool {
-        if evaluation.max_force > options.force_tolerance {
-            return false;
-        }
-        if !self.dof.cell() {
-            return true;
-        }
-        if evaluation.cell_force <= options.force_tolerance {
-            return true;
-        }
-        previous_energy
-            .map(|energy| (evaluation.energy - energy).abs() <= options.energy_tolerance)
-            .unwrap_or(false)
-    }
-
-    pub(crate) fn result(
-        &self,
-        evaluation: Evaluation,
-        steps: usize,
-        converged: bool,
-    ) -> OptimizationResult {
-        OptimizationResult {
-            structure: evaluation.structure,
-            energy: evaluation.energy,
-            max_force: evaluation.max_force,
-            steps,
-            converged,
-        }
-    }
-
-    pub(crate) fn cap_step(&self, direction: &mut [f64], max_step: f64) {
-        let mut longest: f64 = 0.0;
-        let sites = self
-            .dof
-            .n_variables()
-            .saturating_sub(if self.dof.cell() { 6 } else { 0 });
-        let mut index = 0;
-        while index + 2 < sites {
-            let vector = [
-                direction.get(index).copied().unwrap_or(0.0),
-                direction.get(index + 1).copied().unwrap_or(0.0),
-                direction.get(index + 2).copied().unwrap_or(0.0),
-            ];
-            longest = longest.max(crate::math::norm(vector));
-            index += 3;
-        }
-        if longest > max_step {
-            let factor = max_step / longest;
-            for value in direction.iter_mut() {
-                *value *= factor;
-            }
-        }
+/// Records one frame when the cadence asks for it.
+pub(crate) fn record(
+    trajectory: &mut Trajectory,
+    cadence: TrajectoryOptions,
+    step: usize,
+    point: Option<usize>,
+    evaluation: &Evaluation,
+) {
+    if cadence.enabled() && step.is_multiple_of(cadence.every) {
+        trajectory.push(evaluation.frame(step, point, cadence));
     }
 }
 
-/// Largest strain gradient component per atom, in eV/Angstrom.
-fn cell_force(gradient: &[f64], n_variables: usize, cell: bool) -> f64 {
-    if !cell || n_variables < 6 {
-        return 0.0;
+/// Appends an optimizer trajectory to a scan trajectory.
+pub(crate) fn append_frames(target: &mut Trajectory, source: Trajectory, point: usize) {
+    for mut frame in source.frames {
+        frame.point = Some(point);
+        target.push(frame);
     }
-    let base = n_variables - 6;
-    let mut maximum: f64 = 0.0;
-    for index in base..n_variables {
-        maximum = maximum.max(gradient.get(index).copied().unwrap_or(0.0).abs());
-    }
-    maximum
 }
 
 /// Dot product of two flat vectors.

@@ -7,14 +7,19 @@
 //! direction points uphill.  A failed line search drops the history and tries
 //! steepest descent once from the same point; only then does the run stop, and
 //! it says it did not converge.
+//!
+//! [`lbfgs_with`] adds cancellation, progress and a trajectory; [`lbfgs`] is
+//! the same run without a control object.
 
 use xtalforge_core::Structure;
 
 use crate::Error;
 use crate::calculator::Calculator;
 use crate::optimize::{
-    Evaluation, OptimizationResult, OptimizeOptions, Problem, axpy, difference, dot,
+    Evaluation, OptimizationResult, OptimizeOptions, Problem, axpy, difference, dot, record,
 };
+use crate::run::{ProgressEvent, RunControl};
+use crate::trajectory::Trajectory;
 
 /// Curvature pairs kept between restarts.
 const MEMORY: usize = 10;
@@ -30,16 +35,48 @@ pub fn lbfgs(
     structure: &Structure,
     options: &OptimizeOptions,
 ) -> Result<OptimizationResult, Error> {
+    lbfgs_with(calculator, structure, options, &mut RunControl::new())
+}
+
+/// Minimizes a structure with L-BFGS, reporting progress and honouring
+/// cancellation.
+///
+/// A cancelled run returns the last geometry with `converged = false` and
+/// `cancelled = true`; it is not an error.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for bad options or variable setup, and any
+/// typing, topology or data error from the calculator.
+pub fn lbfgs_with(
+    calculator: &dyn Calculator,
+    structure: &Structure,
+    options: &OptimizeOptions,
+    control: &mut RunControl<'_>,
+) -> Result<OptimizationResult, Error> {
     options.validate()?;
     let mut problem = Problem::new(calculator, structure, options)?;
     let mut variables = problem.start();
     let mut evaluation = problem.evaluate(&variables)?;
+    let mut trajectory = Trajectory::new();
+    record(&mut trajectory, options.trajectory, 0, None, &evaluation);
+    control.report(ProgressEvent::Optimizer {
+        step: 0,
+        energy: evaluation.energy,
+        max_force: evaluation.max_force,
+    });
+    if control.is_cancelled() {
+        return Ok(problem.result(evaluation, 0, false, true, trajectory));
+    }
     if problem.converged(&evaluation, None, options) {
-        return Ok(problem.result(evaluation, 0, true));
+        return Ok(problem.result(evaluation, 0, true, false, trajectory));
     }
 
     let mut history: Vec<(Vec<f64>, Vec<f64>, f64)> = Vec::new();
     for step in 1..=options.max_steps {
+        if control.is_cancelled() {
+            return Ok(problem.result(evaluation, step - 1, false, true, trajectory));
+        }
         let mut direction = two_loop(&evaluation.gradient, &history);
         problem.project(&mut direction);
         if dot(&direction, &evaluation.gradient) >= 0.0 {
@@ -68,7 +105,7 @@ pub fn lbfgs(
             )?;
         }
         let Some((new_variables, new_evaluation)) = accepted else {
-            return Ok(problem.result(evaluation, step, false));
+            return Ok(problem.result(evaluation, step, false, false, trajectory));
         };
 
         let s = difference(&new_variables, &variables);
@@ -81,15 +118,21 @@ pub fn lbfgs(
             }
         }
 
-        let converged = problem.converged(&new_evaluation, Some(evaluation.energy), options);
+        let converged = problem.converged(&new_evaluation, Some(evaluation.enthalpy), options);
         variables = new_variables;
         evaluation = new_evaluation;
+        record(&mut trajectory, options.trajectory, step, None, &evaluation);
+        control.report(ProgressEvent::Optimizer {
+            step,
+            energy: evaluation.energy,
+            max_force: evaluation.max_force,
+        });
         if converged {
-            return Ok(problem.result(evaluation, step, true));
+            return Ok(problem.result(evaluation, step, true, false, trajectory));
         }
     }
 
-    Ok(problem.result(evaluation, options.max_steps, false))
+    Ok(problem.result(evaluation, options.max_steps, false, false, trajectory))
 }
 
 /// The two-loop recursion: `H * gradient` from the stored curvature pairs.
@@ -142,11 +185,11 @@ fn line_search(
         let mut trial = variables.to_vec();
         axpy(&mut trial, length, direction);
         let new_evaluation = problem.evaluate(&trial)?;
-        if new_evaluation.energy <= evaluation.energy + 1e-4 * length * slope {
+        if new_evaluation.enthalpy <= evaluation.enthalpy + 1e-4 * length * slope {
             return Ok(Some((trial, new_evaluation)));
         }
         let curvature =
-            (new_evaluation.energy - evaluation.energy - slope * length) / (length * length);
+            (new_evaluation.enthalpy - evaluation.enthalpy - slope * length) / (length * length);
         let guess = if curvature > 0.0 {
             -slope / (2.0 * curvature)
         } else {

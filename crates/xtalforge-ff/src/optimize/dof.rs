@@ -11,20 +11,20 @@
 //! **Documented subset.**  `RelaxMode::Asymmetric` keeps the asymmetric unit
 //! and projects each site's displacement onto what its site symmetry leaves
 //! invariant.  The strain is averaged over the point group, so a cubic cell
-//! keeps one free strain and a triclinic one keeps six; held cell quantities
-//! and external pressure are Task 4.4.2 work not yet in this subset.
-//! `RelaxMode::P1` requires a P1 structure and gives every site three free
-//! coordinates.
+//! keeps one free strain and a triclinic one keeps six.
+//! [`CellFreedom`](crate::CellFreedom) re-imposes held lengths, angles and
+//! volume after every cell update, so they stay exact rather than drifting to
+//! first order.  `RelaxMode::P1` requires a P1 structure and gives every site
+//! three free coordinates.
 
-use xtalforge_core::{Lattice, Structure, SymOp};
+use xtalforge_core::{Lattice, Structure};
 
+use super::symmetry::{mapping, point_group, projectors};
 use super::tensor::{symmetrize, tensor_of, w_of};
 use crate::Error;
-use crate::math::{add, identity3, mat3_mul, mat3_transpose, norm, scale, sub, vec_mat};
-use crate::optimize::RelaxMode;
+use crate::math::{add, identity3, mat3_mul, mat3_transpose, norm, scale, vec_mat};
+use crate::optimize::{CellFreedom, RelaxMode};
 use crate::structure_util::with_frac;
-
-use xtalforge_core::P1Cell;
 
 /// Tolerance, in Angstrom, for deciding that an operation maps a site onto
 /// itself.
@@ -36,6 +36,7 @@ pub(crate) struct Dof {
     base: Structure,
     mode: RelaxMode,
     cell: bool,
+    freedom: CellFreedom,
     base_lattice: Lattice,
     base_inverse: [[f64; 3]; 3],
     n_sites: usize,
@@ -56,12 +57,16 @@ impl Dof {
         mode: RelaxMode,
         cell: bool,
         fixed_atoms: &[usize],
+        freedom: CellFreedom,
     ) -> Result<Self, Error> {
         if mode == RelaxMode::P1 && !structure.is_p1() {
             return Err(Error::InvalidInput(
                 "RelaxMode::P1 needs a P1 structure; use RelaxMode::Asymmetric to keep the space group"
                     .to_owned(),
             ));
+        }
+        if cell {
+            freedom.validate()?;
         }
         let n_sites = structure.sites().len();
         if n_sites == 0 {
@@ -106,6 +111,7 @@ impl Dof {
             base: structure.clone(),
             mode,
             cell,
+            freedom,
             base_lattice,
             base_inverse,
             n_sites,
@@ -123,6 +129,11 @@ impl Dof {
     /// Whether the cell is a variable.
     pub(crate) fn cell(&self) -> bool {
         self.cell
+    }
+
+    /// Which cell quantities the optimization may change.
+    pub(crate) fn cell_freedom(&self) -> CellFreedom {
+        self.freedom
     }
 
     /// Number of variables.
@@ -190,9 +201,11 @@ impl Dof {
         if !self.cell {
             return Ok(self.base_lattice);
         }
-        self.base_lattice
+        let candidate = self
+            .base_lattice
             .strained(self.strain_of(variables))
-            .map_err(Error::from)
+            .map_err(Error::from)?;
+        self.freedom.apply(&self.base_lattice, candidate)
     }
 
     /// The structure the calculator sees at these variables.
@@ -346,133 +359,4 @@ impl Dof {
         let count = self.point_group.len() as f64;
         symmetrize(crate::math::mat3_scale(total, 1.0 / count))
     }
-}
-
-/// Parent site, Cartesian rotation and multiplicity of each P1 atom.
-type Mapping = (Vec<usize>, Vec<[[f64; 3]; 3]>, Vec<usize>);
-
-/// Builds the P1-atom-to-site mapping for the two modes.
-fn mapping(
-    structure: &Structure,
-    mode: RelaxMode,
-    inverse: &[[f64; 3]; 3],
-) -> Result<Mapping, Error> {
-    if mode == RelaxMode::P1 {
-        return Ok((
-            (0..structure.sites().len()).collect(),
-            vec![identity3(); structure.sites().len()],
-            vec![1_usize; structure.sites().len()],
-        ));
-    }
-    let cell = P1Cell::expand(structure, SPECIAL_POSITION_TOL)?;
-    let operations = operations_of(structure);
-    let matrix = structure.lattice().matrix();
-    let mut parents = Vec::with_capacity(cell.n_atoms());
-    let mut rotations = Vec::with_capacity(cell.n_atoms());
-    let mut multiplicities = vec![0_usize; structure.sites().len()];
-    for atom in &cell.atoms {
-        let operation = operations
-            .get(atom.op_idx)
-            .copied()
-            .unwrap_or_else(SymOp::identity);
-        parents.push(atom.site_idx);
-        rotations.push(cartesian_rotation(operation, inverse, &matrix));
-        if let Some(slot) = multiplicities.get_mut(atom.site_idx) {
-            *slot += 1;
-        }
-    }
-    for value in &mut multiplicities {
-        *value = (*value).max(1);
-    }
-    Ok((parents, rotations, multiplicities))
-}
-
-/// Symmetry operations of a structure, with identity when none are stored.
-fn operations_of(structure: &Structure) -> Vec<SymOp> {
-    if structure.operations().is_empty() {
-        vec![SymOp::identity()]
-    } else {
-        structure.operations().to_vec()
-    }
-}
-
-/// One (3,3) projector per site: what its site symmetry leaves free.
-fn projectors(
-    structure: &Structure,
-    mode: RelaxMode,
-    inverse: &[[f64; 3]; 3],
-    lattice: &Lattice,
-) -> Vec<[[f64; 3]; 3]> {
-    let count = structure.sites().len();
-    if mode == RelaxMode::P1 {
-        return vec![identity3(); count];
-    }
-    let operations = operations_of(structure);
-    let matrix = lattice.matrix();
-    let mut result = Vec::with_capacity(count);
-    for site in structure.sites() {
-        let mut total = [[0.0; 3]; 3];
-        let mut found = 0_usize;
-        for operation in &operations {
-            let image = operation.apply(site.frac());
-            let shift = sub(image, site.frac());
-            let wrapped = [
-                shift[0] - shift[0].round(),
-                shift[1] - shift[1].round(),
-                shift[2] - shift[2].round(),
-            ];
-            if norm(vec_mat(wrapped, matrix)) < SPECIAL_POSITION_TOL {
-                let rotation = cartesian_rotation(*operation, inverse, &matrix);
-                total = crate::math::mat3_add(total, rotation);
-                found += 1;
-            }
-        }
-        result.push(if found == 0 {
-            identity3()
-        } else {
-            crate::math::mat3_scale(total, 1.0 / found as f64)
-        });
-    }
-    result
-}
-
-/// Cartesian rotations of every operation, used for strain projection.
-fn point_group(
-    structure: &Structure,
-    inverse: &[[f64; 3]; 3],
-    lattice: &Lattice,
-) -> Vec<[[f64; 3]; 3]> {
-    let operations = operations_of(structure);
-    let matrix = lattice.matrix();
-    operations
-        .iter()
-        .map(|operation| cartesian_rotation(*operation, inverse, &matrix))
-        .collect()
-}
-
-/// `M^-1 R^T M`: the Cartesian rotation an operation applies to a row vector.
-fn cartesian_rotation(
-    operation: SymOp,
-    inverse: &[[f64; 3]; 3],
-    matrix: &[[f64; 3]; 3],
-) -> [[f64; 3]; 3] {
-    let rotation = operation.rotation();
-    let cartesian = [
-        [
-            f64::from(rotation[0][0]),
-            f64::from(rotation[1][0]),
-            f64::from(rotation[2][0]),
-        ],
-        [
-            f64::from(rotation[0][1]),
-            f64::from(rotation[1][1]),
-            f64::from(rotation[2][1]),
-        ],
-        [
-            f64::from(rotation[0][2]),
-            f64::from(rotation[1][2]),
-            f64::from(rotation[2][2]),
-        ],
-    ];
-    mat3_mul(mat3_mul(*inverse, cartesian), *matrix)
 }
