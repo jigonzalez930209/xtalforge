@@ -17,6 +17,7 @@ include = ["src/**"]
 [dependencies]
 xtalforge-core = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 
 [lints]
 workspace = true
