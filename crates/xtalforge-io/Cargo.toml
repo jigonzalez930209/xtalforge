@@ -28,6 +28,10 @@ flate2 = { workspace = true }
 [features]
 parallel = ["dep:rayon"]
 
+[[bench]]
+name = "streaming"
+harness = false
+
 [lints]
 workspace = true
 
