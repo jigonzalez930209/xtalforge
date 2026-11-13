@@ -1,6 +1,6 @@
 # File formats
 
-The format registry (`xtalforge_io::registry`) reads and writes nine formats.
+The format registry (`xtalforge_io::registry`) reads and writes the crystal, electronic-structure and molecule formats below.
 
 | Format | Extensions | Read | Write | Notes |
 |---|---|---|---|---|
@@ -12,7 +12,19 @@ The format registry (`xtalforge_io::registry`) reads and writes nine formats.
 | DFTB+ GEN | `.gen` | yes | yes | `C` cluster, `S` Cartesian and `F` fractional supercells |
 | LAMMPS data | `.data`, `.lmp` | yes | yes | `atom_style full`, triclinic box, masses, charges and bonds |
 | SHELX | `.res`, `.ins` | yes | yes | CELL, LATT, SYMM, SFAC, FVAR, atom records and PART |
-| PDB | `.pdb` | no | yes | HETATM/CONECT for Blender and external viewers |
+| PDB | `.pdb` | yes | yes | ATOM/HETATM, CRYST1 and CONECT; both directions |
+| mmCIF/PDBx | `.mmcif`, `.pdbx` | yes | no | Cartesian or fractional `_atom_site` columns |
+| Quantum ESPRESSO | `.pwi`, `.pwo` | yes | yes | `pw.x` input and final output |
+| CASTEP | `.cell` | yes | yes | lattice blocks and fractional/Cartesian positions |
+| FHI-aims | `geometry.in` | yes | yes | `lattice_vector`, `atom`, `atom_frac` |
+| CP2K | `.cp2k` | yes | yes | `&CELL` and `&COORD` |
+| ABINIT | `.abi` | yes | yes | `acell`, `rprim`, `xred` |
+| CRYSTAL | `.crystal` | yes | yes | CRYSTAL cell and ATOM records |
+| OUTCAR | `OUTCAR` | yes | no | positions, cell and energies into `Trajectory` |
+| vasprun.xml | `vasprun.xml` | yes | no | structures, energies, forces and stress |
+| MOL2 | `.mol2` | yes | yes | atoms, coordinates and bonds |
+| SDF/MOL | `.sdf`, `.mol` | yes | yes | V2000 atoms/bonds; V3000 read subset |
+| OPTIMADE | `.optimade` | no | yes | one `structures` entry; see `remote::optimade_export` |
 
 Use `read_structure(text, hint)` and `write_structure(structure, format)` for
 dispatch by name, extension or content sniffing; the same registry lists the

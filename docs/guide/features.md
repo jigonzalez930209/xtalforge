@@ -11,6 +11,7 @@ downstream crate can be built directly with or without them.
 | `sci-form` | no | force fields | Links the published MIT crate `sci-form` 2.0.0 for in-process GFN0/GFN1/GFN2 (Task 4.10). The methods are molecular only; GFN2 returns forces and the registry lists `gfn0`, `gfn1` and `gfn2`. |
 | `ml` | no | force fields | Reserved for machine-learned potentials (Task 8.4). The decision is recorded in `docs/algorithms/ml-backend.md`; currently a no-op. |
 | `external` | no | force fields | Reserved; the runtime engine probes and input writers for DFTB+, xTB and ORCA are always compiled and need no feature (Task 4.9). |
+| `net` | no | remote data | Adds the blocking `ureq` HTTP client for OPTIMADE, COD and Materials Project fetches (Task 13.3). Parsing and WASM `fetch` do not need it. |
 | `mof-data` | no | MOF builder | Reserved for a future full MOF bundle; the curated six-topology/eight-block subset is always embedded (Tasks 6.11-6.16). |
 
 ## Building with and without defaults

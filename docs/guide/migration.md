@@ -29,6 +29,12 @@ differences that will bite a script.
 | `cli.py` | `xtalforge-cli` | same operations, `--json` on every command |
 | `xtalapp/` (PySide6 + VTK) | **out of scope** | no GUI; `xtalforge-view` + the agent renderer |
 
+## Ecosystem migration guides
+
+- [Migrating from ASE](./from-ase)
+- [Migrating from pymatgen](./from-pymatgen)
+- [Migrating from spglib](./from-spglib)
+
 ## CLI commands
 
 | Crystal-Builder | xtalforge | Notes |
