@@ -9,7 +9,7 @@ use super::values::{
     same_operations,
 };
 
-pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
+pub(crate) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
     let a = number(block.item("_cell_length_a")).ok_or_else(|| missing("_cell_length_a"))?;
     let b = number(block.item("_cell_length_b")).ok_or_else(|| missing("_cell_length_b"))?;
     let c = number(block.item("_cell_length_c")).ok_or_else(|| missing("_cell_length_c"))?;
@@ -42,35 +42,102 @@ pub(super) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error>
     }
     let atoms = block
         .loop_with("_atom_site_fract_x")
+        .or_else(|| block.loop_with("_atom_site_Cartn_x"))
         .ok_or_else(|| Error::InvalidInput("CIF has no _atom_site loop".to_owned()))?;
+    let cartesian = atoms.column("_atom_site_fract_x").is_none();
+    let first_model = atoms
+        .value(0, "_atom_site_pdbx_PDB_model_num")
+        .filter(|model| *model != "." && *model != "?")
+        .map(str::to_owned);
     let oxidation = oxidation_numbers(block);
     let mut sites = Vec::new();
     let mut occupancy_clamped = 0u32;
     for row in 0..atoms.rows.len() {
+        if let (Some(first), Some(model)) = (
+            first_model.as_deref(),
+            atoms
+                .value(row, "_atom_site_pdbx_PDB_model_num")
+                .filter(|model| *model != "." && *model != "?"),
+        ) && model != first
+        {
+            continue;
+        }
         let label = atoms
             .value(row, "_atom_site_label")
+            .or_else(|| atoms.value(row, "_atom_site_auth_atom_id"))
+            .or_else(|| atoms.value(row, "_atom_site_label_atom_id"))
             .or_else(|| atoms.value(row, "_atom_site_type_symbol"))
             .unwrap_or("X");
         let element = atoms.value(row, "_atom_site_type_symbol").unwrap_or(label);
-        let x = number(atoms.value(row, "_atom_site_fract_x"))
-            .ok_or_else(|| missing("_atom_site_fract_x"))?;
-        let y = number(atoms.value(row, "_atom_site_fract_y"))
-            .ok_or_else(|| missing("_atom_site_fract_y"))?;
-        let z = number(atoms.value(row, "_atom_site_fract_z"))
-            .ok_or_else(|| missing("_atom_site_fract_z"))?;
+        let (x, y, z, tags) = if cartesian {
+            (
+                number(atoms.value(row, "_atom_site_Cartn_x")),
+                number(atoms.value(row, "_atom_site_Cartn_y")),
+                number(atoms.value(row, "_atom_site_Cartn_z")),
+                (
+                    "_atom_site_Cartn_x",
+                    "_atom_site_Cartn_y",
+                    "_atom_site_Cartn_z",
+                ),
+            )
+        } else {
+            (
+                number(atoms.value(row, "_atom_site_fract_x")),
+                number(atoms.value(row, "_atom_site_fract_y")),
+                number(atoms.value(row, "_atom_site_fract_z")),
+                (
+                    "_atom_site_fract_x",
+                    "_atom_site_fract_y",
+                    "_atom_site_fract_z",
+                ),
+            )
+        };
+        let x = x.ok_or_else(|| missing(tags.0))?;
+        let y = y.ok_or_else(|| missing(tags.1))?;
+        let z = z.ok_or_else(|| missing(tags.2))?;
+        let frac = if cartesian {
+            lattice.to_frac([x, y, z])
+        } else {
+            [x, y, z]
+        };
         let raw_occupancy = number(atoms.value(row, "_atom_site_occupancy")).unwrap_or(1.0);
         let occupancy = raw_occupancy.clamp(0.0, 1.0);
         if (occupancy - raw_occupancy).abs() > 1e-9 {
             occupancy_clamped += 1;
         }
-        let mut site = Site::new(label, element, [x, y, z])?.with_occupancy(occupancy)?;
+        let mut site = Site::new(label, element, frac)?.with_occupancy(occupancy)?;
         if let Some(u_iso) = number(atoms.value(row, "_atom_site_U_iso_or_equiv")) {
             site = site.with_u_iso(u_iso)?;
+        } else if let Some(b_iso) = number(atoms.value(row, "_atom_site_B_iso_or_equiv")) {
+            let u_iso = b_iso / (8.0 * std::f64::consts::PI * std::f64::consts::PI);
+            site = site.with_u_iso(u_iso.max(0.0))?;
         }
         if let Some(charge) = number(atoms.value(row, "_atom_site_charge")) {
             site = site.with_charge(charge)?;
         } else if let Some(charge) = oxidation.get(element) {
             site = site.with_charge(*charge)?;
+        }
+        for (prop, tags) in [
+            (
+                "chain_id",
+                ["_atom_site_auth_asym_id", "_atom_site_label_asym_id"],
+            ),
+            (
+                "residue_name",
+                ["_atom_site_auth_comp_id", "_atom_site_label_comp_id"],
+            ),
+            (
+                "residue_number",
+                ["_atom_site_auth_seq_id", "_atom_site_label_seq_id"],
+            ),
+        ] {
+            if let Some(value) = tags
+                .iter()
+                .find_map(|tag| atoms.value(row, tag))
+                .filter(|value| *value != "." && *value != "?")
+            {
+                site = site.with_prop(prop, serde_json::Value::String(value.to_owned()));
+            }
         }
         if let Some(group) = atoms.value(row, "_atom_site_disorder_group") {
             let group = group.trim();
