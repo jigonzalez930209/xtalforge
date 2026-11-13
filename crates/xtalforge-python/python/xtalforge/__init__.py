@@ -262,8 +262,11 @@ for _name in [
     if _name in globals() and callable(globals()[_name]):
         globals()[_name] = _accepts_structure(globals()[_name])
 
+from . import plugins as plugins
+
 __all__ = [
     "AgentSession",
+    "AseCalculator",
     "Document",
     "InputError",
     "Lattice",
@@ -312,6 +315,7 @@ __all__ = [
     "ff_thermo",
     "ff_types",
     "ff_vibrations",
+    "get_symmetry_dataset",
     "groups",
     "lattice_info",
     "lattice_minimum_image",
@@ -327,6 +331,7 @@ __all__ = [
     "net_overlay",
     "neighbors",
     "porosity",
+    "plugins",
     "rcsr_names",
     "param_schema",
     "primitive_cell",
@@ -436,3 +441,14 @@ __all__ = [
     "wulff",
     "zeo_run",
 ]
+
+from .adapters import get_symmetry_dataset as get_symmetry_dataset
+
+
+def __getattr__(name):
+    """Resolves the optional ASE calculator without importing ASE eagerly."""
+    if name == "AseCalculator":
+        from .adapters import AseCalculator
+
+        return AseCalculator
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

@@ -1,0 +1,39 @@
+"""Adapters to ASE, pymatgen, phonopy, spglib and RDKit (Task 13.1)."""
+
+from ._object_api import Structure
+
+class AseCalculator:
+    """ASE calculator backed by the native UFF implementation.
+
+    Exposed as ``xtalforge.AseCalculator``; ``UffAseCalculator`` is an alias
+    in ``xtalforge.adapters``.
+    """
+
+    name: str
+    implemented_properties: list[str]
+    results: dict[str, object]
+    atoms: object
+    def __init__(self, **kwargs: object) -> None: ...
+    def calculate(
+        self,
+        atoms: object | None = None,
+        properties: tuple[str, ...] = ...,
+        system_changes: list[str] | None = None,
+    ) -> None: ...
+    def get_potential_energy(
+        self, atoms: object | None = None, force_consistent: bool = False
+    ) -> float: ...
+    def get_forces(self, atoms: object | None = None) -> object: ...
+
+UffAseCalculator = AseCalculator
+
+def ase_to_structure_json(atoms: object) -> str: ...
+def structure_to_ase(structure_json: str) -> object: ...
+def pymatgen_to_structure_json(value: object) -> str: ...
+def structure_to_pymatgen(structure_json: str) -> object: ...
+def structure_to_phonopy_atoms(structure_json: str) -> object: ...
+def get_symmetry_dataset(
+    structure: Structure | str, symprec: float = 1e-5
+) -> dict[str, object]: ...
+def rdkit_to_structure_json(mol: object) -> str: ...
+def structure_to_rdkit(structure_json: str) -> object: ...
