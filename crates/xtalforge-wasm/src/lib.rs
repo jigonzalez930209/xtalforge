@@ -43,11 +43,15 @@ mod powder_export;
 #[cfg(target_arch = "wasm32")]
 mod scene_export;
 #[cfg(target_arch = "wasm32")]
+mod structure_object;
+#[cfg(target_arch = "wasm32")]
 mod structure_text;
 #[cfg(target_arch = "wasm32")]
 mod symmetry;
 #[cfg(target_arch = "wasm32")]
 mod symmetry_analysis;
+#[cfg(target_arch = "wasm32")]
+mod typed_export;
 
 #[cfg(target_arch = "wasm32")]
 use common::{array3, array6, set, to_js_error};
@@ -118,6 +122,8 @@ pub use powder_export::{
 #[cfg(target_arch = "wasm32")]
 pub use scene_export::scene_data;
 #[cfg(target_arch = "wasm32")]
+pub use structure_object::Structure;
+#[cfg(target_arch = "wasm32")]
 pub use structure_text::{
     asymmetrize_text, build_c20_text, build_c60_text, build_carbon_text, build_graphene_text,
     build_mof_text, build_nanotube_text, build_polymer_text, build_ribbon_text,
@@ -136,6 +142,8 @@ pub use symmetry_analysis::{
     magnetic_group_info, pointgroup_info, primitive_info, reduce_info, standardize_info,
     tolerance_ladder_info, wyckoff_info,
 };
+#[cfg(target_arch = "wasm32")]
+pub use typed_export::{mesh_buffers, pxrd_buffers, scene_buffers};
 
 /// Installs the panic hook in debug builds only.
 #[cfg(all(target_arch = "wasm32", debug_assertions))]
