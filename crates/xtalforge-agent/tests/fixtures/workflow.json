@@ -1,0 +1,10 @@
+{
+  "workflow_version": 1,
+  "name": "inspect-copy",
+  "description": "Inspect every input and write a CIF copy next to it",
+  "steps": [
+    {"kind": "read", "path": "{{input}}"},
+    {"kind": "analyse", "name": "summary", "verb": "info"},
+    {"kind": "write", "name": "copy", "path": "{{dir}}/out/{{stem}}.cif"}
+  ]
+}
