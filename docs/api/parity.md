@@ -163,6 +163,11 @@ compares this table with the symbols each surface actually exports.
 | `net_contraction` | 14 | done | n/a | n/a | n/a | Structure-to-net contraction, vertex symbols and RCSR search (Task 14.4.2); native graph API |
 | `mesh_export` | 14 | done | done | done | done | OBJ and glTF/GLB with normals (Task 14.4.4) |
 | `report_renderers` | 14 | done | n/a | n/a | n/a | HTML and JSON report renderers (Task 14.5.1); module listing is the CLI surface |
+| `workflow` | 16 | done | done | done | n/a | Versioned workflow runner and `xtalforge run` (Task 16.1); WASM has no filesystem |
+| `provenance` | 16 | done | done | done | n/a | Provenance record, embedding and `provenance` command (Task 16.2); WASM has no file embedding |
+| `dataset` | 16 | done | n/a | done | n/a | JSON Lines dataset and pandas/polars view (Task 16.3.1); CLI stays file-oriented |
+| `dataset_dedup` | 16 | done | n/a | n/a | n/a | Matcher + fingerprint prefilter (Task 16.3.2); Rust analysis API |
+| `ml_descriptors` | 16 | done | n/a | n/a | n/a | Composition, RDF, Coulomb and SOAP-like arrays (Task 16.3.3); Rust analysis API |
 
 ## Recorded exceptions
 
@@ -184,6 +189,9 @@ compares this table with the symbols each surface actually exports.
 | Materials Project fetch | WASM | The API key must not be embedded in a browser bundle | COD and OPTIMADE fetch from the browser; `xtalforge fetch mp` from the CLI |
 | Python entry-point plugins | Rust, CLI, WASM | Entry points are discovered by the Python interpreter; a browser or the Rust binary cannot import them | Rust plugin registries are visible to the CLI and the agent; Python plugins stay in-process |
 | Diffraction profiles, MD, NET contraction and report renderers | Python, WASM | The option structs carry host callbacks and trajectory/file controls; 1.7 exposes the stable serializable parts and keeps the full model native | CLI for profiles; the public Rust API for the rest |
+| Workflow runner | WASM | Workflows read filesystem inputs and write checkpoint/output files; the browser has no filesystem | `workflow_schema`/`workflow_validate` style metadata can be added later |
+| Provenance embedding | WASM | CIF/extxyz/project files are written by the host | The text/JSON provenance record is available in Rust and Python |
+| Dataset files | CLI, WASM | Dataset files are a host filesystem container; CLI analysis commands stay per-structure | Rust `Dataset` and the Python pandas/polars view |
 
 ## Open gaps: Rust-only capabilities
 
