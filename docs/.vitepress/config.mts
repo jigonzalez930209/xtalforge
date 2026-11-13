@@ -34,6 +34,30 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   markdown: { math: true },
+  head: [
+    ['link', { rel: 'icon', href: '/xtalforge/favicon.ico', sizes: 'any' }],
+    ['link', { rel: 'apple-touch-icon', href: '/xtalforge/apple-touch-icon.png' }],
+    ['meta', { name: 'theme-color', content: '#0d1728' }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    [
+      'meta',
+      {
+        property: 'og:image',
+        content: 'https://jigonzalez930209.github.io/xtalforge/og-image.png',
+      },
+    ],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { property: 'og:image:alt', content: 'xtalforge icon' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    [
+      'meta',
+      {
+        name: 'twitter:image',
+        content: 'https://jigonzalez930209.github.io/xtalforge/og-image.png',
+      },
+    ],
+  ],
   vite: {
     server: {
       fs: {
@@ -50,6 +74,7 @@ export default defineConfig({
     text: 'Edit this page on GitHub',
   },
   themeConfig: {
+    logo: '/logo.png',
     nav: [
       { text: 'Guide', link: '/guide/' },
       { text: 'API', link: '/api/' },
