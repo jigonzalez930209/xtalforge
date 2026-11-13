@@ -19,7 +19,7 @@ name = "xtalforge_wasm"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-xtalforge = { workspace = true }
+xtalforge = { workspace = true, default-features = false, features = ["parallel"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 console_error_panic_hook = { workspace = true }
@@ -33,6 +33,27 @@ wasm-bindgen-futures = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 wasm-bindgen-test = { workspace = true }
+
+# Split WASM packages (Task 15.3.1). `core` is the viewer package: structure
+# reading, conversion, supercells/slabs, scene and mesh buffers, documents and
+# the object handle. Each later tier adds one exported surface and implies the
+# tier below it, matching the facade features. `full` is the npm default and
+# keeps the 1.7.0 surface.
+[features]
+default = ["full"]
+core = []
+symmetry = ["core"]
+analysis = ["core", "xtalforge/analysis"]
+build = ["core", "xtalforge/build"]
+full = [
+  "symmetry",
+  "analysis",
+  "build",
+  "xtalforge/ff",
+  "xtalforge/mof",
+  "xtalforge/modules",
+  "xtalforge/agent",
+]
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["-Oz"]
