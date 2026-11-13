@@ -1,30 +1,25 @@
 //! Python classes for the core model (Task 1.17.2).
 
-type RingPath = Vec<Vec<(usize, (i32, i32, i32))>>;
-
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
-use xtalforge::core::{
-    Lattice as CoreLattice, P1Atom, P1Cell as CoreP1Cell, Site as CoreSite,
-    Structure as CoreStructure,
-};
+use xtalforge::core::{Lattice as CoreLattice, P1Atom, P1Cell as CoreP1Cell, Site as CoreSite};
 
-fn numpy_array1(py: Python<'_>, values: Vec<f64>) -> PyResult<Py<PyAny>> {
+pub(crate) fn numpy_array1(py: Python<'_>, values: Vec<f64>) -> PyResult<Py<PyAny>> {
     Ok(py
         .import("numpy")?
         .call_method1("array", (values,))?
         .unbind())
 }
 
-fn numpy_array2(py: Python<'_>, values: Vec<Vec<f64>>) -> PyResult<Py<PyAny>> {
+pub(crate) fn numpy_array2(py: Python<'_>, values: Vec<Vec<f64>>) -> PyResult<Py<PyAny>> {
     Ok(py
         .import("numpy")?
         .call_method1("array", (values,))?
         .unbind())
 }
 
-fn frac(values: &[f64]) -> PyResult<[f64; 3]> {
+pub(crate) fn triple(values: &[f64]) -> PyResult<[f64; 3]> {
     let [x, y, z] = values else {
         return Err(crate::invalid_input(
             "expected three fractional coordinates",
@@ -37,7 +32,7 @@ fn frac(values: &[f64]) -> PyResult<[f64; 3]> {
 #[pyclass(name = "Lattice", module = "xtalforge")]
 #[derive(Clone)]
 pub(crate) struct Lattice {
-    inner: CoreLattice,
+    pub(crate) inner: CoreLattice,
 }
 
 #[pymethods]
@@ -59,7 +54,7 @@ impl Lattice {
         }
         let mut rows = [[0.0; 3]; 3];
         for (slot, row) in rows.iter_mut().zip(matrix.iter()) {
-            *slot = frac(row)?;
+            *slot = triple(row)?;
         }
         Ok(Self {
             inner: CoreLattice::new(rows).map_err(crate::map_error)?,
@@ -115,23 +110,25 @@ impl Lattice {
     }
 
     fn to_cart(&self, py: Python<'_>, point: Vec<f64>) -> PyResult<Py<PyAny>> {
-        numpy_array1(py, self.inner.to_cart(frac(&point)?).to_vec())
+        numpy_array1(py, self.inner.to_cart(triple(&point)?).to_vec())
     }
 
     fn to_frac(&self, py: Python<'_>, point: Vec<f64>) -> PyResult<Py<PyAny>> {
-        numpy_array1(py, self.inner.to_frac(frac(&point)?).to_vec())
+        numpy_array1(py, self.inner.to_frac(triple(&point)?).to_vec())
     }
 
     fn d_spacing(&self, hkl: Vec<f64>) -> PyResult<f64> {
-        self.inner.d_spacing(frac(&hkl)?).map_err(crate::map_error)
+        self.inner
+            .d_spacing(triple(&hkl)?)
+            .map_err(crate::map_error)
     }
 
     fn distance(&self, first: Vec<f64>, second: Vec<f64>) -> PyResult<f64> {
-        Ok(self.inner.distance(frac(&first)?, frac(&second)?))
+        Ok(self.inner.distance(triple(&first)?, triple(&second)?))
     }
 
     fn minimum_image(&self, py: Python<'_>, delta: Vec<f64>) -> PyResult<(Py<PyAny>, f64)> {
-        let (vector, distance) = self.inner.minimum_image(frac(&delta)?);
+        let (vector, distance) = self.inner.minimum_image(triple(&delta)?);
         Ok((numpy_array1(py, vector.to_vec())?, distance))
     }
 
@@ -156,7 +153,7 @@ impl Lattice {
 #[pyclass(name = "Site", module = "xtalforge")]
 #[derive(Clone)]
 pub(crate) struct Site {
-    inner: CoreSite,
+    pub(crate) inner: CoreSite,
 }
 
 #[pymethods]
@@ -230,193 +227,11 @@ impl Site {
     }
 }
 
-/// A crystal structure: lattice, Hall symbol and asymmetric sites.
-#[pyclass(name = "Structure", module = "xtalforge")]
-#[derive(Clone)]
-pub(crate) struct Structure {
-    inner: CoreStructure,
-}
-
-#[pymethods]
-impl Structure {
-    /// Reads a structure from text; an empty hint auto-detects the format.
-    #[new]
-    #[pyo3(signature = (text, format_hint = ""))]
-    fn new(text: &str, format_hint: &str) -> PyResult<Self> {
-        let hint = if format_hint.trim().is_empty() {
-            crate::structures::detect_format(text)
-        } else {
-            format_hint
-        };
-        Ok(Self {
-            inner: xtalforge::io::read_structure(text.trim_start_matches('\u{feff}'), hint)
-                .map_err(crate::map_error)?,
-        })
-    }
-
-    #[staticmethod]
-    fn from_cif(text: &str) -> PyResult<Self> {
-        Ok(Self {
-            inner: xtalforge::io::read_cif(text.trim_start_matches('\u{feff}'))
-                .map_err(crate::map_error)?,
-        })
-    }
-
-    #[getter]
-    fn name(&self) -> &str {
-        self.inner.name()
-    }
-
-    #[getter]
-    fn formula(&self) -> String {
-        self.inner.formula()
-    }
-
-    #[getter]
-    fn hall(&self) -> &str {
-        self.inner.hall()
-    }
-
-    #[getter]
-    fn lattice(&self) -> Lattice {
-        Lattice {
-            inner: *self.inner.lattice(),
-        }
-    }
-
-    #[getter]
-    fn sites(&self) -> Vec<Site> {
-        self.inner
-            .sites()
-            .iter()
-            .map(|site| Site {
-                inner: site.clone(),
-            })
-            .collect()
-    }
-
-    #[getter]
-    fn n_sites(&self) -> usize {
-        self.inner.sites().len()
-    }
-
-    #[getter]
-    fn volume(&self) -> f64 {
-        self.inner.lattice().volume()
-    }
-
-    #[getter]
-    fn density(&self) -> PyResult<f64> {
-        self.inner.density().map_err(crate::map_error)
-    }
-
-    #[getter]
-    fn is_p1(&self) -> bool {
-        self.inner.is_p1()
-    }
-
-    fn p1(&self) -> PyResult<P1Cell> {
-        Ok(P1Cell {
-            inner: self.inner.p1().map_err(crate::map_error)?,
-        })
-    }
-
-    #[pyo3(signature = (na, nb, nc))]
-    fn supercell(&self, na: u32, nb: u32, nc: u32) -> PyResult<Self> {
-        Ok(Self {
-            inner: crate::structures::as_p1_structure(&self.inner)?
-                .supercell(na, nb, nc)
-                .map_err(crate::map_error)?,
-        })
-    }
-
-    #[pyo3(signature = (h, k, l, layers, vacuum))]
-    fn slab(&self, h: i32, k: i32, l: i32, layers: u32, vacuum: f64) -> PyResult<Self> {
-        Ok(Self {
-            inner: xtalforge::core::make_slab(&self.inner, [h, k, l], layers, vacuum, 0.0)
-                .map_err(crate::map_error)?
-                .structure,
-        })
-    }
-
-    fn bonds<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyList>> {
-        let graph = self.inner.bond_graph().map_err(crate::map_error)?;
-        let items: Vec<Bound<'_, PyDict>> = graph
-            .bonds
-            .iter()
-            .map(|bond| {
-                let dict = PyDict::new(py);
-                dict.set_item("i", bond.i)?;
-                dict.set_item("j", bond.j)?;
-                dict.set_item("image", bond.image.to_vec())?;
-                dict.set_item("distance", bond.distance)?;
-                dict.set_item("order", bond.order)?;
-                dict.set_item("explicit", bond.explicit)?;
-                Ok(dict)
-            })
-            .collect::<PyResult<_>>()?;
-        PyList::new(py, items)
-    }
-
-    fn rings(&self, max_size: usize) -> PyResult<Vec<Vec<usize>>> {
-        Ok(xtalforge::core::rings(&self.inner, max_size)
-            .map_err(crate::map_error)?
-            .into_iter()
-            .map(|ring| ring.atoms)
-            .collect())
-    }
-
-    fn ring_paths(&self, max_size: usize) -> PyResult<RingPath> {
-        Ok(xtalforge::core::ring_paths(&self.inner, max_size)
-            .map_err(crate::map_error)?
-            .into_iter()
-            .map(|path| {
-                path.into_iter()
-                    .map(|step| (step.atom, (step.image[0], step.image[1], step.image[2])))
-                    .collect()
-            })
-            .collect())
-    }
-
-    fn summary<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyDict>> {
-        let summary = self.inner.summary().map_err(crate::map_error)?;
-        let p1 = self.inner.p1().map_err(crate::map_error)?;
-        let dict = PyDict::new(py);
-        dict.set_item("name", summary.name)?;
-        dict.set_item("formula", summary.formula)?;
-        dict.set_item("hall", summary.hall)?;
-        dict.set_item("n_sites", summary.n_sites)?;
-        dict.set_item("n_atoms", p1.n_atoms())?;
-        dict.set_item("volume", summary.volume)?;
-        dict.set_item("density", summary.density)?;
-        dict.set_item("total_charge", summary.total_charge)?;
-        dict.set_item("is_p1", summary.is_p1)?;
-        Ok(dict)
-    }
-
-    fn to_format(&self, format: &str) -> PyResult<String> {
-        xtalforge::io::write_structure(&self.inner, format).map_err(crate::map_error)
-    }
-
-    fn to_json(&self) -> PyResult<String> {
-        self.inner.to_document().to_json().map_err(crate::map_error)
-    }
-
-    fn __repr__(&self) -> String {
-        format!(
-            "Structure(name='{}', formula='{}', n_sites={})",
-            self.inner.name(),
-            self.inner.formula(),
-            self.inner.sites().len()
-        )
-    }
-}
-
 /// The expanded P1 cell of a structure.
 #[pyclass(name = "P1Cell", module = "xtalforge")]
 #[derive(Clone)]
 pub(crate) struct P1Cell {
-    inner: CoreP1Cell,
+    pub(crate) inner: CoreP1Cell,
 }
 
 #[pymethods]

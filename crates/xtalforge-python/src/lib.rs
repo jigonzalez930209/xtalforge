@@ -27,13 +27,14 @@ mod phase9;
 mod phase9_analysis;
 mod phase9_local;
 mod plugins;
+mod structure;
 mod structures;
 mod symmetry;
 mod symmetry_analysis;
 mod view;
 
 use analysis::{angle, bonds, distance, groups, neighbors, pxrd, ring_paths, rings, torsion};
-use classes::{Lattice, P1Cell, Site, Structure};
+use classes::{Lattice, P1Cell, Site};
 use lebail::powder_lebail;
 use phase3::{
     Document, param_schema, project_pack, project_read, workspace_archive, workspace_open,
@@ -77,6 +78,7 @@ use phase11::{
     molecule_from_smiles, place_guest_structure, read, sketch_roundtrip, substitute_structure,
     write,
 };
+use structure::Structure;
 use structures::{
     build_c60, build_graphene, build_nanotube, read_cif, read_structure, slab, supercell,
 };
