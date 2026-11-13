@@ -1,22 +1,75 @@
-//! Internal coordinates for scans and constraints (Task 4.5.1).
+//! Scan coordinates: internal distances, angles, torsions, cell parameters and
+//! collective variables (Tasks 4.5.1 and 14.2.3).
 //!
-//! Three coordinates are supported at this core level: a distance, an angle
-//! and a torsion, each addressed by asymmetric-site indices.  Scans operate on
-//! P1 structures, so those indices are also P1 atom indices.  Periodic images
-//! are taken into account through the lattice's minimum-image convention.
+//! [`ScanCoordinate`] names the quantity a scan steps through:
 //!
-//! Values are Angstrom for a distance and degrees for an angle or torsion.
-//! The analytic gradients are differentiated with respect to Cartesian site
-//! positions; a degenerate angle or torsion has a zero gradient and is refused
-//! explicitly when it is used as a scan axis.
+//! * [`ScanCoordinate::Distance`], [`ScanCoordinate::Angle`] and
+//!   [`ScanCoordinate::Torsion`] are internal geometric coordinates addressed
+//!   by site index; values are Angstrom or degrees.
+//! * [`ScanCoordinate::CellParameter`] varies `a`, `b`, `c`, `alpha`, `beta` or
+//!   `gamma` of the cell (Angstrom or degrees).
+//! * [`ScanCoordinate::Collective`] wraps a [`CollectiveVariable`], a coordinate
+//!   over atom groups such as a centroid distance or a linear combination.
+//!
+//! Scans operate on P1 structures, so the indices are P1 atom indices.  Values
+//! and gradients are defined for every kind; a cell parameter has a zero
+//! Cartesian gradient because it is imposed on the lattice rather than relaxed
+//! through the sites, which is why it must be moved with
+//! [`ScanCoordinate::set_in`] and a [`ScanGeometry`].
 
 use serde::{Deserialize, Serialize};
-use xtalforge_core::Lattice;
+use xtalforge_core::{Lattice, Structure};
 
 use crate::Error;
-use crate::math::{add, cross, dot, norm, scale, sub, unit};
+use crate::structure_util::with_frac;
 
-/// One internal coordinate.
+use super::cell_parameter::CellParameter;
+use super::collective::CollectiveVariable;
+use super::internal;
+
+/// A mutable lattice and Cartesian positions that a scan coordinate acts on.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ScanGeometry {
+    /// Cell of the geometry.
+    pub lattice: Lattice,
+    /// Cartesian positions, one per site.
+    pub positions: Vec<[f64; 3]>,
+}
+
+impl ScanGeometry {
+    /// Reads the geometry of one structure.
+    #[must_use]
+    pub fn from_structure(structure: &Structure) -> Self {
+        Self {
+            lattice: *structure.lattice(),
+            positions: structure.cart_sites(),
+        }
+    }
+
+    /// Rebuilds `base` with this geometry's lattice and positions.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] when the position count differs, or a
+    /// core error when the structure cannot be rebuilt.
+    pub fn into_structure(self, base: &Structure) -> Result<Structure, Error> {
+        if self.positions.len() != base.sites().len() {
+            return Err(Error::InvalidInput(format!(
+                "scan geometry has {} positions for a structure with {} sites",
+                self.positions.len(),
+                base.sites().len()
+            )));
+        }
+        let frac: Vec<[f64; 3]> = self
+            .positions
+            .iter()
+            .map(|position| self.lattice.to_frac(*position))
+            .collect();
+        with_frac(base, self.lattice, &frac)
+    }
+}
+
+/// One coordinate a scan can step through.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum ScanCoordinate {
@@ -46,6 +99,16 @@ pub enum ScanCoordinate {
         k: usize,
         /// Fourth atom.
         l: usize,
+    },
+    /// One cell parameter, imposed on the lattice.
+    CellParameter {
+        /// Parameter being scanned.
+        parameter: CellParameter,
+    },
+    /// A collective variable over atom groups.
+    Collective {
+        /// Variable definition.
+        variable: CollectiveVariable,
     },
 }
 
@@ -97,6 +160,33 @@ impl ScanCoordinate {
         Ok(Self::Torsion { i, j, k, l })
     }
 
+    /// Cell-parameter coordinate.
+    #[must_use]
+    pub fn cell_parameter(parameter: CellParameter) -> Self {
+        Self::CellParameter { parameter }
+    }
+
+    /// Collective-variable coordinate.
+    #[must_use]
+    pub fn collective(variable: CollectiveVariable) -> Self {
+        Self::Collective { variable }
+    }
+
+    /// The cell parameter, when this is one.
+    #[must_use]
+    pub fn parameter(&self) -> Option<CellParameter> {
+        match self {
+            Self::CellParameter { parameter } => Some(*parameter),
+            _ => None,
+        }
+    }
+
+    /// Whether the coordinate moves the cell instead of the sites.
+    #[must_use]
+    pub fn is_cell_parameter(&self) -> bool {
+        matches!(self, Self::CellParameter { .. })
+    }
+
     /// Human-readable label.
     #[must_use]
     pub fn label(&self) -> String {
@@ -104,6 +194,8 @@ impl ScanCoordinate {
             Self::Distance { i, j } => format!("distance {i}-{j}"),
             Self::Angle { i, j, k } => format!("angle {i}-{j}-{k}"),
             Self::Torsion { i, j, k, l } => format!("torsion {i}-{j}-{k}-{l}"),
+            Self::CellParameter { parameter } => format!("cell {}", parameter.name()),
+            Self::Collective { variable } => variable.label(),
         }
     }
 
@@ -111,39 +203,52 @@ impl ScanCoordinate {
     #[must_use]
     pub fn units(&self) -> &'static str {
         match self {
-            Self::Distance { .. } => "A",
+            Self::Distance { .. } | Self::Collective { .. } => "A",
             Self::Angle { .. } | Self::Torsion { .. } => "deg",
+            Self::CellParameter { parameter } => parameter.units(),
         }
     }
 
-    /// Site indices this coordinate reads.
+    /// Site indices this coordinate reads; empty for a cell parameter.
     #[must_use]
     pub fn indices(&self) -> Vec<usize> {
         match self {
             Self::Distance { i, j } => vec![*i, *j],
             Self::Angle { i, j, k } => vec![*i, *j, *k],
             Self::Torsion { i, j, k, l } => vec![*i, *j, *k, *l],
+            Self::CellParameter { .. } => Vec::new(),
+            Self::Collective { variable } => variable.indices(),
         }
     }
 
-    /// Checks the indices against a site count.
+    /// Checks the coordinate against a site count.
     ///
     /// # Errors
     ///
-    /// Returns [`Error::InvalidInput`] for an index outside `0..n_sites`.
+    /// Returns [`Error::InvalidInput`] for an index outside `0..n_sites` or a
+    /// malformed collective variable.
     pub fn validate(&self, n_sites: usize) -> Result<(), Error> {
-        for index in self.indices() {
-            if index >= n_sites {
-                return Err(Error::InvalidInput(format!(
-                    "{} refers to atom {index}, but the structure has {n_sites} sites",
-                    self.label()
-                )));
+        match self {
+            Self::CellParameter { .. } => Ok(()),
+            Self::Collective { variable } => variable.validate(n_sites),
+            _ => {
+                for index in self.indices() {
+                    if index >= n_sites {
+                        return Err(Error::InvalidInput(format!(
+                            "{} refers to atom {index}, but the structure has {n_sites} sites",
+                            self.label()
+                        )));
+                    }
+                }
+                Ok(())
             }
         }
-        Ok(())
     }
 
-    /// Coordinate value for Cartesian site positions.
+    /// Coordinate value for Cartesian site positions and a lattice.
+    ///
+    /// For a cell parameter the value is read from `lattice` and `positions`
+    /// is ignored.
     ///
     /// # Errors
     ///
@@ -151,49 +256,19 @@ impl ScanCoordinate {
     /// array, a degenerate geometry, or a non-finite result.
     pub fn value(&self, positions: &[[f64; 3]], lattice: &Lattice) -> Result<f64, Error> {
         match self {
-            Self::Distance { i, j } => {
-                let vector = minimum_vector(positions, lattice, *i, *j)?;
-                let distance = norm(vector);
-                if distance <= 1e-12 {
-                    return Err(Error::InvalidInput(
-                        "the two atoms of a distance coordinate coincide".to_owned(),
-                    ));
-                }
-                Ok(distance)
-            }
-            Self::Angle { i, j, k } => {
-                let u = minimum_vector(positions, lattice, *j, *i)?;
-                let v = minimum_vector(positions, lattice, *j, *k)?;
-                let denominator = norm(u) * norm(v);
-                if denominator <= 1e-14 {
-                    return Err(Error::InvalidInput(
-                        "an angle coordinate has a zero-length arm".to_owned(),
-                    ));
-                }
-                let cosine = (dot(u, v) / denominator).clamp(-1.0, 1.0);
-                Ok(cosine.acos().to_degrees())
-            }
+            Self::Distance { i, j } => internal::distance_value(positions, lattice, *i, *j),
+            Self::Angle { i, j, k } => internal::angle_value(positions, lattice, *i, *j, *k),
             Self::Torsion { i, j, k, l } => {
-                let b1 = minimum_vector(positions, lattice, *i, *j)?;
-                let b2 = minimum_vector(positions, lattice, *j, *k)?;
-                let b3 = minimum_vector(positions, lattice, *k, *l)?;
-                let n1 = cross(b1, b2);
-                let n2 = cross(b2, b3);
-                let length = norm(b2);
-                if length < 1e-9 || norm(n1) < 1e-9 || norm(n2) < 1e-9 {
-                    return Err(Error::InvalidInput(
-                        "a torsion coordinate is undefined where three atoms are collinear"
-                            .to_owned(),
-                    ));
-                }
-                let x = dot(n1, n2);
-                let y = dot(cross(n1, n2), b2) / length;
-                Ok(y.atan2(x).to_degrees())
+                internal::torsion_value(positions, lattice, *i, *j, *k, *l)
             }
+            Self::CellParameter { parameter } => Ok(parameter.value(lattice)),
+            Self::Collective { variable } => variable.value(positions, lattice),
         }
     }
 
     /// Cartesian gradient `d(value)/d(position)` for every site.
+    ///
+    /// A cell parameter has a zero gradient, because the sites do not move it.
     ///
     /// # Errors
     ///
@@ -203,81 +278,62 @@ impl ScanCoordinate {
         positions: &[[f64; 3]],
         lattice: &Lattice,
     ) -> Result<Vec<[f64; 3]>, Error> {
-        let mut result = vec![[0.0; 3]; positions.len()];
         match self {
-            Self::Distance { i, j } => {
-                let vector = minimum_vector(positions, lattice, *i, *j)?;
-                let Some(direction) = unit(vector) else {
-                    return Err(Error::InvalidInput(
-                        "the two atoms of a distance coordinate coincide".to_owned(),
-                    ));
-                };
-                scatter(&mut result, *i, scale(direction, -1.0));
-                scatter(&mut result, *j, direction);
-            }
-            Self::Angle { i, j, k } => {
-                let u = minimum_vector(positions, lattice, *j, *i)?;
-                let v = minimum_vector(positions, lattice, *j, *k)?;
-                let lu = norm(u);
-                let lv = norm(v);
-                if lu < 1e-12 || lv < 1e-12 {
-                    return Err(Error::InvalidInput(
-                        "an angle coordinate has a zero-length arm".to_owned(),
-                    ));
-                }
-                let uh = scale(u, 1.0 / lu);
-                let vh = scale(v, 1.0 / lv);
-                let cosine = dot(uh, vh).clamp(-1.0, 1.0);
-                let sine = (1.0 - cosine * cosine).sqrt();
-                if sine < 1e-9 {
-                    return Ok(result);
-                }
-                let factor = 180.0 / std::f64::consts::PI;
-                let first = scale(sub(scale(uh, cosine), vh), factor / (lu * sine));
-                let third = scale(sub(scale(vh, cosine), uh), factor / (lv * sine));
-                scatter(&mut result, *i, first);
-                scatter(&mut result, *j, scale(add(first, third), -1.0));
-                scatter(&mut result, *k, third);
-            }
+            Self::Distance { i, j } => internal::distance_gradient(positions, lattice, *i, *j),
+            Self::Angle { i, j, k } => internal::angle_gradient(positions, lattice, *i, *j, *k),
             Self::Torsion { i, j, k, l } => {
-                let b1 = minimum_vector(positions, lattice, *i, *j)?;
-                let b2 = minimum_vector(positions, lattice, *j, *k)?;
-                let b3 = minimum_vector(positions, lattice, *k, *l)?;
-                let n1 = cross(b1, b2);
-                let n2 = cross(b2, b3);
-                let l2 = norm(b2);
-                let s1 = dot(n1, n1);
-                let s2 = dot(n2, n2);
-                if l2 < 1e-9 || s1 < 1e-18 || s2 < 1e-18 {
-                    return Ok(result);
-                }
-                let factor = 180.0 / std::f64::consts::PI;
-                let first = scale(n1, -l2 / s1 * factor);
-                let fourth = scale(n2, l2 / s2 * factor);
-                let a = dot(b1, b2) / (l2 * l2);
-                let b = dot(b3, b2) / (l2 * l2);
-                let second = add(scale(first, -(a + 1.0)), scale(fourth, b));
-                let third = sub(scale(first, a), scale(fourth, b + 1.0));
-                scatter(&mut result, *i, first);
-                scatter(&mut result, *j, second);
-                scatter(&mut result, *k, third);
-                scatter(&mut result, *l, fourth);
+                internal::torsion_gradient(positions, lattice, *i, *j, *k, *l)
             }
+            Self::CellParameter { .. } => Ok(vec![[0.0; 3]; positions.len()]),
+            Self::Collective { variable } => variable.gradient(positions, lattice),
         }
-        Ok(result)
+    }
+
+    /// Value on a full geometry.
+    ///
+    /// # Errors
+    ///
+    /// Returns the errors of [`ScanCoordinate::value`].
+    pub fn value_in(&self, geometry: &ScanGeometry) -> Result<f64, Error> {
+        self.value(&geometry.positions, &geometry.lattice)
     }
 
     /// Moves the geometry so the coordinate reads `target`.
     ///
-    /// This is a seed, not a constraint: it translates or rotates one atom to
-    /// the requested value and leaves the rest for the optimizer.  For a
-    /// torsion it rotates the last atom about the central bond; for an angle
-    /// it rotates the third atom about the normal at the vertex.
+    /// This is a seed, not a constraint: internal coordinates move one atom or
+    /// group, a collective variable translates whole groups and a cell
+    /// parameter rebuilds the lattice while keeping every fractional
+    /// coordinate fixed, so the atoms follow the cell.  The optimizer relaxes
+    /// the rest.
     ///
     /// # Errors
     ///
-    /// Returns [`Error::InvalidInput`] for a degenerate starting geometry or
-    /// a non-finite target.
+    /// Returns [`Error::InvalidInput`] for a degenerate starting geometry, a
+    /// non-finite target or an impossible cell.
+    pub fn set_in(&self, geometry: &mut ScanGeometry, target: f64) -> Result<(), Error> {
+        match self {
+            Self::CellParameter { parameter } => {
+                let frac: Vec<[f64; 3]> = geometry
+                    .positions
+                    .iter()
+                    .map(|position| geometry.lattice.to_frac(*position))
+                    .collect();
+                let lattice = parameter.with_value(&geometry.lattice, target)?;
+                geometry.positions = frac.iter().map(|point| lattice.to_cart(*point)).collect();
+                geometry.lattice = lattice;
+                Ok(())
+            }
+            _ => self.set(&mut geometry.positions, &geometry.lattice, target),
+        }
+    }
+
+    /// Moves Cartesian positions so the coordinate reads `target`.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::InvalidInput`] for a degenerate starting geometry, a
+    /// non-finite target, or a cell parameter, which needs
+    /// [`ScanCoordinate::set_in`] to rebuild the lattice.
     pub fn set(
         &self,
         positions: &mut [[f64; 3]],
@@ -288,88 +344,16 @@ impl ScanCoordinate {
             return Err(Error::InvalidInput("scan target must be finite".to_owned()));
         }
         match self {
-            Self::Distance { i, j } => {
-                let vector = minimum_vector(positions, lattice, *i, *j)?;
-                let Some(direction) = unit(vector) else {
-                    return Err(Error::InvalidInput(
-                        "the two atoms of a distance coordinate coincide".to_owned(),
-                    ));
-                };
-                let change = target - norm(vector);
-                if let Some(position) = positions.get_mut(*j) {
-                    *position = add(*position, scale(direction, change));
-                }
+            Self::Distance { i, j } => internal::set_distance(positions, lattice, *i, *j, target),
+            Self::Angle { i, j, k } => internal::set_angle(positions, lattice, *i, *j, *k, target),
+            Self::Torsion { i, j, k, l } => {
+                internal::set_torsion(positions, lattice, *i, *j, *k, *l, target)
             }
-            Self::Angle { i, j, k } => {
-                let u = minimum_vector(positions, lattice, *j, *i)?;
-                let v = minimum_vector(positions, lattice, *j, *k)?;
-                let Some(axis) = unit(cross(u, v)) else {
-                    return Err(Error::InvalidInput(
-                        "cannot set an angle whose three atoms are collinear".to_owned(),
-                    ));
-                };
-                let current = self.value(positions, lattice)?;
-                let rotated = rotate(v, axis, (target - current).to_radians());
-                let vertex = positions.get(*j).copied().unwrap_or([0.0; 3]);
-                if let Some(position) = positions.get_mut(*k) {
-                    *position = add(vertex, rotated);
-                }
-            }
-            Self::Torsion { j, k, l, .. } => {
-                let b2 = minimum_vector(positions, lattice, *j, *k)?;
-                let Some(axis) = unit(b2) else {
-                    return Err(Error::InvalidInput(
-                        "cannot set a torsion whose central bond is zero".to_owned(),
-                    ));
-                };
-                let pivot = positions.get(*k).copied().unwrap_or([0.0; 3]);
-                let arm = minimum_vector(positions, lattice, *k, *l)?;
-                let current = self.value(positions, lattice)?;
-                let rotated = rotate(arm, axis, (target - current).to_radians());
-                if let Some(position) = positions.get_mut(*l) {
-                    *position = add(pivot, rotated);
-                }
-            }
+            Self::CellParameter { parameter } => Err(Error::InvalidInput(format!(
+                "cell parameter {} is part of the lattice; use ScanCoordinate::set_in",
+                parameter.name()
+            ))),
+            Self::Collective { variable } => variable.set(positions, lattice, target),
         }
-        Ok(())
     }
-}
-
-/// Minimum-image Cartesian vector from site `first` to site `second`.
-fn minimum_vector(
-    positions: &[[f64; 3]],
-    lattice: &Lattice,
-    first: usize,
-    second: usize,
-) -> Result<[f64; 3], Error> {
-    let Some(from) = positions.get(first) else {
-        return Err(Error::InvalidInput(format!(
-            "atom index {first} is outside the position list"
-        )));
-    };
-    let Some(to) = positions.get(second) else {
-        return Err(Error::InvalidInput(format!(
-            "atom index {second} is outside the position list"
-        )));
-    };
-    let delta = sub(*to, *from);
-    let frac = lattice.to_frac(delta);
-    let (wrapped, _) = lattice.minimum_image(frac);
-    Ok(lattice.to_cart(wrapped))
-}
-
-/// Adds a contribution to one site's gradient.
-fn scatter(gradient: &mut [[f64; 3]], index: usize, value: [f64; 3]) {
-    if let Some(slot) = gradient.get_mut(index) {
-        *slot = add(*slot, value);
-    }
-}
-
-/// Rodrigues rotation of `vector` about a unit `axis`.
-fn rotate(vector: [f64; 3], axis: [f64; 3], angle: f64) -> [f64; 3] {
-    let cosine = angle.cos();
-    let sine = angle.sin();
-    let parallel = scale(axis, dot(axis, vector) * (1.0 - cosine));
-    let perpendicular = scale(cross(axis, vector), sine);
-    add(add(scale(vector, cosine), parallel), perpendicular)
 }

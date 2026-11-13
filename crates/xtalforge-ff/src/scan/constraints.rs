@@ -36,12 +36,22 @@ impl Constraint {
     ///
     /// # Errors
     ///
-    /// Returns [`Error::InvalidInput`] when the target is not finite.
+    /// Returns [`Error::InvalidInput`] when the target is not finite, or when
+    /// the coordinate is a cell parameter: a Cartesian penalty cannot hold a
+    /// lattice parameter, so cell parameters are imposed by a scan axis
+    /// instead.
     pub fn new(coordinate: ScanCoordinate, target: f64) -> Result<Self, Error> {
         if !target.is_finite() {
             return Err(Error::InvalidInput(
                 "constraint target must be finite".to_owned(),
             ));
+        }
+        if coordinate.is_cell_parameter() {
+            return Err(Error::InvalidInput(format!(
+                "{} is a cell parameter and cannot be held by a Cartesian penalty; \
+                 scan it with a fixed cell instead",
+                coordinate.label()
+            )));
         }
         Ok(Self { coordinate, target })
     }
@@ -106,7 +116,8 @@ impl Constraint {
     /// # Errors
     ///
     /// Returns [`Error::InvalidInput`] for a negative or non-finite constant,
-    /// and the errors of [`ScanCoordinate::gradient`].
+    /// for a cell-parameter coordinate, and the errors of
+    /// [`ScanCoordinate::gradient`].
     pub fn penalty(
         &self,
         positions: &[[f64; 3]],
@@ -116,6 +127,12 @@ impl Constraint {
         if !constant.is_finite() || constant < 0.0 {
             return Err(Error::InvalidInput(format!(
                 "penalty constant must be non-negative and finite, got {constant}"
+            )));
+        }
+        if self.coordinate.is_cell_parameter() {
+            return Err(Error::InvalidInput(format!(
+                "{} is a cell parameter and has a zero Cartesian gradient",
+                self.coordinate.label()
             )));
         }
         let residual = self.residual(positions, lattice)?;
