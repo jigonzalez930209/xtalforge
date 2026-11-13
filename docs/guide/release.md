@@ -94,7 +94,9 @@ release workflow.
 2. Move the `Unreleased` changelog entries under `## [X.Y.Z] - YYYY-MM-DD`.
 3. Run the full local CI gate from `AGENTS.md` section 5.4 on the exact commit
    to tag. There is no GitHub CI; this gate is mandatory. Run
-   `scripts/check-package.sh` and `scripts/check-bench-budget.sh` as well.
+   `scripts/check-package.sh` and `scripts/check-bench-budget.sh` as well, plus
+   the comparative regression gate `scripts/check-bench.sh` (refresh its
+   machine-specific baseline with `--update` only after an intentional change).
    Model weights are never bundled; the user fetches them with
    `xtalforge models fetch`.
 4. Commit, tag and push:

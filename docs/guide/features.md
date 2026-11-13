@@ -7,7 +7,8 @@ downstream crate can be built directly with or without them.
 
 | Feature | Default | Domains | Effect |
 |---|---|---|---|
-| `parallel` | yes | core, io, symmetry | Reserves Rayon for the parallel algorithms. The current algorithms are single-threaded and deterministic; the feature exists so builds can already opt out with `--no-default-features`. |
+| `full` | yes | facade | Keeps the previous default surface: analysis, build, ff, MOF, modules and agent. Disable it for the base tier. |
+| `parallel` | yes | core, io, symmetry, ff | Reserves Rayon for the parallel algorithms. The current algorithms are single-threaded and deterministic; the feature exists so builds can already opt out with `--no-default-features`. |
 | `sci-form` | no | force fields | Links the published MIT crate `sci-form` 2.0.0 for in-process GFN0/GFN1/GFN2 (Task 4.10). The methods are molecular only; GFN2 returns forces and the registry lists `gfn0`, `gfn1` and `gfn2`. |
 | `ml` | no | force fields | Reserved for machine-learned potentials (Task 8.4). The decision is recorded in `docs/algorithms/ml-backend.md`; currently a no-op. |
 | `external` | no | force fields | Reserved; the runtime engine probes and input writers for DFTB+, xTB and ORCA are always compiled and need no feature (Task 4.9). |
@@ -54,3 +55,14 @@ isolation headers from the host page; without them the module cannot start.
 The Rust `parallel` feature is not enabled in the published WASM build, and
 enabling it never changes a result: every parallel reduction uses a fixed
 order, so the single-threaded and threaded paths agree.
+
+
+## Split packages and cold start
+
+`scripts/build-wasm-packages.sh` builds five packages: `core` (base plus the
+structure handle, scene and mesh), `symmetry`, `analysis`, `build` and the full
+`xtalforge-wasm`. The per-package budgets are in `scripts/check-wasm-size.sh`
+(core 2048, symmetry 2944, analysis 3264, build 2496, full 5504 KiB).
+
+`scripts/check-cli-start.sh` measures the cold `xtalforge info` path; the 1.8.0
+median is about 5 ms against the 20 ms ceiling.
