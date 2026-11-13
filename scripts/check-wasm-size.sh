@@ -40,6 +40,9 @@
 # 5504 KiB since 1.7.0: the diffraction profile model, MD/scan control, mesh
 # export and net contraction (5398 KiB measured).
 #
+# 5632 KiB since 1.9.0: workflows, provenance and dataset descriptors
+# (5606 KiB measured).
+#
 # Build first:
 #   scripts/build-wasm-packages.sh
 # or, for the full package only:
@@ -71,7 +74,7 @@ check_package() {
   fi
 }
 
-check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 5504
+check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 5632
 
 split=(core symmetry analysis build)
 present=0

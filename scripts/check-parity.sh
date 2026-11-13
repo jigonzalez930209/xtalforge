@@ -108,6 +108,11 @@ check_rust() {
     net_contraction) name=contract ;;
     mesh_export) name=write_obj ;;
     report_renderers) name=to_html ;;
+    workflow) name=run_workflow ;;
+    provenance) grep -Rq 'pub struct Provenance' crates/xtalforge-core/src; return ;;
+    dataset) grep -Rq 'pub struct Dataset' crates/xtalforge-analysis/src; return ;;
+    dataset_dedup) name=deduplicate ;;
+    ml_descriptors) name=composition_features ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -128,6 +133,9 @@ check_python() {
     python_plugins) test -f "$PY_STUB/plugins.py"; return ;;
     interop_formats) grep -q "def read(" "$PY_STUB/__init__.pyi"; return ;;
     mesh_export) grep -Rq --include='*.pyi' "def mesh_obj" "$PY_STUB"; return ;;
+    workflow) grep -Rq --include='*.pyi' "class Workflow" "$PY_STUB"; return ;;
+    provenance) grep -Rq --include='*.pyi' "def provenance" "$PY_STUB"; return ;;
+    dataset) grep -Rq --include='*.pyi' "class Dataset" "$PY_STUB"; return ;;
   esac
   case "$name" in
     prepare) name=ff_prepare ;;
@@ -256,6 +264,8 @@ check_cli() {
     interop_formats) command=convert ;;
     diffraction_profiles) command=pxrd ;;
     mesh_export) command=mesh ;;
+    workflow) command=run ;;
+    provenance) command=provenance ;;
     match_structures|periodic_rmsd|kabsch_alignment|group_structures) command=compare ;;
     deform) command=deform ;;
     rattle|edit_structure|interpolate|optimal_supercell|voronoi|coordination|bond_valence_sums|oxidation_states|radial_distribution|structure_fingerprint|unique_miller_indices|slab_terminations|wulff|adsorption_sites|vacancies|substitutions|interstitials|orderings|special_quasirandom|lattice_matches|stack_slabs|elastic_tensor|eos_fit|convex_hull) command=features ;;
