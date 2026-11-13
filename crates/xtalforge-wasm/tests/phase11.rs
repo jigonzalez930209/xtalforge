@@ -11,8 +11,8 @@
 use serde_json::Value;
 use wasm_bindgen_test::*;
 use xtalforge_wasm::{
-    deprecation_warning, fragment_library_info, molecule_from_smiles, read, sketch_roundtrip,
-    substitute_info,
+    Structure, deprecation_warning, fragment_library_info, mesh_buffers, molecule_from_smiles,
+    pxrd_buffers, read, scene_buffers, sketch_roundtrip, substitute_info,
 };
 
 const SI_CIF: &str = include_str!("../../../tests/corpus/simple/Si.cif");
@@ -40,4 +40,23 @@ fn sketch_and_fragments_and_substitution() {
             .is_some_and(|list| list.iter().any(|site| site["element"] == "Ge"))
     );
     deprecation_warning("old_name", "new_name");
+}
+
+#[wasm_bindgen_test]
+fn structure_handle_and_typed_buffers() {
+    let handle = Structure::from_text(SI_CIF, "cif").expect("handle");
+    assert_eq!(handle.n_atoms().unwrap_or(0), 8);
+    assert_eq!(
+        handle.positions().map(|array| array.length()).unwrap_or(0),
+        24
+    );
+    assert_eq!(handle.cell().length(), 9);
+    let supercell = handle.supercell(2, 1, 1).expect("supercell");
+    assert_eq!(supercell.n_atoms().unwrap_or(0), 16);
+    let buffers = scene_buffers(SI_CIF, "cif").expect("scene buffers");
+    assert!(!buffers.is_undefined());
+    let pattern = pxrd_buffers(SI_CIF, "cif").expect("pattern buffers");
+    assert!(!pattern.is_undefined());
+    let mesh = mesh_buffers(SI_CIF, "cif").expect("mesh buffers");
+    assert!(!mesh.is_undefined());
 }
