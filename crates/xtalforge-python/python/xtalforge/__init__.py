@@ -171,6 +171,97 @@ from ._xtalforge import (
     zeo_run,
 )
 
+def _text_input(value):
+    """Returns structure JSON for a Structure, otherwise the value unchanged."""
+    return value.to_json() if isinstance(value, Structure) else value
+
+
+def _accepts_structure(function):
+    def wrapped(first, *args, **kwargs):
+        return function(_text_input(first), *args, **kwargs)
+
+    wrapped.__name__ = getattr(function, "__name__", "wrapped")
+    wrapped.__doc__ = getattr(function, "__doc__", None)
+    return wrapped
+
+
+class _TypedResult(dict):
+    """Read-only mapping with the legacy dict shape."""
+
+    def to_dict(self) -> dict:
+        return dict(self)
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({dict.__repr__(self)})"
+
+    def _repr_html_(self) -> str:
+        rows = "".join(
+            f"<tr><th>{key}</th><td>{value}</td></tr>" for key, value in self.items()
+        )
+        return f"<table>{rows}</table>"
+
+
+class SymmetryDataset(_TypedResult):
+    """Typed symmetry dataset; also behaves like the old dict."""
+
+
+class PxrdPattern(_TypedResult):
+    """Typed PXRD pattern; also behaves like the old dict."""
+
+
+class PorosityReport(_TypedResult):
+    """Typed porosity report; also behaves like the old dict."""
+
+
+class OptimizeResult(_TypedResult):
+    """Typed force-field optimization result; also behaves like the old dict."""
+
+
+_raw_detect_symmetry = detect_symmetry
+_raw_pxrd = pxrd
+_raw_porosity = porosity
+_raw_ff_optimize = ff_optimize
+
+
+def detect_symmetry(*args, **kwargs):
+    return SymmetryDataset(_raw_detect_symmetry(_text_input(args[0]), *args[1:], **kwargs))
+
+
+def pxrd(*args, **kwargs):
+    return PxrdPattern(_raw_pxrd(_text_input(args[0]), *args[1:], **kwargs))
+
+
+def porosity(*args, **kwargs):
+    return PorosityReport(_raw_porosity(_text_input(args[0]), *args[1:], **kwargs))
+
+
+def ff_optimize(*args, **kwargs):
+    return OptimizeResult(_raw_ff_optimize(_text_input(args[0]), *args[1:], **kwargs))
+
+
+for _name in [
+    "add_hydrogens",
+    "asymmetrize",
+    "bonds",
+    "ff_charges",
+    "ff_energy",
+    "ff_vibrations",
+    "groups",
+    "mof_check",
+    "mof_deconstruct",
+    "mof_mofid",
+    "neighbors",
+    "primitive_cell",
+    "reduce_structure",
+    "rings",
+    "slab",
+    "standardize",
+    "supercell",
+    "to_p1",
+]:
+    if _name in globals() and callable(globals()[_name]):
+        globals()[_name] = _accepts_structure(globals()[_name])
+
 __all__ = [
     "AgentSession",
     "Document",
@@ -181,6 +272,10 @@ __all__ = [
     "Plugins",
     "Site",
     "Structure",
+    "SymmetryDataset",
+    "PxrdPattern",
+    "PorosityReport",
+    "OptimizeResult",
     "XtalforgeError",
     "__version__",
     "add_hydrogens",
