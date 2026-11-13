@@ -52,3 +52,37 @@ def test_plugin_errors_are_mapped() -> None:
     plugins.register_module("dup", lambda parameters: "{}")
     with pytest.raises(xtalforge.InputError):
         plugins.register_module("dup", lambda parameters: "{}")
+
+
+def test_entry_point_discovery(monkeypatch: pytest.MonkeyPatch) -> None:
+    import xtalforge.plugins as plugins_module
+
+    class Point:
+        name = "demo"
+
+        def load(self) -> object:
+            def register(registry: xtalforge.Plugins) -> None:
+                registry.register_module("demo", lambda parameters: '{"ok": true}')
+
+            return register
+
+    monkeypatch.setattr(plugins_module, "_entry_points", lambda group: [Point()])
+    plugins_module.reset()
+    registry = plugins_module.default()
+    assert json.loads(registry.names_json())["modules"] == ["demo"]
+    assert json.loads(registry.run_module("demo", "{}")) == {"ok": True}
+
+
+def test_entry_point_failure_is_wrapped(monkeypatch: pytest.MonkeyPatch) -> None:
+    import xtalforge.plugins as plugins_module
+
+    class Point:
+        name = "broken"
+
+        def load(self) -> object:
+            raise RuntimeError("boom")
+
+    monkeypatch.setattr(plugins_module, "_entry_points", lambda group: [Point()])
+    with pytest.raises(plugins_module.PluginError) as error:
+        plugins_module.discover()
+    assert "broken" in str(error.value)
