@@ -213,4 +213,11 @@ impl Site {
         self.props.insert(key.into(), value);
         self
     }
+
+    /// Copy without one extension property.
+    #[must_use]
+    pub fn without_prop(mut self, key: &str) -> Self {
+        self.props.remove(key);
+        self
+    }
 }

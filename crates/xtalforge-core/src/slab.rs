@@ -1,14 +1,21 @@
 //! Slabs cut along a lattice plane (Task 1.8).
 //!
-//! The surface basis is ported from Crystal-Builder `core/slab.py`. Bond
-//! carrying needs the bond graph (Task 1.11); this phase builds the atoms and
-//! leaves the cut bonds to be perceived or carried later.
+//! The surface basis is ported from Crystal-Builder `core/slab.py`. The bonds
+//! of the parent cell are carried down to the copies they join: every bond is
+//! taken to each copy of its first atom and kept when its partner is in the
+//! slab too. A bond whose partner is outside the slab is severed by the cut and
+//! counted in [`Slab::cut`]. Bonds are never perceived afresh from the slab
+//! geometry, so a bond the user removed stays removed and a bond they drew
+//! keeps its order.
 
 #![allow(clippy::indexing_slicing)] // fixed 3x3 integer matrices
 
 use std::f64::consts::PI;
 
+use crate::bonding::{BondRules, perceive_bonds};
 use crate::{Error, Lattice, Site, Structure, StructureBuilder};
+
+mod carry;
 
 /// How far above the bottom of the cell a slab starts, in Angstrom.
 pub const SLAB_FLOOR: f64 = 0.5;
@@ -26,7 +33,7 @@ pub struct Slab {
     pub thickness: f64,
     /// Vacuum above the slab in Angstrom.
     pub vacuum: f64,
-    /// Chemical bonds severed by the cut; zero until bond carrying lands.
+    /// Chemical bonds severed by the cut.
     pub cut: usize,
 }
 
@@ -122,6 +129,7 @@ pub fn make_slab(
             "there are no atoms to cut a slab from".to_owned(),
         ));
     }
+    let graph = perceive_bonds(structure, BondRules::from_structure(structure)?)?;
     let basis = surface_basis(hkl)?;
     let basis_float = basis.map(|row| row.map(f64::from));
     let inverse = Lattice::new(basis_float)?.inverse();
@@ -184,6 +192,7 @@ pub fn make_slab(
     ])?;
 
     let mut builder = StructureBuilder::new(structure.name(), lattice);
+    let mut cells = Vec::with_capacity(p1.atoms.len() * layers as usize);
     for layer in 0..layers {
         for (index, atom) in p1.atoms.iter().enumerate() {
             let z = first[index][2] + f64::from(layer);
@@ -203,7 +212,26 @@ pub fn make_slab(
                 frac,
             )?;
             builder = builder.site(site.with_occupancy(atom.occupancy)?);
+            cells.push([cell[0] as i32, cell[1] as i32]);
         }
+    }
+    let n_atoms = p1.atoms.len();
+    let (carried, cut) = carry::SlabCarry {
+        structure,
+        p1: &p1,
+        graph: &graph,
+        layers,
+        whole: &whole,
+        cells: &cells,
+        inverse,
+        n_atoms,
+    }
+    .bonds();
+    for bond in carried {
+        builder = builder.explicit_bond(bond);
+    }
+    for (key, value) in structure.metadata() {
+        builder = builder.metadata(key.clone(), value.clone());
     }
     let gcd_value = gcd(gcd(hkl[0].abs(), hkl[1].abs()), hkl[2].abs()).max(1);
     Ok(Slab {
@@ -212,7 +240,7 @@ pub fn make_slab(
         layers,
         thickness,
         vacuum,
-        cut: 0,
+        cut,
     })
 }
 

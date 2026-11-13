@@ -1,6 +1,12 @@
 //! Distance-based bond perception and the connectivity graph (Task 1.11).
 
+mod explicit;
+mod rules;
+
 use std::collections::VecDeque;
+
+pub use explicit::explicit_bond_images;
+pub use rules::BondRules;
 
 use crate::elements::element_by_symbol;
 use crate::{Error, Neighbor, Structure, neighbors};
@@ -23,11 +29,14 @@ pub struct Bond {
 }
 
 /// An explicit bond stored by the user.
+///
+/// The indices name atoms of the P1 cell; perception expands the bond onto every
+/// symmetry image of both ends, so drawing one Fe-O bond draws the whole orbit.
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct ExplicitBond {
-    /// First atom index in the asymmetric unit or P1 cell.
+    /// First atom index in the P1 cell.
     pub i: usize,
-    /// Second atom index.
+    /// Second atom index in the P1 cell.
     pub j: usize,
     /// Lattice image of `j`.
     pub image: [i32; 3],
@@ -46,24 +55,6 @@ pub struct TopologyBond {
     pub j: usize,
     /// Lattice image of `j`.
     pub image: [i32; 3],
-}
-
-/// Perception rules.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct BondRules {
-    /// Multiplier on the sum of covalent radii.
-    pub scale: f64,
-    /// Bonds shorter than this are ignored.
-    pub minimum_distance: f64,
-}
-
-impl Default for BondRules {
-    fn default() -> Self {
-        Self {
-            scale: 1.15,
-            minimum_distance: 0.4,
-        }
-    }
 }
 
 /// Connectivity graph over the P1 cell.
@@ -178,114 +169,64 @@ impl BondGraph {
 
 /// Perceives distance-based bonds on the P1 cell.
 ///
+/// Distance perception uses [`BondRules::range`] for each element pair, so a
+/// pair-specific range and the metal-metal switch are honoured. Every stored
+/// explicit bond is then expanded over the symmetry group with
+/// [`explicit_bond_images`], which is how a bond drawn on one image of an atom
+/// reaches its whole orbit; a suppression removes every image it draws.
+///
 /// # Errors
 ///
 /// Returns [`Error::InvalidInput`] for invalid rules or a failed P1 expansion.
 pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGraph, Error> {
-    if !rules.scale.is_finite() || rules.scale <= 0.0 {
-        return Err(Error::InvalidInput(
-            "bond scale must be positive and finite".to_owned(),
-        ));
-    }
-    if !rules.minimum_distance.is_finite() || rules.minimum_distance < 0.0 {
-        return Err(Error::InvalidInput(
-            "bond minimum distance must be non-negative and finite".to_owned(),
-        ));
-    }
+    rules.validate()?;
     let p1 = structure.p1()?;
-    let mut radii = Vec::with_capacity(p1.atoms.len());
-    let mut dummy = Vec::with_capacity(p1.atoms.len());
-    let mut metal = Vec::with_capacity(p1.atoms.len());
-    for atom in &p1.atoms {
-        let element = element_by_symbol(&atom.element)?;
-        radii.push(element.covalent_radius);
-        dummy.push(atom.element == "X");
-        metal.push(element.is_metal);
-    }
-    let maximum = radii.iter().copied().fold(0.0, f64::max);
-    let cutoff = 2.0 * maximum * rules.scale;
-    if cutoff <= 0.0 {
-        return Ok(BondGraph {
-            bonds: Vec::new(),
-            adjacency: vec![Vec::new(); p1.atoms.len()],
-        });
-    }
-    let found = neighbors(&p1_to_structure(&p1)?, cutoff)?;
+    let symbols: Vec<String> = p1.atoms.iter().map(|atom| atom.element.clone()).collect();
+    let elements: Vec<&'static crate::elements::Element> = symbols
+        .iter()
+        .map(|symbol| element_by_symbol(symbol))
+        .collect::<Result<_, _>>()?;
+    let dummy: Vec<bool> = elements.iter().map(|element| element.is_dummy()).collect();
+    let cutoff = rules.max_cutoff(&symbols)?;
     let mut bonds = Vec::new();
-    for Neighbor {
-        i,
-        j,
-        image,
-        distance,
-    } in found
-    {
-        if i == j
-            || distance < rules.minimum_distance
-            || dummy.get(i).copied().unwrap_or(true)
-            || dummy.get(j).copied().unwrap_or(true)
-            || (metal.get(i).copied().unwrap_or(false) && metal.get(j).copied().unwrap_or(false))
+    if cutoff > 0.0 && p1.atoms.len() > 1 {
+        let found = neighbors(&p1_to_structure(&p1)?, cutoff)?;
+        for Neighbor {
+            i,
+            j,
+            image,
+            distance,
+        } in found
         {
-            continue;
-        }
-        let Some(radius_i) = radii.get(i) else {
-            continue;
-        };
-        let Some(radius_j) = radii.get(j) else {
-            continue;
-        };
-        if distance <= (radius_i + radius_j) * rules.scale {
-            bonds.push(Bond {
-                i,
-                j,
-                image,
-                distance,
-                order: 1.0,
-                explicit: false,
-            });
+            if i == j
+                || distance < rules.minimum_distance
+                || dummy.get(i).copied().unwrap_or(true)
+                || dummy.get(j).copied().unwrap_or(true)
+            {
+                continue;
+            }
+            let (Some(first), Some(second)) = (elements.get(i), elements.get(j)) else {
+                continue;
+            };
+            if !rules.allows_elements(first, second) {
+                continue;
+            }
+            let (minimum, maximum) = rules.range_of(first, second);
+            if minimum <= distance && distance <= maximum {
+                bonds.push(Bond {
+                    i,
+                    j,
+                    image,
+                    distance,
+                    order: 1.0,
+                    explicit: false,
+                });
+            }
         }
     }
-    for explicit in structure.explicit_bonds() {
-        let distance = explicit_distance(&p1, explicit);
-        if explicit.remove {
-            bonds.retain(|bond| {
-                !same_bond(bond, explicit.i, explicit.j, explicit.image)
-                    && !same_contact(bond, explicit, distance)
-            });
-            continue;
-        }
-        if let Some(existing) = bonds
-            .iter_mut()
-            .find(|bond| same_bond(bond, explicit.i, explicit.j, explicit.image))
-        {
-            existing.order = explicit.order;
-            existing.explicit = true;
-            continue;
-        }
-        if let Some(existing) = bonds
-            .iter_mut()
-            .find(|bond| same_contact(bond, explicit, distance))
-        {
-            existing.order = explicit.order;
-            existing.explicit = true;
-            continue;
-        }
-        if !structure.is_p1() {
-            // A non-P1 record names a site and an operation; the P1 mapping
-            // may land on a different image representative. Only an existing
-            // perceived contact is safe to annotate; an unmatched record is
-            // kept in memory but does not invent a bond.
-            continue;
-        }
-        if let (Some(distance), Some(_)) = (distance, p1.atoms.get(explicit.j)) {
-            let (i, j, image) = canonical(explicit.i, explicit.j, explicit.image);
-            bonds.push(Bond {
-                i,
-                j,
-                image,
-                distance,
-                order: explicit.order,
-                explicit: true,
-            });
+    for stored in structure.explicit_bonds() {
+        for explicit in explicit_bond_images(structure, &p1, stored) {
+            apply_explicit(&mut bonds, &p1, &explicit);
         }
     }
     let mut adjacency = vec![Vec::new(); p1.atoms.len()];
@@ -293,7 +234,9 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
         if let Some(list) = adjacency.get_mut(bond.i) {
             list.push(index);
         }
-        if let Some(list) = adjacency.get_mut(bond.j) {
+        if bond.j != bond.i
+            && let Some(list) = adjacency.get_mut(bond.j)
+        {
             list.push(index);
         }
     }
@@ -301,14 +244,65 @@ pub fn perceive_bonds(structure: &Structure, rules: BondRules) -> Result<BondGra
 }
 
 impl Structure {
-    /// Perceives bonds with the default rules.
+    /// Perceives bonds with the rules stored on the structure.
+    ///
+    /// The rules come from the `bond_rules` metadata [`BondRules::from_structure`]
+    /// reads, so a pair range or the metal-metal switch set by the editor applies
+    /// here too; a structure with no stored rules uses the defaults.
     ///
     /// # Errors
     ///
     /// Returns the errors of [`perceive_bonds`].
     pub fn bond_graph(&self) -> Result<BondGraph, Error> {
-        perceive_bonds(self, BondRules::default())
+        perceive_bonds(self, BondRules::from_structure(self)?)
     }
+}
+
+fn apply_explicit(bonds: &mut Vec<Bond>, p1: &crate::P1Cell, explicit: &ExplicitBond) {
+    let distance = explicit_distance(p1, explicit);
+    if explicit.remove {
+        let exact = bonds
+            .iter()
+            .any(|bond| same_bond(bond, explicit.i, explicit.j, explicit.image));
+        let target = contact_vector(p1, explicit.i, explicit.j, explicit.image);
+        bonds.retain(|bond| {
+            if exact {
+                !same_bond(bond, explicit.i, explicit.j, explicit.image)
+            } else {
+                !same_contact(bond, p1, target)
+            }
+        });
+        return;
+    }
+    if let Some(existing) = bonds
+        .iter_mut()
+        .find(|bond| same_bond(bond, explicit.i, explicit.j, explicit.image))
+    {
+        existing.order = explicit.order;
+        existing.explicit = true;
+        return;
+    }
+    let target = contact_vector(p1, explicit.i, explicit.j, explicit.image);
+    if let Some(existing) = bonds.iter_mut().find(|bond| same_contact(bond, p1, target)) {
+        existing.order = explicit.order;
+        existing.explicit = true;
+        return;
+    }
+    let Some(distance) = distance else {
+        return;
+    };
+    let (i, j, image) = canonical(explicit.i, explicit.j, explicit.image);
+    if bonds.iter().any(|bond| same_bond(bond, i, j, image)) {
+        return;
+    }
+    bonds.push(Bond {
+        i,
+        j,
+        image,
+        distance,
+        order: explicit.order,
+        explicit: true,
+    });
 }
 
 fn p1_to_structure(cell: &crate::P1Cell) -> Result<Structure, Error> {
@@ -331,7 +325,7 @@ fn same_bond(bond: &Bond, i: usize, j: usize, image: [i32; 3]) -> bool {
         || (bond.i == j && bond.j == i && bond.image == [-image[0], -image[1], -image[2]])
 }
 
-fn canonical(i: usize, j: usize, image: [i32; 3]) -> (usize, usize, [i32; 3]) {
+pub(crate) fn canonical(i: usize, j: usize, image: [i32; 3]) -> (usize, usize, [i32; 3]) {
     if i > j
         || (i == j
             && (image[0] < 0
@@ -367,8 +361,41 @@ fn explicit_distance(cell: &crate::P1Cell, explicit: &ExplicitBond) -> Option<f6
 /// P1 expansion may choose the neighbouring cell's representative for one
 /// end. The pair and length identify the contact; the perceived image is kept
 /// because it is the one the graph is drawn with.
-fn same_contact(bond: &Bond, explicit: &ExplicitBond, distance: Option<f64>) -> bool {
-    let same_pair = (bond.i == explicit.i && bond.j == explicit.j)
-        || (bond.i == explicit.j && bond.j == explicit.i);
-    same_pair && distance.is_some_and(|value| (bond.distance - value).abs() <= 1e-3)
+fn same_contact(bond: &Bond, p1: &crate::P1Cell, target: Option<[f64; 3]>) -> bool {
+    let Some(target) = target else {
+        return false;
+    };
+    let Some(vector) = contact_vector(p1, bond.i, bond.j, bond.image) else {
+        return false;
+    };
+    vector
+        .iter()
+        .zip(target)
+        .all(|(a, b)| (a - b).abs() <= 1e-4)
+}
+
+/// Canonical fractional vector of a periodic contact.
+///
+/// Two lattice images of the same physical contact produce the same vector
+/// after wrapping each component to `[-0.5, 0.5)` and orienting the pair.
+fn contact_vector(p1: &crate::P1Cell, i: usize, j: usize, image: [i32; 3]) -> Option<[f64; 3]> {
+    let first = p1.atoms.get(i)?;
+    let second = p1.atoms.get(j)?;
+    let mut delta = [
+        second.frac[0] + f64::from(image[0]) - first.frac[0],
+        second.frac[1] + f64::from(image[1]) - first.frac[1],
+        second.frac[2] + f64::from(image[2]) - first.frac[2],
+    ];
+    for value in &mut delta {
+        *value -= value.round();
+    }
+    if i > j
+        || (i == j
+            && (delta[0] < 0.0
+                || (delta[0] == 0.0 && delta[1] < 0.0)
+                || (delta[0] == 0.0 && delta[1] == 0.0 && delta[2] < 0.0)))
+    {
+        delta = [-delta[0], -delta[1], -delta[2]];
+    }
+    Some(delta)
 }

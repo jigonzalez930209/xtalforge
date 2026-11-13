@@ -226,9 +226,11 @@ pub fn rattle(structure: &Structure, options: &RattleOptions) -> Result<RattleRe
     })
 }
 
+mod duplicates;
 mod sites;
 mod supercell;
 
+pub use duplicates::merge_duplicates;
 pub use sites::{
     SiteSort, SpeciesReplacement, add_sites, move_site, remove_sites, replace_site,
     replace_species, sort_sites, wrap_sites,
