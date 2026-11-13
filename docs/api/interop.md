@@ -50,6 +50,7 @@ the data it preserves; conversion warns about lost fields.
 ```bash
 xtalforge convert pw.in output.cif
 xtalforge trajectory OUTCAR --frame 0 --out final.cif
+xtalforge convert structure.cif --format optimade
 ```
 
 ## Remote data
