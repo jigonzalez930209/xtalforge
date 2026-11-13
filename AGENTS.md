@@ -270,11 +270,14 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.5.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.4.0` and
-  `1.3.0` were published on 2026-11-12/13). `1.5.0` is backward compatible:
-  Phase 12 adds the object-oriented Python/WASM APIs, NumPy and typed arrays,
-  typed result classes, batch helpers and the typed JavaScript interface.
+- Version: `1.5.1` (published on 2026-11-13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.5.0` shipped on
+  the same day and `1.4.0`/`1.3.0` on 2026-11-12/13). `1.5.1` is a metadata
+  and documentation patch: the icon in the README, docs favicon/logo/Open
+  Graph image, PyPI and npm package READMEs, the crates.io package pages and
+  the AppStream/social-preview assets. `1.5.0` added the object-oriented
+  Python/WASM APIs, NumPy and typed arrays, typed result classes, batch
+  helpers and the typed JavaScript interface.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
