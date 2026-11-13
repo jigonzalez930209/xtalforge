@@ -1,7 +1,10 @@
 //! The `mesh` command: printable STL from a structure.
 
-use xtalforge::view::{DrawStyle, ViewSettings, build_mesh, build_scene, write_stl};
+use xtalforge::view::{
+    DrawStyle, ViewSettings, build_mesh, build_scene, write_gltf, write_obj, write_stl,
+};
 
+use crate::format::MeshFormat;
 use crate::{Cli, CliError, input, output};
 
 /// Builds an STL mesh and writes it to `out` or standard output.
@@ -15,6 +18,7 @@ pub(crate) fn run(
     style: &str,
     scale: f64,
     scene_json: bool,
+    mesh_format: MeshFormat,
     out: Option<&str>,
 ) -> Result<(), CliError> {
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
@@ -55,14 +59,22 @@ pub(crate) fn run(
         return Ok(());
     }
     let triangles = build_mesh(&scene);
-    let stl = write_stl(&triangles, structure.name());
+    let (format, text) = match mesh_format {
+        MeshFormat::Stl => ("stl", write_stl(&triangles, structure.name())),
+        MeshFormat::Obj => ("obj", write_obj(&triangles, structure.name())),
+        MeshFormat::Gltf => (
+            "gltf",
+            write_gltf(&triangles, structure.name()).map_err(CliError::core)?,
+        ),
+    };
     if let Some(destination) = out.filter(|value| *value != "-") {
-        output::write_destination(destination, &stl)?;
+        output::write_destination(destination, &text)?;
         if cli.json {
             println!(
                 "{}",
                 serde_json::json!({
                     "out": destination,
+                    "format": format,
                     "triangles": triangles.len(),
                     "atoms": scene.atoms.len(),
                     "bonds": scene.bonds.len(),
@@ -70,7 +82,7 @@ pub(crate) fn run(
             );
         } else if !cli.quiet {
             println!(
-                "wrote {} triangles ({} atoms, {} bonds) to {destination}",
+                "wrote {} triangles as {format} ({} atoms, {} bonds) to {destination}",
                 triangles.len(),
                 scene.atoms.len(),
                 scene.bonds.len()
@@ -82,14 +94,15 @@ pub(crate) fn run(
         println!(
             "{}",
             serde_json::json!({
+                "format": format,
                 "triangles": triangles.len(),
                 "atoms": scene.atoms.len(),
                 "bonds": scene.bonds.len(),
-                "stl": stl,
+                "content": text,
             })
         );
     } else {
-        print!("{stl}");
+        print!("{text}");
     }
     Ok(())
 }

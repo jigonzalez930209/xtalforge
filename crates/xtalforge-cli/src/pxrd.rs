@@ -1,23 +1,50 @@
 //! The `pxrd` command: calculated powder patterns to XY.
 
-use xtalforge::analysis::{PxrdOptions, Radiation, calculate_pxrd};
+use xtalforge::analysis::{
+    Caglioti, LineShape, PxrdOptions, PxrdProfileOptions, Radiation, calculate_pxrd,
+    calculate_pxrd_profile,
+};
 use xtalforge::io::write_xy;
 
 use crate::{Cli, CliError, input, output};
+
+/// One `pxrd` invocation.
+#[derive(Clone, Copy)]
+pub(crate) struct PxrdRequest<'a> {
+    /// Input path, or `-`.
+    pub(crate) path: &'a str,
+    /// Radiation name.
+    pub(crate) radiation: &'a str,
+    /// Highest 2-theta.
+    pub(crate) two_theta_max: f64,
+    /// Sampling step.
+    pub(crate) step: f64,
+    /// Optional Caglioti U, V, W.
+    pub(crate) caglioti: Option<&'a [f64]>,
+    /// Optional pseudo-Voigt mixing.
+    pub(crate) eta: Option<f64>,
+    /// Optional line shape name.
+    pub(crate) shape: Option<&'a str>,
+    /// Output path.
+    pub(crate) out: Option<&'a str>,
+}
 
 /// Calculates a PXRD pattern and writes an XY file.
 ///
 /// # Errors
 ///
 /// Returns [`CliError`] for a read, calculation or output failure.
-pub(crate) fn run(
-    cli: &Cli,
-    path: &str,
-    radiation: &str,
-    two_theta_max: f64,
-    step: f64,
-    out: Option<&str>,
-) -> Result<(), CliError> {
+pub(crate) fn run(cli: &Cli, request: &PxrdRequest<'_>) -> Result<(), CliError> {
+    let PxrdRequest {
+        path,
+        radiation,
+        two_theta_max,
+        step,
+        caglioti,
+        eta,
+        shape,
+        out,
+    } = *request;
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
     let radiation = match radiation {
         "cu-ka" | "cuka" => Radiation::CuKa,
@@ -33,16 +60,44 @@ pub(crate) fn run(
             )));
         }
     };
-    let pattern = calculate_pxrd(
-        &structure,
-        &PxrdOptions {
-            radiation,
-            two_theta_range: [5.0, two_theta_max],
-            step,
-            ..PxrdOptions::default()
-        },
-    )
-    .map_err(CliError::core)?;
+    let base = PxrdOptions {
+        radiation,
+        two_theta_range: [5.0, two_theta_max],
+        step,
+        ..PxrdOptions::default()
+    };
+    let custom = caglioti.is_some() || eta.is_some() || shape.is_some();
+    let pattern = if custom {
+        let mut options = PxrdProfileOptions::from_pxrd(&base).map_err(CliError::core)?;
+        if let Some(values) = caglioti {
+            let [u, v, w] = values else {
+                return Err(CliError::input("--caglioti needs exactly three values"));
+            };
+            options.profile.caglioti = Some(Caglioti {
+                u: *u,
+                v: *v,
+                w: *w,
+            });
+        }
+        if let Some(eta) = eta {
+            options.profile.eta = eta;
+        }
+        if let Some(shape) = shape {
+            options.profile.shape = match shape {
+                "gaussian" => LineShape::Gaussian,
+                "lorentzian" => LineShape::Lorentzian,
+                "pseudo-voigt" | "pseudovoigt" => LineShape::PseudoVoigt,
+                other => {
+                    return Err(CliError::input(format!(
+                        "unknown profile shape {other:?}; use gaussian, lorentzian or pseudo-voigt"
+                    )));
+                }
+            };
+        }
+        calculate_pxrd_profile(&structure, &options).map_err(CliError::core)?
+    } else {
+        calculate_pxrd(&structure, &base).map_err(CliError::core)?
+    };
     let points: Vec<xtalforge::io::PatternPoint> = pattern
         .points
         .iter()

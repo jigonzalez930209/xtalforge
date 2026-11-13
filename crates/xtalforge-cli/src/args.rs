@@ -108,6 +108,8 @@ pub(crate) enum Command {
         #[command(subcommand)]
         action: FetchAction,
     },
+    /// List the module registry.
+    Modules,
     /// List the format registry.
     Formats,
     /// List parameter presets or print one schema.
@@ -253,6 +255,15 @@ pub(crate) enum Command {
         /// Step in degrees.
         #[arg(long, default_value_t = 0.02)]
         step: f64,
+        /// Caglioti U V W width coefficients.
+        #[arg(long, num_args = 3, value_names = ["U", "V", "W"])]
+        caglioti: Option<Vec<f64>>,
+        /// Pseudo-Voigt mixing in [0, 1].
+        #[arg(long)]
+        eta: Option<f64>,
+        /// Profile shape: gaussian, lorentzian or pseudo-voigt.
+        #[arg(long)]
+        shape: Option<String>,
         /// Output path; defaults to standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,
@@ -341,9 +352,12 @@ pub(crate) enum Command {
         /// Atom radius multiplier.
         #[arg(long, default_value_t = 1.0)]
         scale: f64,
-        /// Emit the full scene geometry as JSON instead of an STL mesh.
+        /// Emit the full scene geometry as JSON instead of a mesh.
         #[arg(long)]
         scene: bool,
+        /// Mesh format to write.
+        #[arg(long, value_enum, default_value_t = crate::format::MeshFormat::Stl)]
+        mesh_format: crate::format::MeshFormat,
         /// Output path; defaults to standard output.
         #[arg(long, value_name = "PATH")]
         out: Option<String>,

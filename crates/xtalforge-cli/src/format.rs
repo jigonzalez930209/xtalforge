@@ -122,3 +122,14 @@ pub(crate) enum PictureFormat {
     /// Raster image.
     Png,
 }
+
+/// A mesh format the CLI can write.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, ValueEnum)]
+pub(crate) enum MeshFormat {
+    /// ASCII STL.
+    Stl,
+    /// Wavefront OBJ.
+    Obj,
+    /// glTF 2.0 JSON.
+    Gltf,
+}

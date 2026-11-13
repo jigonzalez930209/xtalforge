@@ -34,6 +34,7 @@ mod limits;
 mod measure;
 mod mesh;
 mod model_commands;
+mod module_commands;
 mod mof_adsorption_commands;
 mod mof_commands;
 mod mof_platform_commands;

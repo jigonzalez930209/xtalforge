@@ -3,8 +3,9 @@
 use crate::{
     Cli, CliError, agent_commands, analysis_commands, analyze, args, args::Command, basic, build,
     build_structures, commands_extra, convert, docs_commands, doctor, feature_commands,
-    fetch_commands, ff_commands, measure, mesh, model_commands, mof_commands, molecule_commands,
-    powder_commands, pxrd, spacegroup, symmetry, symmetry::SymmetryAction, symmetry_analysis,
+    fetch_commands, ff_commands, measure, mesh, model_commands, module_commands, mof_commands,
+    molecule_commands, powder_commands, pxrd, spacegroup, symmetry, symmetry::SymmetryAction,
+    symmetry_analysis,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -40,6 +41,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Analysis { action } => analysis_commands::run(cli, action),
         Command::Ff { action } => ff_commands::run(cli, action),
         Command::Fetch { action } => fetch_commands::run(cli, action),
+        Command::Modules => module_commands::run(cli),
         Command::Formats => commands_extra::formats(cli),
         Command::Params { name } => commands_extra::params(cli, name.as_deref()),
         Command::Project { action } => match action {
@@ -120,8 +122,23 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             radiation,
             max_two_theta,
             step,
+            caglioti,
+            eta,
+            shape,
             out,
-        } => pxrd::run(cli, path, radiation, *max_two_theta, *step, out.as_deref()),
+        } => pxrd::run(
+            cli,
+            &pxrd::PxrdRequest {
+                path,
+                radiation,
+                two_theta_max: *max_two_theta,
+                step: *step,
+                caglioti: caglioti.as_deref(),
+                eta: *eta,
+                shape: shape.as_deref(),
+                out: out.as_deref(),
+            },
+        ),
         Command::Molecule {
             smiles,
             seed,
@@ -270,8 +287,17 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             style,
             scale,
             scene,
+            mesh_format,
             out,
-        } => mesh::run(cli, path, style, *scale, *scene, out.as_deref()),
+        } => mesh::run(
+            cli,
+            path,
+            style,
+            *scale,
+            *scene,
+            *mesh_format,
+            out.as_deref(),
+        ),
         Command::Supercell {
             path,
             na,
