@@ -24,7 +24,7 @@
 //! * "Indexing engine agreement" (the cubic and general indexers accepting the
 //!   same cell on a shared pattern) is covered by the existing
 //!   [`index_pattern`] / [`index_cubic`] cross-checks; a dedicated agreement
-//!   verdict struct is left to Phase 17 because it would add a public result
+//!   verdict struct is left to Phase 22 because it would add a public result
 //!   type that the frozen 1.x surface cannot deprecate first.
 
 pub mod automatic;

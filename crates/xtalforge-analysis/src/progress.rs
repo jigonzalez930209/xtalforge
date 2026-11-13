@@ -8,7 +8,7 @@
 //! A cancelled run returns [`Error::InvalidInput`] with the message
 //! `the run was cancelled`; the core error enum has no dedicated
 //! cancellation variant, so the stable `code()` of a cancelled run is
-//! `invalid_input`. This is the documented mapping until Phase 17 adds the
+//! `invalid_input`. This is the documented mapping until Phase 22 adds the
 //! variant.
 
 use std::sync::Arc;
