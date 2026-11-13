@@ -68,6 +68,7 @@ fn options() -> OptimizeOptions {
         fixed_atoms: Vec::new(),
         mode: RelaxMode::P1,
         max_step: 0.2,
+        ..OptimizeOptions::default()
     }
 }
 

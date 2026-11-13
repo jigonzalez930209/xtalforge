@@ -50,9 +50,11 @@ fn options() -> ScanOptions {
             fixed_atoms: Vec::new(),
             mode: RelaxMode::P1,
             max_step: 0.1,
+            ..OptimizeOptions::default()
         },
         penalty: 100.0,
         minimizer: Minimizer::Lbfgs,
+        ..ScanOptions::default()
     }
 }
 
