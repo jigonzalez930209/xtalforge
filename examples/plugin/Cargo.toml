@@ -9,7 +9,7 @@ description = "Example plugin crate for xtalforge: format, calculator, module, s
 
 [dependencies]
 serde_json = { workspace = true }
-xtalforge = { workspace = true, default-features = false }
+xtalforge = { workspace = true, default-features = false, features = ["ff", "modules"] }
 
 [lints]
 workspace = true
