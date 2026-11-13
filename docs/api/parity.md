@@ -158,6 +158,11 @@ compares this table with the symbols each surface actually exports.
 | `cod_fetch` | 13 | done | done | n/a | done | COD CIF fetch (Task 13.3.2); CLI `fetch cod`, WASM `fetch_cod` |
 | `materials_project_fetch` | 13 | done | done | n/a | n/a | Materials Project fetch (Task 13.3.2); API-key handling is host-side |
 | `python_plugins` | 13 | n/a | n/a | done | n/a | `xtalforge.plugins` entry points (Task 13.4.1); Rust registries cover the CLI and agent |
+| `diffraction_profiles` | 14 | done | done | n/a | n/a | Caglioti/pseudo-Voigt/FCJ profiles and single-crystal factors (Task 14.1); native option structs and file writers |
+| `md` | 14 | done | n/a | n/a | n/a | NVE/Langevin/Nose-Hoover/NPT molecular dynamics (Task 14.2.5); host-side trajectory and seed control |
+| `net_contraction` | 14 | done | n/a | n/a | n/a | Structure-to-net contraction, vertex symbols and RCSR search (Task 14.4.2); native graph API |
+| `mesh_export` | 14 | done | done | done | done | OBJ and glTF/GLB with normals (Task 14.4.4) |
+| `report_renderers` | 14 | done | n/a | n/a | n/a | HTML and JSON report renderers (Task 14.5.1); module listing is the CLI surface |
 
 ## Recorded exceptions
 
@@ -178,6 +183,7 @@ compares this table with the symbols each surface actually exports.
 | ASE, pymatgen, phonopy and RDKit adapters | Rust, CLI, WASM | They wrap optional Python objects and optional third-party packages | Rust readers/writers and the typed structure model |
 | Materials Project fetch | WASM | The API key must not be embedded in a browser bundle | COD and OPTIMADE fetch from the browser; `xtalforge fetch mp` from the CLI |
 | Python entry-point plugins | Rust, CLI, WASM | Entry points are discovered by the Python interpreter; a browser or the Rust binary cannot import them | Rust plugin registries are visible to the CLI and the agent; Python plugins stay in-process |
+| Diffraction profiles, MD, NET contraction and report renderers | Python, WASM | The option structs carry host callbacks and trajectory/file controls; 1.7 exposes the stable serializable parts and keeps the full model native | CLI for profiles; the public Rust API for the rest |
 
 ## Open gaps: Rust-only capabilities
 

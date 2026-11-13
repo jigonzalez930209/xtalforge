@@ -54,3 +54,14 @@ standard output.
 `--scene` switches the output to the full scene JSON (atoms, bonds, cell
 edges and the sanitized settings), which is the same geometry the Python
 `scene_data` and the WASM `scene_data` return.
+
+## Normals and exchange formats
+
+`vertex_normals` returns one area-weighted normal per triangle corner;
+`build_indexed_mesh` welds identical positions into `IndexedMesh { vertices,
+indices }`. `write_obj` emits `v`, `vn` and `f v//vn` records; `write_gltf`
+emits glTF 2.0 JSON and `write_glb` the binary GLB container. The glTF accessors
+use `f32` positions/normals, the format constraint; OBJ keeps full precision in
+text. A degenerate vertex keeps a zero normal.
+
+Parity key: `mesh_export`.

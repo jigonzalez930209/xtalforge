@@ -135,3 +135,26 @@ candidate, or its indexed cell when the Pawley stage was skipped; Python
 `powder_automatic` and `xtalforge --json powder automatic` carry the same
 `best_cell`), `powder_refine_info`, `powder_cells_info`,
 `rietx_inventory_info`.
+
+## Phase 14 profile and single-crystal surface
+
+`InstrumentProfile` combines a `RadiationSource` (`Xray`, `Neutron` or
+`Electron`), a `LineShape` (Gaussian, Lorentzian, pseudo-Voigt or TCH), a
+constant `fwhm`, an optional `Caglioti { u, v, w }`, an optional `Tch`, an
+`eta`, an optional `FcjAsymmetry` and a `Monochromator`. `PxrdProfileOptions`
+adds the range and step; `calculate_pxrd_profile` samples that model.
+`PxrdProfileOptions::from_pxrd` keeps the historical fields.
+
+`neutron_scattering_length` reads the bundled `data/neutron.json`;
+`electron_wavelength`, `xray_form_factor` and `electron_scattering_factor`
+cover the other radiations. `instrument_presets`, `preset_by_name` and
+`tch_preset_by_name` provide named laboratory and TCH presets.
+
+`structure_factors(structure, &StructureFactorOptions)` returns
+`StructureFactor { h, k, l, d, magnitude, real, imag, phase }`; `hkl_text` and
+`write_hkl` export the list. `electron_diffraction` returns an
+`ElectronPattern` with the same reflections and kinematic intensities.
+`RunControl`, `Cancellation` and `Progress` are shared by the profile and
+whole-range helpers.
+
+Parity key: `diffraction_profiles`.

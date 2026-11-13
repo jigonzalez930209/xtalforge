@@ -22,3 +22,17 @@ has no filesystem, so `archive_records` serializes the records into a ZIP and
 `JobQueue` is a FIFO of `Job { id, module, parameters, status }`.
 `submit` returns the id; `start_next`, `finish`, `fail` and `cancel` move the
 state through `Queued`, `Running`, `Done`, `Failed` and `Cancelled`.
+
+## Reports and listings
+
+`Report::to_markdown`, `to_html` and `to_json` render the same record; HTML
+escapes every dynamic string and shows section bodies inside `<pre>` so the
+data model never becomes executable markup. `Report::from_json` round trips the
+serde form.
+
+`ModuleRegistry::listing()` returns sorted `ModuleListing { name, description,
+version, parameters, available }`; `listing_json()` serializes it. The
+`xtalforge modules` command prints the built-in registry (currently `version`)
+as text or JSON.
+
+Parity key: `report_renderers`.

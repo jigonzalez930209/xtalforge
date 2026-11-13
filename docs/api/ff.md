@@ -98,3 +98,26 @@ energy, forces and optional stress. ORCA is input-only and `orca_catalogue` list
 the `sci-form` feature it returns a typed error that names the feature;
 `capabilities` records periodic/forces/stress so a future adapter cannot
 silently overclaim.
+
+## Phase 14 optimizer and MD surface
+
+`OptimizeOptions` gains `cell_freedom: CellFreedom` and `pressure_gpa`.
+`CellFreedom` holds selected lengths/angles or the volume while the shape
+relaxes; the previous `cell: bool` keeps its meaning. `CancelToken`,
+`ProgressEvent` and `RunControl` are accepted by `minimize_with`,
+`relaxed_scan_with` and `molecular_dynamics_with`; `TrajectoryOptions` and
+`Trajectory` stream every accepted step, and `TrajectoryFrame` carries the
+structure, energy, forces and optional cell.
+
+`ScanGeometry` and the extended `ScanCoordinate` cover cell parameters and
+collective variables in addition to distances, angles and torsions.
+`ScanOptions` can checkpoint to disk, and a resumed scan reads the completed
+points and continues at the next value.
+
+`Ensemble` is `Nve`, `Langevin`, `NoseHoover` or `Npt`; `MdOptions` carries the
+timestep in fs, temperature, friction, thermostat/barostat coupling, seed,
+trajectory and `RunControl`. `MdResult` returns the final structure and the
+`MdSample` series (energy, temperature, pressure). The same seed reproduces the
+same run.
+
+Parity key: `md`.

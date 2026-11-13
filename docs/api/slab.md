@@ -19,9 +19,12 @@ slab a little above the bottom of the cell so atoms on the face are not drawn
 twice. `plane_angle(first, second)` returns the angle between two Miller
 planes.
 
-## Status
+## Bond carrying
 
-The atom cut and the surface basis are complete. `cut` is currently zero: the
-slab builder does not carry the bonds severed by the cut, so the caller
-perceives the slab's bonds from the returned structure. The CIF inspector demo
-downloads the same slabs through the WASM bindings.
+The slab builder maps every perceived or explicit bond onto its layer copies
+using the surface basis. A bond whose partner lies outside the cut is carried
+on the surface copies and counted in `cut`; a bond crossing the periodic
+boundary counts at both surfaces. Explicit bond orders and suppressions
+survive. No atom capping is added: the caller decides which chemistry to apply
+to the dangling valences. The CIF inspector demo downloads the same slabs
+through the WASM bindings.

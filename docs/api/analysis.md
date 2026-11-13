@@ -150,3 +150,5 @@ joins two quotient graphs and `overlay_net` turns one into an `Overlay` with an
 `xtalforge analysis {porosity,nets,zeo,overlay}`, Python `porosity`,
 `net_invariants`, `zeo_parse` and the WASM equivalents expose the same
 operations.
+
+Parity key: `net_contraction`.

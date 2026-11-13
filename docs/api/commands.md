@@ -38,11 +38,13 @@ methods are the public state. `Origin` is `User`, `Script` or `Agent`.
 - `atoms`: `AddSites`, `DeleteSites`, `SetElement`, `MoveSites`, `SetOccupancy`.
 - `bonds`: `AddBond`, `RemoveBond`, `SetBondRules`.
 - `cell`: `SetLattice` (`KeepFractional`/`KeepCartesian`), `Supercell`,
-  `ShiftOrigin`, `WrapIntoCell`.
-- `symmetry`: `ReduceToP1`, `FindSymmetry`, `SetSpaceGroup`, `Standardize`.
+  `ShiftOrigin`, `WrapIntoCell`, `TransformCell`, `MakeSlab`.
+- `symmetry`: `ReduceToP1`, `FindSymmetry`, `SetSpaceGroup`, `Standardize`,
+  `AssignWyckoff`, `Invert`, `DescendToSubgroup`, `MergeDuplicates`.
 - `groups`: `AtomGroup`, `AddAtomGroup`, `RemoveAtomGroup`, `SetGroupColor`,
   `SetGroupHidden`.
-- `clipboard`: `Fragment`, `copy_selection`, `PasteFragment`.
+- `clipboard`: `Fragment`, `copy_selection`, `PasteFragment`, `InsertMolecules`.
+- `ff`: `ApplyOptimizedGeometry`, `AddHydrogens`, `Prepare`, `SetAtomTypes`.
 - `later`: `SetCharges`, `Interpenetrate`, `MarkConnectionPoints` (Phase 4-6
   wrappers, undoable like every other command).
 
@@ -52,3 +54,7 @@ owns the atom groups for `Document`.
 
 Every command is tested for apply and undo; invalid indices and values return
 `Error::InvalidInput`.
+
+`merge_duplicates(structure, tolerance)` collapses sites closer than the
+tolerance after the P1 expansion and remaps explicit bond images; the
+`MergeDuplicates` command wraps it for the undo stack.
