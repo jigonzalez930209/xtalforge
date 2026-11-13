@@ -43,7 +43,7 @@ impl UffModel {
         options.validate()?;
         let p1 = structure.p1()?;
         let view = AtomView::from_p1(structure, &p1)?;
-        let graph = perceive_bonds(structure, options.bond_rules)?;
+        let graph = perceive_bonds(structure, options.bond_rules.clone())?;
         let bonds = local_bonds(&graph, &view);
         let geometry = Geometry::new(view.n_atoms(), &bonds);
         let rings = local_rings(structure, &view)?;
