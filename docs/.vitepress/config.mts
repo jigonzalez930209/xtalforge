@@ -123,6 +123,7 @@ export default defineConfig({
             { text: 'Selection and tracking', link: '/api/selection' },
             { text: 'Hello-world API', link: '/api/hello-world' },
             { text: 'API stability and SemVer', link: '/api/stability' },
+            { text: 'Object API and arrays', link: '/api/objects' },
             { text: 'Usability helpers', link: '/api/usability' },
             { text: 'Option naming', link: '/api/naming' },
             { text: 'Surface parity matrix', link: '/api/parity' },
