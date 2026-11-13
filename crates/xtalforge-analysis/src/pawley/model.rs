@@ -66,6 +66,12 @@ impl Layout {
     }
 
     pub(super) fn cell(&self, parameters: &[f64]) -> [f64; 6] {
+        if self.free_cell == 0 {
+            // With every cell number fixed the base cell is the model; without
+            // this branch the family unpacking would read an empty vector and
+            // collapse the cell to zero.
+            return self.base;
+        }
         self.family
             .unpack(self.base, parameters.get(..self.free_cell).unwrap_or(&[]))
     }
