@@ -86,12 +86,16 @@ impl Structure {
         }
         let lattice = source.lattice().transform(p)?;
         let inverse = Lattice::new(p)?.inverse();
-        let max_inverse = inverse
+        // A shift of the old fractional coordinate must be able to cover every
+        // new cell, and the old coordinate of a point in the new cell spans at
+        // most the largest absolute row sum of the transformation matrix. The
+        // inverse matrix only says how small the new fractional step is, so
+        // deriving the range from it truncates repeats beyond a few cells.
+        let max_row = p
             .iter()
-            .flatten()
-            .map(|value| value.abs())
+            .map(|row| row.iter().map(|value| value.abs()).sum::<f64>())
             .fold(0.0, f64::max);
-        let range = (max_inverse * 4.0).ceil() as i64 + 2;
+        let range = max_row.ceil() as i64 + 2;
         let widths = perpendicular_widths(&lattice)?;
         let mut grid = FractionalGrid::new(widths, 1e-6);
         let mut sites: Vec<Site> = Vec::new();

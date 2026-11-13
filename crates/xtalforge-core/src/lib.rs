@@ -17,6 +17,7 @@ pub mod groups;
 pub mod hull;
 pub mod invert;
 pub mod lattice;
+pub mod lazy;
 pub mod limits;
 pub mod local;
 pub mod measure;
@@ -31,6 +32,7 @@ pub mod scalars;
 pub mod selection;
 pub mod site;
 pub mod slab;
+pub mod soa;
 mod spatial;
 pub mod structure;
 pub mod supercell;
@@ -57,6 +59,7 @@ pub use groups::{GroupKind, GroupMatch, find_groups, group_counts};
 pub use hull::{ConvexHull, PhaseEntry, PhasePoint, convex_hull};
 pub use invert::{invert, is_centrosymmetric};
 pub use lattice::{Lattice, lattice_info, lattice_minimum_image};
+pub use lazy::{LazyExpansion, Orbit};
 pub use limits::{Limits, Profile, Verdict, limits_bounds, limits_check};
 pub use local::{
     AngleDistribution, CoordinationNeighbor, CoordinationShell, CoordinationStrategy,
@@ -79,6 +82,7 @@ pub use scalars::{
 pub use selection::{AtomId, Selection, TrackingTable};
 pub use site::Site;
 pub use slab::{Slab, make_slab, plane_angle, surface_basis};
+pub use soa::{NeighborArrays, P1Arrays, neighbors_arrays};
 pub use structure::{
     SCHEMA_VERSION, Structure, StructureBuilder, StructureDocument, StructureSummary,
     StructureWarning, structure_info,

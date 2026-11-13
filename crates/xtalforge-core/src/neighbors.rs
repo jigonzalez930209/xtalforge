@@ -35,25 +35,43 @@ pub struct Neighbor {
 ///
 /// Returns [`Error::InvalidInput`] for a non-positive or non-finite cutoff.
 pub fn neighbors(structure: &Structure, cutoff: f64) -> Result<Vec<Neighbor>, Error> {
+    validate_cutoff(cutoff)?;
+    let p1 = structure.p1()?;
+    let fracs: Vec<[f64; 3]> = p1.atoms.iter().map(|atom| atom.frac).collect();
+    search(&p1.lattice, &fracs, cutoff)
+}
+
+fn validate_cutoff(cutoff: f64) -> Result<(), Error> {
     if !cutoff.is_finite() || cutoff <= 0.0 {
         return Err(Error::InvalidInput(format!(
             "neighbor cutoff must be positive and finite, got {cutoff}"
         )));
     }
-    let p1 = structure.p1()?;
-    if p1.atoms.is_empty() {
+    Ok(())
+}
+
+/// Neighbor search over fractional positions in one cell.
+///
+/// [`neighbors`] and the structure-of-arrays view share this path, so both
+/// return the same sorted list.
+pub(crate) fn search(
+    lattice: &crate::Lattice,
+    fracs: &[[f64; 3]],
+    cutoff: f64,
+) -> Result<Vec<Neighbor>, Error> {
+    validate_cutoff(cutoff)?;
+    if fracs.is_empty() {
         return Ok(Vec::new());
     }
-    let spacing = perpendicular_widths(&p1.lattice)?;
+    let spacing = perpendicular_widths(lattice)?;
     let counts = bin_counts(spacing, cutoff);
-    let matrix = p1.lattice.matrix();
+    let matrix = lattice.matrix();
 
     let mut bins: HashMap<[usize; 3], Vec<usize>> = HashMap::new();
-    let mut atom_bins: Vec<[usize; 3]> = Vec::with_capacity(p1.atoms.len());
-    let mut fracs: Vec<[f64; 3]> = Vec::with_capacity(p1.atoms.len());
+    let mut atom_bins: Vec<[usize; 3]> = Vec::with_capacity(fracs.len());
     let [count_x, count_y, count_z] = counts;
-    for (index, atom) in p1.atoms.iter().enumerate() {
-        let [x, y, z] = atom.frac;
+    for (index, frac) in fracs.iter().enumerate() {
+        let [x, y, z] = *frac;
         let frac = [x.rem_euclid(1.0), y.rem_euclid(1.0), z.rem_euclid(1.0)];
         let [frac_x, frac_y, frac_z] = frac;
         let bin = [
@@ -63,20 +81,19 @@ pub fn neighbors(structure: &Structure, cutoff: f64) -> Result<Vec<Neighbor>, Er
         ];
         bins.entry(bin).or_default().push(index);
         atom_bins.push(bin);
-        fracs.push(atom.frac);
     }
 
     let search = Search {
         cutoff,
         spacing,
         matrix,
-        fracs: &fracs,
+        fracs,
     };
     let mut found = Vec::new();
     let offsets_x = offsets(count_x);
     let offsets_y = offsets(count_y);
     let offsets_z = offsets(count_z);
-    for i in 0..p1.atoms.len() {
+    for i in 0..fracs.len() {
         let Some(base) = atom_bins.get(i) else {
             continue;
         };

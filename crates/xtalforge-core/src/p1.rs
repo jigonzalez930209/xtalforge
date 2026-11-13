@@ -60,57 +60,10 @@ impl P1Cell {
         };
         let widths = perpendicular_widths(structure.lattice())?;
         let mut atoms: Vec<P1Atom> = Vec::new();
-        for (site_idx, site) in structure.sites().iter().enumerate() {
-            // Coincidences are per site: two disordered sites may occupy the
-            // same point and both must survive the expansion.
-            let mut grid = FractionalGrid::new(widths, tolerance);
-            for (op_idx, operation) in operations.iter().enumerate() {
-                let base = operation.apply(site.frac());
-                let [bx, by, bz] = base;
-                // `x - floor(x)` is exactly 1.0 for a tiny negative `x` such
-                // as -1e-32 (a Cartesian round trip of 0); such a value is
-                // 0 of the next cell so the coordinate stays in [0, 1).
-                let unit = |value: f64| {
-                    let floor = value.floor();
-                    let frac = value - floor;
-                    if frac >= 1.0 {
-                        (0.0, floor + 1.0)
-                    } else {
-                        (frac, floor)
-                    }
-                };
-                let (fx, floor_x) = unit(bx);
-                let (fy, floor_y) = unit(by);
-                let (fz, floor_z) = unit(bz);
-                let frac = [fx, fy, fz];
-                let tau = [-floor_x as i32, -floor_y as i32, -floor_z as i32];
-                let mut duplicate = false;
-                grid.for_each_candidate(site.element(), frac, |existing_index| {
-                    let Some(existing) = atoms.get(existing_index) else {
-                        return true;
-                    };
-                    if structure.lattice().distance(existing.frac, frac) <= tolerance {
-                        duplicate = true;
-                        return false;
-                    }
-                    true
-                });
-                if duplicate {
-                    continue;
-                }
-                let atom_index = atoms.len();
-                atoms.push(P1Atom {
-                    element: site.element().to_owned(),
-                    label: site.label().to_owned(),
-                    frac,
-                    occupancy: site.occupancy(),
-                    site_idx,
-                    op_idx,
-                    tau,
-                    disorder_group: site.disorder_group(),
-                });
-                grid.insert(site.element(), frac, atom_index);
-            }
+        for site_idx in 0..structure.sites().len() {
+            atoms.extend(site_atoms(
+                structure, site_idx, operations, widths, tolerance,
+            ));
         }
         Ok(Self {
             lattice: *structure.lattice(),
@@ -150,6 +103,75 @@ impl P1Cell {
             .filter(|atom| atom.site_idx == site_idx)
             .collect()
     }
+}
+
+/// Generates the distinct images of one asymmetric site.
+///
+/// Shared by [`P1Cell::expand`] and the lazy expansion helper so both apply
+/// the same wrapping, provenance and coincidence rules. Memory is bounded by
+/// the number of operations, not by the size of the cell.
+pub(crate) fn site_atoms(
+    structure: &Structure,
+    site_idx: usize,
+    operations: &[SymOp],
+    widths: [f64; 3],
+    tolerance: f64,
+) -> Vec<P1Atom> {
+    let Some(site) = structure.sites().get(site_idx) else {
+        return Vec::new();
+    };
+    // Coincidences are per site: two disordered sites may occupy the same
+    // point and both must survive the expansion.
+    let mut grid = FractionalGrid::new(widths, tolerance);
+    let mut atoms: Vec<P1Atom> = Vec::new();
+    for (op_idx, operation) in operations.iter().enumerate() {
+        let base = operation.apply(site.frac());
+        let [bx, by, bz] = base;
+        // `x - floor(x)` is exactly 1.0 for a tiny negative `x` such as
+        // -1e-32 (a Cartesian round trip of 0); such a value is 0 of the next
+        // cell so the coordinate stays in [0, 1).
+        let unit = |value: f64| {
+            let floor = value.floor();
+            let frac = value - floor;
+            if frac >= 1.0 {
+                (0.0, floor + 1.0)
+            } else {
+                (frac, floor)
+            }
+        };
+        let (fx, floor_x) = unit(bx);
+        let (fy, floor_y) = unit(by);
+        let (fz, floor_z) = unit(bz);
+        let frac = [fx, fy, fz];
+        let tau = [-floor_x as i32, -floor_y as i32, -floor_z as i32];
+        let mut duplicate = false;
+        grid.for_each_candidate(site.element(), frac, |existing_index| {
+            let Some(existing) = atoms.get(existing_index) else {
+                return true;
+            };
+            if structure.lattice().distance(existing.frac, frac) <= tolerance {
+                duplicate = true;
+                return false;
+            }
+            true
+        });
+        if duplicate {
+            continue;
+        }
+        let atom_index = atoms.len();
+        atoms.push(P1Atom {
+            element: site.element().to_owned(),
+            label: site.label().to_owned(),
+            frac,
+            occupancy: site.occupancy(),
+            site_idx,
+            op_idx,
+            tau,
+            disorder_group: site.disorder_group(),
+        });
+        grid.insert(site.element(), frac, atom_index);
+    }
+    atoms
 }
 
 impl Structure {
