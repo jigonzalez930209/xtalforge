@@ -1,0 +1,234 @@
+{
+  "$defs": {
+    "step": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "read"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "verb"
+                  ]
+                },
+                {
+                  "required": [
+                    "arguments"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "transform",
+                  "analyse",
+                  "compute"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "path"
+              ]
+            },
+            "required": [
+              "verb"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "write"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "verb"
+                  ]
+                },
+                {
+                  "required": [
+                    "arguments"
+                  ]
+                }
+              ]
+            },
+            "required": [
+              "path"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "transform",
+                  "analyse",
+                  "compute"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "format"
+              ]
+            }
+          }
+        }
+      ],
+      "properties": {
+        "arguments": {
+          "description": "Verb arguments, passed through unchanged.",
+          "type": "object"
+        },
+        "format": {
+          "description": "Registered format name or extension for read and write steps.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "What the step does.",
+          "enum": [
+            "read",
+            "transform",
+            "analyse",
+            "compute",
+            "write"
+          ]
+        },
+        "name": {
+          "description": "Stable label used in results; defaults to step-N (1-based).",
+          "pattern": "^[A-Za-z0-9_.-]+$",
+          "type": "string"
+        },
+        "path": {
+          "description": "Path template for read and write steps; placeholders use double braces.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "verb": {
+          "description": "Agent verb for transform, analyse and compute steps.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://jigonzalez930209.github.io/xtalforge/workflow.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "A versioned pipeline of read, transform, analyse, compute and write steps applied to every input structure.",
+  "properties": {
+    "description": {
+      "description": "Optional prose for humans and assistants.",
+      "type": "string"
+    },
+    "name": {
+      "description": "Short name used in reports and checkpoints.",
+      "minLength": 1,
+      "type": "string"
+    },
+    "steps": {
+      "description": "Ordered pipeline. The first step must be a read.",
+      "items": {
+        "$ref": "#/$defs/step"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "workflow_version": {
+      "const": 1,
+      "description": "Workflow model version. This build reads version 1.",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "workflow_version",
+    "name",
+    "steps"
+  ],
+  "title": "xtalforge workflow",
+  "type": "object",
+  "x-xtalforge": {
+    "placeholders": [
+      "input",
+      "stem",
+      "ext",
+      "dir",
+      "index"
+    ],
+    "presets": [
+      "symmetry",
+      "pxrd",
+      "uff"
+    ],
+    "schema_version": 1,
+    "verbs": {
+      "analyse": [
+        "info",
+        "diagnostics",
+        "symmetry",
+        "bonds",
+        "rings",
+        "pxrd",
+        "porosity",
+        "uff_energy"
+      ],
+      "compute": [
+        "info",
+        "diagnostics",
+        "symmetry",
+        "bonds",
+        "rings",
+        "pxrd",
+        "porosity",
+        "uff_energy"
+      ],
+      "transform": [
+        "supercell",
+        "wrap",
+        "hydrogens",
+        "optimize"
+      ]
+    },
+    "yaml": false
+  }
+}
