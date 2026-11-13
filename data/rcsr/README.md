@@ -20,8 +20,10 @@ The files are the snapshots shipped by Crystal-Builder
 
 ## Regenerating the embedded index
 
-The crate embeds `crates/xtalforge-analysis/data/rcsr_index.bin`, a compact
-hash index derived from the JSON fingerprints:
+The crate embeds `crates/xtalforge-analysis/data/rcsr_index.bin.gz`, a compact
+gzip hash index derived from the JSON fingerprints. The generator prints the
+SHA-256 of the decompressed payload, which is the manifest constant in
+`crates/xtalforge-analysis/src/rcsr.rs` (Task 15.3.2):
 
 ```bash
 scripts/golden/rcsr_index.sh
