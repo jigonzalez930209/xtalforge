@@ -17,6 +17,7 @@ include = ["src/**", "data/**"]
 [dependencies]
 xtalforge-build = { workspace = true }
 xtalforge-core = { workspace = true }
+rayon = { workspace = true, optional = true }
 sci-form = { version = "2.0.0", optional = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -28,6 +29,8 @@ xtalforge-io = { workspace = true }
 
 [features]
 default = []
+# Deterministic block-parallel UFF energy, forces and stress (Task 15.2.3).
+parallel = ["dep:rayon", "xtalforge-core/parallel"]
 # In-process GFN0/GFN1/GFN2-xTB through the published sci-form crate
 # (MIT, Task 4.10).  The methods are molecular only: the adapter refuses a
 # structure with space-group symmetry and documents that the P1 cell is
