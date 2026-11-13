@@ -6,11 +6,9 @@
 
 use xtalforge_core::{Error, Structure};
 
-use crate::gencodec::{read_gen, write_gen};
-use crate::{
-    read_cif, read_cssr, read_lammps, read_pmg_json, read_poscar, read_shelx, read_xyz, write_cif,
-    write_cssr, write_lammps, write_pdb, write_pmg_json, write_poscar, write_shelx, write_xyz,
-};
+mod formats;
+
+pub use formats::FORMATS;
 
 /// What a format preserves.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -52,137 +50,6 @@ pub struct FormatSpec {
     /// Preserved features.
     pub capabilities: Capabilities,
 }
-
-const EMPTY: Capabilities = Capabilities {
-    cell: false,
-    symmetry: false,
-    occupancy: false,
-    anisotropic_adp: false,
-    charges: false,
-    bonds: false,
-    labels: false,
-    frames: false,
-};
-
-/// The built-in registry.
-pub const FORMATS: &[FormatSpec] = &[
-    FormatSpec {
-        name: "cif",
-        extensions: &[".cif", ".mcif"],
-        read: Some(read_cif),
-        write: Some(write_cif),
-        capabilities: Capabilities {
-            cell: true,
-            symmetry: true,
-            occupancy: true,
-            anisotropic_adp: true,
-            charges: true,
-            bonds: false,
-            labels: true,
-            frames: false,
-        },
-    },
-    FormatSpec {
-        name: "poscar",
-        extensions: &[".poscar", ".vasp", ".contcar"],
-        read: Some(read_poscar),
-        write: Some(write_poscar),
-        capabilities: Capabilities {
-            cell: true,
-            symmetry: false,
-            occupancy: false,
-            anisotropic_adp: false,
-            charges: false,
-            bonds: false,
-            labels: true,
-            frames: false,
-        },
-    },
-    FormatSpec {
-        name: "pmg-json",
-        extensions: &[".json"],
-        read: Some(read_pmg_json),
-        write: Some(write_pmg_json),
-        capabilities: Capabilities {
-            cell: true,
-            occupancy: true,
-            labels: true,
-            ..EMPTY
-        },
-    },
-    FormatSpec {
-        name: "cssr",
-        extensions: &[".cssr"],
-        read: Some(read_cssr),
-        write: Some(write_cssr),
-        capabilities: Capabilities {
-            cell: true,
-            ..EMPTY
-        },
-    },
-    FormatSpec {
-        name: "gen",
-        extensions: &[".gen"],
-        read: Some(read_gen),
-        write: Some(write_gen),
-        capabilities: Capabilities {
-            cell: true,
-            labels: true,
-            ..EMPTY
-        },
-    },
-    FormatSpec {
-        name: "lammps-data",
-        extensions: &[".data", ".lmp"],
-        read: Some(read_lammps),
-        write: Some(write_lammps),
-        capabilities: Capabilities {
-            cell: true,
-            charges: true,
-            bonds: true,
-            ..EMPTY
-        },
-    },
-    FormatSpec {
-        name: "shelx",
-        extensions: &[".res", ".ins"],
-        read: Some(read_shelx),
-        write: Some(write_shelx),
-        capabilities: Capabilities {
-            cell: true,
-            occupancy: true,
-            labels: true,
-            ..EMPTY
-        },
-    },
-    FormatSpec {
-        name: "pdb",
-        extensions: &[".pdb"],
-        read: None,
-        write: Some(write_pdb),
-        capabilities: Capabilities {
-            bonds: true,
-            labels: true,
-            ..EMPTY
-        },
-    },
-    FormatSpec {
-        name: "xyz",
-        extensions: &[".xyz", ".extxyz"],
-        read: Some(read_xyz),
-        write: Some(write_xyz),
-        capabilities: Capabilities {
-            cell: true,
-            symmetry: false,
-            occupancy: false,
-            anisotropic_adp: false,
-            charges: false,
-            bonds: false,
-            labels: false,
-            frames: false,
-        },
-    },
-];
 
 /// Finds a format by name or extension (case-insensitive).
 #[must_use]
@@ -234,6 +101,9 @@ pub fn write_with(structure: &Structure, hint: &str) -> Result<String, Error> {
 #[must_use]
 pub fn sniff(text: &str) -> Option<&'static FormatSpec> {
     let trimmed = text.trim_start_matches('\u{feff}').trim_start();
+    if text.contains("_atom_site.") || text.contains("_cell.") {
+        return find("mmcif");
+    }
     if trimmed.starts_with("data_")
         || text.contains("_atom_site_")
         || text.contains("_cell_length_")
@@ -243,10 +113,55 @@ pub fn sniff(text: &str) -> Option<&'static FormatSpec> {
     if trimmed.starts_with('{') && text.contains("@module") {
         return find("pmg-json");
     }
+    if trimmed.starts_with("@<TRIPOS>") || trimmed.starts_with("@<tripos>") {
+        return find("mol2");
+    }
+    if text.contains("<modeling") || text.contains("<vasprun") {
+        return find("vasprun");
+    }
+    if (text.contains("TITEL") && text.contains("ions per type"))
+        || (text.contains("POSITION") && text.contains("TOTAL-FORCE"))
+    {
+        return find("outcar");
+    }
+    if trimmed.starts_with("%BLOCK LATTICE") || trimmed.starts_with("%block lattice") {
+        return find("castep");
+    }
+    if trimmed.starts_with("lattice_vector")
+        || trimmed.starts_with("atom ")
+        || trimmed.starts_with("atom_frac ")
+    {
+        return find("fhi-aims");
+    }
+    if text.contains("&FORCE_EVAL") || text.contains("&SUBSYS") {
+        return find("cp2k");
+    }
+    if text.contains("&CONTROL") || text.contains("ATOMIC_POSITIONS") {
+        return find("pwscf");
+    }
+    if text.contains("M  END") && (text.contains("V2000") || text.contains("V3000")) {
+        return find("sdf");
+    }
+    if text.contains("natom")
+        && (text.contains("xred") || text.contains("xcart"))
+        && text.contains("acell")
+    {
+        return find("abinit");
+    }
+    let record = trimmed.get(0..6).unwrap_or("").trim();
+    if matches!(
+        record,
+        "ATOM" | "HETATM" | "CRYST1" | "HEADER" | "TITLE" | "MODEL"
+    ) {
+        return find("pdb");
+    }
     let mut lines = trimmed.lines().filter(|line| !line.trim().is_empty());
     let first = lines.next().unwrap_or("").trim();
     let second = lines.next().unwrap_or("").trim();
-    if first.parse::<usize>().is_ok() && second.split_whitespace().count() >= 1 {
+    if first.parse::<usize>().is_ok() && !second.is_empty() {
+        if second.contains("Properties=") {
+            return find("extxyz");
+        }
         return find("xyz");
     }
     None

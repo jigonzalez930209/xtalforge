@@ -19,6 +19,12 @@ pub struct Frame {
     pub step: Option<u64>,
     /// Arbitrary comment-line key/value pairs.
     pub info: BTreeMap<String, String>,
+    /// Forces in eV/Angstrom in atom order, when present.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub forces: Option<Vec<[f64; 3]>>,
+    /// Stress tensor in GPa, when present (VASP sign convention).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stress: Option<[[f64; 3]; 3]>,
 }
 
 /// Many frames sharing atom order and elements.
@@ -132,6 +138,8 @@ pub fn read_trajectory_xyz(text: &str) -> Result<Trajectory, Error> {
             energy: info.get("energy").and_then(|value| value.parse().ok()),
             step: info.get("step").and_then(|value| value.parse().ok()),
             info,
+            forces: None,
+            stress: None,
         });
     }
     Ok(Trajectory {

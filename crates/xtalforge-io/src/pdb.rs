@@ -1,13 +1,19 @@
-//! PDB writer for finite atom sets (Task 3.3.6).
+//! PDB reader and writer for finite atom sets (Tasks 3.3.6 and 13.2.3).
 //!
 //! Ported from Crystal-Builder `xtal/io/pdb.py` (MIT). The writer expands the
 //! structure to P1, writes every atom as a `HETATM` record with its element in
 //! columns 77-78, and writes one `CONECT` record per explicit bond. Residues
-//! are not modelled: every atom sits in a single `UNL` residue.
+//! are not modelled: every atom sits in a single `UNL` residue. The reader
+//! keeps `CRYST1`, the first `MODEL`, `CONECT` bonds and the residue/chain
+//! hierarchy.
 
 use std::collections::BTreeMap;
 
 use xtalforge_core::{Error, Structure};
+
+mod read;
+
+pub use read::read_pdb;
 
 /// The widest serial a PDB five-column field holds.
 const MAX_ATOMS: usize = 99_999;
@@ -36,6 +42,10 @@ pub fn write_pdb(structure: &Structure) -> Result<String, Error> {
     }
 
     let mut out = String::new();
+    let [a, b, c, alpha, beta, gamma] = structure.lattice().parameters();
+    out.push_str(&format!(
+        "CRYST1{a:9.3}{b:10.3}{c:10.3}{alpha:10.2}{beta:10.2}{gamma:10.2} P 1     1\n"
+    ));
     for (index, atom) in p1.atoms.iter().enumerate() {
         let [x, y, z] = structure.lattice().to_cart(atom.frac);
         out.push_str(&hetatm_record(

@@ -15,8 +15,13 @@ mod structure;
 mod values;
 mod writer;
 
-use structure::structure_from_block;
+use structure::structure_from_block as extract_structure;
 pub use writer::write_cif;
+
+/// Extracts a structure from one parsed block (shared with the mmCIF reader).
+pub(crate) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
+    extract_structure(block)
+}
 
 /// One parsed CIF data block.
 #[derive(Debug, Clone, PartialEq)]
@@ -42,15 +47,21 @@ impl CifBlock {
     /// Single item value.
     #[must_use]
     pub fn item(&self, tag: &str) -> Option<&str> {
-        self.items.get(tag).map(String::as_str)
+        self.items
+            .iter()
+            .find(|(candidate, _)| tag_matches(candidate, tag))
+            .map(|(_, value)| value.as_str())
     }
 
     /// First loop containing `tag`.
     #[must_use]
     pub fn loop_with(&self, tag: &str) -> Option<&CifLoop> {
-        self.loops
-            .iter()
-            .find(|loop_| loop_.tags.iter().any(|candidate| candidate == tag))
+        self.loops.iter().find(|loop_| {
+            loop_
+                .tags
+                .iter()
+                .any(|candidate| tag_matches(candidate, tag))
+        })
     }
 }
 
@@ -58,7 +69,9 @@ impl CifLoop {
     /// Column index of a tag.
     #[must_use]
     pub fn column(&self, tag: &str) -> Option<usize> {
-        self.tags.iter().position(|candidate| candidate == tag)
+        self.tags
+            .iter()
+            .position(|candidate| tag_matches(candidate, tag))
     }
 
     /// Value at `row` and `tag`.
@@ -68,6 +81,22 @@ impl CifLoop {
             .and_then(|column| self.rows.get(row)?.get(column))
             .map(String::as_str)
     }
+}
+
+/// Matches CIF and mmCIF spellings: case-insensitive, and `.` equals `_`.
+fn tag_matches(candidate: &str, wanted: &str) -> bool {
+    let candidate = candidate.as_bytes();
+    let wanted = wanted.as_bytes();
+    if candidate.len() != wanted.len() {
+        return false;
+    }
+    candidate.iter().zip(wanted).all(|(left, right)| {
+        let left = left.to_ascii_lowercase();
+        let right = right.to_ascii_lowercase();
+        let left = if left == b'.' { b'_' } else { left };
+        let right = if right == b'.' { b'_' } else { right };
+        left == right
+    })
 }
 
 /// A parsed CIF document.
