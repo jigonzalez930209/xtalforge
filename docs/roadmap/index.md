@@ -36,10 +36,10 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-13)
 
-- Phases 0-15 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-16 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
   stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`,
-  `v1.6.0`, `v1.7.0` and `v1.8.0` are published on crates.io, PyPI
+  `v1.6.0`, `v1.7.0`, `v1.8.0` and `v1.9.0` are published on crates.io, PyPI
   (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
@@ -53,7 +53,8 @@ are in `AGENTS.md` at the repository root.
   (2026-11-13) releases Phase 13, the ecosystem adapters, formats and remote
   data; `v1.7.0` (2026-11-13) releases Phase 14, the diffraction, force-field,
   structure-operation, mesh and report work; `v1.8.0` releases Phase 15, the
-  benchmark contract, scale paths, split WASM and lazy data.
+  benchmark contract, scale paths, split WASM and lazy data; `v1.9.0` releases
+  Phase 16, the workflow, provenance and dataset work.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
@@ -75,8 +76,10 @@ are in `AGENTS.md` at the repository root.
   bond carrying, undoable commands, OBJ/glTF and HTML/JSON reports. Phase 15
   is complete: comparative benchmarks and the regression gate, SoA/lazy/
   streaming/parallel paths, split WASM packages, lazy data and cold-start
-  measurement. Tasks 9.7.2, 10.5.7, 10.6.4, 10.7.3-10.7.5, 11.4.5, 12.1.4,
-  12.3.5, 12.4.1, 14.1.5 and 14.2.6 remain open. The stable API follows the
+  measurement. Phase 16 is complete: workflows and the runner, provenance,
+  JSON Lines datasets, deduplication and descriptors. Tasks 9.7.2, 10.5.7,
+  10.6.4, 10.7.3-10.7.5, 11.4.5, 12.1.4, 12.3.5, 12.4.1, 14.1.5 and 14.2.6
+  remain open. The stable API follows the
   SemVer policy and the known subsets below are the only documented reference
   gaps.
 - The release workflow is the only GitHub Actions workflow; the CI, rules and
@@ -116,6 +119,13 @@ candidates for Phase 8 or a follow-up and are not silent approximations:
   use in WASM remains open.
 - 15.2.1/15.2.4: the SoA columns are not fused into the linked-cell search and
   lazy expansion only serves operations that do not need the materialised P1.
+- 16.1.1: workflows are JSON only; YAML content needs the JSON-compatible
+  subset because no YAML parser is a dependency in 1.9.
+- 16.1.2: CLI, agent and Python run workflows; WASM can validate metadata but
+  has no filesystem for inputs, checkpoints or outputs.
+- 16.3.1: the dataset container is JSON Lines; Parquet/Arrow remains a future
+  option. 16.3.3: the SOAP-like descriptor is an angular/radial approximation,
+  not exact SOAP.
 - 6.x: the MOF builder uses a curated topology/block subset and a greedy
   orientation instead of PORMAKE's global RMSD fit.
 - 9.1: the matcher works on Niggli-reduced input cells and accepts supercell
