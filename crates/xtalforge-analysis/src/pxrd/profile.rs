@@ -1,4 +1,4 @@
-//! Gaussian peak profile and Lorentz-polarisation factor for PXRD.
+//! Gaussian peak profile sampling for the historical PXRD entry point.
 
 use std::f64::consts::{LN_2, PI};
 
@@ -6,18 +6,6 @@ use super::{PatternPoint, PxrdOptions, Reflection};
 
 /// How many FWHM from a peak centre the Gaussian is evaluated.
 const PROFILE_CUTOFF_FWHM: f64 = 12.0;
-
-/// Lorentz-polarisation factor of an unmonochromated powder.
-pub(super) fn lorentz_polarization(two_theta: f64) -> f64 {
-    let theta = 0.5 * two_theta.to_radians();
-    let sin_theta = theta.sin();
-    let denominator = sin_theta * sin_theta * theta.cos();
-    if denominator.abs() < 1e-12 {
-        return 0.0;
-    }
-    let cos_two_theta = two_theta.to_radians().cos();
-    (1.0 + cos_two_theta * cos_two_theta) / denominator
-}
 
 /// Samples every reflection profile on the `2 theta` grid described by the
 /// options. The Gaussian has unit area and the requested FWHM.
