@@ -16,6 +16,9 @@ runs the CLI builds and the version check.
    version tag; without this rule GitHub rejects the deployment before any
    step runs, with “Tag is not allowed to deploy to github-pages due to
    environment protection rules”.
+4. **Settings → General → Social preview**: upload
+   `assets/social-preview.png` (1280x640). GitHub does not read this file
+   automatically; the upload is a one-time repository setting.
 
 ## 2. Secrets
 
