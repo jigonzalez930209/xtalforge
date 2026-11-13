@@ -266,7 +266,7 @@ fn mp_species(value: Option<&Value>) -> Result<String, Error> {
     }
 }
 
-/// Parses a COD CIF downloaded by [`cod_fetch`].
+/// Parses a COD CIF downloaded by `cod_fetch`.
 ///
 /// # Errors
 ///

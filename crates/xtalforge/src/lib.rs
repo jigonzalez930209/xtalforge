@@ -21,14 +21,24 @@
 //! | Feature | Default | Effect |
 //! |---|---|---|
 //! | `parallel` | yes | Enables the Rayon paths in core, IO and symmetry. |
+//! | `analysis` | yes | Re-exports `xtalforge-analysis` as [`analysis`]. |
+//! | `build` | yes | Re-exports `xtalforge-build` as [`build`]; implies `analysis`. |
+//! | `ff` | yes | Re-exports `xtalforge-ff` as [`ff`]; implies `build`. |
+//! | `mof` | yes | Re-exports `xtalforge-mof` as [`mof`]; implies `ff`. |
+//! | `modules` | yes | Re-exports `xtalforge-modules` as [`modules`]. |
+//! | `agent` | yes | Re-exports `xtalforge-agent` as [`agent`]; implies `mof` and `modules`. |
+//! | `full` | yes | Shorthand for every surface tier above. |
 //! | `sci-form` | no | Links the published `sci-form` crate for in-process GFN0/GFN1/GFN2. |
 //! | `ml` | no | Reserved for the Python machine-learning bridge (Task 8.4). |
 //! | `external` | no | Reserved for the subprocess engines (Task 4.9). |
 //! | `net` | no | Blocking HTTP for OPTIMADE, COD and Materials Project fetches (Task 13.3). |
 //! | `mof-data` | no | Reserved for the complete PORMAKE bundle (Task 10.5.7). |
 //!
-//! Disable default features with `default-features = false` to build without
-//! Rayon; results are identical (AGENTS.md rule 6).
+//! The base build always carries `core`, `io`, `symmetry`, `view` and
+//! `commands`. Disable default features with `default-features = false` to
+//! build only that base plus the tiers you name; a tier-free base is the
+//! smallest build and keeps the same results for the modules it carries
+//! (AGENTS.md rule 6).
 //!
 //! # Example
 //!
@@ -45,14 +55,20 @@
 //! assert!(poscar.contains("Si"));
 //! let _: Structure = supercell;
 //! ```
+#[cfg(feature = "agent")]
 pub use xtalforge_agent as agent;
+#[cfg(feature = "analysis")]
 pub use xtalforge_analysis as analysis;
+#[cfg(feature = "build")]
 pub use xtalforge_build as build;
 pub use xtalforge_commands as commands;
 pub use xtalforge_core as core;
+#[cfg(feature = "ff")]
 pub use xtalforge_ff as ff;
 pub use xtalforge_io as io;
+#[cfg(feature = "modules")]
 pub use xtalforge_modules as modules;
+#[cfg(feature = "mof")]
 pub use xtalforge_mof as mof;
 pub use xtalforge_symmetry as symmetry;
 pub use xtalforge_view as view;
@@ -124,7 +140,9 @@ pub fn write(
 
 /// Common imports for typical xtalforge programs.
 pub mod prelude {
+    #[cfg(feature = "analysis")]
     pub use crate::analysis::calculate_pxrd;
+    #[cfg(feature = "build")]
     pub use crate::build::{
         build_carbon, build_polymer, embed_smiles, fullerene, graphene, nanotube,
     };
@@ -133,6 +151,7 @@ pub mod prelude {
         StructureWarning, SupercellChoice, cell_volume, element_info, lattice_info,
         lattice_minimum_image, structure_info, version,
     };
+    #[cfg(feature = "ff")]
     pub use crate::ff::{Calculator, UffCalculator, minimize};
     pub use crate::io::{read_structure, write_structure};
     pub use crate::symmetry::{SymmetryDataset, SymmetryOptions, detect_symmetry};
