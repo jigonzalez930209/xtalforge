@@ -12,10 +12,17 @@ use std::sync::OnceLock;
 
 use serde::{Deserialize, Serialize};
 
+use xtalforge_core::data::EmbeddedBundle;
 use xtalforge_core::{Error, Structure, neighbors};
 
 const PARAMS_JSON: &str = include_str!("../data/bvparam_1991.json");
-const ICSD_JSON: &str = include_str!("../data/icsd_bv.json");
+/// The gzip table is decompressed and checksum-verified on first use
+/// (Task 15.3.2).
+static ICSD_JSON: EmbeddedBundle = EmbeddedBundle::new(
+    "xtalforge-analysis/icsd_bv.json.gz",
+    include_bytes!("../data/icsd_bv.json.gz"),
+    "aab60250ec0e66e05d5a19843d10dc6704eca9802d3f7007667d37055574b5d7",
+);
 const ELECTRONEGATIVE: [&str; 16] = [
     "H", "B", "C", "Si", "N", "P", "As", "Sb", "O", "S", "Se", "Te", "F", "Cl", "Br", "I",
 ];
@@ -405,7 +412,8 @@ fn parameters() -> Result<&'static BTreeMap<String, BvParameter>, Error> {
 fn icsd() -> Result<&'static IcsdFile, Error> {
     static DATA: OnceLock<Result<IcsdFile, Error>> = OnceLock::new();
     let cached = DATA.get_or_init(|| {
-        serde_json::from_str(ICSD_JSON)
+        let payload = ICSD_JSON.bytes()?;
+        serde_json::from_slice(payload)
             .map_err(|error| Error::InvalidInput(format!("invalid ICSD data: {error}")))
     });
     match cached {

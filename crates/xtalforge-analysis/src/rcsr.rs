@@ -1,7 +1,7 @@
 //! RCSR identification against the full 2019-06-01 catalogue (Tasks 5.6.1,
 //! 5.6.4 and 5.6.5).
 //!
-//! The runtime data is `data/rcsr_index.bin`: one fingerprint hash per
+//! The runtime data is `data/rcsr_index.bin.gz`: one fingerprint hash per
 //! catalogue net, generated from Crystal-Builder's `rcsr-2019-06-01.json`
 //! (which stores the canonical key of every net) by
 //! `examples/build_rcsr_index.rs`. The full snapshots live in
@@ -21,6 +21,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use xtalforge_core::Error;
+use xtalforge_core::data::EmbeddedBundle;
 
 use crate::QuotientGraph;
 use crate::topology::{NetFingerprint, fingerprint};
@@ -40,7 +41,13 @@ use by the general public; cite O'Keeffe, Peskov, Ramsden and Yaghi, Acc. \
 Chem. Res. 41 (2008) 1782. See data/rcsr/ and THIRD_PARTY.md.";
 
 const MAGIC: &[u8; 8] = b"XFRCS01\n";
-const INDEX: &[u8] = include_bytes!("../data/rcsr_index.bin");
+/// The gzip index is decompressed and checksum-verified on first use
+/// (Task 15.3.2).
+static INDEX: EmbeddedBundle = EmbeddedBundle::new(
+    "xtalforge-analysis/rcsr_index.bin.gz",
+    include_bytes!("../data/rcsr_index.bin.gz"),
+    "9d8581b42980bdeadca87dde1cc23112b94eb93f424bf5ae3f806a1eb7d33045",
+);
 const NEAREST_LIMIT: usize = 8;
 
 /// One catalogue entry as the runtime index stores it.
@@ -108,7 +115,7 @@ impl RcsrIndex {
     ///
     /// Returns [`Error::InvalidInput`] when the embedded index is corrupt.
     pub fn from_embedded() -> Result<Self, Error> {
-        Self::parse(INDEX)
+        Self::parse(INDEX.bytes()?)
     }
 
     fn parse(bytes: &[u8]) -> Result<Self, Error> {

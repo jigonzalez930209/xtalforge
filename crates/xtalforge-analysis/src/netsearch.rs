@@ -4,8 +4,8 @@
 //! The embedded fingerprint index ([`crate::RcsrIndex`]) names a net but does
 //! not hold the facts a chemist searches by: the Hermann-Mauguin group, its
 //! ITA number and the Blatov transitivity `p q r s` (kinds of vertex, edge,
-//! face and tile). Those live in `data/rcsr_facts.tsv`, generated from the
-//! bundled RCSR snapshots in `data/rcsr/` (see `data/README.md` in this crate).
+//! face and tile). Those live in `data/rcsr_facts.tsv.gz`, generated from the
+//! bundled RCSR snapshots in `data/rcsr/` (see `data/README.md` in this crate);
 //!
 //! # Deliberate subset
 //!
@@ -23,13 +23,20 @@
 
 use serde::{Deserialize, Serialize};
 use xtalforge_core::Error;
+use xtalforge_core::data::EmbeddedBundle;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::OnceLock;
 
 use crate::netsearch_query::{NetQuery, normalize};
 
-const FACTS: &str = include_str!("../data/rcsr_facts.tsv");
+/// The gzip table is decompressed and checksum-verified on first use
+/// (Task 15.3.2).
+static FACTS: EmbeddedBundle = EmbeddedBundle::new(
+    "xtalforge-analysis/rcsr_facts.tsv.gz",
+    include_bytes!("../data/rcsr_facts.tsv.gz"),
+    "f3d31cb454b8045a229232e0135ad6fd3ff2fd7cb1967a623f5b46dd7e2f218c",
+);
 
 static EMBEDDED: OnceLock<Result<Vec<NetFacts>, String>> = OnceLock::new();
 pub(crate) const TRANSITIVITY_FIELDS: usize = 4;
@@ -188,7 +195,12 @@ impl RcsrFactsIndex {
     ///
     /// Returns [`Error::InvalidInput`] when the embedded file is corrupt.
     pub fn from_embedded() -> Result<Self, Error> {
-        let cached = EMBEDDED.get_or_init(|| parse_rows(FACTS).map_err(|error| error.to_string()));
+        let cached = EMBEDDED.get_or_init(|| {
+            let payload = FACTS.bytes().map_err(|error| error.message())?;
+            let text = std::str::from_utf8(payload)
+                .map_err(|error| format!("rcsr facts are not UTF-8: {error}"))?;
+            parse_rows(text).map_err(|error| error.to_string())
+        });
         cached
             .clone()
             .map(|entries| Self { entries })
