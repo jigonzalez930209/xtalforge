@@ -10,6 +10,10 @@
 //! (Task 14.1.4), and whole-range peak refinement, persistent parameter sets,
 //! Pareto sweeps, instrument presets and cancellation (Task 14.1.5).
 //!
+//! Phase 16 adds the JSON Lines dataset container (Task 16.3.1), dataset
+//! deduplication with a fingerprint pre-filter (Task 16.3.2) and the
+//! composition, RDF, Coulomb-matrix and SOAP-like descriptors (Task 16.3.3).
+//!
 //! Every public operation returns a typed [`Error`] and never panics on user
 //! input.
 //!
@@ -29,7 +33,10 @@ pub mod cells;
 pub mod contraction;
 mod contraction_metals;
 mod contraction_simplify;
+pub mod dataset;
+pub mod dedup;
 pub mod defects;
+pub mod descriptors;
 pub mod diffraction;
 pub mod ewald;
 pub mod extinction;
@@ -79,7 +86,14 @@ pub use contraction::{
     ContractedEdge, ContractedNet, ContractedNode, ContractionOptions, NetNodeRule, NodeKind,
     contract as contract_structure,
 };
+pub use dataset::{DATASET_VERSION, Dataset, DatasetMetadata, DatasetRecord, PropertyValue};
+pub use dedup::{DedupGroup, DedupOptions, DedupReport, DedupResult, deduplicate};
 pub use defects::{DefectKind, PointDefect, interstitials, substitutions, vacancies};
+pub use descriptors::{
+    CompositionFeatures, CoulombMatrix, CoulombMatrixOptions, MAX_SOAP_FEATURES, MAX_SOAP_L,
+    MAX_SOAP_NEIGHBORS, MAX_SOAP_RADIAL, RdfDescriptor, SoapLikeDescriptor, SoapLikeOptions,
+    composition_features, coulomb_matrix, rdf_descriptor, soap_like_descriptor,
+};
 #[cfg(not(target_arch = "wasm32"))]
 pub use diffraction::write_hkl;
 pub use diffraction::{
