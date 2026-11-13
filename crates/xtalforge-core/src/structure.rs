@@ -169,6 +169,20 @@ impl Structure {
         self
     }
 
+    /// Copy with one metadata entry added or replaced.
+    #[must_use]
+    pub fn with_metadata(mut self, key: impl Into<String>, value: Value) -> Self {
+        self.metadata.insert(key.into(), value);
+        self
+    }
+
+    /// Copy without one metadata entry.
+    #[must_use]
+    pub fn without_metadata(mut self, key: &str) -> Self {
+        self.metadata.remove(key);
+        self
+    }
+
     /// A non-periodic molecule in a padded P1 box.
     ///
     /// # Errors

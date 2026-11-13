@@ -27,6 +27,7 @@ pub mod parallel;
 pub mod param_presets;
 pub mod params;
 pub mod polyhedron;
+pub mod provenance;
 pub mod rings;
 pub mod scalars;
 pub mod selection;
@@ -74,6 +75,9 @@ pub use parallel::{ParallelOptions, set_global_threads};
 pub use param_presets::{PRESET_NAMES, preset, presets};
 pub use params::{ParamSet, ParamSpec, ParamType};
 pub use polyhedron::{FULL_SPHERE, HalfSpace, Polyhedron};
+pub use provenance::{
+    PROVENANCE_METADATA_KEY, PROVENANCE_SCHEMA_VERSION, Provenance, ProvenanceInput, sha256_hex,
+};
 pub use rings::{Ring, RingStep, is_aromatic, ring_counts, ring_membership, ring_paths, rings};
 pub use scalars::{
     ScalarFn, ScalarInfo, ScalarRegistry, atom_charges, atom_masses, bond_lengths,
