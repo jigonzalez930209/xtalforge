@@ -83,6 +83,7 @@ pub fn scene_buffers(text: &str, format_hint: &str) -> Result<JsValue, JsValue> 
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text.
+#[cfg(feature = "analysis")]
 #[wasm_bindgen]
 pub fn pxrd_buffers(text: &str, format_hint: &str) -> Result<JsValue, JsValue> {
     let structure = if format_hint.trim().is_empty() {

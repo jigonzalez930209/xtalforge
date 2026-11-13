@@ -41,6 +41,7 @@ pub(crate) fn document(structure: &Structure) -> Result<String, JsValue> {
     structure.to_document().to_json().map_err(to_js_error)
 }
 
+#[cfg(feature = "symmetry")]
 #[derive(Debug, Default, Deserialize)]
 #[serde(default)]
 pub(crate) struct MatcherOptions {
@@ -50,6 +51,7 @@ pub(crate) struct MatcherOptions {
     pub allow_supercell: bool,
 }
 
+#[cfg(feature = "symmetry")]
 impl MatcherOptions {
     fn build(&self) -> xtalforge::symmetry::MatcherOptions {
         let defaults = xtalforge::symmetry::MatcherOptions::default();
@@ -73,6 +75,7 @@ impl MatcherOptions {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or tolerances.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn match_structures(
     first: &str,
@@ -138,6 +141,7 @@ fn flat_points(values: &[f64]) -> Result<Vec<[f64; 3]>, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn group_structures(
     structures: Vec<String>,
@@ -305,6 +309,7 @@ pub fn edit_structure(
 /// # Errors
 ///
 /// Returns a JavaScript `Error` when the structures do not match.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn interpolate(
     first: &str,

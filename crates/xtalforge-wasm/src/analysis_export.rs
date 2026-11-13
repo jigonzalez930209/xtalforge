@@ -2,7 +2,7 @@
 
 use wasm_bindgen::prelude::*;
 
-use crate::common::{parse_any, set, summary_object, to_js_error};
+use crate::common::{parse_any, set, to_js_error};
 
 /// Returns the porosity numbers of a structure.
 ///
@@ -140,21 +140,4 @@ pub fn net_invariants_info(text: &str, tolerance: f64) -> Result<js_sys::Array, 
         array.push(&object.into());
     }
     Ok(array)
-}
-
-/// Adds hydrogens at the missing valences.
-///
-/// # Errors
-///
-/// Returns a JavaScript `Error` for invalid text or a bad distance.
-#[wasm_bindgen]
-pub fn hydrogens_info(text: &str, distance: f64) -> Result<JsValue, JsValue> {
-    let structure = parse_any(text).map_err(to_js_error)?;
-    let options = xtalforge::build::hydrogens::HydrogenOptions {
-        distance,
-        ..Default::default()
-    };
-    let filled =
-        xtalforge::build::hydrogens::add_hydrogens(&structure, &options).map_err(to_js_error)?;
-    summary_object(&filled)
 }

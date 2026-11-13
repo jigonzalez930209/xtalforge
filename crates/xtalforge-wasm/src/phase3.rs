@@ -227,6 +227,7 @@ impl WasmDocument {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid records.
+#[cfg(feature = "full")]
 #[wasm_bindgen]
 pub fn workspace_archive(records_json: &str) -> Result<Vec<u8>, JsValue> {
     let records: Vec<xtalforge::modules::RunRecord> = serde_json::from_str(records_json)
@@ -239,6 +240,7 @@ pub fn workspace_archive(records_json: &str) -> Result<Vec<u8>, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for a corrupt archive.
+#[cfg(feature = "full")]
 #[wasm_bindgen]
 pub fn workspace_read_archive(bytes: &[u8]) -> Result<js_sys::Array, JsValue> {
     let records = xtalforge::modules::read_archived_records(bytes).map_err(to_js_error)?;

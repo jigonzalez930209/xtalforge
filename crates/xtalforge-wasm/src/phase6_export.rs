@@ -7,7 +7,7 @@ use xtalforge::build::{
     build_ztc, commensurate_twist, face_spiral, nanoribbon,
 };
 
-use crate::common::{set, summary_object, to_js_error};
+use crate::common::{parse_any, set, summary_object, to_js_error};
 
 fn ztc_options(samples: usize, cell: f64, isovalue: f64) -> ZtcOptions {
     ZtcOptions {
@@ -154,4 +154,21 @@ pub fn build_carbon_recipe_info(
     }
     set(&object, "notes", notes.into());
     Ok(object.into())
+}
+
+/// Adds hydrogens at the missing valences and returns the summary.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a bad distance.
+#[wasm_bindgen]
+pub fn hydrogens_info(text: &str, distance: f64) -> Result<JsValue, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let options = xtalforge::build::hydrogens::HydrogenOptions {
+        distance,
+        ..Default::default()
+    };
+    let filled =
+        xtalforge::build::hydrogens::add_hydrogens(&structure, &options).map_err(to_js_error)?;
+    summary_object(&filled)
 }

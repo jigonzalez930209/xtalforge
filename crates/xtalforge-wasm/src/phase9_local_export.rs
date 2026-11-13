@@ -49,42 +49,6 @@ pub fn coordination(
     json(&shell)
 }
 
-/// Bond-valence sums as JSON.
-///
-/// # Errors
-///
-/// Returns a JavaScript `Error` for invalid text or cutoff.
-#[wasm_bindgen]
-pub fn bond_valence_sums(text: &str, format_hint: &str, cutoff: f64) -> Result<String, JsValue> {
-    let report = xtalforge::analysis::bond_valence_sums(
-        &load(text, format_hint)?,
-        &xtalforge::analysis::BvsOptions {
-            cutoff,
-            ..xtalforge::analysis::BvsOptions::default()
-        },
-    )
-    .map_err(to_js_error)?;
-    json(&report)
-}
-
-/// Oxidation states as JSON.
-///
-/// # Errors
-///
-/// Returns a JavaScript `Error` for invalid text or cutoff.
-#[wasm_bindgen]
-pub fn oxidation_states(text: &str, format_hint: &str, cutoff: f64) -> Result<String, JsValue> {
-    let report = xtalforge::analysis::oxidation_states(
-        &load(text, format_hint)?,
-        &xtalforge::analysis::BvsOptions {
-            cutoff,
-            ..xtalforge::analysis::BvsOptions::default()
-        },
-    )
-    .map_err(to_js_error)?;
-    json(&report)
-}
-
 /// Total and partial RDF as JSON.
 ///
 /// # Errors

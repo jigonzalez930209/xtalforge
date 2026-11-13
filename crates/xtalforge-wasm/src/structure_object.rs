@@ -181,65 +181,6 @@ impl Structure {
         })
     }
 
-    /// Symmetry dataset as JSON.
-    ///
-    /// # Errors
-    ///
-    /// Returns a JavaScript `Error` for an invalid tolerance.
-    pub fn detect_symmetry(&self, symprec: f64) -> Result<String, JsValue> {
-        let dataset = xtalforge::symmetry::detect_symmetry(
-            &self.inner,
-            xtalforge::symmetry::SymmetryOptions {
-                symprec,
-                ..xtalforge::symmetry::SymmetryOptions::default()
-            },
-        )
-        .map_err(to_js_error)?;
-        serde_json::to_string(&dataset).map_err(|error| JsValue::from_str(&error.to_string()))
-    }
-
-    /// PXRD pattern as JSON.
-    ///
-    /// # Errors
-    ///
-    /// Returns a JavaScript `Error` for invalid options.
-    pub fn pxrd(&self) -> Result<String, JsValue> {
-        let pattern = xtalforge::analysis::calculate_pxrd(
-            &self.inner,
-            &xtalforge::analysis::PxrdOptions::default(),
-        )
-        .map_err(to_js_error)?;
-        serde_json::to_string(&pattern).map_err(|error| JsValue::from_str(&error.to_string()))
-    }
-
-    /// UFF energy in eV.
-    ///
-    /// # Errors
-    ///
-    /// Returns a JavaScript `Error` when UFF cannot type the atoms.
-    pub fn ff_energy(&self) -> Result<f64, JsValue> {
-        let calculator =
-            xtalforge::ff::UffCalculator::new(xtalforge::ff::CalculatorOptions::default())
-                .map_err(|error| JsValue::from_str(&error.to_string()))?;
-        xtalforge::ff::Calculator::energy(&calculator, &self.inner)
-            .map_err(|error| JsValue::from_str(&error.to_string()))
-    }
-
-    /// Adds missing hydrogens.
-    ///
-    /// # Errors
-    ///
-    /// Returns a JavaScript `Error` for an invalid distance.
-    pub fn add_hydrogens(&self, distance: f64) -> Result<Structure, JsValue> {
-        let options = xtalforge::build::HydrogenOptions {
-            distance,
-            ..xtalforge::build::HydrogenOptions::default()
-        };
-        Ok(Self {
-            inner: xtalforge::build::add_hydrogens(&self.inner, &options).map_err(to_js_error)?,
-        })
-    }
-
     /// Returns a copy with new P1 fractional positions (flat xyz).
     ///
     /// # Errors
@@ -262,11 +203,12 @@ impl Structure {
                 .hall("P 1");
         for (index, atom) in p1.atoms.iter().enumerate() {
             let offset = index * 3;
-            let frac = [
-                positions[offset],
-                positions[offset + 1],
-                positions[offset + 2],
-            ];
+            let Some([x, y, z]) = positions.get(offset..offset + 3) else {
+                return Err(JsValue::from_str(
+                    "set_positions needs one point per P1 atom",
+                ));
+            };
+            let frac = [*x, *y, *z];
             builder = builder.site(
                 xtalforge::core::Site::new(atom.label.clone(), &atom.element, frac)
                     .map_err(to_js_error)?
@@ -277,5 +219,80 @@ impl Structure {
         Ok(Self {
             inner: builder.build().map_err(to_js_error)?,
         })
+    }
+}
+
+#[cfg(feature = "symmetry")]
+#[wasm_bindgen]
+impl Structure {
+    /// Symmetry dataset as JSON.
+    ///
+    /// # Errors
+    ///
+    /// Returns a JavaScript `Error` for an invalid tolerance.
+    pub fn detect_symmetry(&self, symprec: f64) -> Result<String, JsValue> {
+        let dataset = xtalforge::symmetry::detect_symmetry(
+            &self.inner,
+            xtalforge::symmetry::SymmetryOptions {
+                symprec,
+                ..xtalforge::symmetry::SymmetryOptions::default()
+            },
+        )
+        .map_err(to_js_error)?;
+        serde_json::to_string(&dataset).map_err(|error| JsValue::from_str(&error.to_string()))
+    }
+}
+
+#[cfg(feature = "analysis")]
+#[wasm_bindgen]
+impl Structure {
+    /// PXRD pattern as JSON.
+    ///
+    /// # Errors
+    ///
+    /// Returns a JavaScript `Error` for invalid options.
+    pub fn pxrd(&self) -> Result<String, JsValue> {
+        let pattern = xtalforge::analysis::calculate_pxrd(
+            &self.inner,
+            &xtalforge::analysis::PxrdOptions::default(),
+        )
+        .map_err(to_js_error)?;
+        serde_json::to_string(&pattern).map_err(|error| JsValue::from_str(&error.to_string()))
+    }
+}
+
+#[cfg(feature = "build")]
+#[wasm_bindgen]
+impl Structure {
+    /// Adds missing hydrogens.
+    ///
+    /// # Errors
+    ///
+    /// Returns a JavaScript `Error` for an invalid distance.
+    pub fn add_hydrogens(&self, distance: f64) -> Result<Structure, JsValue> {
+        let options = xtalforge::build::HydrogenOptions {
+            distance,
+            ..xtalforge::build::HydrogenOptions::default()
+        };
+        Ok(Self {
+            inner: xtalforge::build::add_hydrogens(&self.inner, &options).map_err(to_js_error)?,
+        })
+    }
+}
+
+#[cfg(feature = "full")]
+#[wasm_bindgen]
+impl Structure {
+    /// UFF energy in eV.
+    ///
+    /// # Errors
+    ///
+    /// Returns a JavaScript `Error` when UFF cannot type the atoms.
+    pub fn ff_energy(&self) -> Result<f64, JsValue> {
+        let calculator =
+            xtalforge::ff::UffCalculator::new(xtalforge::ff::CalculatorOptions::default())
+                .map_err(|error| JsValue::from_str(&error.to_string()))?;
+        xtalforge::ff::Calculator::energy(&calculator, &self.inner)
+            .map_err(|error| JsValue::from_str(&error.to_string()))
     }
 }

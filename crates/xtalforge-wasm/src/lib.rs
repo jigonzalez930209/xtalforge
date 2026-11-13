@@ -1,44 +1,56 @@
 //! WebAssembly bindings for `xtalforge`.
 //!
-//! The module exports the same hello-world surface as the Rust, CLI and
-//! Python packages. The wasm-bindgen attributes are compiled only for
+//! The crate is built as several packages from one source (Task 15.3.1). The
+//! `core` feature is the viewer tier: structure reading and conversion,
+//! supercells and slabs, scene and mesh buffers, documents and the `Structure`
+//! object handle. `symmetry`, `analysis` and `build` each add one exported
+//! surface on top of `core`; `full` (the default) adds force fields, MOF, the
+//! workspace and the agent surface. `scripts/build-wasm-packages.sh` builds
+//! every tier into `pkg/<tier>` and `scripts/check-wasm-size.sh` enforces the
+//! per-package budgets.
+//!
+//! The wasm-bindgen attributes are compiled only for
 //! `wasm32-unknown-unknown`; a host build of this crate is intentionally
 //! empty so `cargo test --workspace` stays green.
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 mod agent_export;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 mod analysis_export;
 #[cfg(target_arch = "wasm32")]
 mod common;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 mod forcefield;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 mod lebail_export;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 mod mof_export;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 mod mof_platform_export;
 #[cfg(target_arch = "wasm32")]
 mod phase1;
+#[cfg(all(target_arch = "wasm32", feature = "build"))]
+mod phase11_build_export;
 #[cfg(target_arch = "wasm32")]
 mod phase11_export;
 #[cfg(target_arch = "wasm32")]
 mod phase3;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "build"))]
 mod phase6_export;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 mod phase9_analysis_export;
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
+mod phase9_bvs_export;
 #[cfg(target_arch = "wasm32")]
 mod phase9_export;
 #[cfg(target_arch = "wasm32")]
 mod phase9_local_export;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 mod phase9_mechanics_export;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 mod powder_export;
 #[cfg(target_arch = "wasm32")]
 mod remote_export;
@@ -46,11 +58,11 @@ mod remote_export;
 mod scene_export;
 #[cfg(target_arch = "wasm32")]
 mod structure_object;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", any(feature = "symmetry", feature = "build")))]
 mod structure_text;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "symmetry"))]
 mod symmetry;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "symmetry"))]
 mod symmetry_analysis;
 #[cfg(target_arch = "wasm32")]
 mod typed_export;
@@ -58,65 +70,71 @@ mod typed_export;
 #[cfg(target_arch = "wasm32")]
 use common::{array3, array6, set, to_js_error};
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 pub use agent_export::{AgentSession, agent_capabilities, agent_run, agent_verbs};
-#[cfg(target_arch = "wasm32")]
-pub use analysis_export::{hydrogens_info, net_invariants_info, porosity_info, zeo_parse_info};
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
+pub use analysis_export::{net_invariants_info, porosity_info, zeo_parse_info};
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 pub use forcefield::{
     ff_charges_info, ff_energy, ff_ir_info, ff_optimize_info, ff_optimize_text, ff_prepare_info,
     ff_thermo_info, ff_types_info, ff_vibrations_info,
 };
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use lebail_export::powder_lebail_info;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 pub use mof_export::{build_mof_info, mof_blocks_info, mof_topologies_info};
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 pub use mof_platform_export::{
     mof_charge_balance, mof_check, mof_deconstruct, mof_defects, mof_descriptors, mof_disorder,
     mof_energy_grid, mof_forcefield, mof_functionalize, mof_gcmc, mof_guests, mof_interpenetrate,
     mof_mixed, mof_mofid, mof_open_metal_sites, mof_pores, mof_raspa, mof_solvent_remove,
     mof_stack_layers, mof_widom,
 };
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
+pub use phase1::pxrd_info;
 #[cfg(target_arch = "wasm32")]
 pub use phase1::{
-    bonds, build_c60_info, build_graphene_info, build_nanotube_info, convert_structure, groups,
-    mesh_stl, neighbors, pxrd_info, read_cif, read_structure, rings, scene_summary, slab_info,
-    slab_text, supercell_info, supercell_text,
+    bonds, convert_structure, groups, mesh_stl, neighbors, read_cif, read_structure, rings,
+    scene_summary, slab_info, slab_text, supercell_info, supercell_text,
 };
+#[cfg(all(target_arch = "wasm32", feature = "build"))]
+pub use phase1::{build_c60_info, build_graphene_info, build_nanotube_info};
 #[cfg(target_arch = "wasm32")]
-pub use phase3::{
-    WasmDocument, param_schema, project_info, project_pack, workspace_archive,
-    workspace_read_archive,
-};
-#[cfg(target_arch = "wasm32")]
+pub use phase3::{WasmDocument, param_schema, project_info, project_pack};
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
+pub use phase3::{workspace_archive, workspace_read_archive};
+#[cfg(all(target_arch = "wasm32", feature = "build"))]
 pub use phase6_export::{
-    build_c20_info, build_carbon_recipe_info, polymer_info, ribbon_info, schwarzite_info,
-    twist_info, ztc_info,
+    build_c20_info, build_carbon_recipe_info, hydrogens_info, polymer_info, ribbon_info,
+    schwarzite_info, twist_info, ztc_info,
 };
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use phase9_analysis_export::{
     adsorption_sites, interstitials, lattice_matches, orderings, place_molecule, slab_terminations,
     special_quasirandom, stack_slabs, substitutions, unique_miller_indices, vacancies, wulff,
 };
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
+pub use phase9_bvs_export::{bond_valence_sums, oxidation_states};
 #[cfg(target_arch = "wasm32")]
 pub use phase9_export::{
-    deform, edit_structure, group_structures, interpolate, kabsch_alignment, match_structures,
-    optimal_supercell, periodic_rmsd, rattle,
+    deform, edit_structure, kabsch_alignment, optimal_supercell, periodic_rmsd, rattle,
 };
+#[cfg(all(target_arch = "wasm32", feature = "symmetry"))]
+pub use phase9_export::{group_structures, interpolate, match_structures};
 #[cfg(target_arch = "wasm32")]
 pub use phase9_local_export::{
-    bond_valence_sums, coordination, fingerprint_similarity, oxidation_states, radial_distribution,
-    structure_fingerprint, voronoi,
+    coordination, fingerprint_similarity, radial_distribution, structure_fingerprint, voronoi,
 };
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
 pub use phase9_mechanics_export::{convex_hull, elastic_tensor, eos_fit};
-#[cfg(target_arch = "wasm32")]
-pub use phase11_export::{
-    deprecation_warning, error_category, fragment_info, fragment_library_info,
-    molecule_from_smiles, place_guest_info, read, sketch_roundtrip, substitute_info,
+#[cfg(all(target_arch = "wasm32", feature = "build"))]
+pub use phase11_build_export::{
+    fragment_info, fragment_library_info, molecule_from_smiles, place_guest_info, sketch_roundtrip,
+    substitute_info,
 };
 #[cfg(target_arch = "wasm32")]
+pub use phase11_export::{deprecation_warning, error_category, read};
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
     powder_pawley_width_info, powder_refine_info, rietx_inventory_info,
@@ -127,27 +145,34 @@ pub use remote_export::{fetch_cod, fetch_optimade};
 pub use scene_export::{mesh_gltf, mesh_obj, scene_data};
 #[cfg(target_arch = "wasm32")]
 pub use structure_object::Structure;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
+pub use structure_text::build_mof_text;
+#[cfg(all(target_arch = "wasm32", feature = "symmetry"))]
 pub use structure_text::{
-    asymmetrize_text, build_c20_text, build_c60_text, build_carbon_text, build_graphene_text,
-    build_mof_text, build_nanotube_text, build_polymer_text, build_ribbon_text,
-    build_schwarzite_text, build_twist_text, build_ztc_text, change_setting_text, hydrogens_text,
-    lower_to_subgroup_text, primitive_text, reduce_text, set_space_group_text, standardize_text,
-    to_p1_text,
+    asymmetrize_text, change_setting_text, lower_to_subgroup_text, primitive_text, reduce_text,
+    set_space_group_text, standardize_text, to_p1_text,
 };
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "build"))]
+pub use structure_text::{
+    build_c20_text, build_c60_text, build_carbon_text, build_graphene_text, build_nanotube_text,
+    build_polymer_text, build_ribbon_text, build_schwarzite_text, build_twist_text, build_ztc_text,
+    hydrogens_text,
+};
+#[cfg(all(target_arch = "wasm32", feature = "symmetry"))]
 pub use symmetry::{
     angle, asymmetrize_info, detect_symmetry, distance, lower_to_subgroup_info,
     set_space_group_info, subgroups_info, to_p1_info, torsion,
 };
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "symmetry"))]
 pub use symmetry_analysis::{
     brillouin_zone, change_setting_info, diagnose_info, kpath_info, layer_group_info,
     magnetic_group_info, pointgroup_info, primitive_info, reduce_info, standardize_info,
     tolerance_ladder_info, wyckoff_info,
 };
+#[cfg(all(target_arch = "wasm32", feature = "analysis"))]
+pub use typed_export::pxrd_buffers;
 #[cfg(target_arch = "wasm32")]
-pub use typed_export::{mesh_buffers, pxrd_buffers, scene_buffers};
+pub use typed_export::{mesh_buffers, scene_buffers};
 
 /// Installs the panic hook in debug builds only.
 #[cfg(all(target_arch = "wasm32", debug_assertions))]

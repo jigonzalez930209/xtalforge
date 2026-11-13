@@ -328,6 +328,7 @@ fn view_style(name: &str) -> Result<xtalforge::view::DrawStyle, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text, radiation or options.
+#[cfg(feature = "analysis")]
 #[wasm_bindgen]
 pub fn pxrd_info(
     text: &str,
@@ -393,6 +394,7 @@ pub fn pxrd_info(
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid repeats or spacing.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_graphene_info(
     nx: u32,
@@ -411,6 +413,7 @@ pub fn build_graphene_info(
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for a bad chiral vector or length.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_nanotube_info(n: i32, m: i32, length: u32, vacuum: f64) -> Result<JsValue, JsValue> {
     let structure = xtalforge::build::nanotube(n, m, length, vacuum).map_err(to_js_error)?;
@@ -422,6 +425,7 @@ pub fn build_nanotube_info(n: i32, m: i32, length: u32, vacuum: f64) -> Result<J
 /// # Errors
 ///
 /// Returns a JavaScript `Error` when the embedded data is invalid.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_c60_info() -> Result<JsValue, JsValue> {
     let structure = xtalforge::build::fullerene(60).map_err(to_js_error)?;

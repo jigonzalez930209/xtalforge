@@ -15,6 +15,7 @@ fn cif(structure: &Structure) -> Result<String, JsValue> {
     xtalforge::io::write_cif(structure).map_err(to_js_error)
 }
 
+#[cfg(feature = "full")]
 fn mof_error(error: xtalforge::mof::Error) -> JsValue {
     let value = js_sys::Object::new();
     let _ = js_sys::Reflect::set(
@@ -35,6 +36,7 @@ fn mof_error(error: xtalforge::mof::Error) -> JsValue {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or a failed search.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn asymmetrize_text(text: &str, symprec: f64) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -54,6 +56,7 @@ pub fn asymmetrize_text(text: &str, symprec: f64) -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or an empty structure.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn to_p1_text(text: &str) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -66,6 +69,7 @@ pub fn to_p1_text(text: &str) -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text, an unknown symbol or mode.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn set_space_group_text(text: &str, symbol: &str, mode: &str) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -89,6 +93,7 @@ pub fn set_space_group_text(text: &str, symbol: &str, mode: &str) -> Result<Stri
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or a failed search.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn standardize_text(text: &str, symprec: f64) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -108,6 +113,7 @@ pub fn standardize_text(text: &str, symprec: f64) -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or a failed search.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn primitive_text(text: &str, symprec: f64) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -127,6 +133,7 @@ pub fn primitive_text(text: &str, symprec: f64) -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or an unknown algorithm.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn reduce_text(text: &str, algorithm: &str) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -150,6 +157,7 @@ pub fn reduce_text(text: &str, algorithm: &str) -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or a Hall number out of range.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn change_setting_text(text: &str, hall_number: u32) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
@@ -163,6 +171,7 @@ pub fn change_setting_text(text: &str, hall_number: u32) -> Result<String, JsVal
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or an unknown subgroup.
+#[cfg(feature = "symmetry")]
 #[wasm_bindgen]
 pub fn lower_to_subgroup_text(
     text: &str,
@@ -180,6 +189,7 @@ pub fn lower_to_subgroup_text(
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid repeats or spacing.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_graphene_text(
     nx: u32,
@@ -198,6 +208,7 @@ pub fn build_graphene_text(
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for a bad chiral vector or length.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_nanotube_text(n: i32, m: i32, length: u32, vacuum: f64) -> Result<String, JsValue> {
     let structure = xtalforge::build::nanotube(n, m, length, vacuum).map_err(to_js_error)?;
@@ -209,6 +220,7 @@ pub fn build_nanotube_text(n: i32, m: i32, length: u32, vacuum: f64) -> Result<S
 /// # Errors
 ///
 /// Returns a JavaScript `Error` when the embedded data is invalid.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_c60_text() -> Result<String, JsValue> {
     let structure = xtalforge::build::fullerene(60).map_err(to_js_error)?;
@@ -220,6 +232,7 @@ pub fn build_c60_text() -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` when the embedded data is invalid.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_c20_text() -> Result<String, JsValue> {
     let structure = xtalforge::build::face_spiral(20).map_err(to_js_error)?;
@@ -231,6 +244,7 @@ pub fn build_c20_text() -> Result<String, JsValue> {
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for an unknown topology or block.
+#[cfg(feature = "full")]
 #[wasm_bindgen]
 pub fn build_mof_text(topology: &str, node: &str, linker: &str) -> Result<String, JsValue> {
     let request = xtalforge::mof::MofRequest::new(topology, node, linker);
@@ -243,6 +257,7 @@ pub fn build_mof_text(topology: &str, node: &str, linker: &str) -> Result<String
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid dimensions.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_ribbon_text(width: u32, length: u32, vacuum: f64) -> Result<String, JsValue> {
     let structure = xtalforge::build::nanoribbon(width, length, vacuum).map_err(to_js_error)?;
@@ -254,6 +269,7 @@ pub fn build_ribbon_text(width: u32, length: u32, vacuum: f64) -> Result<String,
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid repeats or angle.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_twist_text(n: u32, m: u32, theta: f64, layers: u32) -> Result<String, JsValue> {
     let structure =
@@ -266,6 +282,7 @@ pub fn build_twist_text(n: u32, m: u32, theta: f64, layers: u32) -> Result<Strin
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid options.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_ztc_text(samples: usize, cell: f64, isovalue: f64) -> Result<String, JsValue> {
     let structure = xtalforge::build::build_ztc(&xtalforge::build::ZtcOptions {
@@ -282,6 +299,7 @@ pub fn build_ztc_text(samples: usize, cell: f64, isovalue: f64) -> Result<String
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid options.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_schwarzite_text(samples: usize, cell: f64, isovalue: f64) -> Result<String, JsValue> {
     let structure = xtalforge::build::build_schwarzite(&xtalforge::build::ZtcOptions {
@@ -298,6 +316,7 @@ pub fn build_schwarzite_text(samples: usize, cell: f64, isovalue: f64) -> Result
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for an invalid SMILES or density.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_polymer_text(smiles: &str, monomers: u32, density: f64) -> Result<String, JsValue> {
     let build = xtalforge::build::build_polymer(
@@ -317,6 +336,7 @@ pub fn build_polymer_text(smiles: &str, monomers: u32, density: f64) -> Result<S
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for an unknown net or invalid options.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn build_carbon_text(
     net: &str,
@@ -340,6 +360,7 @@ pub fn build_carbon_text(
 /// # Errors
 ///
 /// Returns a JavaScript `Error` for invalid text or a bad distance.
+#[cfg(feature = "build")]
 #[wasm_bindgen]
 pub fn hydrogens_text(text: &str, distance: f64) -> Result<String, JsValue> {
     let structure = parse_any(text).map_err(to_js_error)?;
