@@ -54,6 +54,13 @@ fn general_supercell_uses_the_determinant() {
 }
 
 #[test]
+fn large_diagonal_supercell_keeps_every_repeat() {
+    let cell = carbon().supercell(8, 8, 8).unwrap();
+    assert_eq!(cell.sites().len(), 512);
+    assert!((cell.lattice().volume() - 32_768.0).abs() < 1e-6);
+}
+
+#[test]
 fn origin_shift_rewraps_the_sites() {
     let lattice = Lattice::cubic(4.0).unwrap();
     let structure = StructureBuilder::new("shift", lattice)
