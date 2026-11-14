@@ -84,10 +84,13 @@ pub fn mbtr_descriptor_info(
         &structure,
         &xtalforge::ml::MbtrOptions {
             cutoff,
-            n_grid: grid,
-            sigma,
-            angular,
-            ..xtalforge::ml::MbtrOptions::default()
+            k2: Some(xtalforge::ml::MbtrGrid::new(0.0, cutoff, grid, sigma)),
+            k3: if angular {
+                Some(xtalforge::ml::MbtrGrid::new(0.0, 180.0, grid, sigma))
+            } else {
+                None
+            },
+            elements: Vec::new(),
         },
     )
     .map_err(to_js_error)?;
@@ -238,4 +241,69 @@ pub fn ml_active_workflow_info(
         checkpoint.as_deref(),
     );
     json(&document)
+}
+
+/// Writes a JSON Lines dataset as Parquet bytes.
+#[wasm_bindgen]
+pub fn ml_parquet_write_info(dataset_jsonl: &str) -> Result<Vec<u8>, JsValue> {
+    let dataset = xtalforge::analysis::dataset::Dataset::from_json_lines(dataset_jsonl)
+        .map_err(to_js_error)?;
+    xtalforge::ml::write_parquet_bytes(&dataset).map_err(to_js_error)
+}
+
+/// Reads Parquet bytes into a JSON Lines dataset.
+#[wasm_bindgen]
+pub fn ml_parquet_read_info(bytes: &[u8]) -> Result<JsValue, JsValue> {
+    let dataset = xtalforge::ml::read_parquet_bytes(bytes).map_err(to_js_error)?;
+    let jsonl = dataset.to_json_lines().map_err(to_js_error)?;
+    json(&serde_json::json!({ "dataset": jsonl }))
+}
+
+/// Runs a single-input ONNX model from bytes.
+#[wasm_bindgen]
+pub fn onnx_predict_info(
+    model_bytes: &[u8],
+    features_json: &str,
+    n_features: usize,
+) -> Result<JsValue, JsValue> {
+    let model = xtalforge::ml::OnnxModel::from_bytes(
+        model_bytes,
+        &xtalforge::ml::OnnxOptions {
+            n_features,
+            input: None,
+        },
+    )
+    .map_err(to_js_error)?;
+    let features: Vec<f64> = serde_json::from_str(features_json)
+        .map_err(|error| JsValue::from_str(&format!("feature JSON: {error}")))?;
+    let values = model.predict(&features).map_err(to_js_error)?;
+    json(&values)
+}
+
+/// Computes the ONNX Cartesian energy of a structure from model bytes.
+#[wasm_bindgen]
+pub fn onnx_energy_info(
+    text: &str,
+    model_bytes: &[u8],
+    n_features: usize,
+    displacement: f64,
+) -> Result<f64, JsValue> {
+    let structure = parse_any(text).map_err(to_js_error)?;
+    let model = xtalforge::ml::OnnxModel::from_bytes(
+        model_bytes,
+        &xtalforge::ml::OnnxOptions {
+            n_features,
+            input: None,
+        },
+    )
+    .map_err(to_js_error)?;
+    let calculator = xtalforge::ml::OnnxCalculator::new(
+        model,
+        xtalforge::ml::OnnxDescriptor::Cartesian,
+        displacement,
+        0.001,
+    )
+    .map_err(to_js_error)?;
+    xtalforge::ff::Calculator::energy(&calculator, &structure)
+        .map_err(|error| to_js_error(xtalforge::core::Error::InvalidInput(error.message())))
 }

@@ -165,8 +165,8 @@ pub use phase20_export::{
 #[cfg(all(target_arch = "wasm32", feature = "ml"))]
 pub use phase21_export::{
     acsf_descriptor_info, crystal_graph_info, mbtr_descriptor_info, ml_active_workflow_info,
-    ml_import_info, ml_predict_info, ml_select_info, ml_split_info, mof_ml_features_info,
-    soap_descriptor_info,
+    ml_import_info, ml_parquet_read_info, ml_parquet_write_info, ml_predict_info, ml_select_info,
+    ml_split_info, mof_ml_features_info, onnx_energy_info, onnx_predict_info, soap_descriptor_info,
 };
 #[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use powder_export::{
