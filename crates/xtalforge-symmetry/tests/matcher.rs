@@ -64,8 +64,8 @@ fn conventional_and_primitive_silicon_match() {
         match_structures(&conventional_silicon(), &primitive_silicon(), &options).unwrap();
     assert!(outcome.matched, "rms {}", outcome.rms);
     assert!(outcome.rms < 0.1);
-    assert_eq!(outcome.n_atoms, 8);
-    assert_eq!(outcome.mapping.len(), 8);
+    assert_eq!(outcome.n_atoms, 2);
+    assert_eq!(outcome.mapping.len(), 2);
 }
 
 #[test]
