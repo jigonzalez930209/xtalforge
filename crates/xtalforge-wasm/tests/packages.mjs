@@ -48,6 +48,10 @@ const expected = {
     // Phase 18 engine bridge.
     'engine_presets_info', 'engine_input_set_info', 'engine_parse_info', 'engine_bands_info',
     'engine_dos_info', 'engine_script_info', 'engine_failures_info',
+    // Phase 19 surfaces.
+    'magnetic_orderings_info', 'disorder_groups_info', 'derivative_structures_info',
+    'neutron_powder_info', 'magnetic_powder_info', 'electron_diffraction_info',
+    'raman_powder_average_info',
   ],
 };
 const required = {
