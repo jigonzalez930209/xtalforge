@@ -36,6 +36,16 @@ for argument in "$@"; do
   esac
 done
 
+python_command() {
+  if [ -x "$root/.venv/bin/python" ] && "$root/.venv/bin/python" -c 'import mypy' >/dev/null 2>&1; then
+    printf '%s' "$root/.venv/bin/python"
+  elif command -v python3 >/dev/null 2>&1; then
+    printf 'python3'
+  else
+    printf 'python'
+  fi
+}
+
 names=()
 commands=()
 add() {
@@ -61,7 +71,7 @@ if [ "$quick" -eq 0 ]; then
   add "wasm-size" "scripts/check-wasm-size.sh"
   add "wasm-tests" "(cd crates/xtalforge-wasm && wasm-pack test --node --release)"
   add "python-wheel" "(cd crates/xtalforge-python && maturin build --release)"
-  add "python-types" "python -m mypy --strict crates/xtalforge-python/python/xtalforge"
+  add "python-types" "$(python_command) -m mypy --strict crates/xtalforge-python/python/xtalforge"
   add "docs-build" "(cd docs && npm run docs:build)"
   add "bench" "scripts/check-bench.sh"
 fi
