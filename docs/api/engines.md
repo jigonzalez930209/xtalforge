@@ -88,3 +88,80 @@ energies, conservative GFN2 forces and the refusal paths.
 The decision is recorded in [the ML backend page](../algorithms/ml-backend.md):
 no native backend in Phases 1-7, no silent model, and the Python bridge is the
 only supported path. The `ml` feature stays reserved and a no-op.
+
+## Input sets (Phase 18)
+
+`xtalforge_engines` turns a structure into a reproducible set of engine files.
+`list_presets()` returns the 20 registered names, `preset(name)` returns a
+typed writer and `write_input_set(structure, &InputSetRequest { preset,
+overrides })` merges the nested JSON overrides over the versioned preset data
+and returns `InputSetSummary { preset, files }`. The presets are stored under
+`crates/xtalforge-engines/data/input-sets/` with a provenance block (template
+version, source, reference and license). Unknown override keys are
+`Error::UnknownOverride` unless the branch is declared open or the request
+sets `allow_unknown`.
+
+| Family | Presets | Files |
+|---|---|---|
+| VASP | `vasp/{relax,static,band,dos,mof}` | `INCAR`, `KPOINTS`, `POSCAR`, `POTCAR.spec` (names only, never the licensed POTCAR) |
+| Quantum ESPRESSO | `qe/{relax,vc-relax,scf,nscf,bands}` | `pw.in` with SSSP pseudopotential names and the symmetry k-path for bands |
+| CP2K | `cp2k/{geo-opt,mof-geo-opt,single-point}` | `cp2k.inp` with MOLOPT/GTH names, cell and coordinates, DFT-D3 |
+| LAMMPS | `lammps/{uff,uff4mof}` | `data.lammps` plus the UFF/UFF4MOF input script |
+| GULP | `gulp/{relax,lattice-relax}` | `gulp.gin` |
+| RASPA | `raspa/widom` | the Phase 10 RASPA export, byte-identical |
+| ORCA | `orca/{single-point,pbe0-def2-tzvp}` | the Phase 4 ORCA input, byte-identical |
+
+The same structure, preset and overrides give byte-identical files on every
+surface. VASP `MAGMOM` and `LDAU` read the `magmom`, `ldau_u`, `ldau_orbital`
+and `ldau_j` site properties (or structure metadata), with the documented
+settings fallback.
+
+## Result model and parsers
+
+`CalculationResult` carries the final structure, `trajectory`, energies,
+forces, stress, magnetic moments, charges, convergence flags, timings,
+warnings, scalars, Fermi level, bands, DOS, orbital projections and the
+producing engine. Parsers map malformed or truncated files to
+`Error::Parse` (`engine_parse`):
+
+- `parse_vasp_vasprun`, `parse_vasp_outcar`, `parse_vasp_oszicar`,
+  `parse_vasp_eigenval`, `parse_vasp_doscar`, `parse_vasp_procar`;
+- `parse_qe`, `parse_qe_xml`, `parse_qe_bands`, `parse_qe_projwfc`;
+- `parse_cp2k`, `parse_lammps`, `parse_lammps_dump`, `parse_gulp`;
+- `bader_charges`/`bader_table` and `ddec_charges`/`ddec_table` map charges
+  onto site order.
+
+The fixtures under `crates/xtalforge-engines/tests/fixtures/engines/` are
+hand-written representative outputs (repository license) with provenance in
+their README; they are not copied third-party data.
+
+## Electronic structure
+
+`band_structure(&ElectronicStructure)` returns labeled bands, `band_gap`
+returns the direct/indirect gap and edges, `effective_mass`/`band_edge_masses`
+fit parabolic band edges, and `density_of_states`/`smear_dos` build total,
+element and orbital DOS with Gaussian smearing and the d-band centre. The WASM
+and Python surfaces expose JSON-shaped results; the CLI adds `engines bands`
+and `engines dos`.
+
+## Jobs and schedulers
+
+`JobOptions`/`scheduler_script`/`write_scheduler_script` write deterministic
+SLURM and PBS scripts; `submit`/`poll`/`collect` drive them behind a runtime
+probe. `ComputeStep`/`run_job` write an input set, run the configured engine
+and parse the result through `ParserRegistry`; process launch is behind the
+`external` feature, and a dry run writes inputs only. `JobCheckpoint` records
+the typed state for restart/resume. `detect_failure`/`failure_catalogue` map
+SCF non-convergence, `ZBRENT`, walltime, out-of-memory and missing
+pseudopotential output to a corrective action. The CLI is
+`xtalforge engines script`; WASM/Python only write scripts because processes
+are host-side (recorded exception).
+
+## Surfaces
+
+CLI: `xtalforge engines presets|inputs|parse|bands|dos|script|failures`.
+Python: `engine_presets`, `engine_input_set`, `engine_parse`, `engine_bands`,
+`engine_dos`, `engine_script`, `engine_failures`.
+WASM: the same names with `_info`, except `engine_script_info` returns text.
+
+Parity keys: `engine_inputs`, `engine_outputs`, `engine_electronic`, `engine_jobs`.

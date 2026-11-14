@@ -172,6 +172,10 @@ compares this table with the symbols each surface actually exports.
 | `indexing_agreement` | 17 | done | done | done | done | Cubic/general engine verdict (Task 17.1.7); CLI `powder index --general`, Python `powder_index_agreement`, WASM `powder_index_agreement_info` |
 | `database_fetch` | 17 | done | done | done | done | On-demand CoRE MOF/QMOF download with cache, SHA-256 and offline mode (Task 17.1.4); WASM `fetch_data_bundle` leaves storage to the page |
 | `mof_data` | 17 | done | done | n/a | n/a | Full PORMAKE 0.2.3 bundle behind `mof-data` (Task 17.1.3); Python/WASM leave it off for package size |
+| `engine_inputs` | 18 | done | done | done | done | 20 versioned input-set presets (Task 18.1); CLI `engines inputs`, Python `engine_input_set`, WASM `engine_input_set_info` |
+| `engine_outputs` | 18 | done | done | done | done | Typed result model and VASP/QE/CP2K/LAMMPS/GULP parsers (Task 18.2); Bader/DDEC readers |
+| `engine_electronic` | 18 | done | done | done | done | Bands, gaps, effective masses and DOS (Task 18.3); CLI `engines bands/dos` |
+| `engine_jobs` | 18 | done | done | done | done | Scheduler scripts and failure patterns (Task 18.4); process execution is a host-side exception |
 
 ## Recorded exceptions
 
@@ -182,6 +186,7 @@ compares this table with the symbols each surface actually exports.
 | External engines (DFTB+, xtb, Zeo++) and process probes | WASM | No subprocesses in the browser | Native engines (UFF, QEq, EQeq, grid porosity) |
 | In-process GFN0/GFN1/GFN2 (`sci-form` feature) | CLI, Python, WASM | Optional build-time feature whose methods are molecular only; the Rust `Calculator` and the registry listing are the supported surface, and no binding negotiation for the feature exists yet | Rust `quantum::adapter`; CLI `ff engines` lists the registry entries |
 | Multi-threading | WASM | Threads need cross-origin isolation | Optional threaded build |
+| Process execution and scheduler probes | WASM, Python | No subprocesses in the browser, and the Python package does not drive a scheduler; script writing and parsing stay available | CLI `engines script`; WASM/Python script text |
 | Python progress callbacks | Python | The profile refinement entry points that accept `RunControl` are not bound as separate Python functions yet; the Python surface exposes the results and cancellation is available in Rust | Rust `RunControl`/`Cancellation`; Python `Structure` context manager |
 | MCP server over stdio | Python, WASM | It is a process, served by the CLI | `xtalforge mcp` |
 | Machine-learning potentials (`MlCalculator`, `ml_backends`) | Rust, CLI, WASM | The Task 4.11 decision is the Python/ASE bridge; torch is not a WASM target and the Rust `ml` feature is a declared no-op | Python `MlCalculator`; the CLI `models` command manages weights |
