@@ -5,6 +5,36 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.13.0] - 2026-11-14
+
+Phase 20 adds structure generation and global search.
+
+### Added
+
+- New `xtalforge-generation` crate and facade `generation` feature:
+  Wyckoff-constrained random crystals with seeded acceptance checks, rigid
+  molecular crystals, the 80 layer groups, a fourteen-group rod catalogue,
+  and reusable `layer_groups`/`WyckoffPosition` access.
+- AIRSS-style random search and an evolutionary search with cut-and-splice
+  crossover, displacement/strain mutations, UFF4MOF relaxation, matcher-based
+  deduplication and energy ranking; checkpointed chunks and a `search` agent
+  verb make both resumable inside Phase 16 workflows.
+- Curated AFLOW/Strukturbericht prototype library with build and identify
+  operations, plus ionic-radius/oxidation-state substitution proposals.
+- Hypothetical MOF enumeration (topology × node × linker) with UFF4MOF,
+  framework/pore descriptors, MOFkey duplicate marking, the global Kabsch
+  orientation fit and functionalisation sweeps.
+- CLI `generate` subcommands, 14 Python functions, 13 WASM exports, API,
+  algorithm and tutorial pages, and 13 parity rows.
+
+### Notes
+
+- The prototype, rod and ionic-radius tables are documented curated subsets.
+- The 10 000-seed statistics are documented but CI runs a smaller sweep.
+- WASM searches are synchronous; callers use a worker for long runs, and
+  checkpoints stay host-side because they need a filesystem.
+- The complete PORMAKE bundle stays behind `mof-data` for package size.
+
 ## [1.12.0] - 2026-11-14
 
 Phase 19 opens the library to the magnetism, alloy and spectroscopy
