@@ -24,13 +24,11 @@ potentials, and active-learning loops inside workflows.
   Description: the full SOAP power spectrum with GTO radial basis, validated
   against dscribe within documented tolerance; the 16.3.3 approximation
   stays as a fast option.
-  Result: GTO power spectrum through l=5 with the DScribe layout and a
-  recorded fixture. **Deviation:** the absolute DScribe normalization is not
-  reproduced numerically; the algorithm page records the difference and the
-  analysis approximation stays the default for large screens.
+  Result: GTO power spectrum through l=5 with the DScribe layout, the centre
+  self term and a recorded fixture; every feature matches within 5e-4.
 - [x] 21.1.3 ACSF and MBTR descriptors, validated against dscribe.
-  Result: documented G2/G4 and k=1/k=2 formulas with shape, finiteness and
-  averaging tests; DScribe is not bit-identical for the same reason as SOAP.
+  Result: DScribe-compatible G1/G2/G3/G4 and k=2/k=3 MBTR; the recorded
+  fixtures match within 5e-6.
 - [x] 21.1.4 MOF-specific features
   Description: RACs (revised autocorrelations) and pore geometry vectors
   combined into one feature table for MOF screening models.
@@ -43,8 +41,9 @@ potentials, and active-learning loops inside workflows.
   Description: columnar datasets through a pure-Rust Arrow/Parquet crate
   behind a feature (known subset 16.3.1); JSON Lines stays the default and
   both convert losslessly.
-  Result: `ml-parquet` with three UTF-8 columns and a lossless round-trip
-  test; WASM and the default wheels do not carry the feature.
+  Result: `ml-parquet` with three UTF-8 columns, file and byte APIs, a
+  lossless round-trip test, and inclusion in the default wheels, CLI and WASM
+  package.
 - [x] 21.2.2 Leakage-safe splits
   Description: random, composition-grouped, structure-cluster (matcher and
   fingerprint) and prototype-grouped splits, all seeded.
@@ -65,10 +64,10 @@ potentials, and active-learning loops inside workflows.
   bridge of Phase 8 remains for PyTorch-only models.
   Acceptance: energies and forces equal to the reference PyTorch model within
   documented tolerance on the fixture model.
-  Result: `OnnxModel`/`OnnxCalculator` behind `ml-onnx` with tract and
-  finite-difference forces/stress. **Deviation:** no reference PyTorch fixture
-  is bundled, so the acceptance comparison is not run; the test covers the
-  loader error paths.
+  Result: `OnnxModel`/`OnnxCalculator` with tract, finite-difference
+  forces/stress, and a bundled PyTorch-exported ONNX fixture whose energy and
+  forces match the reference within 1e-5 eV and 2e-4 eV/Angstrom. The default
+  wheels, CLI and WASM package include `ml-onnx`.
 - [x] 21.3.2 Property models
   Description: a generic `PropertyModel` (graph or descriptor → scalar) for
   ONNX classifiers and regressors, usable as a workflow step and in WASM.
@@ -90,8 +89,8 @@ potentials, and active-learning loops inside workflows.
   compute with an engine (Task 18.4) → append to the dataset, with
   checkpoints and provenance.
   Result: `active_learning_loop` with caller closures and
-  `active_learning_workflow` with the six-step document; the ML verbs are
-  named but only `search` is dispatched by the agent today.
+  `active_learning_workflow` with the six-step document; `search`,
+  `ml_predict`, `ml_select` and `ml_append` are all dispatched by the agent.
 
 ## Task 21.5 — Notebook experience
 
