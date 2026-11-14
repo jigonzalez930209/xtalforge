@@ -42,6 +42,8 @@ mod phase11_export;
 mod phase19_export;
 #[cfg(all(target_arch = "wasm32", feature = "generation"))]
 mod phase20_export;
+#[cfg(all(target_arch = "wasm32", feature = "ml"))]
+mod phase21_export;
 #[cfg(target_arch = "wasm32")]
 mod phase3;
 #[cfg(all(target_arch = "wasm32", feature = "build"))]
@@ -159,6 +161,12 @@ pub use phase20_export::{
     generate_crystal_info, generate_layer_crystal_info, generate_molecule_crystal_info,
     generate_rod_crystal_info, identify_prototype_info, layer_groups_info, mof_dataset_info,
     prototype_library_info, random_search_info, search_workflow_info, substitution_candidates_info,
+};
+#[cfg(all(target_arch = "wasm32", feature = "ml"))]
+pub use phase21_export::{
+    acsf_descriptor_info, crystal_graph_info, mbtr_descriptor_info, ml_active_workflow_info,
+    ml_import_info, ml_predict_info, ml_select_info, ml_split_info, mof_ml_features_info,
+    soap_descriptor_info,
 };
 #[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use powder_export::{
