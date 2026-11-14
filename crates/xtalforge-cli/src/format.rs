@@ -7,6 +7,8 @@ use clap::ValueEnum;
 pub(crate) enum StructureFormat {
     /// Crystallographic Information File.
     Cif,
+    /// Magnetic CIF.
+    Mcif,
     /// mmCIF/PDBx.
     Mmcif,
     /// VASP POSCAR/CONTCAR.
@@ -56,6 +58,7 @@ impl StructureFormat {
     pub(crate) const fn name(self) -> &'static str {
         match self {
             Self::Cif => "cif",
+            Self::Mcif => "mcif",
             Self::Mmcif => "mmcif",
             Self::Poscar => "poscar",
             Self::Xyz => "xyz",
@@ -88,6 +91,7 @@ impl StructureFormat {
             .to_ascii_lowercase();
         match extension.as_str() {
             "cif" => Some(Self::Cif),
+            "mcif" => Some(Self::Mcif),
             "mmcif" | "pdbx" => Some(Self::Mmcif),
             "poscar" | "contcar" | "vasp" => Some(Self::Poscar),
             "xyz" => Some(Self::Xyz),

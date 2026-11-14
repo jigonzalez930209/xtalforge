@@ -390,4 +390,31 @@ pub enum FeatureAction {
         /// JSON file with `[{ "name", "composition", "energy" }]`.
         path: String,
     },
+    /// Enumerate symmetry-ranked collinear magnetic orderings.
+    MagneticOrderings {
+        /// Input structure.
+        path: String,
+        /// Supercell repeat (one integer for a cubic repeat).
+        #[arg(long, default_value_t = 1)]
+        supercell: u32,
+        /// Maximum number of orderings.
+        #[arg(long, default_value_t = 8)]
+        max: usize,
+    },
+    /// Report partial-occupancy groups, composition and density.
+    Disorder {
+        /// Input structure.
+        path: String,
+    },
+    /// Enumerate symmetry-distinct derivative structures.
+    Derivatives {
+        /// Input structure.
+        path: String,
+        /// Largest HNF supercell index.
+        #[arg(long, default_value_t = 2)]
+        max_index: u32,
+        /// Maximum number of structures.
+        #[arg(long, default_value_t = 8)]
+        max: usize,
+    },
 }

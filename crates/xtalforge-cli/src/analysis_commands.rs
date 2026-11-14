@@ -43,6 +43,31 @@ pub(crate) enum AnalysisAction {
         #[arg(long, default_value_t = 1000)]
         samples: u32,
     },
+    /// Nuclear neutron powder diffraction.
+    Neutron {
+        /// Input structure.
+        path: String,
+        /// Neutron wavelength in Angstrom.
+        #[arg(long, default_value_t = 1.54)]
+        wavelength: f64,
+        /// Sampling step in degrees.
+        #[arg(long, default_value_t = 0.05)]
+        step: f64,
+    },
+    /// Kinematic electron diffraction for a zone axis.
+    Electron {
+        /// Input structure.
+        path: String,
+        /// Zone axis `u,v,w`.
+        #[arg(long, default_value = "0,0,1")]
+        zone: String,
+        /// Accelerating voltage in kV.
+        #[arg(long, default_value_t = 200.0)]
+        voltage: f64,
+        /// Optional PGM image output.
+        #[arg(long)]
+        image: Option<String>,
+    },
     /// Write a net overlay as JSON.
     Overlay {
         /// CGD file path.
@@ -77,6 +102,17 @@ pub(crate) fn run(cli: &Cli, action: &AnalysisAction) -> Result<(), CliError> {
             probe,
             samples,
         } => zeo(cli, path, *probe, *samples),
+        AnalysisAction::Neutron {
+            path,
+            wavelength,
+            step,
+        } => crate::phase19_commands::neutron(cli, path, *wavelength, *step),
+        AnalysisAction::Electron {
+            path,
+            zone,
+            voltage,
+            image,
+        } => crate::phase19_commands::electron(cli, path, zone, *voltage, image.as_deref()),
         AnalysisAction::Overlay {
             path,
             tolerance,

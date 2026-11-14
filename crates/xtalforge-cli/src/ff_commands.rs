@@ -62,6 +62,28 @@ pub(crate) enum FfAction {
         #[arg(long, default_value_t = 0.005)]
         step: f64,
     },
+    /// Powder-averaged Raman spectrum from an engine tensor file.
+    Raman {
+        /// Input structure.
+        path: String,
+        /// Raman tensor file.
+        #[arg(long)]
+        tensors: String,
+        /// Line width in cm^-1.
+        #[arg(long, default_value_t = 10.0)]
+        fwhm: f64,
+    },
+    /// IR spectrum from Born effective-charge tensors.
+    IrBorn {
+        /// Input structure.
+        path: String,
+        /// Born tensor file.
+        #[arg(long)]
+        born: String,
+        /// Line width in cm^-1.
+        #[arg(long, default_value_t = 10.0)]
+        fwhm: f64,
+    },
     /// Gamma-point IR spectrum.
     Ir {
         /// Input path, or `-` for standard input.
@@ -162,6 +184,14 @@ pub(crate) fn run(cli: &Cli, action: &FfAction) -> Result<(), CliError> {
             total_charge,
         } => charges(cli, path, method, *total_charge),
         FfAction::Vibrations { path, step } => vibrations(cli, path, *step),
+        FfAction::Raman {
+            path,
+            tensors,
+            fwhm,
+        } => crate::phase19_commands::raman(cli, path, tensors, *fwhm),
+        FfAction::IrBorn { path, born, fwhm } => {
+            crate::phase19_commands::ir_born(cli, path, born, *fwhm)
+        }
         FfAction::Ir { path, fwhm } => ir(cli, path, *fwhm),
         FfAction::Thermo {
             path,

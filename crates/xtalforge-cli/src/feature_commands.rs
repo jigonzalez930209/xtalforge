@@ -226,6 +226,9 @@ pub(crate) fn features(cli: &Cli, action: &FeatureAction) -> Result<(), CliError
         | FeatureAction::Elastic { .. }
         | FeatureAction::Eos { .. }
         | FeatureAction::Hull { .. } => crate::feature_mechanics::run(cli, action),
+        FeatureAction::MagneticOrderings { .. }
+        | FeatureAction::Disorder { .. }
+        | FeatureAction::Derivatives { .. } => crate::phase19_commands::feature(cli, action),
     }
 }
 
