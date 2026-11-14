@@ -41,11 +41,12 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-13)
 
-- Phases 0-16 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-17 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
   stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`,
-  `v1.6.0`, `v1.7.0`, `v1.8.0` and `v1.9.0` are published on crates.io, PyPI
-  (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release and GitHub Pages.
+  `v1.6.0`, `v1.7.0`, `v1.8.0`, `v1.9.0` and `v1.10.0` are published on
+  crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release
+  and GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
   playground and the end-to-end audit battery; `v1.2.0` (2026-11-11) releases
@@ -96,83 +97,55 @@ are in `AGENTS.md` at the repository root.
 ### Known subsets
 
 The checkboxes record that the documented local subset is implemented, tested
-and exposed on the surfaces. The following reference behaviours are subsets or
-simplified ports rather than complete reproductions; they are the first
-candidates for Phase 8 or a follow-up and are not silent approximations:
+and exposed on the surfaces. The following reference behaviours are still
+subsets or simplified ports; they are listed here rather than hidden:
 
-- 4.9: the DFTB+ parser is validated against a recorded DFTB+ output
-  (`crates/xtalforge-ff/tests/fixtures/dftb/si_scc_detailed.out`), and the xTB
-  GFN0/GFN1/GFN2 methods are available in-process through the `sci-form`
-  feature. The external launchers still need a real binary, so a complete
-  DFTB+/xTB run is not executed in CI; ORCA remains input-only by design.
-- 9.6: the Vinet equation of state is not in `EosForm`; the historical
-  Birch-Murnaghan and Murnaghan forms are unchanged (Task 9.6.2).
-- 5.3-5.4: the porosity grid still has no channel percolation,
-  probe-occupiable volume or per-mass area (MOF Tasks 10.3.1/10.3.2); meshes,
-  normals and OBJ/glTF are complete.
-- 6.1-6.4: SMILES parsing and embedding, sketches, the fragment library,
-  substitution and guest placement are Rust-only (no CLI, Python or WASM
-  surface), see the open gaps in `docs/api/parity.md`.
-- 7.x: indexing-engine agreement and the powder demo remain open; whole-range
+- 4.9: the DFTB+ parser is validated against a recorded output and the xTB
+  GFN0/GFN1/GFN2 methods are available through `sci-form`; the external
+  launchers still need a real binary, so a complete run is not in CI. ORCA
+  remains input-only by design.
+- 7.x: the powder demo and indexing-engine agreement are complete. Whole-range
   refinement, TCH/Caglioti/FCJ profiles, persistent parameter sets, Pareto
-  sweep/knee, named presets and cancellation are complete.
-- 15.2.2: streaming readers cover XYZ/LAMMPS/CIF; streaming writers and the
-  extxyz/force columns of the streams remain open.
-- 15.3.1: the local split WASM packages and budgets are complete; publishing
-  the new npm tier names is a release follow-up.
-- 15.3.2: the bundles are gzip/lazy in the crates; automatic download-on-first-
-  use in WASM remains open.
-- 15.2.1/15.2.4: the SoA columns are not fused into the linked-cell search and
-  lazy expansion only serves operations that do not need the materialised P1.
-- 16.1.1: workflows are JSON only; YAML content needs the JSON-compatible
-  subset because no YAML parser is a dependency in 1.9.
-- 16.1.2: CLI, agent and Python run workflows; WASM can validate metadata but
-  has no filesystem for inputs, checkpoints or outputs.
-- 16.3.1: the dataset container is JSON Lines; Parquet/Arrow remains a future
-  option. 16.3.3: the SOAP-like descriptor is an angular/radial approximation,
-  not exact SOAP.
-- 6.x: the MOF builder uses a curated topology/block subset and a greedy
-  orientation instead of PORMAKE's global RMSD fit.
-- 9.1: the matcher works on Niggli-reduced input cells and accepts supercell
-  relationships; it does not call the standardized primitive-cell path (which
-  is a separate API and is being audited), so a conventional/primitive pair is
-  matched by expanding the smaller cell.
-- 9.3: the Voronoi cutoff must contain every face of the cell (twice the
-  longest nearest-neighbour distance is safe); shape measures cover the
-  common polyhedra up to 12 vertices; the CrystalNN strategy is a documented
-  solid-angle/distance approximation, not pymatgen's full bond-order model.
-- 9.4: terminations use midpoint cuts between atomic layers, so cuts inside a
-  layer are not generated; adsorption sites are top/bridge/hollow on the
-  uppermost layer only.
+  sweep/knee, named presets and cancellation are complete too.
+- 9.3: the Voronoi cutoff must contain every face; shape measures cover the
+  common polyhedra up to 12 vertices. CrystalNN now uses distance,
+  solid-angle and electronegativity weights, but remains an approximation of
+  pymatgen's bond-order model rather than a bit-identical port.
 - 9.5: point defects use Voronoi vertices as interstitial candidates; the
-  ordering search caps the decorations (`max_orderings`) and ranks them with
-  the in-process Ewald sum; SQS is binary and reports pair/triplet
-  correlations, not a full cluster expansion.
-- 10.x: the curated six-topology/eight-block builder subset remains until the
-  licensed PORMAKE data drop (Task 10.5.7); database readers work on an
-  extracted directory, not a zip, and on-demand fetch is Task 10.6.4.
+  ordering search caps decorations (`max_orderings`) and ranks them with the
+  in-process Ewald sum; SQS is binary and reports pair/triplet correlations,
+  not a full cluster expansion.
+- 9.6: the elastic tensor uses stress finite differences of the native UFF
+  calculator; EOS/hull fits are point estimates with parameter errors, without
+  a global optimizer audit.
 - 10.2: deconstruction uses the all-node rule with metal-adjacent non-carbon
   atoms in the node; MOFid is a deterministic subset of the published syntax
   (unit graphs, topology, interpenetration) and MOFkey is its SHA-256.
 - 10.3: PLD/channel dimension are voxelized union-find results from the
   distance grid; they converge with the spacing and are not bit-identical to
-  Zeo++.
-- 11.1: `--threads` and the Python `threads=`/`set_threads` pool change only
-  execution; the parallel implementations keep fixed reductions. WASM has no
-  threads without cross-origin isolation, recorded as an exception.
-- 11.2-11.3: the facade `write` and the Python file helpers need a filesystem;
-  WASM offers the text/JSON forms instead. SMILES embedding builds heavy-atom
-  geometry and does not infer hydrogens from aromatic bond orders.
-- 11.4: the recipe page is documentation; Task 11.4.5 executes every recipe
-  on every surface, and the deprecation aliases are listed in
-  `docs/api/naming.md`.
+  Zeo++. POV equals the accessible voxel volume, not Zeo++'s sphere union.
 - 10.4: GCMC is single-component with rigid host/guest and an ideal-gas
   chemical potential; guest-guest interactions and Peng-Robinson fugacity are
   left to the RASPA export. Widom uses direct host-guest sums with a 15 A
   cutoff.
-- 9.6: the elastic tensor uses the stress finite differences of the native UFF
-  calculator (any `Calculator` with stress works), and the EOS/hull fits are
-  point estimates with parameter errors, without a global optimizer audit.
+- 10.x: the full PORMAKE bundle is available behind `mof-data` (2,129 nets and
+  867 blocks plus the curated subset). The conversion drops self-loop edges
+  and repeated index pairs the quotient builder cannot express; database
+  readers work on an extracted directory and `fetch_core_mof`/`fetch_qmof`
+  cache the archive.
+- 11.1: `--threads` and the Python `threads=`/`set_threads` pool change only
+  execution; fixed reductions keep results deterministic. WASM threads need
+  cross-origin isolation and stay a recorded exception.
+- 11.2-11.3: the facade `write` and Python file helpers need a filesystem;
+  WASM offers text/JSON. SMILES embedding keeps the heavy-atom default and
+  adds hydrogens only with `hydrogens`/`infer_hydrogens`.
+- 16.3.1: the dataset container is JSON Lines; Parquet/Arrow remains a future
+  option. 16.3.3: the SOAP-like descriptor is an angular/radial approximation,
+  not exact SOAP.
+- 17.x: Python progress callbacks for the profile refinements and fresh
+  external Zeo++/MOFid/RASPA e2e snapshots remain documented follow-ups; the
+  split npm tier upload needs the maintainer's token. The scripts and native
+  coverage are in the repository.
 - 8.x: every library error exits the CLI with code 3 and Python raises
   `XtalforgeError` (`InputError` for invalid input); the `code` string is the
   discriminator.
