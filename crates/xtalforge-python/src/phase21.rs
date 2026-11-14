@@ -183,10 +183,13 @@ pub(crate) fn mbtr_descriptor(
         &structure,
         &MbtrOptions {
             cutoff,
-            n_grid: grid,
-            sigma,
-            angular,
-            ..MbtrOptions::default()
+            k2: Some(xtalforge::ml::MbtrGrid::new(0.0, cutoff, grid, sigma)),
+            k3: if angular {
+                Some(xtalforge::ml::MbtrGrid::new(0.0, 180.0, grid, sigma))
+            } else {
+                None
+            },
+            elements: Vec::new(),
         },
     )
     .map_err(crate::map_error)?;
@@ -399,6 +402,77 @@ pub(crate) fn ml_active_workflow(
     json_value(py, &document)
 }
 
+/// Writes a JSON Lines dataset as a Parquet file.
+#[cfg(feature = "ml-parquet")]
+#[pyfunction]
+#[pyo3(signature = (dataset_jsonl, path))]
+pub(crate) fn ml_write_parquet(dataset_jsonl: &str, path: &str) -> PyResult<usize> {
+    let dataset = parse_dataset(dataset_jsonl)?;
+    xtalforge::ml::write_parquet(&dataset, path).map_err(crate::map_error)?;
+    Ok(dataset.len())
+}
+
+/// Reads a Parquet file as a JSON Lines dataset.
+#[cfg(feature = "ml-parquet")]
+#[pyfunction]
+#[pyo3(signature = (path))]
+pub(crate) fn ml_read_parquet(path: &str) -> PyResult<String> {
+    let dataset = xtalforge::ml::read_parquet(path).map_err(crate::map_error)?;
+    dataset.to_json_lines().map_err(crate::map_error)
+}
+
+/// Runs a single-input ONNX model.
+#[cfg(feature = "ml-onnx")]
+#[pyfunction]
+#[pyo3(signature = (model_path, features, n_features))]
+pub(crate) fn onnx_predict(
+    py: Python<'_>,
+    model_path: &str,
+    features: Vec<f64>,
+    n_features: usize,
+) -> PyResult<Py<PyAny>> {
+    let model = xtalforge::ml::OnnxModel::from_path(
+        model_path,
+        &xtalforge::ml::OnnxOptions {
+            n_features,
+            input: None,
+        },
+    )
+    .map_err(crate::map_error)?;
+    let values = model.predict(&features).map_err(crate::map_error)?;
+    json_value(py, &values)
+}
+
+/// Computes the ONNX Cartesian energy of a structure.
+#[cfg(feature = "ml-onnx")]
+#[pyfunction]
+#[pyo3(signature = (text, model_path, n_features, displacement = 0.001, format_hint = None))]
+pub(crate) fn onnx_energy(
+    text: &str,
+    model_path: &str,
+    n_features: usize,
+    displacement: f64,
+    format_hint: Option<&str>,
+) -> PyResult<f64> {
+    let structure = crate::structures::load_structure(text, format_hint)?;
+    let model = xtalforge::ml::OnnxModel::from_path(
+        model_path,
+        &xtalforge::ml::OnnxOptions {
+            n_features,
+            input: None,
+        },
+    )
+    .map_err(crate::map_error)?;
+    let calculator = xtalforge::ml::OnnxCalculator::new(
+        model,
+        xtalforge::ml::OnnxDescriptor::Cartesian,
+        displacement,
+        0.001,
+    )
+    .map_err(crate::map_error)?;
+    xtalforge::ff::Calculator::energy(&calculator, &structure).map_err(crate::map_ff_error)
+}
+
 /// Registers the Phase 21 functions.
 pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(crystal_graph_arrays_py, module)?)?;
@@ -412,5 +486,15 @@ pub(crate) fn register(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(ml_predict_dataset, module)?)?;
     module.add_function(wrap_pyfunction!(ml_select, module)?)?;
     module.add_function(wrap_pyfunction!(ml_active_workflow, module)?)?;
+    #[cfg(feature = "ml-parquet")]
+    {
+        module.add_function(wrap_pyfunction!(ml_write_parquet, module)?)?;
+        module.add_function(wrap_pyfunction!(ml_read_parquet, module)?)?;
+    }
+    #[cfg(feature = "ml-onnx")]
+    {
+        module.add_function(wrap_pyfunction!(onnx_predict, module)?)?;
+        module.add_function(wrap_pyfunction!(onnx_energy, module)?)?;
+    }
     Ok(())
 }
