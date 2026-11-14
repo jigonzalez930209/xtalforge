@@ -15,11 +15,11 @@ import PlaygroundSymmetryPanel from './PlaygroundSymmetryPanel.vue'
 import PlaygroundAnalysisPanel from './PlaygroundAnalysisPanel.vue'
 import PlaygroundPowderPanel from './PlaygroundPowderPanel.vue'
 import PlaygroundForcefieldPanel from './PlaygroundForcefieldPanel.vue'
+import PlaygroundMofPanel from './PlaygroundMofPanel.vue'
 import PlaygroundExportPanel from './PlaygroundExportPanel.vue'
 import PlaygroundTourPanel from './PlaygroundTourPanel.vue'
 import { runOperation } from '../playground/operations'
 import type { TourStep } from '../playground/tour'
-
 type Measure = { kind: string; value: number; indices: number[] }
 const host = ref<HTMLElement | null>(null)
 const viewer = ref<HTMLElement | null>(null)
@@ -49,7 +49,6 @@ const autoRotate = ref(false)
 let renderer: SceneRenderer | null = null
 
 const summary = computed(() => inspection.value?.summary)
-
 function applyVisibility() {
   renderer?.setCellVisible(showCell.value)
   renderer?.setAxesVisible(showAxes.value)
@@ -484,6 +483,7 @@ onBeforeUnmount(() => {
           :busy="busy"
           @apply="(contents, name) => loadText(contents, name)"
         />
+        <PlaygroundMofPanel v-else-if="tab === 'mof'" :wasm="wasmModule" :text="text" :busy="busy" />
         <PlaygroundExportPanel
           v-else
           :summary="summary"
