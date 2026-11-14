@@ -4,17 +4,18 @@
 //!
 //! Two structures match when a unimodular lattice mapping, an origin shift and
 //! a species-preserving atom permutation bring every site within `stol`. The
-//! search works on Niggli-reduced cells, so it does not depend on the input
-//! basis. A supercell relationship is accepted when the volume ratio is an
-//! integer and `allow_supercell` is set.
+//! search works on standardized primitive cells (Task 17.3.3), so a
+//! conventional/primitive pair matches directly and does not depend on the
+//! input basis. A supercell relationship is accepted when the volume ratio is
+//! an integer and `allow_supercell` is set.
 
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use xtalforge_core::{Error, Lattice, Site, Structure, StructureBuilder};
 
+use crate::matcher_canonical::prepare;
 use crate::matcher_lattice::find_integer_mappings;
-use crate::reduction::{Reduction, reduce_structure};
 
 /// How species are compared.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -257,15 +258,6 @@ pub fn interpolate_matched(
     xtalforge_core::interpolate(&first_p1, &aligned, images)
 }
 
-fn prepare(
-    structure: &Structure,
-    options: &MatcherOptions,
-) -> Result<xtalforge_core::P1Cell, Error> {
-    let _ = options;
-    let reduced = reduce_structure(structure, Reduction::Niggli)?;
-    reduced.structure.p1()
-}
-
 type BestMatch = (f64, [f64; 3], Vec<usize>, [[i32; 3]; 3]);
 
 fn no_match() -> StructureMatch {
@@ -313,7 +305,7 @@ fn map_cell(
     matrix: &[[i32; 3]; 3],
 ) -> Result<xtalforge_core::P1Cell, Error> {
     let rows = matrix.map(|row| row.map(f64::from));
-    let lattice = Lattice::new(rows)?.transform(structure.lattice.matrix())?;
+    let lattice = structure.lattice.transform(rows)?;
     let inverse = lattice.inverse();
     let site_lattice = lattice;
     let mut builder = StructureBuilder::new("mapped", site_lattice);

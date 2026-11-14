@@ -116,7 +116,7 @@ fn lattice_error(
             error += ((length - lengths[row]) / lengths[row]).abs();
         }
     }
-    for (index, (i, j)) in [(0, 1), (0, 2), (1, 2)].iter().enumerate() {
+    for (index, (i, j)) in [(1, 2), (0, 2), (0, 1)].iter().enumerate() {
         let a = transformed[*i];
         let b = transformed[*j];
         let norm_a = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]).sqrt();

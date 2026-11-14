@@ -14,6 +14,7 @@ pub mod kpath;
 pub mod layer;
 pub mod magnetic;
 pub mod matcher;
+mod matcher_canonical;
 mod matcher_lattice;
 pub mod molecular;
 pub mod reduction;
