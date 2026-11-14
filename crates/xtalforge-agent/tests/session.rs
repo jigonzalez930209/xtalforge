@@ -333,3 +333,48 @@ fn close_removes_the_document() {
         Err(Error::NoDocument)
     ));
 }
+
+#[test]
+fn ml_verbs_predict_select_and_append() {
+    let (mut session, _) = loaded();
+    let model = serde_json::json!({
+        "name": "constant",
+        "weights": vec![0.0; 50],
+        "bias": 1.5,
+        "mean": [],
+        "scale": []
+    })
+    .to_string();
+    let answer = session
+        .run("ml_predict", &json!({ "model": model, "features": "soap" }))
+        .expect("predict");
+    let Answer::MlPrediction { value, .. } = answer else {
+        panic!("expected a prediction");
+    };
+    assert!((value - 1.5).abs() < 1e-12);
+
+    let answer = session
+        .run(
+            "ml_select",
+            &json!({
+                "features": [[0.0], [1.0], [5.0]],
+                "uncertainties": [0.1, 0.9, 0.2],
+                "batch": 2,
+                "strategy": "uncertainty"
+            }),
+        )
+        .expect("select");
+    let Answer::MlSelection { selected } = answer else {
+        panic!("expected a selection");
+    };
+    assert_eq!(selected, vec![1, 2]);
+
+    let answer = session
+        .run("ml_append", &json!({ "key": "predicted", "value": 2.5 }))
+        .expect("append");
+    let Answer::MlAppend { key, value, .. } = answer else {
+        panic!("expected an append");
+    };
+    assert_eq!(key, "predicted");
+    assert_eq!(value, 2.5);
+}
