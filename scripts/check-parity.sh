@@ -51,6 +51,10 @@ check_rust() {
     indexing_agreement) name=indexing_agreement ;;
     database_fetch) name=fetch_core_mof ;;
     mof_data) name=build_mof ;;
+    engine_inputs) name=write_input_set ;;
+    engine_outputs) grep -Rq 'pub fn parse' crates/xtalforge-engines/src/parse && return ;;
+    engine_electronic) name=band_structure ;;
+    engine_jobs) name=scheduler_script ;;
     net_invariants) name=quotient_graph ;;
     zeo_parse) name=parse_zeo_channels ;;
     groups) name=find_groups ;;
@@ -152,6 +156,10 @@ check_python() {
     indexing_agreement) name=powder_index_agreement ;;
     database_fetch) name=mof_fetch_database ;;
     mof_data) name=mof_blocks ;;
+    engine_inputs) name=engine_input_set ;;
+    engine_outputs) name=engine_parse ;;
+    engine_electronic) name=engine_bands ;;
+    engine_jobs) name=engine_script ;;
     powder_pawley) name=powder_pawley ;;
     refine_phase) name=powder_refine ;;
   esac
@@ -220,6 +228,10 @@ check_wasm() {
     indexing_agreement) name=powder_index_agreement_info ;;
     database_fetch) name=fetch_data_bundle ;;
     mof_data) name=mof_topologies_info ;;
+    engine_inputs) name=engine_input_set_info ;;
+    engine_outputs) name=engine_parse_info ;;
+    engine_electronic) name=engine_bands_info ;;
+    engine_jobs) name=engine_script_info ;;
     net_invariants) name=net_invariants_info ;;
     zeo_parse) name=zeo_parse_info ;;
     fragment_library) name=fragment_library_info ;;
@@ -264,6 +276,7 @@ check_cli() {
     porosity|porosity_report|net_invariants|zeo_parse|ring_paths) command=analysis ;;
     indexing_agreement) command=powder ;;
     database_fetch|mof_data) command=mof ;;
+    engine_inputs|engine_outputs|engine_electronic|engine_jobs) command=engines ;;
     agent_capabilities|agent_verbs) command=capabilities ;;
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
