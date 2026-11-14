@@ -1,0 +1,32 @@
+ vasp.6.4.2 13Nov2026
+ POSCAR: MgO
+   TITEL  = PAW_PBE Mg 06Sep2000
+   TITEL  = PAW_PBE O 08Apr2002
+   ions per type =               1   1
+
+   direct lattice vectors
+   4.210000000  0.000000000  0.000000000
+   0.000000000  4.210000000  0.000000000
+   0.000000000  0.000000000  4.210000000
+
+ POSITION                                       TOTAL-FORCE (eV/Angst)
+ -----------------------------------------------------------------------------------
+      0.00000      0.00000      0.00000         0.000000      0.000000      0.010000
+      2.10500      2.10500      2.10500         0.000000      0.000000     -0.010000
+ -----------------------------------------------------------------------------------
+
+ free  energy   TOTEN  =        -10.500000 eV
+ E-fermi :   5.1234     XC(G=0):  -0.1234     alpha+bet : -0.0456
+
+ in kB       1.00000   2.00000   3.00000   0.00000   0.00000   0.00000
+ total charge = 20.0000
+
+ magnetization (x)
+
+# of ions per type     2
+   1      0.010000      0.000000      0.000000
+   2     -0.010000      0.000000      0.000000
+
+ reached required accuracy - stopping structural energy minimisation
+ Total CPU time used (sec):       12.345
+ Elapsed time (sec):       13.000

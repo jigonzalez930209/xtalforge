@@ -1,0 +1,7 @@
+       N       E                     dE             d eps       ncg     rms          rms(c)
+DAV:   1    -0.105000000000E+02   -0.105E+02   -0.100E-02   16   0.100E-03
+DAV:   2    -0.106000000000E+02   -0.100E+00   -0.100E-05   12   0.100E-06
+   1 F= -.10500000E+02 E0= -.10500000E+02  d E =-.105000E+02
+DAV:   1    -0.107000000000E+02   -0.200E-01   -0.100E-03   14   0.200E-04
+   2 F= -.10700000E+02 E0= -.10700000E+02  d E =-.200000E-01
+ reached required accuracy - stopping structural energy minimisation

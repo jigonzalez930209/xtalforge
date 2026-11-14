@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<modeling>
+ <generator>
+  <i name="program" type="string">vasp.6.4.2</i>
+  <i name="version" type="string">6.4.2</i>
+ </generator>
+ <atominfo>
+  <atoms>2</atoms>
+  <array name="atoms">
+   <set>
+    <rc><c>Mg</c><c>1</c><c>-1.000</c></rc>
+    <rc><c>O</c><c>2</c><c>-1.000</c></rc>
+   </set>
+  </array>
+ </atominfo>
+ <kpoints>
+  <varray name="kpointlist">
+   <v>0.000000 0.000000 0.000000</v>
+  </varray>
+  <varray name="weights">
+   <v>1.000000</v>
+  </varray>
+ </kpoints>
+ <calculation>
+  <structure name="initialpos">
+   <crystal>
+    <varray name="basis">
+     <v>4.210000 0.000000 0.000000</v>
+     <v>0.000000 4.210000 0.000000</v>
+     <v>0.000000 0.000000 4.210000</v>
+    </varray>
+   </crystal>
+   <varray name="positions">
+    <v>0.000000 0.000000 0.000000</v>
+    <v>0.500000 0.500000 0.500000</v>
+   </varray>
+  </structure>
+  <energy>
+   <i name="e_fr_energy">-10.500000</i>
+   <i name="e_0_energy">-10.500000</i>
+  </energy>
+  <varray name="forces">
+   <v>0.000000 0.000000 0.010000</v>
+   <v>0.000000 0.000000 -0.010000</v>
+  </varray>
+  <varray name="stress">
+   <v>1.000000 0.000000 0.000000</v>
+   <v>0.000000 2.000000 0.000000</v>
+   <v>0.000000 0.000000 3.000000</v>
+  </varray>
+  <varray name="magnetization">
+   <v>0.010000 0.000000 0.000000</v>
+   <v>-0.010000 0.000000 0.000000</v>
+  </varray>
+ </calculation>
+ <calculation>
+  <structure>
+   <crystal>
+    <varray name="basis">
+     <v>4.210000 0.000000 0.000000</v>
+     <v>0.000000 4.210000 0.000000</v>
+     <v>0.000000 0.000000 4.210000</v>
+    </varray>
+   </crystal>
+   <varray name="positions">
+    <v>0.000000 0.000000 0.000000</v>
+    <v>0.490000 0.500000 0.500000</v>
+   </varray>
+  </structure>
+  <energy>
+   <i name="e_fr_energy">-10.700000</i>
+   <i name="e_0_energy">-10.700000</i>
+  </energy>
+  <varray name="forces">
+   <v>0.000000 0.000000 0.020000</v>
+   <v>0.000000 0.000000 -0.020000</v>
+  </varray>
+  <varray name="stress">
+   <v>1.500000 0.000000 0.000000</v>
+   <v>0.000000 2.500000 0.000000</v>
+   <v>0.000000 0.000000 3.500000</v>
+  </varray>
+  <varray name="magnetization">
+   <v>0.020000 0.000000 0.000000</v>
+   <v>-0.020000 0.000000 0.000000</v>
+  </varray>
+  <eigenvalues>
+   <array>
+    <set comment="spin 1">
+     <set comment="kpoint 1">
+      <r>-1.000000 1.000000</r>
+      <r>2.000000 0.000000</r>
+     </set>
+    </set>
+   </array>
+  </eigenvalues>
+ </calculation>
+ <structure name="finalpos">
+  <crystal>
+   <varray name="basis">
+    <v>4.210000 0.000000 0.000000</v>
+    <v>0.000000 4.210000 0.000000</v>
+    <v>0.000000 0.000000 4.210000</v>
+   </varray>
+  </crystal>
+  <varray name="positions">
+   <v>0.000000 0.000000 0.000000</v>
+   <v>0.490000 0.500000 0.500000</v>
+  </varray>
+ </structure>
+ <dos>
+  <i name="efermi">5.123400</i>
+  <total>
+   <array>
+    <set comment="spin 1">
+     <r>-5.000000 0.000000 0.000000</r>
+     <r>0.000000 1.000000 0.500000</r>
+     <r>5.000000 2.000000 2.000000</r>
+    </set>
+   </array>
+  </total>
+ </dos>
+ <timing>
+  <i name="total_cpu_time">12.500000</i>
+  <i name="total_wall_time">13.000000</i>
+ </timing>
+</modeling>
