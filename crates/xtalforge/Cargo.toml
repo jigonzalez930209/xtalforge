@@ -54,7 +54,7 @@ full = ["analysis", "build", "ff", "mof", "modules", "agent"]
 sci-form = ["agent", "xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
 ml = []
 external = []
-net = ["dep:ureq"]
+net = ["dep:ureq", "xtalforge-mof?/net"]
 mof-data = ["mof", "xtalforge-mof/mof-data"]
 
 [lints]
