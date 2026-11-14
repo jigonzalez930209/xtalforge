@@ -44,11 +44,13 @@ default = ["full"]
 core = []
 symmetry = ["core"]
 workflow = ["core", "xtalforge/agent"]
+engines = ["core", "xtalforge/engines"]
 analysis = ["core", "xtalforge/analysis"]
 build = ["core", "xtalforge/build"]
 full = [
   "symmetry",
   "workflow",
+  "engines",
   "analysis",
   "build",
   "xtalforge/ff",
