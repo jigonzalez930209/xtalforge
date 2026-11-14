@@ -125,6 +125,9 @@ pub(crate) fn detect_format(text: &str) -> &'static str {
     if text.trim_start().starts_with('{') {
         return "json";
     }
+    if text.contains("_space_group_symop_magn_") || text.contains("_atom_site_moment_") {
+        return "mcif";
+    }
     if text.trim_start().starts_with("data_")
         || text.contains("_cell_length_a")
         || text.contains("_atom_site_")
@@ -158,9 +161,18 @@ pub(crate) fn as_p1_structure(structure: &Structure) -> PyResult<Structure> {
     let p1 = structure.p1().map_err(crate::map_error)?;
     let mut builder = StructureBuilder::new(structure.name(), *structure.lattice());
     for atom in &p1.atoms {
-        let site = Site::new(atom.label.clone(), &atom.element, atom.frac)
-            .and_then(|site| site.with_occupancy(atom.occupancy))
-            .map_err(crate::map_error)?;
+        let site = if let Some(source) = structure.sites().get(atom.site_idx) {
+            source
+                .clone()
+                .with_label(atom.label.clone())
+                .and_then(|site| site.with_frac(atom.frac))
+                .and_then(|site| site.with_occupancy(atom.occupancy))
+                .map_err(crate::map_error)?
+        } else {
+            Site::new(atom.label.clone(), &atom.element, atom.frac)
+                .and_then(|site| site.with_occupancy(atom.occupancy))
+                .map_err(crate::map_error)?
+        };
         builder = builder.site(site);
     }
     for (key, value) in structure.metadata() {
