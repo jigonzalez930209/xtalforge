@@ -8,12 +8,12 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.11.0` published on 2026-11-14. Phases 0-18 are complete; Phases
-> 19-21 (magnetism and spectroscopy, structure generation, ML) lead to the 2.0
-> redesign in Phase 22. The public API is frozen; later changes follow the
-> SemVer policy in `docs/api/stability.md`. `1.11.0` adds the simulation-engine
-> bridge: input sets, output parsers, bands/DOS, scheduler jobs and the
-> `xtalforge-engines` crate. The known reference gaps are
+> Status: `1.12.0` published on 2026-11-14. Phases 0-19 are complete; Phases
+> 20-21 (structure generation, ML) lead to the 2.0 redesign in Phase 22. The
+> public API is frozen; later changes follow the SemVer policy in
+> `docs/api/stability.md`. `1.12.0` adds magnetism, mCIF, disorder and
+> derivative enumeration, neutron/electron diffraction and vibrational
+> spectroscopy. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
@@ -59,9 +59,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.11.0
-pip install xtalforge==1.11.0
-npm install xtalforge-wasm@1.11.0
+cargo add xtalforge@1.12.0
+pip install xtalforge==1.12.0
+npm install xtalforge-wasm@1.12.0
 ```
 
 ## Goals

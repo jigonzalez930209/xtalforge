@@ -5,6 +5,41 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.12.0] - 2026-11-14
+
+Phase 19 opens the library to the magnetism, alloy and spectroscopy
+communities.
+
+### Added
+
+- Typed collinear and vector magnetic moments on sites, preserved by the P1
+  expansion, supercells, slabs and the additive JSON schema; mCIF read/write
+  with magnetic operations and crystal-axis moments.
+- Magnetic space-group detection options, moment symmetrisation with
+  per-site stabilizers, MAGMOM helpers and symmetry-ranked ferro/antiferro/
+  ferri ordering enumeration.
+- Partial occupancies as first-class data: disorder groups, composition,
+  density and scattering weights; HNF supercells with symmetry-distinct
+  decorations; multicomponent SQS correlations; cluster-expansion feature
+  vectors.
+- Nuclear neutron powder diffraction (constant wavelength and TOF), magnetic
+  neutron scattering from site moments, kinematic SAED with an image buffer,
+  and the phase 19 CLI/Python/WASM surfaces.
+- IR intensities from Born effective charges, powder-averaged Raman from
+  engine tensors, phonon DOS and inelastic-neutron mode weights.
+- API pages for magnetism, disorder and spectroscopy, algorithm pages for
+  magnetic symmetry, disorder enumeration, neutron/electron diffraction and
+  spectroscopy, the magnetism tutorial and 10 parity rows.
+
+### Notes
+
+- spglib magnetic golden data is not redistributed; the magnetic cases are
+  hand-built and the deviation is documented.
+- mCIF magnetic operations are stored and round-tripped; applying a
+  higher-symmetry magnetic asymmetric unit is limited to the explicit sites.
+- Raman needs engine-provided polarizability tensors; no native model.
+- Process execution and scheduler probes remain host-side.
+
 ## [1.11.0] - 2026-11-14
 
 Phase 18 makes xtalforge the layer between a structure and a real simulation.
