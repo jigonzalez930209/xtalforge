@@ -1,0 +1,36 @@
+[package]
+name = "xtalforge-generation"
+readme = "../../README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Structure generation and global search for xtalforge."
+include = ["src/**", "data/**"]
+
+[features]
+default = []
+# Loads the complete PORMAKE 0.2.3 topology and block bundle (Task 17.1.3).
+mof-data = ["xtalforge-mof/mof-data"]
+
+[dependencies]
+xtalforge-analysis = { workspace = true }
+xtalforge-build = { workspace = true }
+xtalforge-core = { workspace = true }
+xtalforge-ff = { workspace = true }
+xtalforge-mof = { workspace = true }
+xtalforge-symmetry = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
