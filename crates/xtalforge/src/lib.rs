@@ -15,6 +15,8 @@
 //! - [`build`]: molecules, carbon, polymers and the SMILES embedder.
 //! - [`mof`]: the MOF builder and the Phase 10 platform.
 //! - [`engines`]: simulation input sets, output parsers and electronic structure.
+//! - [`generation`]: random crystals, molecular and low-dimensional
+//!   generators, global search, prototypes and hypothetical MOFs.
 //! - [`modules`] and [`agent`]: workspaces, jobs and the agent/MCP surface.
 //!
 //! # Features
@@ -27,6 +29,7 @@
 //! | `ff` | yes | Re-exports `xtalforge-ff` as [`ff`]; implies `build`. |
 //! | `mof` | yes | Re-exports `xtalforge-mof` as [`mof`]; implies `ff`. |
 //! | `engines` | yes | Re-exports `xtalforge-engines` as [`engines`]; implies `mof`. |
+//! | `generation` | yes | Re-exports `xtalforge-generation` as [`generation`]; implies `mof`. |
 //! | `modules` | yes | Re-exports `xtalforge-modules` as [`modules`]. |
 //! | `agent` | yes | Re-exports `xtalforge-agent` as [`agent`]; implies `mof` and `modules`. |
 //! | `full` | yes | Shorthand for every surface tier above. |
@@ -69,6 +72,8 @@ pub use xtalforge_core as core;
 pub use xtalforge_engines as engines;
 #[cfg(feature = "ff")]
 pub use xtalforge_ff as ff;
+#[cfg(feature = "generation")]
+pub use xtalforge_generation as generation;
 pub use xtalforge_io as io;
 #[cfg(feature = "modules")]
 pub use xtalforge_modules as modules;
