@@ -19,6 +19,13 @@ set -u
 root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 cd "$root" || exit 2
 
+# rustdoc and the linker use TMPDIR for large temporary files; the default
+# /tmp is often a small tmpfs on developer machines. Keep gate temporaries on
+# the same filesystem as the target directory.
+gate_tmp="$root/target/gate-tmp"
+mkdir -p "$gate_tmp"
+export TMPDIR="$gate_tmp"
+
 quick=0
 list_only=0
 for argument in "$@"; do
