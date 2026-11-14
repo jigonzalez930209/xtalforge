@@ -14,6 +14,7 @@
 //! - [`analysis`]: PXRD, porosity, nets, defects, orderings and interfaces.
 //! - [`build`]: molecules, carbon, polymers and the SMILES embedder.
 //! - [`mof`]: the MOF builder and the Phase 10 platform.
+//! - [`engines`]: simulation input sets, output parsers and electronic structure.
 //! - [`modules`] and [`agent`]: workspaces, jobs and the agent/MCP surface.
 //!
 //! # Features
@@ -25,6 +26,7 @@
 //! | `build` | yes | Re-exports `xtalforge-build` as [`build`]; implies `analysis`. |
 //! | `ff` | yes | Re-exports `xtalforge-ff` as [`ff`]; implies `build`. |
 //! | `mof` | yes | Re-exports `xtalforge-mof` as [`mof`]; implies `ff`. |
+//! | `engines` | yes | Re-exports `xtalforge-engines` as [`engines`]; implies `mof`. |
 //! | `modules` | yes | Re-exports `xtalforge-modules` as [`modules`]. |
 //! | `agent` | yes | Re-exports `xtalforge-agent` as [`agent`]; implies `mof` and `modules`. |
 //! | `full` | yes | Shorthand for every surface tier above. |
@@ -32,7 +34,7 @@
 //! | `ml` | no | Reserved for the Python machine-learning bridge (Task 8.4). |
 //! | `external` | no | Reserved for the subprocess engines (Task 4.9). |
 //! | `net` | no | Blocking HTTP for OPTIMADE, COD and Materials Project fetches (Task 13.3). |
-//! | `mof-data` | no | Reserved for the complete PORMAKE bundle (Task 10.5.7). |
+//! | `mof-data` | no | Loads the full PORMAKE 0.2.3 bundle (Task 17.1.3). |
 //!
 //! The base build always carries `core`, `io`, `symmetry`, `view` and
 //! `commands`. Disable default features with `default-features = false` to
@@ -63,6 +65,8 @@ pub use xtalforge_analysis as analysis;
 pub use xtalforge_build as build;
 pub use xtalforge_commands as commands;
 pub use xtalforge_core as core;
+#[cfg(feature = "engines")]
+pub use xtalforge_engines as engines;
 #[cfg(feature = "ff")]
 pub use xtalforge_ff as ff;
 pub use xtalforge_io as io;
