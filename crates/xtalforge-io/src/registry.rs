@@ -101,6 +101,12 @@ pub fn write_with(structure: &Structure, hint: &str) -> Result<String, Error> {
 #[must_use]
 pub fn sniff(text: &str) -> Option<&'static FormatSpec> {
     let trimmed = text.trim_start_matches('\u{feff}').trim_start();
+    if text.contains("_atom_site_moment")
+        || text.contains("_space_group_symop_magn")
+        || text.contains("_space_group_symop.magn")
+    {
+        return find("mcif");
+    }
     if text.contains("_atom_site.") || text.contains("_cell.") {
         return find("mmcif");
     }
