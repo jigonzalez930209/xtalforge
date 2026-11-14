@@ -20,7 +20,42 @@ fn parses_ethanol_and_benzene() {
     assert_eq!(benzene.atoms.len(), 6);
     assert_eq!(benzene.bonds.len(), 6);
     assert!(benzene.atoms.iter().all(|atom| atom.aromatic));
-    assert!(benzene.bonds.iter().any(|bond| bond.order == 1.0));
+    assert!(benzene.bonds.iter().all(|bond| bond.order == 1.5));
+}
+
+#[test]
+fn aromatic_bonds_default_to_one_and_a_half() {
+    let benzene = parse_smiles("c1ccccc1").unwrap();
+    assert_eq!(benzene.bonds.len(), 6);
+    assert!(benzene.bonds.iter().all(|bond| bond.order == 1.5));
+    let pyridine = parse_smiles("c1ccncc1").unwrap();
+    assert_eq!(pyridine.atoms[3].element, "N");
+    assert_eq!(pyridine.bonds.len(), 6);
+    assert!(pyridine.bonds.iter().all(|bond| bond.order == 1.5));
+    assert!(pyridine.bonds.iter().any(|bond| {
+        let first = &pyridine.atoms[bond.a];
+        let second = &pyridine.atoms[bond.b];
+        (first.element == "N" && second.element == "C")
+            || (first.element == "C" && second.element == "N")
+    }));
+}
+
+#[test]
+fn explicit_bond_symbols_override_the_aromatic_order() {
+    let single = parse_smiles("c1ccccc-1").unwrap();
+    let closure = single
+        .bonds
+        .iter()
+        .find(|bond| bond.a == 0 && bond.b == 5)
+        .unwrap();
+    assert_eq!(closure.order, 1.0);
+    let double = parse_smiles("c1ccccc=1").unwrap();
+    let closure = double
+        .bonds
+        .iter()
+        .find(|bond| bond.a == 0 && bond.b == 5)
+        .unwrap();
+    assert_eq!(closure.order, 2.0);
 }
 
 #[test]
