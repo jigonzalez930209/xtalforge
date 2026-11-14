@@ -254,7 +254,7 @@ fn the_published_schema_describes_the_model() {
     assert_eq!(schema["properties"]["workflow_version"]["const"], 1);
     assert_eq!(schema["$defs"]["step"]["required"][0], "kind");
     assert_eq!(schema["x-xtalforge"]["schema_version"], WORKFLOW_VERSION);
-    assert_eq!(schema["x-xtalforge"]["yaml"], false);
+    assert_eq!(schema["x-xtalforge"]["yaml"], true);
     let presets = schema["x-xtalforge"]["presets"]
         .as_array()
         .expect("presets");
@@ -328,16 +328,20 @@ fn a_missing_literal_input_is_an_error() {
 }
 
 #[test]
-fn a_yaml_file_holding_json_is_accepted() {
+fn a_yaml_file_is_read_by_extension() {
     let directory = temp_dir("yaml");
     let path = directory.join("workflow.yaml");
-    std::fs::write(&path, FIXTURE).expect("write");
+    std::fs::write(&path, FIXTURE).expect("write JSON");
     let workflow = Workflow::from_path(&path).expect("JSON is a YAML subset");
     assert_eq!(workflow.name, "inspect-copy");
 
-    std::fs::write(&path, "workflow_version: 1\nname: x\nsteps: []\n").expect("write");
-    let error = Workflow::from_path(&path).expect_err("YAML-only syntax is refused");
-    assert_eq!(error.code(), "workflow_parse");
-    assert!(error.to_string().contains("JSON only"));
+    std::fs::write(
+        &path,
+        "workflow_version: 1\nname: x\nsteps:\n  - kind: read\n",
+    )
+    .expect("write YAML");
+    let workflow = Workflow::from_path(&path).expect("YAML is accepted");
+    assert_eq!(workflow.name, "x");
+    assert_eq!(workflow.steps.len(), 1);
     let _ = std::fs::remove_dir_all(&directory);
 }
