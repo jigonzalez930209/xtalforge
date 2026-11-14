@@ -186,6 +186,19 @@ compares this table with the symbols each surface actually exports.
 | `electron_diffraction` | 19 | done | done | done | done | Kinematic SAED with an image buffer (Task 19.3.3) |
 | `raman` | 19 | done | done | done | done | Powder-averaged Raman from engine tensors (Task 19.4.2) |
 | `phonon_dos_neutron` | 19 | done | done | done | done | Phonon DOS and inelastic-neutron weights (Task 19.4.3) |
+| `generate_crystal` | 20 | done | done | done | done | Wyckoff-constrained random crystals (Task 20.1.1) |
+| `generate_molecule_crystal` | 20 | done | done | done | done | Rigid molecules on Wyckoff positions (Task 20.1.2) |
+| `layer_groups` | 20 | done | done | done | done | The 80 layer groups and their Wyckoff positions (Tasks 2.8.1 and 20.1.3) |
+| `generate_layer_crystal` | 20 | done | done | done | done | Layer generator (Task 20.1.3) |
+| `generate_rod_crystal` | 20 | done | done | done | done | The fourteen-rod-group subset (Task 20.1.3) |
+| `random_search` | 20 | done | done | done | done | AIRSS-style relaxation, deduplication and ranking (Task 20.2.1); WASM callers run it in a worker |
+| `evolutionary_search` | 20 | done | done | done | done | Cut-and-splice, mutation and diversity (Task 20.2.2) |
+| `search_workflow` | 20 | done | done | done | done | Checkpointed workflow document and resumable chunks (Task 20.2.3); WASM emits the document, checkpoints stay host-side |
+| `prototype_library` | 20 | done | done | done | done | Curated AFLOW/Strukturbericht subset (Task 20.3.1) |
+| `identify_prototype` | 20 | done | done | done | done | Space group, Wyckoff signature, stoichiometry and matcher (Task 20.3.2) |
+| `substitution_candidates` | 20 | done | done | done | done | Ionic-radius and oxidation-state rules (Task 20.3.3) |
+| `mof_dataset` | 20 | done | done | done | done | Topology x node x linker enumeration with UFF4MOF and descriptors (Task 20.4.2); the browser keeps the curated subset |
+| `functionalization_sweep` | 20 | done | done | done | done | Post-synthetic modification over groups and fractions (Task 20.4.3) |
 
 ## Recorded exceptions
 
