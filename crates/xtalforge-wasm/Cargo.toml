@@ -46,6 +46,7 @@ symmetry = ["core"]
 workflow = ["core", "xtalforge/agent"]
 engines = ["core", "xtalforge/engines"]
 generation = ["core", "xtalforge/generation", "xtalforge/mof"]
+ml = ["core", "xtalforge/ml", "xtalforge/analysis"]
 analysis = ["core", "xtalforge/analysis"]
 build = ["core", "xtalforge/build"]
 full = [
@@ -55,6 +56,7 @@ full = [
   "analysis",
   "build",
   "generation",
+  "ml",
   "xtalforge/ff",
   "xtalforge/mof",
   "xtalforge/modules",
