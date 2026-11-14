@@ -41,12 +41,12 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-13)
 
-- Phases 0-18 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-19 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
   stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`,
-  `v1.6.0`, `v1.7.0`, `v1.8.0`, `v1.9.0`, `v1.10.0` and `v1.11.0` are published on
-  crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release
-  and GitHub Pages.
+  `v1.6.0`, `v1.7.0`, `v1.8.0`, `v1.9.0`, `v1.10.0`, `v1.11.0` and `v1.12.0`
+  are published on crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the
+  GitHub release and GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
   package and the hosted CLI assets; `v1.1.0` (2026-11-11) adds the 3D
   playground and the end-to-end audit battery; `v1.2.0` (2026-11-11) releases
@@ -60,7 +60,9 @@ are in `AGENTS.md` at the repository root.
   data; `v1.7.0` (2026-11-13) releases Phase 14, the diffraction, force-field,
   structure-operation, mesh and report work; `v1.8.0` releases Phase 15, the
   benchmark contract, scale paths, split WASM and lazy data; `v1.9.0` releases
-  Phase 16, the workflow, provenance and dataset work.
+  Phase 16, the workflow, provenance and dataset work; `v1.10.0` releases the
+  Phase 17 consolidation; `v1.11.0` releases the Phase 18 engine bridge;
+  `v1.12.0` releases Phase 19, magnetism, disorder and spectroscopy.
 - Phase 8 is complete: `xtalforge-agent` (verbs, session, diagnostics, MCP,
   skill), plugins, the Python ML bridge, distribution, benchmarks, robustness,
   tutorials and the API freeze. Phase 9 is complete: comparison, edits, local
@@ -146,6 +148,11 @@ subsets or simplified ports; they are listed here rather than hidden:
   external Zeo++/MOFid/RASPA e2e snapshots remain documented follow-ups; the
   split npm tier upload needs the maintainer's token. The scripts and native
   coverage are in the repository.
+- 19.x: spglib magnetic golden data is not redistributed, so the magnetic
+  cases are hand-built; mCIF operation loops are stored and round-tripped but
+  a higher-symmetry magnetic asymmetric unit is not expanded. The magnetic
+  form factor is the normalized X-ray shape (spin-only), and Raman needs
+  engine-provided polarizability tensors rather than a native model.
 - 8.x: every library error exits the CLI with code 3 and Python raises
   `XtalforgeError` (`InputError` for invalid input); the `code` string is the
   discriminator.
