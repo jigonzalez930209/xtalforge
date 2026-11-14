@@ -33,6 +33,23 @@ pub(super) fn hydrogen_directions(
     }
 }
 
+/// Directions for `missing` hydrogens seen from `origin` towards `neighbours`.
+///
+/// Non-periodic counterpart of the P1 path: every neighbour point is turned
+/// into a unit vector before the ideal-geometry construction runs.
+pub(crate) fn directions_from_points(
+    origin: [f64; 3],
+    neighbours: &[[f64; 3]],
+    missing: usize,
+    angle_degrees: f64,
+) -> Result<Vec<[f64; 3]>, Error> {
+    let mut directions = Vec::with_capacity(neighbours.len());
+    for neighbour in neighbours {
+        directions.push(normalized(difference(*neighbour, origin))?);
+    }
+    hydrogen_directions(&directions, missing, angle_degrees)
+}
+
 /// Directions for an isolated atom: the cardinal axes, tetrahedral for four.
 fn no_neighbour_directions(missing: usize) -> Result<Vec<[f64; 3]>, Error> {
     let axes = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
@@ -156,6 +173,14 @@ fn add(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
         first[0] + second[0],
         first[1] + second[1],
         first[2] + second[2],
+    ]
+}
+
+fn difference(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
+    [
+        first[0] - second[0],
+        first[1] - second[1],
+        first[2] - second[2],
     ]
 }
 
