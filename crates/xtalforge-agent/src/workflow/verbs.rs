@@ -114,7 +114,7 @@ fn workflow_argument(arguments: &Value) -> Result<Workflow, Error> {
                 reason: "must be a string".to_owned(),
             });
         };
-        return Workflow::from_json(text).map_err(Error::Workflow);
+        return Workflow::from_text(text).map_err(Error::Workflow);
     }
     let Some(value) = path else {
         return Err(Error::Argument {

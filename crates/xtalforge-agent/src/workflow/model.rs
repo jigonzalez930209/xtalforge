@@ -160,38 +160,79 @@ impl Workflow {
         Ok(workflow)
     }
 
+    /// Parses and validates a YAML document.
+    ///
+    /// Only the documented workflow subset is accepted (block mappings and
+    /// sequences, one-line flow collections, quoted and plain scalars,
+    /// comments, null/booleans/numbers). Anchors, aliases, tags, directives,
+    /// block scalars and multiple documents are rejected. The document is
+    /// converted to a JSON value and validated by the same rules as
+    /// [`Self::from_json`]. A JSON document is valid YAML and is accepted
+    /// through the JSON reader when it spans several lines.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`WorkflowError::Parse`] with line and column context for
+    /// syntax outside the subset, and the errors of [`Self::from_json`] for a
+    /// value of the wrong shape, an unknown field, or a rule violation.
+    pub fn from_yaml(text: &str) -> Result<Self, WorkflowError> {
+        match super::yaml::parse(text) {
+            Ok(value) => Self::from_value(value),
+            Err(yaml_error) => {
+                if looks_like_json(text) {
+                    Self::from_json(text)
+                } else {
+                    Err(yaml_error)
+                }
+            }
+        }
+    }
+
+    /// Parses and validates a document, detecting JSON versus YAML.
+    ///
+    /// JSON is tried first because it is the canonical format; a document that
+    /// is not JSON is read with the YAML subset of [`Self::from_yaml`].
+    ///
+    /// # Errors
+    ///
+    /// Returns the error of the parser selected for the document.
+    pub fn from_text(text: &str) -> Result<Self, WorkflowError> {
+        match Self::from_json(text) {
+            Ok(workflow) => Ok(workflow),
+            Err(json_error) => Self::from_yaml(text).map_err(|yaml_error| {
+                if looks_like_json(text) {
+                    json_error
+                } else {
+                    yaml_error
+                }
+            }),
+        }
+    }
+
     /// Reads and validates a workflow file.
     ///
-    /// `.json`, `.yaml` and `.yml` are accepted; the content is always JSON
-    /// (a subset of YAML), and a YAML-only document reports that YAML is not
-    /// supported by this build.
+    /// `.yaml` and `.yml` (in any case) select the YAML reader, which also
+    /// accepts JSON; every other extension, including `.json` and no
+    /// extension, auto-detects JSON versus YAML like [`Self::from_text`].
     ///
     /// # Errors
     ///
     /// Returns [`WorkflowError::Io`] when the file cannot be read and the
-    /// errors of [`Self::from_json`] otherwise.
+    /// errors of [`Self::from_text`] otherwise.
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, WorkflowError> {
         let path = path.as_ref();
         let text = std::fs::read_to_string(path).map_err(|error| WorkflowError::Io {
             path: path.display().to_string(),
             reason: error.to_string(),
         })?;
-        Self::from_json(&text).map_err(|error| match error {
-            WorkflowError::Parse { reason }
-                if matches!(
-                    path.extension().and_then(|extension| extension.to_str()),
-                    Some("yaml" | "yml")
-                ) =>
-            {
-                WorkflowError::Parse {
-                    reason: format!(
-                        "{reason} (this build reads JSON only; JSON is a subset of YAML, \
-                         so other YAML syntax is not accepted)"
-                    ),
-                }
-            }
-            other => other,
-        })
+        let extension = path
+            .extension()
+            .and_then(|extension| extension.to_str())
+            .map(str::to_ascii_lowercase);
+        match extension.as_deref() {
+            Some("yaml" | "yml") => Self::from_yaml(&text),
+            _ => Self::from_text(&text),
+        }
     }
 
     /// Renders the workflow as indented JSON.
@@ -214,4 +255,10 @@ impl Workflow {
     pub fn validate(&self) -> Result<WorkflowSummary, WorkflowError> {
         super::rules::validate(self)
     }
+}
+
+fn looks_like_json(text: &str) -> bool {
+    let text = text.strip_prefix('\u{feff}').unwrap_or(text);
+    let trimmed = text.trim_start();
+    trimmed.starts_with('{') || trimmed.starts_with('[')
 }

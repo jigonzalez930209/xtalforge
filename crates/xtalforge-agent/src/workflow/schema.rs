@@ -62,7 +62,7 @@ pub fn schema_json() -> Value {
                 "analyse": usable_verbs(StepKind::Analyse),
                 "compute": usable_verbs(StepKind::Compute),
             },
-            "yaml": false,
+            "yaml": true,
             "presets": xtalforge_core::PRESET_NAMES,
         },
     })
@@ -177,7 +177,7 @@ pub fn tool_schema(name: &str) -> Option<Value> {
             "type": "object",
             "properties": {
                 "workflow": source.clone(),
-                "text": {"type": "string", "description": "Workflow JSON as text."},
+                "text": {"type": "string", "description": "Workflow JSON or YAML as text."},
                 "path": {"type": "string", "description": "Workflow file to read."},
             },
             "additionalProperties": false,
@@ -186,7 +186,7 @@ pub fn tool_schema(name: &str) -> Option<Value> {
             "type": "object",
             "properties": {
                 "workflow": source,
-                "text": {"type": "string", "description": "Workflow JSON as text."},
+                "text": {"type": "string", "description": "Workflow JSON or YAML as text."},
                 "path": {"type": "string", "description": "Workflow file to read."},
                 "inputs": {
                     "type": "array",

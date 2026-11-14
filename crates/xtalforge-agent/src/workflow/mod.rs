@@ -32,25 +32,28 @@
 //! processes one structure per session, isolates item failures, keeps the
 //! report in input order and can resume from a JSON checkpoint.
 //!
-//! Only JSON is supported. YAML was considered (the roadmap names
-//! `wf.yaml`); the pure-Rust YAML crates available for this workspace pull
-//! dependencies that are not part of the locked set, so the build stays
-//! JSON-only. JSON is a subset of YAML, so a JSON document stored with a
-//! `.yaml` extension still loads; any other YAML syntax is reported as a parse
-//! error that says so.
+//! Workflows can be written as JSON (canonical, and what the schema
+//! describes) or as a documented YAML subset. [`Workflow::from_yaml`] reads
+//! the subset, [`Workflow::from_text`] detects JSON versus YAML, and
+//! [`Workflow::from_path`] selects the YAML reader for `.yaml`/`.yml` files.
+//! Both forms become the same `serde_json::Value` and run through the same
+//! validation, so they cannot diverge.
 
 mod checkpoint;
 mod exec;
 mod inputs;
+mod memory;
 mod model;
 mod rules;
 mod runner;
 mod schema;
 mod template;
 mod verbs;
+mod yaml;
 
 pub use checkpoint::{CHECKPOINT_VERSION, WorkflowCheckpoint, fingerprint};
 pub use inputs::expand_inputs;
+pub use memory::{MemoryWorkflowReport, run_workflow_memory};
 pub use model::{
     Problem, Step, StepKind, StepSummary, WORKFLOW_VERSION, Workflow, WorkflowSummary,
 };
@@ -63,8 +66,9 @@ pub(crate) use verbs::{run_answer, schema_answer, validate_answer};
 /// An error raised while reading, validating or running a workflow.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum WorkflowError {
-    /// The document is not valid JSON, or does not have the declared shape.
-    #[error("workflow JSON: {reason}")]
+    /// The document is not valid JSON or YAML, or does not have the declared
+    /// shape.
+    #[error("workflow document: {reason}")]
     Parse {
         /// Parser message with the line and column.
         reason: String,
