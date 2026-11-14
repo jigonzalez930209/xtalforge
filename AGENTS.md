@@ -272,25 +272,32 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.9.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.8.0` and earlier
-  shipped on 2026-11-13/12). `1.9.0` completes Phase 16: declarative JSON
-  workflows and the runner, provenance records and embedding, JSON Lines
-  datasets, deduplication and ML descriptors.
+- Version: `1.10.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.9.0` and earlier
+  shipped on 2026-11-13/12). `1.10.0` completes Phase 17: the full PORMAKE
+  bundle behind `mof-data`, cached/checksummed database fetch, porosity
+  completeness, aromatic hydrogen inference, indexing agreement, YAML
+  workflows, in-memory WASM workflows, streaming writers, fused SoA
+  neighbours, slab/adsorption options, standardized-primitive matching,
+  CrystalNN coordination and the local `scripts/gate.sh`.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 17 — Consolidation and trust
-  (`docs/roadmap/phase-17-consolidation.md`, target `1.10.0`). Phases 18-21
-  (engines, magnetism/spectroscopy, generation, ML; `1.11.0`-`1.14.0`) widen
-  the scope before Phase 22 — 2.0 redesign and freeze
+- Current phase: Phase 18 — Simulation engine bridge
+  (`docs/roadmap/phase-18-engines.md`, target `1.11.0`). Phases 19-21
+  (magnetism/spectroscopy, generation, ML; `1.12.0`-`1.14.0`) widen the scope
+  before Phase 22 — 2.0 redesign and freeze
   (`docs/roadmap/phase-22-v2.md`), renumbered from 17 on 2026-11-13.
-  Phase 16 — Workflows, provenance and high throughput shipped as `1.9.0`.
-  JSON-only workflows (no YAML parser), WASM workflow execution (filesystem)
-  and the Parquet/Arrow dataset option remain documented follow-ups.
-  Phase 15 — Performance and scale shipped as `1.8.0`. Streaming writers,
-  download-on-first-use WASM data and publishing the split npm tiers remain
-  open and documented.
+  Phase 17 shipped as `1.10.0`; the remaining documented follow-ups are Python
+  progress callbacks for the profile refinements, fresh external
+  Zeo++/MOFid/RASPA e2e snapshots, and the maintainer's npm token for the
+  split-tier upload (the scripts are in the repository).
+  Phase 16 — Workflows, provenance and high throughput shipped as `1.9.0`;
+  YAML and in-memory WASM workflows closed its follow-ups in 1.10.0. The
+  Parquet/Arrow dataset option remains open and documented.
+  Phase 15 — Performance and scale shipped as `1.8.0`; streaming writers,
+  download-on-first-use WASM data and the split npm tier publication scripts
+  closed its follow-ups in 1.10.0.
   Phase 14 — Scientific completeness shipped as `1.7.0` with the diffraction,
   force-field, structure-operation, mesh and report work. Task 14.1.5
   (indexing-engine agreement and powder demo) and Task 14.2.6 (real DFTB+/xTB

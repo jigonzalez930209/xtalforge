@@ -8,12 +8,13 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.9.0` published on 2026-11-13. Phases 0-16 are complete; Phases 17-21
-> (consolidation, simulation engines, magnetism and spectroscopy, structure
-> generation, ML) lead to the 2.0 redesign in Phase 22. The public API is frozen; later changes follow the
-> SemVer policy in `docs/api/stability.md`. `1.9.0` adds declarative JSON
-> workflows, provenance records, JSON Lines datasets, deduplication and ML
-> descriptors. The known reference gaps are
+> Status: `1.10.0` published on 2026-11-13. Phases 0-17 are complete; Phases 18-21
+> (simulation engines, magnetism and spectroscopy, structure generation, ML)
+> lead to the 2.0 redesign in Phase 22. The public API is frozen; later changes
+> follow the SemVer policy in `docs/api/stability.md`. `1.10.0` closes the
+> Phase 17 gaps: the full PORMAKE bundle, database fetch, porosity
+> completeness, aromatic hydrogens, YAML and in-memory workflows, streaming
+> writers and the local gate. The known reference gaps are
 > listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
@@ -59,9 +60,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.9.0
-pip install xtalforge==1.9.0
-npm install xtalforge-wasm@1.9.0
+cargo add xtalforge@1.10.0
+pip install xtalforge==1.10.0
+npm install xtalforge-wasm@1.10.0
 ```
 
 ## Goals

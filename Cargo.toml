@@ -21,7 +21,7 @@ members = [
 ]
 
 [workspace.package]
-version = "1.9.0"
+version = "1.10.0"
 edition = "2024"
 rust-version = "1.89"
 license = "MIT OR Apache-2.0"
@@ -34,18 +34,18 @@ categories = ["science", "simulation"]
 
 [workspace.dependencies]
 # Internal crates. `scripts/sync-version.sh` rewrites the pinned versions.
-xtalforge = { version = "=1.9.0", path = "crates/xtalforge" }
-xtalforge-agent = { version = "=1.9.0", path = "crates/xtalforge-agent" }
-xtalforge-core = { version = "=1.9.0", path = "crates/xtalforge-core" }
-xtalforge-ff = { version = "=1.9.0", path = "crates/xtalforge-ff" }
-xtalforge-io = { version = "=1.9.0", path = "crates/xtalforge-io" }
-xtalforge-mof = { version = "=1.9.0", path = "crates/xtalforge-mof" }
-xtalforge-modules = { version = "=1.9.0", path = "crates/xtalforge-modules" }
-xtalforge-analysis = { version = "=1.9.0", path = "crates/xtalforge-analysis" }
-xtalforge-build = { version = "=1.9.0", path = "crates/xtalforge-build" }
-xtalforge-commands = { version = "=1.9.0", path = "crates/xtalforge-commands" }
-xtalforge-symmetry = { version = "=1.9.0", path = "crates/xtalforge-symmetry" }
-xtalforge-view = { version = "=1.9.0", path = "crates/xtalforge-view" }
+xtalforge = { version = "=1.10.0", path = "crates/xtalforge" }
+xtalforge-agent = { version = "=1.10.0", path = "crates/xtalforge-agent" }
+xtalforge-core = { version = "=1.10.0", path = "crates/xtalforge-core" }
+xtalforge-ff = { version = "=1.10.0", path = "crates/xtalforge-ff" }
+xtalforge-io = { version = "=1.10.0", path = "crates/xtalforge-io" }
+xtalforge-mof = { version = "=1.10.0", path = "crates/xtalforge-mof" }
+xtalforge-modules = { version = "=1.10.0", path = "crates/xtalforge-modules" }
+xtalforge-analysis = { version = "=1.10.0", path = "crates/xtalforge-analysis" }
+xtalforge-build = { version = "=1.10.0", path = "crates/xtalforge-build" }
+xtalforge-commands = { version = "=1.10.0", path = "crates/xtalforge-commands" }
+xtalforge-symmetry = { version = "=1.10.0", path = "crates/xtalforge-symmetry" }
+xtalforge-view = { version = "=1.10.0", path = "crates/xtalforge-view" }
 
 # External crates shared by more than one crate.
 nalgebra = { version = "0.35", default-features = false, features = ["std"] }

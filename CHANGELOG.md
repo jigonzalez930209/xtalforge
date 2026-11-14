@@ -5,6 +5,52 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.10.0] - 2026-11-13
+
+Phase 17 closes the open subtasks and documented subsets that blocked
+production use, before the scope widens in Phases 18-21.
+
+### Added
+
+- Full PORMAKE 0.2.3 topology/block bundle behind `mof-data`: 2,129 quotient
+  nets and 867 blocks in lazy gzip files, with the conversion and license in
+  `THIRD_PARTY.md`; the curated six-topology/eight-block subset stays embedded.
+- On-demand CoRE MOF/QMOF download with a cache directory, SHA-256
+  verification and an offline mode (`mof::fetch_core_mof`, CLI
+  `mof database fetch`, Python `mof_fetch_database`, WASM
+  `fetch_data_bundle`).
+- Porosity completeness: probe-occupiable volume in A^3 and cm^3/g,
+  accessible surface area in A^2 and m^2/g, percolating directions and a typed
+  `PorosityReport`; the CLI/Python/WASM `porosity` output carries the fields.
+- Aromatic hydrogen inference for SMILES (`embed_smiles_with_hydrogens`, CLI
+  `--hydrogens`, Python `molecule_from_smiles(..., hydrogens=True)`, WASM
+  `infer_hydrogens`), including aromatic bond order 1.5.
+- Cubic/general indexing agreement (`indexing_agreement` and surfaces).
+- YAML workflows (pure-Rust subset), YAML in the agent/MCP verbs, and the
+  in-memory WASM runner `run_workflow_memory`; JSON stays canonical.
+- Streaming XYZ/extxyz, LAMMPS dump and CIF writers with forces and custom
+  per-atom columns; the readers expose the same columns.
+- Fused structure-of-arrays neighbor search (no row-array materialisation).
+- Intra-layer slab terminations, adsorption sites below the top layer, and
+  `TerminationOptions` with defaults that preserve the 1.9 behaviour.
+- Standardized-primitive structure matching, so a conventional/primitive pair
+  matches directly; canonical orientation keeps the result deterministic.
+- CrystalNN-style coordination with distance, solid-angle and
+  electronegativity weights, documented against a pymatgen-shaped test set.
+- `scripts/gate.sh` (one local gate with a summary table),
+  `scripts/publish-npm-packages.sh`, the regenerated/verified golden data, a
+  MOF playground tab and the Phase 17 documentation/parity rows.
+
+### Notes
+
+- `mof-data` is off by default and not enabled in the Python/WASM packages.
+- The PORMAKE conversion drops self-loop edges and repeated index pairs that
+  the quotient builder cannot express; the affected nets are not in the
+  bundle.
+- The probe-occupiable volume equals the accessible voxel volume; Zeo++'s
+  sphere union is not reproduced, as documented on the algorithm page.
+- YAML rejects anchors, aliases, tags, block scalars and multi-document files.
+
 ## [1.9.0] - 2026-11-13
 
 Phase 16 makes high-throughput runs reproducible, inspectable and shareable.
