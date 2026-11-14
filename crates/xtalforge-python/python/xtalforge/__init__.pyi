@@ -30,6 +30,7 @@ from .workflow import Workflow as Workflow
 from .dataset import Dataset as Dataset
 from ._ml import MlCalculator as MlCalculator
 from ._phase20 import *
+from ._phase21 import *
 from ._phase19 import (
     magnetic_orderings as magnetic_orderings,
     disorder_groups as disorder_groups,
@@ -486,3 +487,5 @@ def powder_supported_groups() -> list[int]: ...
 def rietx() -> dict[str, object]: ...
 
 def provenance(text: str) -> dict[str, object] | None: ...
+
+from .widget import StructureWidget as StructureWidget

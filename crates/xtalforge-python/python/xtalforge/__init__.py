@@ -3,6 +3,7 @@
 import json
 
 from ._phase20 import *
+from ._phase21 import *
 from ._xtalforge import (
     AgentSession,
     Document,
@@ -493,3 +494,5 @@ def __getattr__(name):
 
         return AseCalculator
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+from .widget import StructureWidget as StructureWidget
