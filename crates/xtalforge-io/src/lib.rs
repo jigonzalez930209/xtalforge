@@ -46,7 +46,7 @@ pub use castep::{read_castep, write_castep};
 pub use cgd::{CgdEntry, CgdFile, CgdNode, read_cgd, write_cgd};
 pub use cif::{
     CifBlock, CifDocument, CifLoop, read_cif, read_cif_all, read_cif_block, read_cif_stream,
-    write_cif,
+    write_cif, write_cif_stream,
 };
 pub use cp2k::{read_cp2k, write_cp2k};
 pub use crystal::{read_crystal, write_crystal};
@@ -70,7 +70,10 @@ pub use provenance::{
 pub use pwscf::{read_pwscf, write_pwscf};
 pub use sdf::{read_sdf, read_sdf_all, write_sdf};
 pub use shelx::{read_shelx, write_shelx};
-pub use stream::{LammpsStream, StreamFrame, XyzStream};
+pub use stream::{
+    LammpsStream, LammpsWriter, StreamFrame, XyzStream, XyzWriter, write_lammps_frame,
+    write_xyz_frame,
+};
 pub use text::{decode_text, read_text};
 pub use trajectory::{
     Frame, Trajectory, XyzIndex, read_geo_end, read_lammps_dump, read_lammps_dump_with_types,

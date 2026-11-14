@@ -19,7 +19,7 @@ use crate::molecule::{MoleculeAtom, molecule_box};
 use crate::provenance::{XYZ_PROVENANCE_KEY, provenance_from_xyz_info, xyz_provenance_pair};
 use crate::trajectory::parse_info;
 
-mod properties;
+pub(crate) mod properties;
 
 use properties::{AtomRecord, PropertySpec, parse_properties};
 

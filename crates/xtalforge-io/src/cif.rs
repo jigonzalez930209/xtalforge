@@ -19,7 +19,7 @@ mod writer;
 
 pub use stream::read_cif_stream;
 use structure::structure_from_block as extract_structure;
-pub use writer::write_cif;
+pub use writer::{write_cif, write_cif_stream};
 
 /// Extracts a structure from one parsed block (shared with the mmCIF reader).
 pub(crate) fn structure_from_block(block: &CifBlock) -> Result<Structure, Error> {
