@@ -41,6 +41,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
         Command::Mof { action } => mof_commands::run(cli, action),
         Command::Analysis { action } => analysis_commands::run(cli, action),
         Command::Ff { action } => ff_commands::run(cli, action),
+        Command::Engines { action } => crate::engine_bridge_commands::run(cli, action),
         Command::Fetch { action } => fetch_commands::run(cli, action),
         Command::Provenance { path } => provenance_commands::run(cli, path),
         Command::Modules => module_commands::run(cli),

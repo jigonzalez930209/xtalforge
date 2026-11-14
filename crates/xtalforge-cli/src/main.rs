@@ -18,6 +18,7 @@ mod convert;
 mod dispatch;
 mod docs_commands;
 mod doctor;
+mod engine_bridge_commands;
 mod engine_commands;
 mod feature_args;
 mod feature_commands;

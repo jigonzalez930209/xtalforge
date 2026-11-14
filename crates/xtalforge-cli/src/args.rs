@@ -105,6 +105,11 @@ pub(crate) enum Command {
         #[command(subcommand)]
         action: FfAction,
     },
+    /// Simulation-engine input sets, output parsers and scheduler scripts.
+    Engines {
+        #[command(subcommand)]
+        action: crate::engine_bridge_commands::EngineAction,
+    },
     /// Fetch a structure from OPTIMADE, COD or the Materials Project.
     Fetch {
         #[command(subcommand)]
