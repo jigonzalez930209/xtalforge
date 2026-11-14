@@ -1,12 +1,60 @@
 #![allow(clippy::indexing_slicing, clippy::needless_range_loop)] // fixed-size numeric kernels
 
 //! Coordination numbers and continuous shape measures (Task 9.3.2).
+//!
+//! # CrystalNN-like weighting
+//!
+//! [`CoordinationStrategy::CrystalNn`] is an independent, pure-Rust
+//! approximation of the weighting idea behind pymatgen's `CrystalNN`; it does
+//! not call pymatgen and its tests are ordinary Rust integration tests. For
+//! every Voronoi face the reported weight is
+//!
+//! ```text
+//! w = exp(-(d - d_min)^2 / (2 * sigma^2)) * Omega / (4 * pi) * c / c_max
+//! ```
+//!
+//! with `sigma = 0.3` Angstrom, `d_min` the shortest neighbor distance in the
+//! cell, `Omega = 4 * A / d^2` the planar solid-angle estimate of a face of
+//! area `A` at the bisector distance `d / 2`, and `c` the chemical factor
+//! below. The factors `c` are divided by the largest one in the shell, so a
+//! weight never exceeds its solid-angle fraction. Faces with `w <= 0.05` are
+//! discarded and the rest are sorted by weight, distance, index and image,
+//! which makes the result deterministic.
+//!
+//! The chemical factor is
+//!
+//! ```text
+//! c = 1 + 3 * sqrt(|X_center - X_neighbor| / 3.3)
+//! ```
+//!
+//! when the two atoms lie on opposite sides of the arithmetic mean Pauling
+//! electronegativity of the P1 cell, and `c = 1` otherwise. Atoms below the
+//! mean are treated as cation-like and atoms at or above it as anion-like.
+//! Missing electronegativities disable the correction for that pair.
+//!
+//! pymatgen's `cation_anion` option restricts Voronoi targets to sites with
+//! opposite (or zero) formal charge, which needs oxidation states that
+//! xtalforge P1 atoms do not carry; the mean-electronegativity classification
+//! is therefore an approximation. The chemical factor borrows the form of
+//! pymatgen's `x_diff_weight` term. The distance term is also deliberate:
+//! pymatgen uses a cosine cutoff based on covalent radii, whereas this model
+//! uses a Gaussian around the nearest-neighbor distance.
 
 use serde::{Deserialize, Serialize};
 
+use crate::elements::element_by_symbol;
 use crate::local::shapes::{ShapeMeasure, shape_measures};
 use crate::local::voronoi::{VoronoiNeighbor, voronoi};
-use crate::{Error, Structure};
+use crate::{Error, P1Atom, Structure};
+
+/// Width of the Gaussian distance term, in Angstrom.
+const CRYSTAL_NN_SIGMA: f64 = 0.3;
+/// Preference for cation-anion pairs over same-class pairs.
+const CRYSTAL_NN_X_DIFF_WEIGHT: f64 = 3.0;
+/// Largest Pauling electronegativity difference used by pymatgen.
+const CRYSTAL_NN_MAX_X_DIFF: f64 = 3.3;
+/// Smallest weight retained in a CrystalNN-like shell.
+const CRYSTAL_NN_WEIGHT_MIN: f64 = 0.05;
 
 /// How a coordination shell is selected.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -20,7 +68,9 @@ pub enum CoordinationStrategy {
         /// Minimum solid angle in steradians.
         solid_angle_min: f64,
     },
-    /// A CrystalNN-like distance and solid-angle weighting.
+    /// A CrystalNN-like distance, solid-angle and electronegativity weighting.
+    ///
+    /// See the [module documentation](self) for the exact formula.
     CrystalNn {
         /// Cutoff in Angstrom.
         cutoff: f64,
@@ -132,17 +182,46 @@ pub fn coordination(
                 .iter()
                 .map(|neighbor| neighbor.distance)
                 .fold(f64::INFINITY, f64::min);
-            let list = cell
-                .neighbors
-                .iter()
-                .map(|neighbor| {
-                    let distance_weight = (-((neighbor.distance - minimum) / 0.4).powi(2)).exp();
-                    let solid_weight = (neighbor.solid_angle / std::f64::consts::PI).sqrt();
-                    let mut converted = to_neighbor(neighbor);
-                    converted.weight = distance_weight * solid_weight;
-                    converted
+            let mean = mean_electronegativity(&p1.atoms);
+            let centre = p1
+                .atoms
+                .get(index)
+                .and_then(|atom| electronegativity(&atom.element));
+            let mut strongest_chemical = 1.0_f64;
+            let mut weighted = Vec::with_capacity(cell.neighbors.len());
+            for neighbor in &cell.neighbors {
+                let neighbor_x = p1
+                    .atoms
+                    .get(neighbor.index)
+                    .and_then(|atom| electronegativity(&atom.element));
+                let chemical = cation_anion_factor(centre, neighbor_x, mean);
+                strongest_chemical = strongest_chemical.max(chemical);
+                let distance_weight = (-((neighbor.distance - minimum).powi(2))
+                    / (2.0 * CRYSTAL_NN_SIGMA * CRYSTAL_NN_SIGMA))
+                    .exp();
+                // The stored Voronoi solid angle is evaluated with an absolute
+                // origin, which is only correct for atoms at the cell origin.
+                // The planar estimate from the face area and the bisector
+                // distance is symmetric for equivalent faces and independent
+                // of the central atom position.
+                let solid_angle = if neighbor.distance > 0.0 {
+                    4.0 * neighbor.area / (neighbor.distance * neighbor.distance)
+                } else {
+                    neighbor.solid_angle
+                };
+                let solid_weight = solid_angle / (4.0 * std::f64::consts::PI);
+                let mut converted = to_neighbor(neighbor);
+                converted.solid_angle = Some(solid_angle);
+                converted.weight = distance_weight * solid_weight * chemical;
+                weighted.push(converted);
+            }
+            let list = weighted
+                .into_iter()
+                .map(|mut neighbor| {
+                    neighbor.weight /= strongest_chemical;
+                    neighbor
                 })
-                .filter(|neighbor| neighbor.weight > 0.05)
+                .filter(|neighbor| neighbor.weight > CRYSTAL_NN_WEIGHT_MIN)
                 .collect();
             (list, true)
         }
@@ -211,6 +290,48 @@ fn to_neighbor(neighbor: &VoronoiNeighbor) -> CoordinationNeighbor {
         weight: neighbor.solid_angle,
         solid_angle: Some(neighbor.solid_angle),
     }
+}
+
+/// Pauling electronegativity of an element symbol, when the table defines it.
+fn electronegativity(symbol: &str) -> Option<f64> {
+    element_by_symbol(symbol)
+        .ok()
+        .and_then(|element| element.electronegativity)
+}
+
+/// Arithmetic mean over the P1 atoms whose electronegativity is defined.
+fn mean_electronegativity(atoms: &[P1Atom]) -> Option<f64> {
+    let mut total = 0.0;
+    let mut count = 0usize;
+    for atom in atoms {
+        if let Some(value) = electronegativity(&atom.element) {
+            total += value;
+            count += 1;
+        }
+    }
+    if count == 0 {
+        None
+    } else {
+        Some(total / count as f64)
+    }
+}
+
+/// Chemical preference of a pair, relative to the cell mean electronegativity.
+///
+/// Opposite classes (one below the mean, one at or above it) receive the
+/// pymatgen-style `1 + 3 * sqrt(delta / 3.3)` boost; same-class pairs and
+/// pairs with missing data receive `1`.
+fn cation_anion_factor(centre: Option<f64>, neighbor: Option<f64>, mean: Option<f64>) -> f64 {
+    let (Some(centre), Some(neighbor), Some(mean)) = (centre, neighbor, mean) else {
+        return 1.0;
+    };
+    let centre_is_cation = centre < mean;
+    let neighbor_is_cation = neighbor < mean;
+    if centre_is_cation == neighbor_is_cation {
+        return 1.0;
+    }
+    let difference = (centre - neighbor).abs();
+    1.0 + CRYSTAL_NN_X_DIFF_WEIGHT * (difference / CRYSTAL_NN_MAX_X_DIFF).sqrt()
 }
 
 fn p1_structure(p1: &crate::P1Cell) -> Result<Structure, Error> {
