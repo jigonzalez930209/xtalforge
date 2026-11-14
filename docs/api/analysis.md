@@ -67,6 +67,15 @@ peaks, `completeness`, `mean_error`, the de Wolff `m20`, the Smith-Snyder
 and the matching. `index_cubic(peaks, wavelength, max_index, tolerance)` is
 the original cubic-only search and keeps returning `CubicIndex`.
 
+`indexing_agreement(peaks, wavelength, &options, relative_tolerance)` compares
+the cubic engine with the general winner and returns `IndexingAgreement
+{ agree, cubic_a, general_a, delta_a, relative_delta, cubic_completeness,
+general_completeness, n_peaks, message }`. It is `agree` when the general
+winner is cubic and the two parameters differ by at most the relative
+tolerance (default 1 %). The CLI adds it to `powder index --general --json`,
+Python exposes `powder_index_agreement` and WASM
+`powder_index_agreement_info`.
+
 Run `xtalforge powder index PATTERN --general` for the ranked table. See
 [Powder indexing](../algorithms/indexing.md) for the solve, the figures of
 merit and the ranking rules.
@@ -115,6 +124,19 @@ with marching tetrahedra (six tetrahedra per cell, no ambiguous marching-cube
 cases). The four crossings of a 2-2 sign pattern are ordered around their
 quadrilateral, so adjacent tetrahedra share the same diagonal and the surface
 is watertight. It rejects grids with fewer than two samples along an axis.
+
+## Porosity report
+
+`porosity_report(structure, radii, spacing, probe_radius)` builds the periodic
+distance grid and returns `PorosityReport { probe_radius, spacing,
+accessible_volume, probe_occupiable_volume, pov_per_mass, surface_area,
+asa_per_mass, percolating_directions, pore_limiting_diameter }`. The
+percolation test is a periodic union-find over the samples where the probe
+fits; a direction counts when one component reaches both opposite faces.
+`porosity_report`, Python `porosity` and WASM `porosity_info` return the same
+fields, and `xtalforge analysis porosity` prints them. The probe-occupiable
+volume equals the accessible volume in this voxel model; the algorithm page
+records the difference from Zeo++'s sphere union.
 
 ## Distance grid
 

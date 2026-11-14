@@ -59,15 +59,22 @@ The crate also exposes documented geometric helpers:
 
 ## Deliberate limits
 
-- Six topologies and eight blocks, not the full PORMAKE catalogue.
-- The global RMSD/Kabsch locator is implemented (`align`); the full PORMAKE
-  data drop is still the `mof-data` feature gap, and the linker/node choice is
-  explicit in the request.
+- Six topologies and eight blocks are always embedded. The `mof_data` (`mof-data` in the facade) feature
+  adds the full PORMAKE 0.2.3 bundle (2,129 quotient nets and 867 blocks) from
+  two lazy gzip files; Python and WASM leave it off for package size, recorded
+  in the parity exceptions.
+- The global RMSD/Kabsch locator is implemented (`align`); the linker/node
+  choice is explicit in the request.
+- `database_fetch`: `mof::fetch_core_mof` / `fetch_qmof` download an archive into a cache
+  directory, verify its SHA-256 and reuse it offline. The CLI is
+  `xtalforge mof database fetch`; Python is `mof_fetch_database`; WASM uses
+  `fetch_data_bundle` and keeps the bytes in JavaScript.
 - Rods, layers, merged nets and decoration are the simplified helpers above,
   not full PORMAKE net manipulations.
 - Blocks are not relaxed; the builder is geometric.
-- The full MOF and RCSR bundles are external data (`data-YYYY.MM.DD`), not
-  part of this crate.
+- The RCSR catalogue is the 2019-06-01 snapshot. The PORMAKE bundle is
+  embedded only behind `mof-data`; its license and conversion are recorded in
+  `THIRD_PARTY.md`.
 
 
 ## MOF platform (Phase 10)

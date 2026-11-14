@@ -54,7 +54,7 @@ compares this table with the symbols each surface actually exports.
 | `workspace_archive` | 3 | done | n/a | done | done | In-memory workspace (Task 3.12.3); the CLI reads `run.json` directly |
 | `prepare` | 4 | done | done | done | done | Preparation pipeline (Task 4.7); Python `ff_prepare`, WASM `ff_prepare_info` |
 | `add_hydrogens` | 4 | done | done | done | done | Hydrogen placement (Task 4.6) |
-| `porosity` | 5 | done | done | done | done | Distance grid (Task 5.2/5.3); Rust `distance_grid` |
+| `porosity` | 5 | done | done | done | done | Distance grid (Task 5.2/5.3); Rust `distance_grid`; 17.1.2 adds POV, ASA per mass and percolating directions |
 | `net_invariants` | 5 | done | done | done | done | Quotient graphs and the full RCSR fingerprint identification (Task 5.6/5.7); Rust `quotient_graph` and `RcsrIndex` |
 | `zeo_parse` | 5 | done | done | done | done | Zeo++ output parser (Task 5.5); Rust `parse_zeo_channels` |
 | `build_graphene` | 6 | done | done | done | done | Carbon builders (Task 6.5); Rust `graphene`, WASM `build_graphene_info` |
@@ -70,7 +70,7 @@ compares this table with the symbols each surface actually exports.
 | `build_polymer` | 6 | done | done | done | done | Polymer chain (Task 6.9); CLI `build polymer` |
 | `run_automatic` | 7 | done | done | done | done | Automatic run with the Le Bail-BIC extinction-class ranking and the Pawley-ranked (cell, class) table (Task 7.10); Python `powder_automatic` |
 | `refine_phase` | 7 | done | done | done | done | McCusker-order structural refinement with esds and stages (Task 7.8); Python `powder_refine` |
-| `powder_index` | 7 | done | done | done | done | General metric-family indexing with M20/F_N (Task 7.5); Python `powder_index`, WASM `powder_index_info` |
+| `powder_index` | 7 | done | done | done | done | General metric-family indexing with M20/F_N (Task 7.5); Python `powder_index`, WASM `powder_index_info`; 17.1.7 adds the cubic/general agreement verdict |
 | `powder_lebail` | 7 | done | done | done | done | Le Bail intensity extraction with a SNIP background (Task 7.6.1; Python/WASM added by the 2026-11-11 audit); Rust `le_bail`, CLI `powder lebail`, WASM `powder_lebail_info` |
 | `powder_pawley` | 7 | done | done | done | done | Pawley fit with esds and free cell/instrument parameters (Task 7.6.2); Python `powder_pawley`, WASM `powder_pawley_info` and `powder_pawley_width_info` (size/strain refinement, added by the 2026-11-11 audit) |
 | `agent_capabilities` | 8 | done | done | done | done | Runtime feature, engine, bundle and verb report (Task 8.1.1); Rust `capability_report`, CLI `capabilities` |
@@ -78,7 +78,7 @@ compares this table with the symbols each surface actually exports.
 | `agent_run` | 8 | done | done | done | done | Batch session over a JSON script (Task 8.1.2); Rust `run_verbs`, CLI `agent` |
 | `ml_backends` | 8 | n/a | done | done | n/a | The ML bridge is Python-only by the Task 4.11 decision; the CLI `models` command lists the catalogue (Task 8.4) |
 | `models` | 8 | done | done | n/a | n/a | Model cache with SHA-256 and license (Task 8.4.2); Rust `fetch`, CLI `models` |
-| `match_structures` | 9 | done | done | done | done | Structure matcher (Task 9.1.1); Rust `match_structures`, CLI `compare` |
+| `match_structures` | 9 | done | done | done | done | Structure matcher (Task 9.1.1); Rust `match_structures`, CLI `compare`; 17.3.3 standardizes the primitive cell by default |
 | `periodic_rmsd` | 9 | done | done | done | done | Periodic RMSD under a mapping (Task 9.1.2) |
 | `kabsch_alignment` | 9 | done | done | done | done | Kabsch alignment (Task 9.1.2) |
 | `group_structures` | 9 | done | done | done | done | Equality classes (Task 9.1.3); CLI `group` |
@@ -94,7 +94,7 @@ compares this table with the symbols each surface actually exports.
 | `radial_distribution` | 9 | done | done | done | done | Total and partial RDF (Task 9.3.4) |
 | `structure_fingerprint` | 9 | done | done | done | done | Composition, cell and RDF fingerprint (Task 9.3.4); Rust `fingerprint`, Python `structure_fingerprint` |
 | `unique_miller_indices` | 9 | done | done | done | done | Symmetry-unique Miller indices (Task 9.4.1) |
-| `slab_terminations` | 9 | done | done | done | done | All slab terminations (Task 9.4.2) |
+| `slab_terminations` | 9 | done | done | done | done | All slab terminations (Task 9.4.2); 17.3.2 adds intra-layer cuts and lower-layer adsorption sites |
 | `wulff` | 9 | done | done | done | done | Wulff construction (Task 9.4.3) |
 | `adsorption_sites` | 9 | done | done | done | done | Top, bridge and hollow sites (Task 9.4.4) |
 | `vacancies` | 9 | done | done | done | done | Symmetry-unique vacancies (Task 9.5.1) |
@@ -127,7 +127,7 @@ compares this table with the symbols each surface actually exports.
 | `mof_interpenetrate` | 10 | done | done | done | done | Interpenetrated variants (Task 10.5.5); CLI `mof modify interpenetrate` |
 | `mof_stack_layers` | 10 | done | done | done | done | Layered variants (Task 10.5.5); CLI `mof modify stack-layers` |
 | `mof_mixed` | 10 | done | done | done | done | Mixed-metal/linker frameworks (Task 10.5.6); CLI `mof modify mixed` |
-| `mof_read_database` | 10 | done | done | done | n/a | CoRE MOF/QMOF directory readers (Task 10.6.1); no filesystem in WASM |
+| `mof_read_database` | 10 | done | done | done | n/a | CoRE MOF/QMOF directory readers (Task 10.6.1); no filesystem in WASM; 17.1.4 adds `fetch_core_mof`/`fetch_qmof` with cache, checksum and offline mode |
 | `mof_screen` | 10 | done | done | done | n/a | Screening pipeline (Task 10.6.2); no filesystem in WASM |
 | `mof_deduplicate` | 10 | done | done | done | n/a | MOFkey + matcher deduplication (Task 10.6.3); no filesystem in the browser |
 | `read` | 11 | done | done | done | n/a | One-call IO (Task 11.2.3); WASM has no filesystem, use `read(text, hint)` |
@@ -163,11 +163,15 @@ compares this table with the symbols each surface actually exports.
 | `net_contraction` | 14 | done | n/a | n/a | n/a | Structure-to-net contraction, vertex symbols and RCSR search (Task 14.4.2); native graph API |
 | `mesh_export` | 14 | done | done | done | done | OBJ and glTF/GLB with normals (Task 14.4.4) |
 | `report_renderers` | 14 | done | n/a | n/a | n/a | HTML and JSON report renderers (Task 14.5.1); module listing is the CLI surface |
-| `workflow` | 16 | done | done | done | n/a | Versioned workflow runner and `xtalforge run` (Task 16.1); WASM has no filesystem |
+| `workflow` | 16 | done | done | done | done | Versioned workflow runner and `xtalforge run` (Task 16.1); 17.2.1 adds YAML and 17.2.5 the in-memory WASM runner |
 | `provenance` | 16 | done | done | done | n/a | Provenance record, embedding and `provenance` command (Task 16.2); WASM has no file embedding |
 | `dataset` | 16 | done | n/a | done | n/a | JSON Lines dataset and pandas/polars view (Task 16.3.1); CLI stays file-oriented |
 | `dataset_dedup` | 16 | done | n/a | n/a | n/a | Matcher + fingerprint prefilter (Task 16.3.2); Rust analysis API |
 | `ml_descriptors` | 16 | done | n/a | n/a | n/a | Composition, RDF, Coulomb and SOAP-like arrays (Task 16.3.3); Rust analysis API |
+| `porosity_report` | 17 | done | done | done | done | POV, ASA per mass, percolating directions and PLD from one grid (Task 17.1.2); CLI/Python/WASM extend the existing `porosity` output |
+| `indexing_agreement` | 17 | done | done | done | done | Cubic/general engine verdict (Task 17.1.7); CLI `powder index --general`, Python `powder_index_agreement`, WASM `powder_index_agreement_info` |
+| `database_fetch` | 17 | done | done | done | done | On-demand CoRE MOF/QMOF download with cache, SHA-256 and offline mode (Task 17.1.4); WASM `fetch_data_bundle` leaves storage to the page |
+| `mof_data` | 17 | done | done | n/a | n/a | Full PORMAKE 0.2.3 bundle behind `mof-data` (Task 17.1.3); Python/WASM leave it off for package size |
 
 ## Recorded exceptions
 
@@ -178,11 +182,12 @@ compares this table with the symbols each surface actually exports.
 | External engines (DFTB+, xtb, Zeo++) and process probes | WASM | No subprocesses in the browser | Native engines (UFF, QEq, EQeq, grid porosity) |
 | In-process GFN0/GFN1/GFN2 (`sci-form` feature) | CLI, Python, WASM | Optional build-time feature whose methods are molecular only; the Rust `Calculator` and the registry listing are the supported surface, and no binding negotiation for the feature exists yet | Rust `quantum::adapter`; CLI `ff engines` lists the registry entries |
 | Multi-threading | WASM | Threads need cross-origin isolation | Optional threaded build |
+| Python progress callbacks | Python | The profile refinement entry points that accept `RunControl` are not bound as separate Python functions yet; the Python surface exposes the results and cancellation is available in Rust | Rust `RunControl`/`Cancellation`; Python `Structure` context manager |
 | MCP server over stdio | Python, WASM | It is a process, served by the CLI | `xtalforge mcp` |
 | Machine-learning potentials (`MlCalculator`, `ml_backends`) | Rust, CLI, WASM | The Task 4.11 decision is the Python/ASE bridge; torch is not a WASM target and the Rust `ml` feature is a declared no-op | Python `MlCalculator`; the CLI `models` command manages weights |
 | Plugins (`Plugins`, runtime registries) | CLI, WASM | Python callables and Rust registries are host-side extension points; a browser has no dynamic library or Python runtime | Rust `FormatRegistry`, `ScalarRegistry`, `StyleRegistry`, `CalculatorRegistry`, `ModuleRegistry`; Python `Plugins` |
 | Model cache (`models`) | Python, WASM | It is a filesystem command with `curl`; the browser and Python package leave the download to the user | CLI `models`; `xtalforge_ff::models` |
-| Full MOF topology bundle | WASM | Package size | The builder carries the curated six-topology/eight-block subset (Tasks 6.11-6.16); the RCSR fingerprint index (35 KB) is embedded on every surface |
+| Full MOF topology bundle | WASM | Package size | The builder always carries the curated six-topology/eight-block subset and the RCSR fingerprint index; the full PORMAKE bundle is a Rust/CLI feature (`mof-data`) and stays out of the browser/Python packages for size |
 | lattice_minimum_image, limits_bounds, limits_check | CLI | The CLI exposes geometry through `cell` and the global `--limits` flag | Use `cell` and `--limits` |
 | workspace_archive | CLI | The CLI has no `modules`/`run` command; the workspace is a library API | Rust `Workspace` and Python `workspace_*`; `project` for archives |
 | ASE, pymatgen, phonopy and RDKit adapters | Rust, CLI, WASM | They wrap optional Python objects and optional third-party packages | Rust readers/writers and the typed structure model |
@@ -195,15 +200,8 @@ compares this table with the symbols each surface actually exports.
 
 ## Open gaps: Rust-only capabilities
 
-These capabilities exist in the Rust API but have **no** CLI, Python or WASM
-surface and no justification in the table above, so under rule 4 of
-`AGENTS.md` they are not finished. They are recorded here instead of being
-hidden; closing them is post-1.0 work.
-
-| Capability | Rust | CLI | Python | WASM |
-|---|---|---|---|---|
-| SMILES parser (`parse_smiles`) and 3D embedding (`embed_smiles`), Tasks 6.1.1-6.1.3 | done | open | open | open |
-| Sketch data model (`Sketch`, `from_smiles`, `to_smiles`), Task 6.1.6 | done | open | open | open |
-| Fragment library (`find_fragment`), Task 6.2 | done | open | open | open |
-| Substitution and clearance (`substitute`), Task 6.3 | done | open | open | open |
-| Guest placement (`guest` module), Task 6.4 | done | open | open | open |
+None. Every capability that had a Rust-only row in 1.9 now has a CLI, Python and
+WASM surface or a recorded exception in the table above. The former
+SMILES/sketch/fragment/substitution/guest gaps were closed in Phase 11 and the
+aromatic hydrogen inference is the opt-in `hydrogens`/`infer_hydrogens` flag
+(Task 17.1.1); the RCSR and PORMAKE bundles are data, not an operation.

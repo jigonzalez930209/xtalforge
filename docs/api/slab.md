@@ -19,6 +19,20 @@ slab a little above the bottom of the cell so atoms on the face are not drawn
 twice. `plane_angle(first, second)` returns the angle between two Miller
 planes.
 
+## Terminations and adsorption depth
+
+`slab_cut_shifts(structure, hkl, &options)` returns the sorted cut shifts.
+`slab_terminations(structure, hkl, layers, vacuum)` returns the midpoint cuts
+of Task 9.4 as a `SlabTerminationReport { hkl, terminations }`, where each
+`SlabTermination { shift, slab }` pairs a cut with its slab.
+`slab_terminations_with_options(..., &TerminationOptions)` adds
+`cuts` (extra shifts in interplanar-spacing units), `include_intra_layer`
+(quarter and three-quarter cuts inside each gap) and `layer_tolerance`.
+`adsorption_sites_with_options(slab, tolerance, &options)` reads
+`TerminationOptions::site_layers` to enumerate sites down to that many atomic
+layers below the top; the default of one reproduces `adsorption_sites`. The
+CLI exposes `--intra-layer`, `--cut` and `--site-layers`.
+
 ## Bond carrying
 
 The slab builder maps every perceived or explicit bond onto its layer copies
