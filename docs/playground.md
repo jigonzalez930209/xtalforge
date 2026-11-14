@@ -37,6 +37,8 @@ import Playground from './.vitepress/components/Playground.vue'
   distance/angle/torsion.
 - **Force field**: UFF energy, atom types, QEq/EQeq charges, vibrations and a
   UFF minimization that replaces the current structure.
+- **MOF**: health check, MOFid/MOFkey, deconstruction into building units and
+  the native PLD/LCD/ASA/void/channel descriptors.
 - **Powder**: Cu Kα and other radiations, International Tables form factors,
   a plotted pattern with hkl labels, an I/I₀ peak table and CSV export, plus a
   refinement panel: Le Bail, Pawley, Rietveld and the automatic run against
