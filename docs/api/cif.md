@@ -29,6 +29,17 @@ matched by `_atom_site_aniso_label`, so a subset of atoms is read correctly.
 `decode_text(bytes)` strips a UTF-8 BOM, reads UTF-8 and falls back to Latin-1
 byte by byte. `read_text(path)` is the file wrapper.
 
+## Magnetic CIF
+
+`xtalforge_io::read_mcif` / `write_mcif` (and `read_mcif_block`) handle the
+magnetic CIF dialect: `_space_group_symop_magn_operation_xyz` with the
+`+1`/`-1` time-reversal suffix, `_space_group_symop_magn_centering_xyz`, and
+`_atom_site_moment_crystalaxis_*` / `_atom_site_moment_cartn_*` loops. The
+operations are stored in `magnetic_operations`; the moments become typed
+`Site::magnetic_moment` values. The registry sniffs a magnetic loop before
+plain CIF, so `.mcif` and a hint-less `read_structure` select it. See
+[Magnetism](./magnetism.md).
+
 ## Status
 
 The reader covers the corpus CIFs and malformed input returns a typed error.

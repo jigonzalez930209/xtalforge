@@ -31,7 +31,7 @@ name, extensions, reader/writer and `Capabilities`. `find("cif")`,
 occupancy, ADPs, charges, bonds, labels, frames), and `losses(from, to)` names
 the data a conversion drops.
 
-Built-in formats: CIF, mmCIF/PDBx (`_atom_site_Cartn_*` and fractional
+Built-in formats: CIF, mCIF (`.mcif`, magnetic loops), mmCIF/PDBx (`_atom_site_Cartn_*` and fractional
 sites; read-only), POSCAR, XYZ and extxyz, pymatgen JSON (`.json`), CSSR (`.cssr`),
 DFTB+ GEN (`.gen`), LAMMPS data (`.data`, `.lmp`), SHELX (`.res`, `.ins`),
 PDB, Quantum ESPRESSO `pw.x` input/output, CASTEP `.cell`, FHI-aims
