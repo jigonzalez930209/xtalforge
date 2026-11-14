@@ -16,6 +16,7 @@ include = ["src/**"]
 
 [dependencies]
 xtalforge-core = { workspace = true }
+xtalforge-engines = { workspace = true, optional = true }
 xtalforge-io = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 xtalforge-view = { workspace = true }
@@ -48,9 +49,10 @@ analysis = ["dep:xtalforge-analysis"]
 build = ["dep:xtalforge-build", "analysis"]
 ff = ["dep:xtalforge-ff", "build"]
 mof = ["dep:xtalforge-mof", "ff", "analysis"]
+engines = ["dep:xtalforge-engines", "mof"]
 modules = ["dep:xtalforge-modules"]
 agent = ["dep:xtalforge-agent", "analysis", "build", "ff", "mof", "modules"]
-full = ["analysis", "build", "ff", "mof", "modules", "agent"]
+full = ["analysis", "build", "ff", "mof", "engines", "modules", "agent"]
 sci-form = ["agent", "xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
 ml = []
 external = []
