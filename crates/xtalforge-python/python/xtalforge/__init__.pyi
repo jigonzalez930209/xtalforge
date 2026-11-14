@@ -29,6 +29,16 @@ from ._agent_session import AgentSession as AgentSession
 from .workflow import Workflow as Workflow
 from .dataset import Dataset as Dataset
 from ._ml import MlCalculator as MlCalculator
+from ._phase19 import (
+    magnetic_orderings as magnetic_orderings,
+    disorder_groups as disorder_groups,
+    derivative_structures as derivative_structures,
+    neutron_powder as neutron_powder,
+    magnetic_powder as magnetic_powder,
+    electron_diffraction as electron_diffraction,
+    raman_powder_average as raman_powder_average,
+    born_diagonal_average as born_diagonal_average,
+)
 from ._engines import (
     engine_bands as engine_bands,
     engine_dos as engine_dos,
