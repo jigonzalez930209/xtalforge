@@ -5,6 +5,39 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.14.0] - 2026-11-14
+
+Phase 21 makes xtalforge the preprocessing and inference layer for machine
+learning on crystals.
+
+### Added
+
+- New `xtalforge-ml` crate and facade `ml` feature: canonical periodic crystal
+  graphs with image offsets and typed arrays, exact GTO SOAP through l=5,
+  ACSF G2/G4, k=1/k=2 MBTR and MOF RAC/pore features.
+- Leakage-safe random, composition, matcher-cluster and prototype splits,
+  extxyz/JSON/OPTIMADE importers and a CIF-directory importer.
+- Linear `PropertyModel`, `Predictor` trait, dataset prediction and append,
+  ensemble/committee uncertainty, uncertainty/farthest-point/diversity
+  selection and a six-step active-learning workflow.
+- Optional `ml-parquet` Arrow/Parquet container and `ml-onnx` tract inference
+  with descriptor-based forces and stress.
+- `xtalforge.widget.StructureWidget` anywidget preview reusing `scene_data`.
+- CLI `ml` subcommands, 12 Python functions, 10 WASM exports, API/algorithm
+  pages, a tutorial, 12 parity rows and the release version.
+
+### Notes
+
+- SOAP follows the published GTO power spectrum but is not numerically
+  identical to DScribe; the algorithm page records the deviation.
+- ACSF/MBTR are documented formulas, not bit-identical DScribe ports.
+- ONNX has no bundled reference PyTorch fixture; the loader error paths are
+  tested, and the Python bridge remains the route for message-passing models.
+- Parquet and ONNX are optional features and stay out of the default wheels,
+  WASM and CLI builds; JSON Lines stays the default dataset format.
+- The active-learning workflow names the ML verbs; only `search` is dispatched
+  by the agent today.
+
 ## [1.13.0] - 2026-11-14
 
 Phase 20 adds structure generation and global search.

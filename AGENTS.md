@@ -273,21 +273,22 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.13.0` (published on 2026-11-14 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.11.0`, `1.12.0`
-  and earlier shipped on 2026-11-13/14). `1.13.0` completes Phase 20:
-  random symmetric, molecular and low-dimensional crystals, AIRSS and
-  evolutionary searches with checkpoints, the prototype library and
-  identification, substitution rules and hypothetical MOF enumeration, with
-  the four-surface wiring.
+- Version: `1.14.0` (published on 2026-11-14 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.11.0`-`1.13.0`
+  and earlier shipped on 2026-11-13/14). `1.14.0` completes Phase 21: crystal
+  graphs, SOAP/ACSF/MBTR and MOF features, leakage-safe splits, imports,
+  native linear/ONNX inference with uncertainty and active learning, with the
+  four-surface wiring.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 21 — ML-ready data and inference
-  (`docs/roadmap/phase-21-ml.md`, target `1.14.0`), followed by Phase 22 —
-  2.0 redesign and freeze (`docs/roadmap/phase-22-v2.md`), renumbered from 17
-  on 2026-11-13. Phase 20 shipped as `1.13.0`; the prototype, rod and ionic
-  radius tables are curated subsets and WASM checkpoints stay host-side.
+- Current phase: Phase 22 — 2.0 redesign and freeze
+  (`docs/roadmap/phase-22-v2.md`, target `2.0.0`). Phase 21 shipped as
+  `1.14.0`; SOAP/ACSF/MBTR are documented formulas rather than bit-identical
+  DScribe ports, ONNX has no bundled reference fixture, and Parquet/ONNX stay
+  optional features outside the default wheels and WASM. Phase 20 shipped as
+  `1.13.0`; the prototype, rod and ionic radius tables are curated subsets and
+  WASM checkpoints stay host-side.
   Phase 19 shipped as `1.12.0`; spglib magnetic golden data and fresh
   Zeo++/MOFid/RASPA e2e snapshots remain documented exceptions, and higher-
   symmetry mCIF asymmetric units are not expanded.
@@ -389,7 +390,7 @@ publishes, and runs no tests. Never create a tag before this gate passes.
   `xtalforge-symmetry`, `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`,
   `xtalforge-ff`, `xtalforge-analysis`, `xtalforge-build`, `xtalforge-mof`,
   `xtalforge-modules`, `xtalforge-agent`, `xtalforge-engines`,
-  `xtalforge-generation`, the facade
+  `xtalforge-generation`, `xtalforge-ml`, the facade
   `xtalforge`, `xtalforge-cli`, `xtalforge-python`, `xtalforge-wasm`, the test crate
   `xtalforge-testkit` and the unpublished example crate
   `xtalforge-plugin-example` under `examples/plugin`. Rust edition 2024, MSRV 1.89, license

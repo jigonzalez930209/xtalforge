@@ -59,9 +59,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.13.0
-pip install xtalforge==1.13.0
-npm install xtalforge-wasm@1.13.0
+cargo add xtalforge@1.14.0
+pip install xtalforge==1.14.0
+npm install xtalforge-wasm@1.14.0
 ```
 
 ## Goals
