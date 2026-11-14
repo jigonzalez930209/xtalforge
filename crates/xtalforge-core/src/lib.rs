@@ -84,7 +84,7 @@ pub use scalars::{
     coordination_numbers,
 };
 pub use selection::{AtomId, Selection, TrackingTable};
-pub use site::Site;
+pub use site::{MagneticAxis, MagneticMoment, Site};
 pub use slab::{
     Slab, SlabTermination, SlabTerminationReport, TerminationOptions, make_slab, plane_angle,
     slab_cut_shifts, slab_terminations, slab_terminations_with_options, surface_basis,

@@ -13,7 +13,7 @@
 use std::f64::consts::PI;
 
 use crate::bonding::{BondRules, perceive_bonds};
-use crate::{Error, Lattice, Site, Structure, StructureBuilder};
+use crate::{Error, Lattice, Structure, StructureBuilder};
 
 mod carry;
 mod terminations;
@@ -213,12 +213,15 @@ pub fn make_slab(
                 plane[1] - cell[1],
                 floor + z * rise.abs() / height,
             ];
-            let site = Site::new(
-                format!("{}{}", atom.element, index + 1),
-                &atom.element,
-                frac,
-            )?;
-            builder = builder.site(site.with_occupancy(atom.occupancy)?);
+            let parent = structure.sites().get(atom.site_idx).ok_or_else(|| {
+                Error::InvalidInput("the P1 expansion references a missing site".to_owned())
+            })?;
+            let site = parent
+                .clone()
+                .with_label(format!("{}{}", atom.element, index + 1))?
+                .with_frac(frac)?
+                .with_occupancy(atom.occupancy)?;
+            builder = builder.site(site);
             cells.push([cell[0] as i32, cell[1] as i32]);
         }
     }
