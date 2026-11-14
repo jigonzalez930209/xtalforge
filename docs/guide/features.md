@@ -7,13 +7,16 @@ downstream crate can be built directly with or without them.
 
 | Feature | Default | Domains | Effect |
 |---|---|---|---|
-| `full` | yes | facade | Keeps the previous default surface: analysis, build, ff, MOF, modules and agent. Disable it for the base tier. |
+| `full` | yes | facade | Keeps the previous default surface: analysis, build, ff, MOF, engines, generation, ML (including ONNX and Parquet), modules and agent. Disable it for the base tier. |
 | `parallel` | yes | core, io, symmetry, ff | Reserves Rayon for the parallel algorithms. The current algorithms are single-threaded and deterministic; the feature exists so builds can already opt out with `--no-default-features`. |
 | `sci-form` | no | force fields | Links the published MIT crate `sci-form` 2.0.0 for in-process GFN0/GFN1/GFN2 (Task 4.10). The methods are molecular only; GFN2 returns forces and the registry lists `gfn0`, `gfn1` and `gfn2`. |
-| `ml` | no | force fields | Reserved for machine-learned potentials (Task 8.4). The decision is recorded in `docs/algorithms/ml-backend.md`; currently a no-op. |
+| `generation` | yes | facade | Re-exports `xtalforge-generation`: random, molecular and low-dimensional crystals, global search, prototypes and hypothetical MOFs; implies `mof`. |
+| `ml` | yes | facade | Re-exports `xtalforge-ml`: crystal graphs, SOAP/ACSF/MBTR, MOF features, splits, imports, inference and active learning; implies `analysis`. |
+| `ml-onnx` | yes | ML | Adds tract ONNX inference and the descriptor-based calculator. Included in `full`. |
+| `ml-parquet` | yes | ML | Adds the Arrow/Parquet dataset container and the byte APIs. Included in `full`. |
 | `external` | no | force fields | Reserved; the runtime engine probes and input writers for DFTB+, xTB and ORCA are always compiled and need no feature (Task 4.9). |
 | `net` | no | remote data | Adds the blocking `ureq` HTTP client for OPTIMADE, COD and Materials Project fetches (Task 13.3). Parsing and WASM `fetch` do not need it. |
-| `engines` | no | Simulation engines | Re-exports `xtalforge-engines`: input sets, output parsers, electronic structure and scheduler scripts; implies `mof`. Part of `full`. |
+| `engines` | yes | Simulation engines | Re-exports `xtalforge-engines`: input sets, output parsers, electronic structure and scheduler scripts; implies `mof`. Part of `full`. |
 | `mof-data` | no | MOF builder | Loads the full PORMAKE 0.2.3 bundle lazily (2,129 nets and 867 blocks) instead of the six-topology/eight-block curated subset. Adds gzip decoding only. |
 
 ## Building with and without defaults
