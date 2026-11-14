@@ -1,0 +1,36 @@
+[package]
+name = "xtalforge-engines"
+readme = "../../README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "Simulation-engine input sets, output parsers and electronic-structure analysis for xtalforge."
+include = ["src/**", "data/**"]
+
+[dependencies]
+xtalforge-analysis = { workspace = true }
+xtalforge-core = { workspace = true }
+xtalforge-ff = { workspace = true }
+xtalforge-io = { workspace = true }
+xtalforge-symmetry = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []
+# Process execution and scheduler probes are host-side only.
+external = []
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
