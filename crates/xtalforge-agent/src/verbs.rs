@@ -9,9 +9,11 @@ mod types;
 
 pub use types::{ParameterInfo, ParameterKind, VerbInfo};
 
-use types::param;
+pub(crate) use types::param;
 
 use ParameterKind::{Array, Boolean, Integer, Object, String as Text};
+
+use crate::verbs_ml::ML_VERBS;
 
 const DOCUMENT: ParameterInfo = param(
     "document",
@@ -441,6 +443,9 @@ pub const VERBS: &[VerbInfo] = &[
         example: r#"{"kind": "random", "options": {"composition": {"Na": 4, "Cl": 4}, "space_groups": [225], "n_structures": 4, "seed": 0}, "chunk": 1}"#,
         mutation: false,
     },
+    ML_VERBS[0],
+    ML_VERBS[1],
+    ML_VERBS[2],
     VerbInfo {
         name: "workflow_run",
         summary: "Run a workflow over input files, directories or glob patterns",

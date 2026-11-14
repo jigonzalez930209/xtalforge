@@ -315,6 +315,29 @@ pub enum Answer {
         /// Chunk report and checkpoint.
         chunk: xtalforge_generation::SearchChunk,
     },
+    /// `ml_predict`: one model prediction for the active document.
+    MlPrediction {
+        /// Document name.
+        document: String,
+        /// Model name.
+        model: String,
+        /// Predicted value.
+        value: f64,
+    },
+    /// `ml_select`: selected candidate indices.
+    MlSelection {
+        /// Candidate indices in ascending order.
+        selected: Vec<usize>,
+    },
+    /// `ml_append`: a metadata property written to the active document.
+    MlAppend {
+        /// Document name.
+        document: String,
+        /// Metadata key.
+        key: String,
+        /// Metadata value.
+        value: f64,
+    },
 }
 
 impl Answer {
@@ -352,6 +375,9 @@ impl Answer {
             Self::WorkflowValidated { .. } => "workflow_validation",
             Self::WorkflowRun { .. } => "workflow_run",
             Self::Search { .. } => "search",
+            Self::MlPrediction { .. } => "ml_prediction",
+            Self::MlSelection { .. } => "ml_selection",
+            Self::MlAppend { .. } => "ml_append",
         }
     }
 }
