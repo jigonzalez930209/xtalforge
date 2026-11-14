@@ -62,7 +62,7 @@ fn feature_layout_matches_the_dscribe_fixture() {
     let descriptor = soap_power_spectrum(
         &structure(),
         &SoapOptions {
-            cutoff: 5.0,
+            cutoff: 4.0,
             n_max: 3,
             l_max: 2,
             sigma: 0.5,
@@ -73,6 +73,29 @@ fn feature_layout_matches_the_dscribe_fixture() {
     assert_eq!(descriptor.n_features(), 18);
     assert_eq!(descriptor.layout[0], [0, 0, 0]);
     assert_eq!(descriptor.layout[17], [2, 2, 2]);
+    let expected: Vec<Vec<f64>> = rows
+        .iter()
+        .map(|row| {
+            row.as_array()
+                .expect("row")
+                .iter()
+                .map(|value| value.as_f64().expect("number"))
+                .collect()
+        })
+        .collect();
+    let mut ours = descriptor.rows.clone();
+    ours.sort_by(|a, b| a[0].total_cmp(&b[0]));
+    let mut reference = expected;
+    reference.sort_by(|a, b| a[0].total_cmp(&b[0]));
+    for (row, expected_row) in ours.iter().zip(&reference) {
+        for (value, expected) in row.iter().zip(expected_row) {
+            let tolerance = 5e-4 * expected.abs().max(1.0);
+            assert!(
+                (value - expected).abs() < tolerance,
+                "SOAP feature {value} differs from DScribe {expected}"
+            );
+        }
+    }
 }
 
 #[test]

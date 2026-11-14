@@ -63,7 +63,7 @@ fn acsf_rejects_bad_options() {
         acsf(
             &structure,
             &AcsfOptions {
-                eta: Vec::new(),
+                g4: vec![[0.5, 0.0, 1.0]],
                 ..AcsfOptions::default()
             }
         )
@@ -72,52 +72,146 @@ fn acsf_rejects_bad_options() {
 }
 
 #[test]
-fn mbtr_shape_and_finiteness() {
+fn acsf_matches_the_dscribe_fixture() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("../data/acsf_dscribe.json")).expect("fixture");
+    let lattice =
+        Lattice::new([[20.0, 0.0, 0.0], [0.0, 20.0, 0.0], [0.0, 0.0, 20.0]]).expect("cell");
+    let mut builder = StructureBuilder::new("acsf", lattice);
+    for (index, position) in fixture["structure"]["cartesian"]
+        .as_array()
+        .expect("positions")
+        .iter()
+        .enumerate()
+    {
+        let values = position.as_array().expect("position");
+        let cart = [
+            values[0].as_f64().expect("x"),
+            values[1].as_f64().expect("y"),
+            values[2].as_f64().expect("z"),
+        ];
+        builder = builder
+            .site(Site::new(format!("C{}", index + 1), "C", lattice.to_frac(cart)).expect("site"));
+    }
+    let structure = builder.build().expect("structure");
+    let options = AcsfOptions {
+        cutoff: 4.0,
+        g2: vec![[0.5, 0.0]],
+        g4: vec![[0.5, 1.0, 1.0]],
+        ..AcsfOptions::default()
+    };
+    let descriptor = acsf(&structure, &options).expect("acsf");
+    let expected: Vec<Vec<f64>> = fixture["rows"]
+        .as_array()
+        .expect("rows")
+        .iter()
+        .map(|row| {
+            row.as_array()
+                .expect("row")
+                .iter()
+                .map(|value| value.as_f64().expect("number"))
+                .collect()
+        })
+        .collect();
+    let mut ours = descriptor.rows.clone();
+    ours.sort_by(|a, b| a[0].total_cmp(&b[0]));
+    let mut reference = expected;
+    reference.sort_by(|a, b| a[0].total_cmp(&b[0]));
+    for (row, expected_row) in ours.iter().zip(&reference) {
+        for (value, expected) in row.iter().zip(expected_row) {
+            assert!(
+                (value - expected).abs() < 5e-6 * expected.abs().max(1.0),
+                "ACSF feature {value} differs from DScribe {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn mbtr_matches_the_dscribe_fixture() {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("../data/mbtr_dscribe.json")).expect("fixture");
+    let lattice =
+        Lattice::new([[20.0, 0.0, 0.0], [0.0, 20.0, 0.0], [0.0, 0.0, 20.0]]).expect("cell");
+    let mut builder = StructureBuilder::new("mbtr", lattice);
+    for (index, position) in fixture["structure"]["cartesian"]
+        .as_array()
+        .expect("positions")
+        .iter()
+        .enumerate()
+    {
+        let values = position.as_array().expect("position");
+        let cart = [
+            values[0].as_f64().expect("x"),
+            values[1].as_f64().expect("y"),
+            values[2].as_f64().expect("z"),
+        ];
+        builder = builder
+            .site(Site::new(format!("C{}", index + 1), "C", lattice.to_frac(cart)).expect("site"));
+    }
+    let structure = builder.build().expect("structure");
+    let grid = |value: &serde_json::Value| {
+        xtalforge_ml::MbtrGrid::new(
+            value["min"].as_f64().expect("min"),
+            value["max"].as_f64().expect("max"),
+            value["n"].as_u64().expect("n") as usize,
+            value["sigma"].as_f64().expect("sigma"),
+        )
+    };
+    for (name, key) in [("k2", "k2"), ("k3", "k3")] {
+        let options = xtalforge_ml::MbtrOptions {
+            k2: if name == "k2" {
+                Some(grid(&fixture[key]["grid"]))
+            } else {
+                None
+            },
+            k3: if name == "k3" {
+                Some(grid(&fixture[key]["grid"]))
+            } else {
+                None
+            },
+            cutoff: 5.0,
+            elements: vec!["C".to_owned()],
+        };
+        let descriptor = mbtr(&structure, &options).expect("mbtr");
+        let expected: Vec<f64> = fixture[key]["features"]
+            .as_array()
+            .expect("features")
+            .iter()
+            .map(|value| value.as_f64().expect("number"))
+            .collect();
+        assert_eq!(descriptor.features.len(), expected.len(), "{name} length");
+        for (value, expected) in descriptor.features.iter().zip(&expected) {
+            assert!(
+                (value - expected).abs() < 5e-6 * expected.abs().max(1.0),
+                "MBTR {name} feature {value} differs from DScribe {expected}"
+            );
+        }
+    }
+}
+
+#[test]
+fn mbtr_shape_and_errors() {
     let structure = nacl();
     let options = MbtrOptions {
+        k2: Some(xtalforge_ml::MbtrGrid::new(0.0, 6.0, 16, 0.1)),
+        k3: Some(xtalforge_ml::MbtrGrid::new(0.0, 180.0, 16, 0.1)),
         cutoff: 6.0,
-        n_grid: 16,
-        ..MbtrOptions::default()
+        elements: Vec::new(),
     };
     let descriptor = mbtr(&structure, &options).expect("mbtr");
     let elements = descriptor.elements.len();
     let pairs = elements * (elements + 1) / 2;
-    let triples = elements * elements * elements;
-    assert_eq!(
-        descriptor.features.len(),
-        (pairs + triples) * options.n_grid
-    );
+    let triples = elements * elements * (elements + 1) / 2;
+    assert_eq!(descriptor.features.len(), (pairs + triples) * 16);
     assert!(descriptor.features.iter().all(|value| value.is_finite()));
-    let no_angles = mbtr(
-        &structure,
-        &MbtrOptions {
-            angular: false,
-            ..options
-        },
-    )
-    .expect("radial");
-    assert_eq!(no_angles.features.len(), pairs * 16);
-}
-
-#[test]
-fn mbtr_rejects_bad_options() {
-    let structure = nacl();
     assert!(
         mbtr(
             &structure,
             &MbtrOptions {
-                r_max: 0.0,
-                ..MbtrOptions::default()
-            }
-        )
-        .is_err()
-    );
-    assert!(
-        mbtr(
-            &structure,
-            &MbtrOptions {
-                n_grid: 1,
-                ..MbtrOptions::default()
+                k2: None,
+                k3: None,
+                ..options
             }
         )
         .is_err()
