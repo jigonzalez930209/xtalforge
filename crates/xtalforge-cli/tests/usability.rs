@@ -111,6 +111,39 @@ fn json_errors_carry_a_category() {
 }
 
 #[test]
+fn molecule_hydrogens_flag_appends_inferred_atoms() {
+    let molecule = run(&[
+        "--json",
+        "molecule",
+        "--smiles",
+        "c1ccccc1",
+        "--hydrogens",
+        "--out",
+        "-",
+    ]);
+    assert!(
+        molecule.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&molecule.stderr)
+    );
+    let value: serde_json::Value = serde_json::from_slice(&molecule.stdout).expect("JSON");
+    let sites = value["structure"]["sites"].as_array().expect("sites");
+    assert_eq!(sites.len(), 12);
+    assert_eq!(
+        sites.iter().filter(|site| site["element"] == "H").count(),
+        6
+    );
+
+    let heavy_only = run(&["--json", "molecule", "--smiles", "c1ccccc1", "--out", "-"]);
+    assert!(heavy_only.status.success());
+    let value: serde_json::Value = serde_json::from_slice(&heavy_only.stdout).expect("JSON");
+    assert_eq!(
+        value["structure"]["sites"].as_array().expect("sites").len(),
+        6
+    );
+}
+
+#[test]
 fn molecule_sketch_fragment_and_guest_commands_run() {
     let molecule = run(&["--json", "molecule", "--smiles", "c1ccccc1", "--out", "-"]);
     assert!(molecule.status.success());
