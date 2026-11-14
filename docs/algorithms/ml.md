@@ -36,42 +36,50 @@ The power spectrum follows the DScribe/`SOAPGTO` structure:
 Feature order is `l`, `k`, `k'` with `k <= k'`. `average = true` averages the
 power spectrum over centres.
 
-### Validation and deviation
+### Validation
 
 `crates/xtalforge-ml/data/soap_dscribe.json` records a DScribe 2.x run
-(`r_cut = 5.0`, `n_max = 3`, `l_max = 2`, `sigma = 0.5`, `periodic = true`,
-`average = "off"`, `compression = "off"`) on two carbon atoms in a 5 A cubic
-cell. The Rust test checks the layout and feature count against that fixture.
-**The absolute normalization differs from DScribe in this build**: the
-recorded DScribe rows are not reproduced numerically. The implementation is
-therefore a GTO power spectrum with the published formula, not a bit-identical
-DScribe port. The deviation is deliberate and documented here; the fast
-approximation in `xtalforge_analysis::soap_like_descriptor` remains the
-default for large screens.
+(`r_cut = 4.0`, `n_max = 3`, `l_max = 2`, `sigma = 0.5`, `periodic = true`,
+`average = "off"`, `compression = "off"`) on two carbon atoms in an 8 A cubic
+cell. The Rust test compares every feature with the recorded DScribe row; the
+tolerance is `5e-4 * max(1, |reference|)`, which covers the last-bit
+differences of the independently implemented `pow`/`erf` kernels. The centre
+atom is included in the density exactly as DScribe does; that self term is
+the `l = 0` constant.
+
+The fast approximation in `xtalforge_analysis::soap_like_descriptor` remains
+available for large screens, but the ML descriptor is the exact one.
 
 ## ACSF
 
-G2 and G4 follow Behler and Parrinello with the cosine cutoff
+G1, G2, G3 and G4 follow DScribe's `acsf.cpp` with the cosine cutoff
 
 ```text
 fc(r) = 0.5 (cos(pi r / r_cut) + 1) for r < r_cut, else 0
+G1_i  = sum_j fc(r_ij)
 G2_i  = sum_j exp(-eta (r_ij - r_s)^2) fc(r_ij)
-G4_i  = 2^(1-zeta) sum_{j,k != i} (1 + lambda cos theta_jik)^zeta
+G3_i  = sum_j cos(kappa r_ij) fc(r_ij)
+G4_i  = 2 sum_{j<k} (0.5 (1 + lambda cos theta_jik))^zeta
         exp(-eta (r_ij^2 + r_ik^2 + r_jk^2)) fc(r_ij) fc(r_ik) fc(r_jk)
 ```
 
-Every element pair gets a G2 block and every unordered element pair a G4
-block in sorted element order. The descriptor is invariant to rotation,
-translation and atom order. The tests check shape, finiteness and averaging;
-DScribe ACSF comparison is not bit-identical for the same reason as SOAP.
+The feature layout is one `(G1, G2*, G3*)` block per element followed by one
+`G4*` block per unordered element pair, exactly like DScribe. The recorded
+fixture covers a three-carbon triangle with `g2 = [[0.5, 0]]` and
+`g4 = [[0.5, 1, 1]]`; the test matches every feature within `5e-6`.
 
 ## MBTR
 
-`k=1` broadens pair distances with weight `1/r`; `k=2` broadens the angle at
-every neighbour triple with weight `1/(r_ij r_jk)`. Both use a Gaussian of
-width `sigma` on a fixed grid. The vector concatenates the element-pair
-distance blocks and the element-triple angle blocks; `angular = false` drops
-the angle block.
+`k=2` broadens pair distances with weight one; `k=3` broadens the angle at
+every unordered triple, in **degrees**, with weight one. Both use the
+DScribe integrated Gaussian: the normal CDF is evaluated at each bin edge and
+the difference is divided by the bin width, which preserves the norm on a
+coarse grid. The vector concatenates the enabled blocks in element-pair and
+element-triple order. Separate grids are allowed for `k=2` and `k=3`.
+
+The recorded fixtures compare the `k=2` distance block and the `k=3` angle
+block against DScribe 2.x on a three-carbon triangle; every feature matches
+within `5e-6`.
 
 ## MOF features
 
