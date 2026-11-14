@@ -18,6 +18,7 @@ include = ["src/**"]
 xtalforge-core = { workspace = true }
 xtalforge-engines = { workspace = true, optional = true }
 xtalforge-generation = { workspace = true, optional = true }
+xtalforge-ml = { workspace = true, optional = true }
 xtalforge-io = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 xtalforge-view = { workspace = true }
@@ -52,11 +53,13 @@ ff = ["dep:xtalforge-ff", "build"]
 mof = ["dep:xtalforge-mof", "ff", "analysis"]
 engines = ["dep:xtalforge-engines", "mof"]
 generation = ["dep:xtalforge-generation", "mof"]
+ml = ["dep:xtalforge-ml", "analysis"]
+ml-onnx = ["ml", "xtalforge-ml/onnx"]
+ml-parquet = ["ml", "xtalforge-ml/parquet"]
 modules = ["dep:xtalforge-modules"]
 agent = ["dep:xtalforge-agent", "analysis", "build", "ff", "mof", "modules"]
-full = ["analysis", "build", "ff", "mof", "engines", "generation", "modules", "agent"]
+full = ["analysis", "build", "ff", "mof", "engines", "generation", "ml", "modules", "agent"]
 sci-form = ["agent", "xtalforge-ff/sci-form", "xtalforge-agent/sci-form"]
-ml = []
 external = []
 net = ["dep:ureq", "xtalforge-mof?/net"]
 mof-data = ["mof", "xtalforge-mof/mof-data", "xtalforge-generation?/mof-data"]
