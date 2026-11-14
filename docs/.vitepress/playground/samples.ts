@@ -39,6 +39,7 @@ export const TABS = [
   ['analysis', 'Analysis'],
   ['powder', 'Powder'],
   ['forcefield', 'Force field'],
+  ['mof', 'MOF'],
   ['export', 'Export'],
 ] as const
 
