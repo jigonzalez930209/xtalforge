@@ -1,0 +1,39 @@
+     Program PWSCF v.7.2 starts on 13Nov2026
+
+     lattice parameter (alat)  =      10.2600  a.u.
+     unit-cell volume          =     271.5000 (a.u.)^3
+     number of atoms/cell      =          2
+     number of atomic types    =          1
+
+     crystal axes: (cart. coord. in units of alat)
+       a(1) = (  -0.500000   0.000000   0.500000 )
+       a(2) = (   0.000000   0.500000   0.500000 )
+       a(3) = (  -0.500000   0.500000   0.000000 )
+
+     site n.     atom                  positions (alat units)
+         1           Si  tau(   1) = (    0.0000000   0.0000000   0.0000000  )
+         2           Si  tau(   2) = (    0.2500000   0.2500000   0.2500000  )
+
+     iteration #  1     ecut=    30.00 Ry     beta= 0.70
+     total energy              =     -22.80000000 Ry
+     iteration #  2     ecut=    30.00 Ry     beta= 0.70
+     total energy              =     -22.84600000 Ry
+!    total energy              =     -22.84600000 Ry
+     convergence has been achieved in   4 iterations
+     highest occupied, lowest unoccupied level (ev):     5.1234    5.4567
+
+     Forces acting on atoms (cartesian axes, Ry/au):
+
+     atom    1 type  1   force =     0.001000    0.002000    0.003000
+     atom    2 type  1   force =    -0.001000   -0.002000   -0.003000
+
+     Total force =     0.007483     Total SCF correction =     0.000000
+
+     Computing stress (Cartesian axis) and pressure
+
+          total   stress  (Ry/bohr**3)                   (kbar)     P=      0.01
+   0.00001000   0.00000000   0.00000000        1.47   0.00   0.00
+   0.00000000   0.00002000   0.00000000        0.00   2.94   0.00
+   0.00000000   0.00000000   0.00003000        0.00   0.00   4.41
+
+     PWSCF        :      1.23s CPU         1.50s WALL

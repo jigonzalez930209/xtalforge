@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<qes:espresso xmlns:qes="http://www.quantum-espresso.org/ns/qes/qes-1.0">
+ <output>
+  <convergence_achieved>true</convergence_achieved>
+  <n_scf_steps>4</n_scf_steps>
+  <total_energy>
+   <etot> -11.543210 </etot>
+   <ehart> 5.000000 </ehart>
+  </total_energy>
+  <band_structure>
+   <nbnd>2</nbnd>
+   <nks>2</nks>
+   <fermi_energy>5.1234</fermi_energy>
+   <ks_energies>
+    <k_point weight="1.0">0.000000 0.000000 0.000000</k_point>
+    <eigenvalues>-0.400000 0.200000</eigenvalues>
+    <occupations>1.000000 0.000000</occupations>
+   </ks_energies>
+   <ks_energies>
+    <k_point weight="1.0">0.500000 0.500000 0.500000</k_point>
+    <eigenvalues>-0.300000 0.300000</eigenvalues>
+    <occupations>1.000000 0.000000</occupations>
+   </ks_energies>
+  </band_structure>
+  <atomic_structure nat="2" alat="10.2600">
+   <atomic_positions>
+    <atom name="Si" index="1">0.000000 0.000000 0.000000</atom>
+    <atom name="Si" index="2">0.250000 0.250000 0.250000</atom>
+   </atomic_positions>
+   <cell>
+    <a1>-0.500000 0.000000 0.500000</a1>
+    <a2>0.000000 0.500000 0.500000</a2>
+    <a3>-0.500000 0.500000 0.000000</a3>
+   </cell>
+  </atomic_structure>
+  <forces>
+   <force name="Si" index="1">0.001000 0.002000 0.003000</force>
+   <force name="Si" index="2">-0.001000 -0.002000 -0.003000</force>
+  </forces>
+  <stress unit="kbar">
+   <row>1.000000 0.000000 0.000000</row>
+   <row>0.000000 2.000000 0.000000</row>
+   <row>0.000000 0.000000 3.000000</row>
+  </stress>
+  <timing_info>
+   <total_seconds>1.250000</total_seconds>
+  </timing_info>
+ </output>
+</qes:espresso>
