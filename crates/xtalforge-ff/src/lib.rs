@@ -9,10 +9,11 @@
 //!
 //! [`vibrations`] builds on that boundary: a Gamma-point Hessian from central
 //! differences of analytic forces, mass-weighted modes through a Jacobi
-//! eigensolver, IR intensities from a documented fixed-charge dipole model,
-//! Gamma-point phonons, harmonic thermochemistry and a sampled-volume
-//! quasi-harmonic free energy.  Every approximation is named in the module
-//! that makes it.
+//! eigensolver, IR intensities from a documented fixed-charge dipole model or
+//! from Born effective-charge tensors, powder-averaged Raman activities from
+//! engine tensors, Gamma-point phonons with a DOS and inelastic-neutron
+//! weights, harmonic thermochemistry and a sampled-volume quasi-harmonic free
+//! energy.  Every approximation is named in the module that makes it.
 //!
 //! Task 14.2 adds the scientific-completeness layer on top of Phase 4:
 //! [`CellFreedom`] holds selected cell lengths, angles or the volume and
@@ -86,11 +87,15 @@ pub use uff::model::UffModel;
 pub use uff::params::{ParameterSet, UffParams};
 pub use uff::typer::{AtomType, Confidence, Typing};
 pub use vibrations::{
-    Broadening, CM_PER_SQRT_EV_PER_A2_AMU, CM_TO_EV, DEFAULT_HESSIAN_STEP, DisplacementMode,
-    Hessian, HessianOptions, IMAGINARY_BELOW_CM, IrOptions, IrPeak, IrSpectrum, PhononOptions,
-    PhononResult, QhaFreeEnergy, QhaPoint, QhaResult, ThermoOptions, ThermoResult,
-    VibrationalModes, ZERO_MODE_TOLERANCE_CM, hessian, ideal_gas_thermochemistry, ir_spectrum,
-    phonons, quasi_harmonic_free_energy, thermochemistry, vibrational_modes,
+    BornCharges, Broadening, CM_PER_SQRT_EV_PER_A2_AMU, CM_TO_EV, DEFAULT_HESSIAN_STEP,
+    DEFAULT_IR_FWHM, DEFAULT_IR_STEP, DEFAULT_RAMAN_FWHM, DEFAULT_RAMAN_STEP, DisplacementMode,
+    DosOptions, Hessian, HessianOptions, IMAGINARY_BELOW_CM, InelasticNeutronDos, IrOptions,
+    IrPeak, IrSpectrum, MAX_IR_POINTS, MAX_RAMAN_POINTS, NeutronWeights, PhononDos, PhononOptions,
+    PhononResult, QhaFreeEnergy, QhaPoint, QhaResult, RamanOptions, RamanPeak, RamanSpectrum,
+    RamanTensorSet, TensorFile, ThermoOptions, ThermoResult, VibrationalModes,
+    ZERO_MODE_TOLERANCE_CM, hessian, ideal_gas_thermochemistry, inelastic_neutron_dos, ir_spectrum,
+    ir_spectrum_with_born, mode_neutron_weights, parse_tensor_file, phonon_dos, phonons,
+    powder_average, quasi_harmonic_free_energy, raman_spectrum, thermochemistry, vibrational_modes,
 };
 
 /// Errors returned by force-field operations.
