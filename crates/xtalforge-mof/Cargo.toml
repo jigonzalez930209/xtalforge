@@ -23,14 +23,17 @@ xtalforge-io = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+flate2 = { workspace = true, optional = true }
+ureq = { workspace = true, optional = true }
 sha2 = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
 default = []
-# The full PORMAKE topology and block bundle is a curated subset in this
-# release; the flag is reserved for the complete data drop.
-mof-data = []
+# The full PORMAKE 0.2.3 topology and block bundle (MIT) is loaded lazily
+# from the gzip data files under `data/`.
+mof-data = ["dep:flate2"]
+net = ["dep:ureq"]
 
 [lints]
 workspace = true
