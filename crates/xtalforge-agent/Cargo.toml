@@ -21,6 +21,7 @@ xtalforge-commands = { workspace = true }
 xtalforge-core = { workspace = true }
 xtalforge-ff = { workspace = true }
 xtalforge-generation = { workspace = true }
+xtalforge-ml = { workspace = true }
 xtalforge-io = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 xtalforge-view = { workspace = true }
