@@ -29,6 +29,15 @@ from ._agent_session import AgentSession as AgentSession
 from .workflow import Workflow as Workflow
 from .dataset import Dataset as Dataset
 from ._ml import MlCalculator as MlCalculator
+from ._engines import (
+    engine_bands as engine_bands,
+    engine_dos as engine_dos,
+    engine_failures as engine_failures,
+    engine_input_set as engine_input_set,
+    engine_parse as engine_parse,
+    engine_presets as engine_presets,
+    engine_script as engine_script,
+)
 from ._mof import (
     mof_check as mof_check,
     mof_solvent_remove as mof_solvent_remove,
