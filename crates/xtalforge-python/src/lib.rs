@@ -20,6 +20,7 @@ mod phase11;
 mod phase18;
 mod phase19;
 mod phase20;
+mod phase21;
 mod phase3;
 mod phase4;
 mod phase5;
@@ -474,6 +475,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     phase18::register(module)?;
     phase19::register(module)?;
     phase20::register(module)?;
+    phase21::register(module)?;
 
     module.add_function(wrap_pyfunction!(mof_read_database, module)?)?;
     module.add_function(wrap_pyfunction!(mof_screen, module)?)?;
