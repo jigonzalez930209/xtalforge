@@ -68,3 +68,26 @@ def test_widget_optional() -> None:
         pytest.skip("anywidget is not installed")
     else:
         assert widget.frames == 1
+
+
+def test_parquet_round_trip(tmp_path) -> None:
+    document = xtalforge.read_structure(NACL, "cif")
+    dataset = xtalforge.Dataset(
+        [{"id": "a", "structure": document, "properties": {"e": -1.5}}]
+    ).to_jsonl()
+    path = tmp_path / "data.parquet"
+    count = xtalforge.ml_write_parquet(dataset, str(path))
+    assert count == 1
+    restored = xtalforge.ml_read_parquet(str(path))
+    assert '"id":"a"' in restored.replace(" ", "")
+
+
+def test_onnx_fixture() -> None:
+    model = ROOT / "crates" / "xtalforge-ml" / "data" / "onnx_linear.onnx"
+    values = xtalforge.onnx_predict(str(model), [0.0, 0.0, 0.0, 2.0, 0.0, 0.0], 6)
+    assert abs(values[0] - 0.2) < 1e-5
+    poscar = (
+        "C2\n1.0\n20 0 0\n0 20 0\n0 0 20\nC\n2\nDirect\n0 0 0\n0.1 0 0\n"
+    )
+    energy = xtalforge.onnx_energy(poscar, str(model), 6)
+    assert abs(energy - 0.2) < 1e-5
