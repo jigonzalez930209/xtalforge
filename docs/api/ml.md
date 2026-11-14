@@ -102,11 +102,13 @@ inference layer. Optional features: `ml-onnx` (tract) and `ml-parquet`
 - Python: `crystal_graph_arrays`, `crystal_graph_numpy`, `soap_descriptor`,
   `acsf_descriptor`, `mbtr_descriptor`, `mof_ml_features`, `ml_split`,
   `ml_import`, `ml_predict`, `ml_predict_dataset`, `ml_select`,
-  `ml_active_workflow`
+  `ml_active_workflow`, `ml_write_parquet`, `ml_read_parquet`, `onnx_predict`,
+  `onnx_energy`
 - WASM: `crystal_graph_info`, `soap_descriptor_info`, `acsf_descriptor_info`,
   `mbtr_descriptor_info`, `mof_ml_features_info`, `ml_split_info`,
   `ml_import_info`, `ml_predict_info`, `ml_select_info`,
-  `ml_active_workflow_info`
+  `ml_active_workflow_info`, `ml_parquet_write_info`, `ml_parquet_read_info`,
+  `onnx_predict_info`, `onnx_energy_info`
 
 ### `crystal_graph`
 
@@ -130,9 +132,12 @@ normalization is documented in [the algorithm page](../algorithms/ml).
 
 ### `acsf_descriptor` and `mbtr_descriptor`
 
-`acsf` implements the Behler-Parrinello G2/G4 functions with a cosine cutoff.
-`mbtr` implements the k=1 pair and k=2 angle blocks with Gaussian broadening
-on a fixed grid. Both return the element order and feature layout.
+`acsf` implements the DScribe G1/G2/G3/G4 functions with a cosine cutoff and
+the DScribe feature layout per element and element pair. `mbtr` implements
+the DScribe `k=2` distance and `k=3` degree-angle blocks with the integrated
+Gaussian broadening; `MbtrGrid` sets the grid and width per block. Both return
+the element order and feature layout. The recorded DScribe fixtures are
+matched within `5e-6`.
 
 ### `mof_ml_features`
 
@@ -158,9 +163,10 @@ space or uncertainty-then-diversity. The result is a sorted index list.
 ### `ml_active_workflow`
 
 `active_learning_workflow` emits a six-step Phase 16 workflow:
-read, search, predict, select, append, write. `active_learning_loop` runs the
-same pipeline over an in-memory dataset with caller-supplied featurizer,
-uncertainty, compute and retrain closures.
+read, search, predict, select, append, write. The `search`, `ml_predict`,
+`ml_select` and `ml_append` verbs are all dispatched by the agent.
+`active_learning_loop` runs the same pipeline over an in-memory dataset with
+caller-supplied featurizer, uncertainty, compute and retrain closures.
 
 ## Limits
 
@@ -168,7 +174,7 @@ uncertainty, compute and retrain closures.
   models stay in the Python ML bridge.
 - Parquet stores `id`, structure document JSON and properties JSON as three
   UTF-8 columns; it is lossless but not a nested Arrow schema.
-- SOAP follows the published GTO power spectrum; the DScribe absolute
-  normalization differs (documented in the algorithm page).
-- WASM has no filesystem, so Parquet and checkpointed active learning stay
-  host-side.
+- The default wheels, CLI and WASM package include the `ml-onnx` and
+  `ml-parquet` features. WASM uses byte buffers because it has no filesystem;
+  checkpointed active learning still needs a host.
+- ONNX models with dynamic or graph-structured inputs use the Python bridge.
