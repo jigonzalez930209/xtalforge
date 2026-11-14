@@ -1,5 +1,10 @@
 //! CIF writer (Task 1.15.4): sites, displacement parameters, disorder,
 //! charges and the program's explicit-bond loop.
+//!
+//! [`write_cif`] keeps the string-returning API. [`write_cif_stream`] writes
+//! the same bytes to any [`Write`] without building the document twice.
+
+use std::io::Write;
 
 use serde_json::Value;
 use xtalforge_core::{Error, Provenance, Structure};
@@ -16,14 +21,33 @@ use crate::provenance::CIF_PROVENANCE_TAG;
 /// Returns [`Error::InvalidInput`] if a site has no usable label or the
 /// attached provenance record is invalid.
 pub fn write_cif(structure: &Structure) -> Result<String, Error> {
-    let mut out = String::new();
-    out.push_str(&format!("data_{}\n", sanitize_name(structure.name())));
+    let mut buffer = Vec::new();
+    write_cif_stream(&mut buffer, structure)?;
+    String::from_utf8(buffer).map_err(|error| {
+        Error::InvalidInput(format!("the CIF writer produced invalid UTF-8: {error}"))
+    })
+}
+
+/// Writes a structure to a [`Write`] as one CIF data block.
+///
+/// The output is byte for byte the same as [`write_cif`], including the cell
+/// fields, symmetry operations, site properties, explicit bonds and the
+/// `_xtalforge_provenance` text block when the structure carries a record.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] when the structure cannot be written or the
+/// destination reports an I/O error.
+pub fn write_cif_stream<W: Write>(writer: &mut W, structure: &Structure) -> Result<(), Error> {
+    emit(
+        writer,
+        &format!("data_{}\n", sanitize_name(structure.name())),
+    )?;
     if let Some(record) = Provenance::from_structure(structure)? {
-        out.push_str(CIF_PROVENANCE_TAG);
-        out.push('\n');
-        out.push(';');
-        out.push_str(&record.to_json()?);
-        out.push_str("\n;\n");
+        emit(writer, CIF_PROVENANCE_TAG)?;
+        emit(writer, "\n;")?;
+        emit(writer, &record.to_json()?)?;
+        emit(writer, "\n;\n")?;
     }
     let [a, b, c, alpha, beta, gamma] = structure.lattice().parameters();
     for (tag, value) in [
@@ -34,13 +58,16 @@ pub fn write_cif(structure: &Structure) -> Result<String, Error> {
         ("_cell_angle_beta", beta),
         ("_cell_angle_gamma", gamma),
     ] {
-        out.push_str(&format!("{tag} {value:.6}\n"));
+        emit(writer, &format!("{tag} {value:.6}\n"))?;
     }
-    out.push_str(&format!("_space_group_name_Hall '{}'\n", structure.hall()));
+    emit(
+        writer,
+        &format!("_space_group_name_Hall '{}'\n", structure.hall()),
+    )?;
     if !structure.operations().is_empty() {
-        out.push_str("loop_\n_symmetry_equiv_pos_as_xyz\n");
+        emit(writer, "loop_\n_symmetry_equiv_pos_as_xyz\n")?;
         for operation in structure.operations() {
-            out.push_str(&format!("'{}'\n", operation.triplet()));
+            emit(writer, &format!("'{}'\n", operation.triplet()))?;
         }
     }
 
@@ -74,10 +101,10 @@ pub fn write_cif(structure: &Structure) -> Result<String, Error> {
     if has_charge {
         tags.push("_atom_site_charge");
     }
-    out.push_str("loop_\n");
+    emit(writer, "loop_\n")?;
     for tag in &tags {
-        out.push_str(tag);
-        out.push('\n');
+        emit(writer, tag)?;
+        emit(writer, "\n")?;
     }
     for site in structure.sites() {
         let [x, y, z] = site.frac();
@@ -110,8 +137,8 @@ pub fn write_cif(structure: &Structure) -> Result<String, Error> {
         if has_charge {
             row.push(site.charge().map_or("?".to_owned(), format_number));
         }
-        out.push_str(&row.join(" "));
-        out.push('\n');
+        emit(writer, &row.join(" "))?;
+        emit(writer, "\n")?;
     }
 
     let aniso: Vec<_> = structure
@@ -120,31 +147,43 @@ pub fn write_cif(structure: &Structure) -> Result<String, Error> {
         .filter(|site| site.u_aniso().is_some())
         .collect();
     if !aniso.is_empty() {
-        out.push_str("loop_\n_atom_site_aniso_label\n_atom_site_aniso_U_11\n");
-        out.push_str("_atom_site_aniso_U_22\n_atom_site_aniso_U_33\n_atom_site_aniso_U_12\n");
-        out.push_str("_atom_site_aniso_U_13\n_atom_site_aniso_U_23\n");
+        emit(
+            writer,
+            "loop_\n_atom_site_aniso_label\n_atom_site_aniso_U_11\n",
+        )?;
+        emit(
+            writer,
+            "_atom_site_aniso_U_22\n_atom_site_aniso_U_33\n_atom_site_aniso_U_12\n",
+        )?;
+        emit(writer, "_atom_site_aniso_U_13\n_atom_site_aniso_U_23\n")?;
         for site in aniso {
             let Some([u11, u22, u33, u12, u13, u23]) = site.u_aniso() else {
                 continue;
             };
-            out.push_str(&format!(
-                "{} {} {} {} {} {} {}\n",
-                site.label(),
-                format_number(u11),
-                format_number(u22),
-                format_number(u33),
-                format_number(u12),
-                format_number(u13),
-                format_number(u23)
-            ));
+            emit(
+                writer,
+                &format!(
+                    "{} {} {} {} {} {} {}\n",
+                    site.label(),
+                    format_number(u11),
+                    format_number(u22),
+                    format_number(u33),
+                    format_number(u12),
+                    format_number(u13),
+                    format_number(u23)
+                ),
+            )?;
         }
     }
 
     if !structure.explicit_bonds().is_empty() {
         if structure.is_p1() {
-            out.push_str("loop_\n_xtal_bond_kind\n_geom_bond_atom_site_label_1\n");
-            out.push_str("_geom_bond_atom_site_label_2\n_xtal_bond_image\n");
-            out.push_str("_xtal_bond_order\n");
+            emit(
+                writer,
+                "loop_\n_xtal_bond_kind\n_geom_bond_atom_site_label_1\n",
+            )?;
+            emit(writer, "_geom_bond_atom_site_label_2\n_xtal_bond_image\n")?;
+            emit(writer, "_xtal_bond_order\n")?;
             for bond in structure.explicit_bonds() {
                 let first = structure
                     .sites()
@@ -159,40 +198,57 @@ pub fn write_cif(structure: &Structure) -> Result<String, Error> {
                 } else {
                     "explicit"
                 };
-                out.push_str(&format!(
-                    "{kind} {first} {second} {},{},{} {}\n",
-                    bond.image[0],
-                    bond.image[1],
-                    bond.image[2],
-                    format_number(bond.order)
-                ));
+                emit(
+                    writer,
+                    &format!(
+                        "{kind} {first} {second} {},{},{} {}\n",
+                        bond.image[0],
+                        bond.image[1],
+                        bond.image[2],
+                        format_number(bond.order)
+                    ),
+                )?;
             }
         } else {
-            out.push_str(&format!(
-                "_xtal_bond_p1_count {}\n",
-                structure.p1()?.n_atoms()
-            ));
-            out.push_str("loop_\n_xtal_bond_kind\n_xtal_bond_atom_1\n");
-            out.push_str("_xtal_bond_atom_2\n_xtal_bond_image\n_xtal_bond_order\n");
+            emit(
+                writer,
+                &format!("_xtal_bond_p1_count {}\n", structure.p1()?.n_atoms()),
+            )?;
+            emit(writer, "loop_\n_xtal_bond_kind\n_xtal_bond_atom_1\n")?;
+            emit(
+                writer,
+                "_xtal_bond_atom_2\n_xtal_bond_image\n_xtal_bond_order\n",
+            )?;
             for bond in structure.explicit_bonds() {
                 let kind = if bond.remove {
                     "suppressed"
                 } else {
                     "explicit"
                 };
-                out.push_str(&format!(
-                    "{kind} {} {} {},{},{} {}\n",
-                    bond.i,
-                    bond.j,
-                    bond.image[0],
-                    bond.image[1],
-                    bond.image[2],
-                    format_number(bond.order)
-                ));
+                emit(
+                    writer,
+                    &format!(
+                        "{kind} {} {} {},{},{} {}\n",
+                        bond.i,
+                        bond.j,
+                        bond.image[0],
+                        bond.image[1],
+                        bond.image[2],
+                        format_number(bond.order)
+                    ),
+                )?;
             }
         }
     }
-    Ok(out)
+    Ok(())
+}
+
+fn emit<W: Write>(writer: &mut W, text: &str) -> Result<(), Error> {
+    writer.write_all(text.as_bytes()).map_err(io_error)
+}
+
+fn io_error(error: std::io::Error) -> Error {
+    Error::InvalidInput(format!("could not write the CIF: {error}"))
 }
 
 fn format_number(value: f64) -> String {
