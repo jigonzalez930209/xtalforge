@@ -145,9 +145,18 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             smiles,
             seed,
             iterations,
+            hydrogens,
             out,
             format,
-        } => molecule_commands::molecule(cli, smiles, *seed, *iterations, out.as_deref(), *format),
+        } => molecule_commands::molecule(
+            cli,
+            smiles,
+            *seed,
+            *iterations,
+            *hydrogens,
+            out.as_deref(),
+            *format,
+        ),
         Command::Fragment { name, out, format } => {
             molecule_commands::fragment(cli, name.as_deref(), out.as_deref(), *format)
         }
@@ -164,14 +173,18 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             smiles,
             offset,
             clearance,
+            hydrogens,
             out,
             format,
         } => molecule_commands::guest(
             cli,
-            host,
-            smiles,
-            offset,
-            *clearance,
+            &molecule_commands::GuestRequest {
+                host: host.as_str(),
+                smiles: smiles.as_str(),
+                offset: offset.as_str(),
+                clearance: *clearance,
+                hydrogens: *hydrogens,
+            },
             out.as_deref(),
             *format,
         ),

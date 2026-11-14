@@ -3,8 +3,10 @@
 
 use std::collections::BTreeSet;
 
-use xtalforge::analysis::{slab_terminations, unique_miller_indices};
-use xtalforge::core::{SurfaceEnergy, adsorption_sites, place_molecule, wulff};
+use xtalforge::analysis::{slab_terminations_with_options, unique_miller_indices};
+use xtalforge::core::{
+    SurfaceEnergy, TerminationOptions, adsorption_sites_with_options, place_molecule, wulff,
+};
 use xtalforge::symmetry::{SymmetryOptions, detect_symmetry};
 
 use crate::feature_args::FeatureAction;
@@ -43,14 +45,23 @@ pub(crate) fn run(cli: &Cli, action: &FeatureAction) -> Result<(), CliError> {
             layers,
             vacuum,
             symmetric,
+            intra_layer,
+            cuts,
             index,
             out,
             format,
         } => {
             let structure = load(path)?;
             let hkl = parse_hkl(hkl)?;
-            let report = slab_terminations(&structure, hkl, *layers, *vacuum, *symmetric)
-                .map_err(analysis_error)?;
+            let options = TerminationOptions {
+                include_intra_layer: *intra_layer,
+                cuts: cuts.clone(),
+                ..TerminationOptions::default()
+            };
+            let report = slab_terminations_with_options(
+                &structure, hkl, *layers, *vacuum, *symmetric, &options,
+            )
+            .map_err(analysis_error)?;
             if cli.json {
                 let summaries: Vec<serde_json::Value> = report
                     .terminations
@@ -178,13 +189,19 @@ pub(crate) fn run(cli: &Cli, action: &FeatureAction) -> Result<(), CliError> {
         FeatureAction::Adsorption {
             path,
             tolerance,
+            site_layers,
             molecule,
             offset,
             out,
             format,
         } => {
             let slab = load(path)?;
-            let sites = adsorption_sites(&slab, *tolerance).map_err(analysis_error)?;
+            let options = TerminationOptions {
+                site_layers: *site_layers,
+                ..TerminationOptions::default()
+            };
+            let sites = adsorption_sites_with_options(&slab, *tolerance, &options)
+                .map_err(analysis_error)?;
             if cli.json {
                 println!("{}", serde_json::to_string(&sites).map_err(json_error)?);
             } else {

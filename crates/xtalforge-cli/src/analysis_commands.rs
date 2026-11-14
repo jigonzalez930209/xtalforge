@@ -3,7 +3,8 @@
 use clap::Subcommand;
 use serde_json::json;
 use xtalforge::analysis::{
-    RcsrIndex, ZeoOptions, default_radii, distance_grid, overlay_net, quotient_graph,
+    RcsrIndex, ZeoOptions, default_radii, distance_grid, overlay_net, porosity_report,
+    quotient_graph,
 };
 
 use crate::format::StructureFormat;
@@ -89,6 +90,7 @@ fn porosity(cli: &Cli, path: &str, spacing: f64, probe: f64) -> Result<(), CliEr
     let structure = input::read_structure_path(path).map_err(CliError::core)?;
     let radii = default_radii(&structure).map_err(CliError::analysis)?;
     let grid = distance_grid(&structure, &radii, spacing).map_err(CliError::analysis)?;
+    let report = porosity_report(&structure, &radii, spacing, probe).map_err(CliError::analysis)?;
     let accessible = grid.accessible_volume(probe).map_err(CliError::analysis)?;
     let pore = grid.pore_volume();
     let surface = grid.surface_area();
@@ -104,6 +106,12 @@ fn porosity(cli: &Cli, path: &str, spacing: f64, probe: f64) -> Result<(), CliEr
                 "pore_volume": pore,
                 "surface_area": surface,
                 "largest_included_diameter": largest,
+                "probe_occupiable_volume": report.probe_occupiable_volume,
+                "pov_per_mass": report.pov_per_mass,
+                "accessible_surface_area": report.surface_area,
+                "asa_per_mass": report.asa_per_mass,
+                "percolating_directions": report.percolating_directions,
+                "pore_limiting_diameter": report.pore_limiting_diameter,
             })
         );
     } else {
@@ -112,6 +120,14 @@ fn porosity(cli: &Cli, path: &str, spacing: f64, probe: f64) -> Result<(), CliEr
         println!("pore volume {pore:.3} A^3");
         println!("surface area {surface:.3} A^2");
         println!("largest included diameter {largest:.3} A");
+        println!(
+            "probe-occupiable volume {:.3} A^3 ({:.6} cm^3/g)",
+            report.probe_occupiable_volume, report.pov_per_mass
+        );
+        println!(
+            "accessible surface area {:.3} A^2 ({:.6} m^2/g), percolating {:?}",
+            report.surface_area, report.asa_per_mass, report.percolating_directions
+        );
     }
     Ok(())
 }

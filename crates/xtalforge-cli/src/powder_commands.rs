@@ -3,11 +3,12 @@
 use clap::Subcommand;
 use serde_json::json;
 use xtalforge::analysis::{
-    AutomaticOptions, IndexingOptions, LebailOptions, PawleyOptions, PeakOptions, RefineOptions,
-    RietveldOptions, extinction_symbol, find_peaks, free_cell_parameters, index_cubic,
-    index_pattern, le_bail, pawley_refine, refine_phase, rietx_inventory, run_automatic,
+    AutomaticOptions, LebailOptions, PawleyOptions, RefineOptions, RietveldOptions,
+    extinction_symbol, free_cell_parameters, le_bail, pawley_refine, refine_phase, rietx_inventory,
+    run_automatic,
 };
 
+use crate::powder_index_command::{index, pattern};
 use crate::{Cli, CliError, input};
 
 /// Subcommands of `xtalforge powder`.
@@ -159,88 +160,6 @@ pub(crate) fn run(cli: &Cli, action: &PowderAction) -> Result<(), CliError> {
             Ok(())
         }
     }
-}
-
-fn pattern(path: &str) -> Result<Vec<xtalforge::io::PatternPoint>, CliError> {
-    let text = input::read_source(path).map_err(CliError::core)?;
-    xtalforge::io::read_xy(&text).map_err(CliError::core)
-}
-
-#[allow(clippy::too_many_arguments)] // one flag per documented search switch
-fn index(
-    cli: &Cli,
-    path: &str,
-    wavelength: f64,
-    max_index: i32,
-    tolerance: f64,
-    general: bool,
-    background: bool,
-    refine_peaks: bool,
-) -> Result<(), CliError> {
-    let points = pattern(path)?;
-    // `--background` also applies the noise threshold, so a noisy pattern on a
-    // raised baseline is not indexed on its noise maxima.
-    let peak_options = PeakOptions {
-        refine: refine_peaks,
-        ..if background {
-            PeakOptions::noise_limited(&points)
-        } else {
-            PeakOptions::default()
-        }
-    };
-    let peaks = find_peaks(&points, &peak_options).map_err(CliError::analysis)?;
-    let cubic =
-        index_cubic(&peaks, wavelength, max_index, tolerance).map_err(CliError::analysis)?;
-    let candidates = if general {
-        Some(
-            index_pattern(
-                &peaks,
-                wavelength,
-                &IndexingOptions {
-                    max_index,
-                    tolerance,
-                    ..IndexingOptions::default()
-                },
-            )
-            .map_err(CliError::analysis)?,
-        )
-    } else {
-        None
-    };
-    if cli.json {
-        println!(
-            "{}",
-            json!({"peaks": peaks, "index": cubic, "candidates": candidates})
-        );
-        return Ok(());
-    }
-    println!("{} peaks", peaks.len());
-    match cubic {
-        Some(index) => {
-            println!(
-                "a = {:.6} A, completeness {:.2}, mean error {:.4} deg",
-                index.a, index.completeness, index.mean_error
-            );
-        }
-        None => println!("no cubic candidate"),
-    }
-    if let Some(candidates) = candidates {
-        for (rank, candidate) in candidates.candidates.iter().take(5).enumerate() {
-            println!(
-                "{}. {} a={:.4} b={:.4} c={:.4} beta={:.2} M20={:.1} F_N={:.1} coverage={:.2}",
-                rank + 1,
-                candidate.system.name(),
-                candidate.cell.a,
-                candidate.cell.b,
-                candidate.cell.c,
-                candidate.cell.beta,
-                candidate.m20,
-                candidate.f_n,
-                candidate.completeness
-            );
-        }
-    }
-    Ok(())
 }
 
 fn lebail(

@@ -286,6 +286,9 @@ pub(crate) enum Command {
         /// Embedder gradient steps.
         #[arg(long, default_value_t = 1500)]
         iterations: usize,
+        /// Add the hydrogens implied by the SMILES bond orders.
+        #[arg(long)]
+        hydrogens: bool,
         /// Output path; defaults to standard output.
         #[arg(long)]
         out: Option<String>,
@@ -337,6 +340,9 @@ pub(crate) enum Command {
         /// Minimum host-guest clearance in Angstrom.
         #[arg(long, default_value_t = 1.0)]
         clearance: f64,
+        /// Add the hydrogens implied by the guest SMILES bond orders.
+        #[arg(long)]
+        hydrogens: bool,
         /// Output path.
         #[arg(long)]
         out: Option<String>,

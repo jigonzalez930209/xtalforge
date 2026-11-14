@@ -41,6 +41,7 @@ mod mof_platform_commands;
 mod molecule_commands;
 mod output;
 mod powder_commands;
+mod powder_index_command;
 mod provenance_commands;
 mod pxrd;
 mod spacegroup;

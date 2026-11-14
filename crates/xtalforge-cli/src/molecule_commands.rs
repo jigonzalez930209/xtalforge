@@ -11,18 +11,21 @@ pub(crate) fn molecule(
     smiles: &str,
     seed: u64,
     iterations: usize,
+    hydrogens: bool,
     out: Option<&str>,
     format: Option<StructureFormat>,
 ) -> Result<(), CliError> {
     let graph = xtalforge::build::parse_smiles(smiles).map_err(CliError::core)?;
-    let structure = xtalforge::build::embed_smiles(
-        &graph,
-        &xtalforge::build::EmbedOptions {
-            seed,
-            iterations,
-            ..xtalforge::build::EmbedOptions::default()
-        },
-    )
+    let options = xtalforge::build::EmbedOptions {
+        seed,
+        iterations,
+        ..xtalforge::build::EmbedOptions::default()
+    };
+    let structure = if hydrogens {
+        xtalforge::build::embed_smiles_with_hydrogens(&graph, &options)
+    } else {
+        xtalforge::build::embed_smiles(&graph, &options)
+    }
     .map_err(CliError::core)?;
     if cli.json && out.is_none() {
         println!(
@@ -60,7 +63,7 @@ pub(crate) fn fragment(
     let fragment = xtalforge::build::find_fragment(name)
         .map_err(CliError::core)?
         .ok_or_else(|| CliError::input(format!("unknown fragment {name:?}")))?;
-    molecule(cli, &fragment.smiles, 7, 1500, out, format)
+    molecule(cli, &fragment.smiles, 7, 1500, false, out, format)
 }
 
 pub(crate) fn sketch(cli: &Cli, smiles: &str) -> Result<(), CliError> {
@@ -90,19 +93,35 @@ pub(crate) fn substitute(
     output::emit_structure(cli, &structure, out, format)
 }
 
+/// Inputs of the `guest` command.
+pub(crate) struct GuestRequest<'a> {
+    /// Host structure text.
+    pub host: &'a str,
+    /// Guest SMILES string.
+    pub smiles: &'a str,
+    /// Cartesian offset `x,y,z`.
+    pub offset: &'a str,
+    /// Minimum host-guest clearance in Angstrom.
+    pub clearance: f64,
+    /// Add the hydrogens implied by the guest bond orders.
+    pub hydrogens: bool,
+}
+
 pub(crate) fn guest(
     cli: &Cli,
-    host: &str,
-    smiles: &str,
-    offset: &str,
-    clearance: f64,
+    request: &GuestRequest<'_>,
     out: Option<&str>,
     format: Option<StructureFormat>,
 ) -> Result<(), CliError> {
-    let host = load(host)?;
-    let graph = xtalforge::build::parse_smiles(smiles).map_err(CliError::core)?;
-    let guest = xtalforge::build::embed_smiles(&graph, &xtalforge::build::EmbedOptions::default())
-        .map_err(CliError::core)?;
+    let host = load(request.host)?;
+    let graph = xtalforge::build::parse_smiles(request.smiles).map_err(CliError::core)?;
+    let options = xtalforge::build::EmbedOptions::default();
+    let guest = if request.hydrogens {
+        xtalforge::build::embed_smiles_with_hydrogens(&graph, &options)
+    } else {
+        xtalforge::build::embed_smiles(&graph, &options)
+    }
+    .map_err(CliError::core)?;
     let points: Vec<(String, [f64; 3])> = guest
         .p1()
         .map_err(CliError::core)?
@@ -110,12 +129,12 @@ pub(crate) fn guest(
         .iter()
         .map(|atom| (atom.element.clone(), guest.lattice().to_cart(atom.frac)))
         .collect();
-    let values = parse_numbers(offset)?;
+    let values = parse_numbers(request.offset)?;
     let [x, y, z] = match values.as_slice() {
         [x, y, z] => [*x, *y, *z],
         _ => return Err(CliError::input("--offset needs three numbers")),
     };
-    let structure = xtalforge::build::place_guest(&host, &points, [x, y, z], clearance)
+    let structure = xtalforge::build::place_guest(&host, &points, [x, y, z], request.clearance)
         .map_err(CliError::core)?;
     output::emit_structure(cli, &structure, out, format)
 }

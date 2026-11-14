@@ -188,6 +188,12 @@ pub enum FeatureAction {
         /// Mirror the slab into a symmetric one.
         #[arg(long)]
         symmetric: bool,
+        /// Add cuts at the quarter and three-quarter points of every gap.
+        #[arg(long)]
+        intra_layer: bool,
+        /// Extra cut shift in interplanar-spacing units; repeat for more.
+        #[arg(long = "cut")]
+        cuts: Vec<f64>,
         /// Termination to write; defaults to the first.
         #[arg(long)]
         index: Option<usize>,
@@ -213,6 +219,9 @@ pub enum FeatureAction {
         /// Tolerance for the top layer in fractional units.
         #[arg(long, default_value_t = 0.05)]
         tolerance: f64,
+        /// Atomic layers below the top that produce sites.
+        #[arg(long, default_value_t = 1)]
+        site_layers: u32,
         /// Optional molecule to place on the first site.
         #[arg(long)]
         molecule: Option<String>,

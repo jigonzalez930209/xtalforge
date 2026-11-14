@@ -162,6 +162,23 @@ pub(crate) enum DatabaseAction {
     },
     /// Deduplicate a list of structure paths.
     Deduplicate { paths: Vec<String> },
+    /// Download a database archive into a cache with a checksum.
+    Fetch {
+        /// Archive URL.
+        url: String,
+        /// Cache directory.
+        #[arg(long, default_value = ".xtalforge-cache")]
+        cache: String,
+        /// Expected SHA-256 of the archive.
+        #[arg(long)]
+        sha256: Option<String>,
+        /// Accept only an already cached archive.
+        #[arg(long)]
+        offline: bool,
+        /// Database name: core or qmof.
+        #[arg(long, default_value = "core")]
+        kind: String,
+    },
 }
 
 /// Subcommands of `xtalforge mof`.

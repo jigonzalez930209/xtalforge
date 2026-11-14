@@ -421,6 +421,40 @@ pub(crate) fn database(cli: &Cli, action: &DatabaseAction) -> Result<(), CliErro
                 Ok(())
             }
         }
+        DatabaseAction::Fetch {
+            url,
+            cache,
+            sha256,
+            offline,
+            kind,
+        } => {
+            let mut options = xtalforge::mof::FetchOptions::new(cache).offline(*offline);
+            if let Some(sha256) = sha256 {
+                options = options.with_sha256(sha256);
+            }
+            let fetched = if kind.eq_ignore_ascii_case("qmof") {
+                xtalforge::mof::fetch_qmof(url, &options)
+            } else {
+                xtalforge::mof::fetch_core_mof(url, &options)
+            }
+            .map_err(CliError::core)?;
+            if cli.json {
+                emit_json(&fetched)
+            } else {
+                println!(
+                    "{} {} ({} bytes, sha256 {})",
+                    if fetched.from_cache {
+                        "cached"
+                    } else {
+                        "downloaded"
+                    },
+                    fetched.path.display(),
+                    fetched.bytes,
+                    fetched.sha256
+                );
+                Ok(())
+            }
+        }
         DatabaseAction::Deduplicate { paths } => {
             let mut structures = Vec::with_capacity(paths.len());
             for path in paths {
