@@ -41,10 +41,10 @@ are in `AGENTS.md` at the repository root.
 
 ## Current status (2026-11-13)
 
-- Phases 0-17 are complete; the Rust API, CLI, Python and WASM surfaces build
+- Phases 0-18 are complete; the Rust API, CLI, Python and WASM surfaces build
   and pass their checks. `v0.0.1`, `v0.0.2`, `v0.0.3`, `v1.0.0-rc.1`, the
   stable `v1.0.0`, `v1.1.0`, `v1.2.0`, `v1.3.0`, `v1.4.0`, `v1.5.0`, `v1.5.1`,
-  `v1.6.0`, `v1.7.0`, `v1.8.0`, `v1.9.0` and `v1.10.0` are published on
+  `v1.6.0`, `v1.7.0`, `v1.8.0`, `v1.9.0`, `v1.10.0` and `v1.11.0` are published on
   crates.io, PyPI (`xtalforge`), npm (`xtalforge-wasm`), the GitHub release
   and GitHub Pages.
   `v1.0.0` (2026-11-10) ships 13 crates, 7 wheels plus an sdist, the npm
