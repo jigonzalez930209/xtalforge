@@ -5,6 +5,37 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.11.0] - 2026-11-14
+
+Phase 18 makes xtalforge the layer between a structure and a real simulation.
+
+### Added
+
+- `xtalforge-engines` crate and facade `engines` feature: versioned input-set
+  presets for VASP, Quantum ESPRESSO, CP2K, LAMMPS, GULP, RASPA and ORCA,
+  deterministic override merging and byte-identical files.
+- Typed `CalculationResult` and parsers for vasprun.xml, OUTCAR, OSZICAR,
+  EIGENVAL, DOSCAR, PROCAR, QE text/XML/bands/projwfc, CP2K, LAMMPS log/dump
+  and GULP, plus Bader and DDEC charge readers.
+- Band structures, direct/indirect/spin gaps, parabolic effective masses,
+  total/element/orbital DOS, Gaussian smearing and the d-band centre.
+- Workflow compute steps with scratch directories, parser registry, restart
+  checkpoints, SLURM/PBS scripts, scheduler probes and the failure catalogue
+  (SCF, ZBRENT, walltime, out-of-memory, missing pseudopotential).
+- CLI `xtalforge engines presets|inputs|parse|bands|dos|script|failures`,
+  Python `engine_*` functions and WASM `engine_*_info` exports.
+- The "MOF from CIF to DFT band gap" tutorial, the electronic-structure
+  algorithm page, engine fixtures with provenance and the Phase 18 parity rows.
+
+### Notes
+
+- Process execution and scheduler probes are host-only; WASM and Python write
+  scripts and parse outputs, recorded as a parity exception.
+- The engine fixtures are hand-written representative outputs under the
+  repository license, not copied third-party data.
+- No licensed POTCAR or pseudopotential content is generated; only names are
+  emitted.
+
 ## [1.10.0] - 2026-11-13
 
 Phase 17 closes the open subtasks and documented subsets that blocked

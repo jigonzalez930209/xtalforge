@@ -156,6 +156,7 @@ xtalforge/
 │  ├─ xtalforge-view/         view settings, draw styles, colormaps, scene data, STL
 │  ├─ xtalforge-ff/           Calculator trait, UFF/UFF4MOF, QEq/EQeq, Ewald,
 │  │                          optimizers, scans, vibrations, phonons, thermo, engines
+│  ├─ xtalforge-engines/      Input sets, output parsers, electronic structure, jobs
 │  ├─ xtalforge-analysis/     PXRD, grids, porosity, voids, topology, RCSR, interpenetration
 │  ├─ xtalforge-build/        molecules, substituents, fill, carbon, graphene, nanotubes,
 │  │                          fullerenes, polymers
@@ -272,22 +273,21 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.10.0` (published on 2026-11-13 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.9.0` and earlier
-  shipped on 2026-11-13/12). `1.10.0` completes Phase 17: the full PORMAKE
-  bundle behind `mof-data`, cached/checksummed database fetch, porosity
-  completeness, aromatic hydrogen inference, indexing agreement, YAML
-  workflows, in-memory WASM workflows, streaming writers, fused SoA
-  neighbours, slab/adsorption options, standardized-primitive matching,
-  CrystalNN coordination and the local `scripts/gate.sh`.
+- Version: `1.11.0` (published on 2026-11-14 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.10.0` and
+  earlier shipped on 2026-11-13/12). `1.11.0` completes Phase 18: the
+  `xtalforge-engines` input-set presets, output parsers, electronic-structure
+  analysis, scheduler jobs, CLI/Python/WASM surfaces and the engine fixtures.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
-- Current phase: Phase 18 — Simulation engine bridge
-  (`docs/roadmap/phase-18-engines.md`, target `1.11.0`). Phases 19-21
-  (magnetism/spectroscopy, generation, ML; `1.12.0`-`1.14.0`) widen the scope
-  before Phase 22 — 2.0 redesign and freeze
-  (`docs/roadmap/phase-22-v2.md`), renumbered from 17 on 2026-11-13.
+- Current phase: Phase 19 — Magnetism, disorder and spectroscopy
+  (`docs/roadmap/phase-19-magnetism-spectroscopy.md`, target `1.12.0`).
+  Phases 20-21 (generation, ML; `1.13.0`-`1.14.0`) widen the scope before
+  Phase 22 — 2.0 redesign and freeze (`docs/roadmap/phase-22-v2.md`),
+  renumbered from 17 on 2026-11-13. Phase 18 shipped as `1.11.0`; process
+  execution and scheduler probes stay host-side (parity exception), and the
+  representative engine fixtures are not recorded external runs.
   Phase 17 shipped as `1.10.0`; the remaining documented follow-ups are Python
   progress callbacks for the profile refinements, fresh external
   Zeo++/MOFid/RASPA e2e snapshots, and the maintainer's npm token for the
@@ -382,8 +382,8 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 - Workspace members (Task 0.1.1, extended by later phases): `xtalforge-core`,
   `xtalforge-symmetry`, `xtalforge-io`, `xtalforge-commands`, `xtalforge-view`,
   `xtalforge-ff`, `xtalforge-analysis`, `xtalforge-build`, `xtalforge-mof`,
-  `xtalforge-modules`, `xtalforge-agent`, the facade `xtalforge`,
-  `xtalforge-cli`, `xtalforge-python`, `xtalforge-wasm`, the test crate
+  `xtalforge-modules`, `xtalforge-agent`, `xtalforge-engines`, the facade
+  `xtalforge`, `xtalforge-cli`, `xtalforge-python`, `xtalforge-wasm`, the test crate
   `xtalforge-testkit` and the unpublished example crate
   `xtalforge-plugin-example` under `examples/plugin`. Rust edition 2024, MSRV 1.89, license
   `MIT OR Apache-2.0` (`LICENSE-MIT`, `LICENSE-APACHE`).
