@@ -29,6 +29,7 @@ from ._agent_session import AgentSession as AgentSession
 from .workflow import Workflow as Workflow
 from .dataset import Dataset as Dataset
 from ._ml import MlCalculator as MlCalculator
+from ._phase20 import *
 from ._phase19 import (
     magnetic_orderings as magnetic_orderings,
     disorder_groups as disorder_groups,
