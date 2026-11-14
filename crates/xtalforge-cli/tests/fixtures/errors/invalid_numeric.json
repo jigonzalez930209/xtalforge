@@ -1,0 +1,11 @@
+{
+  "description": "invalid numeric option: a zero RDF bin width",
+  "args": ["features", "rdf", "a.cif", "--bin", "0"],
+  "exit_code": 3,
+  "error": {
+    "category": "input",
+    "code": "invalid_input",
+    "message": "invalid input: RDF bin width must be positive and finite"
+  },
+  "message_contains": ["RDF bin width must be positive and finite"]
+}

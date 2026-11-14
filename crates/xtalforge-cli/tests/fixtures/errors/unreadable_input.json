@@ -1,0 +1,11 @@
+{
+  "description": "unreadable input: a structure path that does not exist",
+  "args": ["info", "missing.cif"],
+  "exit_code": 3,
+  "error": {
+    "category": "input",
+    "code": "invalid_input",
+    "message": "invalid input: could not read missing.cif: <os error>"
+  },
+  "message_contains": ["could not read missing.cif"]
+}

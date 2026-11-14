@@ -1,0 +1,11 @@
+{
+  "description": "invalid index: the second atom is outside the P1 cell",
+  "args": ["distance", "a.cif", "0", "99"],
+  "exit_code": 3,
+  "error": {
+    "category": "input",
+    "code": "invalid_input",
+    "message": "invalid input: atom index 99 is outside the P1 cell (length 8)"
+  },
+  "message_contains": ["atom index 99", "outside the P1 cell"]
+}

@@ -1,0 +1,15 @@
+{
+  "description": "unknown format: a suffix with no registered reader",
+  "args": ["info", "unknown.bin"],
+  "exit_code": 3,
+  "write_file": {
+    "name": "unknown.bin",
+    "content": "not a crystal structure\n"
+  },
+  "error": {
+    "category": "input",
+    "code": "invalid_input",
+    "message": "invalid input: unknown structure format: bin"
+  },
+  "message_contains": ["unknown structure format: bin"]
+}

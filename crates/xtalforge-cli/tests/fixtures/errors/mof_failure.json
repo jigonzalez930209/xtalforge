@@ -1,0 +1,11 @@
+{
+  "description": "failed MOF request: a topology missing from the curated table",
+  "args": ["mof", "build", "NOT_A_TOPOLOGY", "node", "linker"],
+  "exit_code": 3,
+  "error": {
+    "category": "input",
+    "code": "unknown_topology",
+    "message": "unknown topology NOT_A_TOPOLOGY"
+  },
+  "message_contains": ["unknown topology NOT_A_TOPOLOGY"]
+}
