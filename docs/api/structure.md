@@ -75,3 +75,7 @@ registry and returns the same summary.
   whole cell (4 for rock salt, 8 for diamond silicon), or 1 when a count is not
   an integer; `n_sites` stays the number of asymmetric sites.
 - `total_charge` is the occupancy-weighted sum of formal charges.
+
+## Magnetic moments
+
+`Site` carries an optional `MagneticMoment`: collinear (`MagneticAxis::{A,B,C}` plus a signed magnitude) or a three-component crystal-axis vector. `with_collinear_moment`, `with_moment_vector` and `with_magnetic_moment` set it; the P1 expansion, supercell and slab copy it. The JSON field is additive and the `SCHEMA_VERSION` stays 1. See [Magnetism](./magnetism.md).

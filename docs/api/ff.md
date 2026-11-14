@@ -121,3 +121,15 @@ trajectory and `RunControl`. `MdResult` returns the final structure and the
 same run.
 
 Parity key: `md`.
+
+## IR from Born charges and Raman
+
+`BornCharges` reads Born effective-charge tensors (a text/JSON file, explicit
+tensors, or the QEq/EQeq diagonal) and
+`ir_spectrum_with_born(structure, modes, born, options)` returns the same
+`IrSpectrum` as the fixed-charge path with Lorentzian broadening.
+`RamanTensorSet::from_text`/`from_tensors` supplies engine Raman tensors and
+`raman_spectrum(modes, tensors, options)` returns the powder-averaged
+`RamanSpectrum`. `phonon_dos`, `NeutronWeights` and `inelastic_neutron_dos`
+turn a `PhononResult` into a DOS and mode-weighted inelastic-neutron curve.
+See [Spectroscopy](spectroscopy.md).

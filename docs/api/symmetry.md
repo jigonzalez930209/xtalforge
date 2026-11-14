@@ -141,8 +141,13 @@ part of the current lowering.
 the lattice must have `c` perpendicular to `a` and `b`, and the result carries
 the layer-group number (1 to 80), Hall number, operations, orbits, Wyckoff
 letters and Pearson symbol. `detect_magnetic_symmetry(structure, symprec)`
-reads the `magmom` site property and returns a `MagneticDataset` with the UNI
-number, `MagneticOperation`s and orbits; it is marked experimental.
+reads the typed site moment (falling back to the `magmom` property) and returns
+a `MagneticDataset` with the UNI number, `MagneticOperation`s and orbits;
+`detect_magnetic_symmetry_with_options` takes `MagneticSymmetryOptions`.
+`symmetrize_moments` / `symmetrize_structure_moments` return a
+`MagneticSymmetrization { moments, orbits, stabilizers, operation_count,
+time_reversal_count }`; `magmom_values` and `format_magmom` write the VASP
+vector. See [Magnetism](./magnetism.md).
 
 ## Band paths and molecular point groups
 

@@ -174,3 +174,28 @@ joins two quotient graphs and `overlay_net` turns one into an `Overlay` with an
 operations.
 
 Parity key: `net_contraction`.
+
+## Neutron and electron diffraction
+
+`neutron_powder(structure, &NeutronOptions)` returns a
+`NeutronPattern { axis, range, step, points, reflections }` for
+`NeutronGeometry::ConstantWavelength { wavelength }` or `TimeOfFlight {
+path_length }`. `magnetic_powder(structure, &MagneticOptions)` returns the
+magnetic contribution and `with_nuclear(&NeutronPattern)` adds the two.
+`zone_axis_pattern(structure, &SaedOptions)` returns a kinematic
+`SaedPattern { spots, ... }`; `image()` rasterises it into `SaedImage` with
+`to_u8` for a PGM/PNG display. The CLI exposes `analysis neutron` and
+`analysis electron` (with `--image`), Python `neutron_powder`,
+`magnetic_powder` and `electron_diffraction`, and WASM the `_info` forms.
+
+## Disorder and derivative structures
+
+`disorder_groups`, `disorder_composition`, `disorder_formula` and
+`disorder_density` describe partial occupancies; `disorder_scattering_weights`
+returns the occupancy-weighted scattering amplitudes. `hnf_supercells` and
+`derivative_structures` enumerate symmetry-distinct decorations.
+`cluster_correlation_vectors` exports pair/triplet/quadruplet correlations for
+external fitting. See [Disorder](disorder.md) and the
+[enumeration algorithm](../algorithms/disorder-enumeration.md).
+
+Parity keys: `disorder`, `derivative_structures`, `neutron_powder`, `magnetic_powder`, `electron_diffraction`.

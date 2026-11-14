@@ -176,6 +176,16 @@ compares this table with the symbols each surface actually exports.
 | `engine_outputs` | 18 | done | done | done | done | Typed result model and VASP/QE/CP2K/LAMMPS/GULP parsers (Task 18.2); Bader/DDEC readers |
 | `engine_electronic` | 18 | done | done | done | done | Bands, gaps, effective masses and DOS (Task 18.3); CLI `engines bands/dos` |
 | `engine_jobs` | 18 | done | done | done | done | Scheduler scripts and failure patterns (Task 18.4); process execution is a host-side exception |
+| `magnetic_moments` | 19 | done | done | done | done | Collinear and vector moments on sites, preserved by P1/supercell/slab (Task 19.1.1); mCIF and the JSON schema |
+| `mcif` | 19 | done | done | done | done | magCIF reader/writer with magnetic operations and moments (Task 19.1.3) |
+| `magnetic_orderings` | 19 | done | done | done | done | Ferro/antiferro/ferri enumeration ranked by magnetic symmetry (Task 19.1.4) |
+| `disorder` | 19 | done | done | done | done | Partial-occupancy groups, composition, density and scattering weights (Task 19.2.1) |
+| `derivative_structures` | 19 | done | done | done | done | HNF supercells and symmetry-distinct decorations (Task 19.2.2) |
+| `neutron_powder` | 19 | done | done | done | done | Nuclear neutron pattern, constant wavelength and TOF (Task 19.3.1) |
+| `magnetic_powder` | 19 | done | done | done | done | Magnetic neutron structure factors from site moments (Task 19.3.2) |
+| `electron_diffraction` | 19 | done | done | done | done | Kinematic SAED with an image buffer (Task 19.3.3) |
+| `raman` | 19 | done | done | done | done | Powder-averaged Raman from engine tensors (Task 19.4.2) |
+| `phonon_dos_neutron` | 19 | done | done | done | done | Phonon DOS and inelastic-neutron weights (Task 19.4.3) |
 
 ## Recorded exceptions
 
