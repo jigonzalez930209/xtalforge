@@ -45,6 +45,9 @@
 #   the in-memory workflow runner
 # 6400 KiB since 1.11.0: engine input sets, parsers and electronic-structure
 #   analysis
+# 7168 KiB since 1.13.0: Phase 20 generators, global search, prototypes and
+#   MOF enumeration (6788 KiB measured)
+#
 # 6656 KiB since 1.12.0: magnetism, disorder, diffraction and spectroscopy
 # (5606 KiB measured).
 #
@@ -79,7 +82,7 @@ check_package() {
   fi
 }
 
-check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 6656
+check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 7168
 
 split=(core symmetry analysis build)
 present=0

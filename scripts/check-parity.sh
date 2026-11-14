@@ -131,6 +131,10 @@ check_rust() {
     dataset) grep -Rq 'pub struct Dataset' crates/xtalforge-analysis/src; return ;;
     dataset_dedup) name=deduplicate ;;
     ml_descriptors) name=composition_features ;;
+    generate_molecule_crystal) name=generate_molecular_crystal ;;
+    layer_groups) name=layer_groups ;;
+    search_workflow) name=search_workflow_document ;;
+    mof_dataset) name=generate_mof_dataset ;;
   esac
   grep -Rq "pub fn $name(" crates/*/src
 }
@@ -182,6 +186,20 @@ check_python() {
     phonon_dos_neutron) name=raman_powder_average ;;
     powder_pawley) name=powder_pawley ;;
     refine_phase) name=powder_refine ;;
+    generate_crystal) name=generate_crystal ;;
+    generate_molecule_crystal) name=generate_molecule_crystal ;;
+    generate_layer_crystal) name=generate_layer_crystal ;;
+    generate_rod_crystal) name=generate_rod_crystal ;;
+    random_search) name=random_search ;;
+    evolutionary_search) name=evolutionary_search ;;
+    search_workflow) name=search_workflow ;;
+    prototype_library) name=prototype_library ;;
+    build_prototype) name=build_prototype ;;
+    identify_prototype) name=identify_prototype ;;
+    substitution_candidates) name=substitution_candidates ;;
+    mof_dataset) name=mof_dataset ;;
+    functionalization_sweep) name=functionalize_sweep ;;
+    layer_groups) name=layer_groups ;;
   esac
   grep -Rq --include='*.pyi' "def $name(" "$PY_STUB"
 }
@@ -265,6 +283,19 @@ check_wasm() {
     net_invariants) name=net_invariants_info ;;
     zeo_parse) name=zeo_parse_info ;;
     fragment_library) name=fragment_library_info ;;
+    generate_crystal) name=generate_crystal_info ;;
+    generate_molecule_crystal) name=generate_molecule_crystal_info ;;
+    generate_layer_crystal) name=generate_layer_crystal_info ;;
+    generate_rod_crystal) name=generate_rod_crystal_info ;;
+    random_search) name=random_search_info ;;
+    evolutionary_search) name=evolutionary_search_info ;;
+    search_workflow) name=search_workflow_info ;;
+    prototype_library) name=prototype_library_info ;;
+    identify_prototype) name=identify_prototype_info ;;
+    substitution_candidates) name=substitution_candidates_info ;;
+    mof_dataset) name=mof_dataset_info ;;
+    functionalization_sweep) name=functionalize_sweep_info ;;
+    layer_groups) name=layer_groups_info ;;
     fragment_structure) name=fragment_info ;;
     substitute_structure) name=substitute_info ;;
     place_guest_structure) name=place_guest_info ;;
@@ -272,7 +303,7 @@ check_wasm() {
   if [ -f "$WASM_TS" ]; then
     grep -q "function $name(" "$WASM_TS"
   else
-    grep -q "pub fn $name(" "$WASM_SRC"
+    grep -Rq "pub fn $name(" "$ROOT/crates/xtalforge-wasm/src"
   fi
 }
 
@@ -315,6 +346,7 @@ check_cli() {
     agent_capabilities|agent_verbs) command=capabilities ;;
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
+    generate_crystal|generate_molecule_crystal|generate_layer_crystal|generate_rod_crystal|random_search|evolutionary_search|search_workflow|prototype_library|identify_prototype|substitution_candidates|mof_dataset|functionalization_sweep|layer_groups) command=generate ;;
     mof_check|mof_solvent_remove|mof_disorder|mof_charge_balance|mof_deconstruct|mof_mofid|mof_open_metal_sites|mof_descriptors|mof_pores|mof_guests|mof_forcefield|mof_widom|mof_gcmc|mof_energy_grid|mof_raspa|mof_functionalize|mof_defects|mof_interpenetrate|mof_stack_layers|mof_mixed|mof_read_database|mof_screen|mof_deduplicate) command=mof ;;
     read) command=info ;;
     write) command=convert ;;
