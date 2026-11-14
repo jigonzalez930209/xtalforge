@@ -5,6 +5,14 @@
 //! A binary disordered sublattice is decorated with a fixed seed, and the
 //! decoration is relaxed by swapping A/B sites so the pair and triplet
 //! correlations approach the random targets. The report lists every shell.
+//!
+//! The multicomponent extension with pair, triplet and quadruplet targets
+//! lives in [`crate::sqs_multicomponent`] and is re-exported here as
+//! [`multicomponent_sqs`].
+
+pub use crate::sqs_multicomponent::{
+    MulticomponentSqsOptions, MulticomponentSqsResult, SqsCorrelation, multicomponent_sqs,
+};
 
 use std::collections::BTreeMap;
 

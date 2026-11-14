@@ -225,6 +225,16 @@ pub(crate) struct Scatterer {
     debye: DebyeWaller,
 }
 
+impl Scatterer {
+    /// Debye-Waller attenuation `exp(-W)` of one reflection.
+    ///
+    /// Used by the magnetic diffraction module, which evaluates the nuclear
+    /// amplitude itself but must apply the same displacement model.
+    pub(crate) fn attenuation(&self, metric: &[[f64; 3]; 3], hkl: [i32; 3]) -> f64 {
+        (-debye_exponent(&self.debye, metric, hkl)).exp()
+    }
+}
+
 /// One structure expanded to P1, its reciprocal metric and the total
 /// scattering power used for the absence threshold.
 #[derive(Debug, Clone)]
@@ -329,7 +339,7 @@ pub(crate) fn amplitude(scattering: &Scattering, hkl: [i32; 3]) -> (f64, f64) {
     for scatterer in &scattering.scatterers {
         let [x, y, z] = scatterer.frac;
         let phase = TAU * (h * x + k * y + l * z);
-        let attenuation = (-debye_exponent(&scatterer.debye, &scattering.metric, hkl)).exp();
+        let attenuation = scatterer.attenuation(&scattering.metric, hkl);
         let value = scatterer.form.value(s2) * scatterer.occupancy * attenuation;
         real += value * phase.cos();
         imaginary += value * phase.sin();

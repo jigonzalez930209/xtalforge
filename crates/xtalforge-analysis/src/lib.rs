@@ -30,14 +30,18 @@
 pub mod automatic;
 pub mod bvs;
 pub mod cells;
+pub mod cluster_expansion;
 pub mod contraction;
 mod contraction_metals;
 mod contraction_simplify;
 pub mod dataset;
 pub mod dedup;
 pub mod defects;
+pub mod derivative;
 pub mod descriptors;
 pub mod diffraction;
+pub mod disorder;
+pub mod electron_diffraction;
 pub mod ewald;
 pub mod extinction;
 pub mod fit;
@@ -48,10 +52,12 @@ pub mod interfaces;
 pub mod interpenetration;
 pub mod isosurface;
 pub mod lebail;
+pub mod magnetic_diffraction;
 pub mod merge;
 pub mod nets;
 pub mod netsearch;
 mod netsearch_query;
+pub mod neutron;
 pub mod orderings;
 pub mod overlay;
 pub mod parameters;
@@ -68,6 +74,7 @@ pub mod rietveld;
 pub mod rietx;
 pub mod scattering;
 pub mod sqs;
+pub mod sqs_multicomponent;
 pub mod surfaces;
 pub mod topology;
 pub mod vertex_symbols;
@@ -82,6 +89,10 @@ pub use cells::{
     CELL_PARAMETER_NAMES, TrigonalSetting, extinction_symbol, free_cell_parameters,
     free_cell_parameters_with_setting,
 };
+pub use cluster_expansion::{
+    ClusterCorrelationSet, ClusterCorrelationVector, ClusterExpansionOptions, ClusterLattice,
+    ClusterShell, MAX_CLUSTER_ORDER, cluster_correlation_vectors,
+};
 pub use contraction::{
     ContractedEdge, ContractedNet, ContractedNode, ContractionOptions, NetNodeRule, NodeKind,
     contract as contract_structure,
@@ -89,6 +100,9 @@ pub use contraction::{
 pub use dataset::{DATASET_VERSION, Dataset, DatasetMetadata, DatasetRecord, PropertyValue};
 pub use dedup::{DedupGroup, DedupOptions, DedupReport, DedupResult, deduplicate};
 pub use defects::{DefectKind, PointDefect, interstitials, substitutions, vacancies};
+pub use derivative::{
+    DerivativeOptions, DerivativeStructure, MAX_HNF_INDEX, derivative_structures, hnf_supercells,
+};
 pub use descriptors::{
     CompositionFeatures, CoulombMatrix, CoulombMatrixOptions, MAX_SOAP_FEATURES, MAX_SOAP_L,
     MAX_SOAP_NEIGHBORS, MAX_SOAP_RADIAL, RdfDescriptor, SoapLikeDescriptor, SoapLikeOptions,
@@ -100,6 +114,12 @@ pub use diffraction::{
     ElectronDiffractionOptions, ElectronPattern, ElectronReflection, StructureFactor,
     StructureFactorOptions, electron_diffraction, hkl_text, structure_factors,
 };
+pub use disorder::{
+    DisorderComposition, DisorderGroup, DisorderOccupant, DisorderPosition, DisorderScatterer,
+    DisorderScatteringWeights, ElementOccupancy, ScatteringOccupant, disorder_composition,
+    disorder_density, disorder_formula, disorder_groups, disorder_scattering_weights,
+};
+pub use electron_diffraction::{SaedImage, SaedOptions, SaedPattern, SaedSpot, zone_axis_pattern};
 pub use ewald::{EwaldOptions, ewald_energy};
 pub use extinction::{
     ExtinctionClass, MAX_CANDIDATES as MAX_SPACE_GROUP_CANDIDATES, SpaceGroupMatch,
@@ -135,11 +155,22 @@ pub use lebail::{
     LebailOptions, LebailProfileOptions, LebailProfileResult, LebailResult, le_bail,
     le_bail_profile, pawley,
 };
+pub use magnetic_diffraction::{
+    MagneticOptions, MagneticPattern, MagneticReflection, MagneticSite, magnetic_form_factor,
+    magnetic_moment_cartesian, magnetic_powder, site_moment,
+};
 pub use merge::merge_nets;
 pub use nets::{NetEdge, NetIndex, NetInvariants, QuotientGraph, interpenetrate, quotient_graph};
 pub use netsearch::{NetFacts, RcsrFactsIndex, plane_group_number, space_group_number};
 pub use netsearch_query::NetQuery;
-pub use orderings::{Ordering, OrderingOptions, orderings};
+pub use neutron::{
+    NeutronAxis, NeutronGeometry, NeutronOptions, NeutronPattern, NeutronPoint, NeutronReflection,
+    neutron_powder,
+};
+pub use orderings::{
+    MagneticOrdering, MagneticOrderingKind, MagneticOrderingOptions, Ordering, OrderingOptions,
+    magnetic_orderings, magnetic_orderings_in_supercell, orderings,
+};
 pub use overlay::{Overlay, OverlaySet, OverlayStyle, overlay_net};
 pub use parameters::{PARAMETER_SET_VERSION, ParameterSet};
 pub use pareto::{ParetoSample, ParetoSweep, knee_index, pareto_front, pareto_sweep};
@@ -167,6 +198,9 @@ pub use rietx::{
 };
 pub use scattering::{electron_scattering_factor, neutron_scattering_length, xray_form_factor};
 pub use sqs::{SqsOptions, SqsResult, SqsShell, special_quasirandom};
+pub use sqs_multicomponent::{
+    MulticomponentSqsOptions, MulticomponentSqsResult, SqsCorrelation, multicomponent_sqs,
+};
 pub use surfaces::{
     MillerIndex, Termination, TerminationReport, minimal_slab, slab_terminations,
     slab_terminations_with_options, unique_miller_indices,

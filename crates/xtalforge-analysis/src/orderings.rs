@@ -14,6 +14,13 @@ use serde::{Deserialize, Serialize};
 use xtalforge_core::{Error, Site, Structure, StructureBuilder};
 use xtalforge_symmetry::{MatcherOptions, match_structures};
 
+mod magnetic;
+
+pub use magnetic::{
+    MagneticOrdering, MagneticOrderingKind, MagneticOrderingOptions, magnetic_orderings,
+    magnetic_orderings_in_supercell,
+};
+
 use crate::bvs::{BvsOptions, oxidation_states};
 use crate::ewald::{EwaldOptions, ewald_energy};
 
