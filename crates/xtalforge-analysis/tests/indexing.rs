@@ -11,6 +11,7 @@ use std::time::Instant;
 
 use xtalforge_analysis::{
     CellMetric, LatticeSystem, Peak, figures_of_merit, index_cubic, index_pattern,
+    indexing_agreement,
 };
 
 const CU_KA1: f64 = 1.540_598;
@@ -244,4 +245,31 @@ fn face_centred_lines_index_on_the_smallest_cubic_cell() {
     let index = index_cubic(&peaks, CU_KA1, 6, 0.1).unwrap().unwrap();
     assert!((index.a - a).abs() < 0.01, "a = {}", index.a);
     assert!((index.completeness - 1.0).abs() < 1e-12);
+}
+
+#[test]
+fn cubic_and_general_engines_agree_on_a_cubic_cell() {
+    let cell = CellMetric::new(6.2, 6.2, 6.2, 90.0, 90.0, 90.0);
+    let peaks = peaks_from_cell(&cell, 8, 100.0);
+    let options = xtalforge_analysis::IndexingOptions {
+        max_index: 5,
+        tolerance: 0.05,
+        ..Default::default()
+    };
+    let agreement = indexing_agreement(&peaks, CU_KA1, &options, 0.01).unwrap();
+    assert!(agreement.agree, "{}", agreement.message);
+    assert!(agreement.cubic_a.is_some());
+    assert!(agreement.general_a.is_some());
+    assert!(agreement.relative_delta.unwrap_or(1.0) <= 0.01);
+    assert_eq!(agreement.n_peaks, peaks.len());
+    assert!(!agreement.message.is_empty());
+}
+
+#[test]
+fn indexing_agreement_rejects_invalid_tolerance_and_short_lists() {
+    let cell = CellMetric::new(5.0, 5.0, 5.0, 90.0, 90.0, 90.0);
+    let peaks = peaks_from_cell(&cell, 4, 100.0);
+    let options = xtalforge_analysis::IndexingOptions::default();
+    assert!(indexing_agreement(&peaks, CU_KA1, &options, 0.0).is_err());
+    assert!(indexing_agreement(&peaks[..1], CU_KA1, &options, 0.01).is_err());
 }
