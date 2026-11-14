@@ -32,7 +32,7 @@ pub fn standardize(
     let dataset = detect_symmetry(structure, options)?;
     let group = SpaceGroup::from_hall_number(dataset.hall_number)?;
     let temp = full_cell_structure(
-        structure.name(),
+        structure,
         dataset.std_lattice,
         &dataset.std_positions,
         &dataset.std_elements,
@@ -68,7 +68,7 @@ pub fn primitive_cell(
 ) -> Result<StandardizedStructure, Error> {
     let dataset = detect_symmetry(structure, options)?;
     let temp = full_cell_structure(
-        structure.name(),
+        structure,
         dataset.prim_std_lattice,
         &dataset.prim_std_positions,
         &dataset.prim_std_elements,
@@ -104,19 +104,35 @@ pub fn idealize(
 }
 
 fn full_cell_structure(
-    name: &str,
+    source: &Structure,
     lattice: [[f64; 3]; 3],
     positions: &[[f64; 3]],
     elements: &[String],
 ) -> Result<Structure, Error> {
     let lattice = xtalforge_core::Lattice::new(lattice)?;
-    let mut builder = StructureBuilder::new(name, lattice);
+    let mut builder = StructureBuilder::new(source.name(), lattice);
     for (index, (position, element)) in positions.iter().zip(elements.iter()).enumerate() {
-        builder = builder.site(Site::new(
-            format!("{element}{}", index + 1),
-            element,
-            *position,
-        )?);
+        // The standardized cell can duplicate a site; preserve its typed
+        // properties when the element is unambiguous. A multi-site element
+        // keeps the geometry but falls back to a fresh site because moyo does
+        // not expose a site-to-site mapping for the standardized cell.
+        let matches: Vec<&Site> = source
+            .sites()
+            .iter()
+            .filter(|site| site.element() == element)
+            .collect();
+        let site = if matches.len() == 1 {
+            let Some(site) = matches.first() else {
+                continue;
+            };
+            (*site)
+                .clone()
+                .with_label(format!("{element}{}", index + 1))?
+                .with_frac(*position)?
+        } else {
+            Site::new(format!("{element}{}", index + 1), element, *position)?
+        };
+        builder = builder.site(site);
     }
     builder.build()
 }

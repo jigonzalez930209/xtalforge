@@ -287,6 +287,9 @@ fn asymmetric_structure(
             if let Some(group) = parent.disorder_group() {
                 site = site.with_disorder_group(group);
             }
+            if let Some(moment) = parent.magnetic_moment() {
+                site = site.with_magnetic_moment(moment);
+            }
             for (key, value) in parent.props() {
                 site = site.with_prop(key.clone(), value.clone());
             }
@@ -302,14 +305,18 @@ fn asymmetric_structure(
 fn p1_structure(original: &Structure, p1: &P1Cell) -> Result<Structure, Error> {
     let mut builder = StructureBuilder::new(original.name(), p1.lattice);
     for (index, atom) in p1.atoms.iter().enumerate() {
-        builder = builder.site(
-            Site::new(
-                format!("{}{}", atom.element, index + 1),
-                &atom.element,
-                atom.frac,
-            )?
-            .with_occupancy(atom.occupancy)?,
-        );
+        let mut site = Site::new(
+            format!("{}{}", atom.element, index + 1),
+            &atom.element,
+            atom.frac,
+        )?
+        .with_occupancy(atom.occupancy)?;
+        if let Some(parent) = original.sites().get(atom.site_idx)
+            && let Some(moment) = parent.magnetic_moment()
+        {
+            site = site.with_magnetic_moment(moment);
+        }
+        builder = builder.site(site);
     }
     for (key, value) in original.metadata() {
         builder = builder.metadata(key.clone(), value.clone());
@@ -465,6 +472,9 @@ fn lower_with_group(
             }
             if let Some(charge) = parent.charge() {
                 site = site.with_charge(charge)?;
+            }
+            if let Some(moment) = parent.magnetic_moment() {
+                site = site.with_magnetic_moment(moment);
             }
             for (key, value) in parent.props() {
                 site = site.with_prop(key.clone(), value.clone());

@@ -33,7 +33,11 @@ pub use diagnostics::{
 };
 pub use kpath::{KPath, band_path, band_path_for_structure, classify_bravais};
 pub use layer::{LayerDataset, detect_layer_symmetry};
-pub use magnetic::{MagneticDataset, MagneticOperation, detect_magnetic_symmetry};
+pub use magnetic::{
+    MagneticDataset, MagneticOperation, MagneticSymmetrization, MagneticSymmetryOptions,
+    detect_magnetic_symmetry, detect_magnetic_symmetry_with_options, format_magmom, magmom_values,
+    symmetrize_moments, symmetrize_structure_moments,
+};
 pub use matcher::{
     MatcherOptions, SpeciesComparator, StructureMatch, classify_structures, group_structures,
     interpolate_matched, match_structures,
