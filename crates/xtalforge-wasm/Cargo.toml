@@ -43,10 +43,12 @@ wasm-bindgen-test = { workspace = true }
 default = ["full"]
 core = []
 symmetry = ["core"]
+workflow = ["core", "xtalforge/agent"]
 analysis = ["core", "xtalforge/analysis"]
 build = ["core", "xtalforge/build"]
 full = [
   "symmetry",
+  "workflow",
   "analysis",
   "build",
   "xtalforge/ff",
