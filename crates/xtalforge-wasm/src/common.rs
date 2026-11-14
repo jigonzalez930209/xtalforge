@@ -108,6 +108,9 @@ pub(crate) fn parse_any(text: &str) -> Result<Structure, Error> {
 /// Detects the format of a structure text.
 fn detect_format(text: &str) -> Result<&'static str, Error> {
     let trimmed = text.trim_start_matches('\u{feff}').trim_start();
+    if text.contains("_space_group_symop_magn_") || text.contains("_atom_site_moment_") {
+        return Ok("mcif");
+    }
     if trimmed.starts_with("data_")
         || text.contains("_atom_site_")
         || text.contains("_cell_length_")

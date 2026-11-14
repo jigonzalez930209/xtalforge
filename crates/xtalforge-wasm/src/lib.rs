@@ -38,6 +38,8 @@ mod phase1;
 mod phase11_build_export;
 #[cfg(target_arch = "wasm32")]
 mod phase11_export;
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
+mod phase19_export;
 #[cfg(target_arch = "wasm32")]
 mod phase3;
 #[cfg(all(target_arch = "wasm32", feature = "build"))]
@@ -143,6 +145,12 @@ pub use phase11_build_export::{
 };
 #[cfg(target_arch = "wasm32")]
 pub use phase11_export::{deprecation_warning, error_category, read};
+#[cfg(all(target_arch = "wasm32", feature = "engines"))]
+#[cfg(all(target_arch = "wasm32", feature = "full"))]
+pub use phase19_export::{
+    derivative_structures_info, disorder_groups_info, electron_diffraction_info,
+    magnetic_orderings_info, magnetic_powder_info, neutron_powder_info, raman_powder_average_info,
+};
 #[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use powder_export::{
     powder_automatic_info, powder_cells_info, powder_index_agreement_info, powder_index_info,
