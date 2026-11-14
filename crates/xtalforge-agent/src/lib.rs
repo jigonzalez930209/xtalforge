@@ -36,6 +36,7 @@ pub mod mcp;
 mod ops;
 mod ops_analysis;
 mod ops_ff;
+mod ops_generation;
 mod ops_picture;
 pub mod png;
 pub mod render;

@@ -310,6 +310,11 @@ pub enum Answer {
         /// The run report, in deterministic input order.
         report: crate::workflow::WorkflowReport,
     },
+    /// `search`: one checkpointed generation chunk.
+    Search {
+        /// Chunk report and checkpoint.
+        chunk: xtalforge_generation::SearchChunk,
+    },
 }
 
 impl Answer {
@@ -346,6 +351,7 @@ impl Answer {
             Self::WorkflowSchema { .. } => "workflow_schema",
             Self::WorkflowValidated { .. } => "workflow_validation",
             Self::WorkflowRun { .. } => "workflow_run",
+            Self::Search { .. } => "search",
         }
     }
 }

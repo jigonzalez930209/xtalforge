@@ -35,6 +35,7 @@ pub(crate) fn run(session: &mut Session, verb: &str, arguments: &Value) -> Resul
         "porosity" => crate::ops_analysis::porosity(session, arguments),
         "uff_energy" => crate::ops_ff::energy(session, arguments),
         "optimize" => crate::ops_ff::optimize(session, arguments),
+        "search" => crate::ops_generation::search(session, arguments),
         "render" => crate::ops_picture::render(session, arguments),
         "undo" => crate::ops::undo(session, arguments, true),
         "redo" => crate::ops::undo(session, arguments, false),

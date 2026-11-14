@@ -405,6 +405,43 @@ pub const VERBS: &[VerbInfo] = &[
         mutation: false,
     },
     VerbInfo {
+        name: "search",
+        summary: "Run or resume one chunk of a random or evolutionary structure search",
+        parameters: &[
+            param(
+                "kind",
+                Text,
+                false,
+                "`random` or `evolutionary`",
+                Some("\"random\""),
+            ),
+            param(
+                "options",
+                Object,
+                true,
+                "Search options, as in the CLI",
+                None,
+            ),
+            param(
+                "checkpoint",
+                Text,
+                false,
+                "Checkpoint file to read and write",
+                None,
+            ),
+            param(
+                "chunk",
+                Integer,
+                false,
+                "Seeds or generations in this chunk",
+                Some("1"),
+            ),
+        ],
+        result: "search",
+        example: r#"{"kind": "random", "options": {"composition": {"Na": 4, "Cl": 4}, "space_groups": [225], "n_structures": 4, "seed": 0}, "chunk": 1}"#,
+        mutation: false,
+    },
+    VerbInfo {
         name: "workflow_run",
         summary: "Run a workflow over input files, directories or glob patterns",
         parameters: WORKFLOW_RUN_PARAMETERS,
