@@ -4,7 +4,8 @@ The format registry (`xtalforge_io::registry`) reads and writes the crystal, ele
 
 | Format | Extensions | Read | Write | Notes |
 |---|---|---|---|---|
-| CIF | `.cif`, `.mcif` | yes | yes | blocks, loops, symmetry operations, sites, occupancy, Uiso/Uij, disorder, charge, explicit bonds |
+| CIF | `.cif` | yes | yes | blocks, loops, symmetry operations, sites, occupancy, Uiso/Uij, disorder, charge, explicit bonds |
+| mCIF | `.mcif` | yes | yes | magnetic operation and `_atom_site_moment_*` loops, collinear or vector moments |
 | POSCAR/CONTCAR | `.poscar`, `.vasp`, `.contcar` | yes | yes | positive scale or negative target volume, species/counts, selective dynamics |
 | XYZ | `.xyz`, `.extxyz` | yes | yes | plain and extended (`Lattice=`, `Properties=`); plain becomes a padded P1 box |
 | pymatgen JSON | `.json` | yes | yes | lattice matrix plus `species`/`abc` sites, partial occupancy |

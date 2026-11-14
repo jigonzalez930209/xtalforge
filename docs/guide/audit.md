@@ -234,6 +234,10 @@ Angstrom).
 - The CLI, Python and WASM surfaces have their own integration suites; the
   Playwright battery targets the WASM surface because it is the one a browser
   user sees. `scripts/check-parity.sh` keeps the four surfaces aligned.
+- Phase 19 adds magnetic moments, mCIF, disorder/derivative enumeration,
+  neutron/electron patterns and IR/Raman/phonon DOS. The magnetic golden data
+  and engine tensors are not redistributed; the tests use hand-built cells and
+  documented approximations.
 - Task 17.1.8 added the MOF playground tab. Fresh Zeo++/MOFid/RASPA e2e
   snapshots are not committed because those binaries are not installed in the
   maintainer environment; the native pore, MOFid and RASPA outputs are covered
