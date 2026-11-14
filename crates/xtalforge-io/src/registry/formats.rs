@@ -3,11 +3,11 @@
 use super::{Capabilities, FormatSpec};
 use crate::{
     read_abinit, read_aims, read_castep, read_cif, read_cp2k, read_crystal, read_cssr, read_gen,
-    read_lammps, read_mmcif, read_mol2, read_outcar_structure, read_pdb, read_pmg_json,
+    read_lammps, read_mcif, read_mmcif, read_mol2, read_outcar_structure, read_pdb, read_pmg_json,
     read_poscar, read_pwscf, read_sdf, read_shelx, read_vasprun_structure, read_xyz, write_abinit,
     write_aims, write_castep, write_cif, write_cp2k, write_crystal, write_cssr, write_gen,
-    write_lammps, write_mol2, write_optimade, write_pdb, write_pmg_json, write_poscar, write_pwscf,
-    write_sdf, write_shelx, write_xyz,
+    write_lammps, write_mcif, write_mol2, write_optimade, write_pdb, write_pmg_json, write_poscar,
+    write_pwscf, write_sdf, write_shelx, write_xyz,
 };
 
 const EMPTY: Capabilities = Capabilities {
@@ -25,9 +25,25 @@ const EMPTY: Capabilities = Capabilities {
 pub const FORMATS: &[FormatSpec] = &[
     FormatSpec {
         name: "cif",
-        extensions: &[".cif", ".mcif"],
+        extensions: &[".cif"],
         read: Some(read_cif),
         write: Some(write_cif),
+        capabilities: Capabilities {
+            cell: true,
+            symmetry: true,
+            occupancy: true,
+            anisotropic_adp: true,
+            charges: true,
+            bonds: false,
+            labels: true,
+            frames: false,
+        },
+    },
+    FormatSpec {
+        name: "mcif",
+        extensions: &[".mcif"],
+        read: Some(read_mcif),
+        write: Some(write_mcif),
         capabilities: Capabilities {
             cell: true,
             symmetry: true,
