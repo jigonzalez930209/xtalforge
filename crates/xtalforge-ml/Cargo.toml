@@ -1,0 +1,41 @@
+[package]
+name = "xtalforge-ml"
+readme = "../../README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "ML representations, datasets and inference for xtalforge."
+include = ["src/**", "data/**"]
+
+[features]
+default = []
+# Native ONNX inference through tract (pure Rust).
+onnx = ["dep:tract-onnx"]
+# Columnar Parquet datasets through arrow/parquet (pure Rust).
+parquet = ["dep:parquet", "dep:arrow"]
+
+[dependencies]
+xtalforge-analysis = { workspace = true }
+xtalforge-core = { workspace = true }
+xtalforge-ff = { workspace = true }
+xtalforge-io = { workspace = true }
+xtalforge-mof = { workspace = true }
+xtalforge-symmetry = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+arrow = { version = "60", default-features = false, optional = true }
+parquet = { version = "60", default-features = false, features = ["arrow", "snap"], optional = true }
+tract-onnx = { version = "0.23", optional = true }
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
