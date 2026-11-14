@@ -126,10 +126,43 @@ impl Topology {
 /// Returns [`Error::Data`] when the embedded JSON is invalid, has a duplicate
 /// name, or fails [`Topology::validate`].
 pub fn topologies() -> Result<Vec<Topology>, Error> {
+    #[cfg(feature = "mof-data")]
+    let entries = {
+        let mut entries = full_topologies()?.to_vec();
+        let curated: Vec<Topology> = serde_json::from_str(include_str!("../data/topologies.json"))
+            .map_err(|error| Error::Data(format!("topology data: {error}")))?;
+        for topology in curated {
+            if !entries
+                .iter()
+                .any(|entry| entry.name.eq_ignore_ascii_case(&topology.name))
+            {
+                entries.push(topology);
+            }
+        }
+        entries
+    };
+    #[cfg(not(feature = "mof-data"))]
     let entries: Vec<Topology> = serde_json::from_str(include_str!("../data/topologies.json"))
         .map_err(|error| Error::Data(format!("topology data: {error}")))?;
+    validate_topologies(&entries)?;
+    Ok(entries)
+}
+
+/// The always-embedded curated six-net subset, independent of `mof-data`.
+///
+/// # Errors
+///
+/// Returns [`Error::Data`] when the embedded JSON is invalid.
+pub fn curated_topologies() -> Result<Vec<Topology>, Error> {
+    let entries: Vec<Topology> = serde_json::from_str(include_str!("../data/topologies.json"))
+        .map_err(|error| Error::Data(format!("topology data: {error}")))?;
+    validate_topologies(&entries)?;
+    Ok(entries)
+}
+
+fn validate_topologies(entries: &[Topology]) -> Result<(), Error> {
     let mut names = BTreeSet::new();
-    for topology in &entries {
+    for topology in entries {
         topology
             .validate()
             .map_err(|error| Error::Data(format!("topology data: {error}")))?;
@@ -140,7 +173,30 @@ pub fn topologies() -> Result<Vec<Topology>, Error> {
             )));
         }
     }
-    Ok(entries)
+    Ok(())
+}
+
+#[cfg(feature = "mof-data")]
+fn full_topologies() -> Result<&'static [Topology], Error> {
+    use std::io::Read;
+    use std::sync::OnceLock;
+
+    static FULL: OnceLock<Result<Vec<Topology>, String>> = OnceLock::new();
+    let loaded = FULL.get_or_init(|| {
+        let bytes = include_bytes!("../data/pormake-topologies.json.gz");
+        let mut decoder = flate2::read::GzDecoder::new(&bytes[..]);
+        let mut text = String::new();
+        decoder
+            .read_to_string(&mut text)
+            .map_err(|error| format!("topology bundle: {error}"))?;
+        let entries: Vec<Topology> =
+            serde_json::from_str(&text).map_err(|error| format!("topology bundle: {error}"))?;
+        Ok(entries)
+    });
+    match loaded {
+        Ok(entries) => Ok(entries),
+        Err(message) => Err(Error::Data(message.clone())),
+    }
 }
 
 /// Finds a topology by case-insensitive name.
@@ -149,7 +205,18 @@ pub fn topologies() -> Result<Vec<Topology>, Error> {
 ///
 /// Returns the errors of [`topologies`].
 pub fn find_topology(name: &str) -> Result<Option<Topology>, Error> {
-    Ok(topologies()?
+    if let Some(topology) = curated_topologies()?
         .into_iter()
-        .find(|topology| topology.name.eq_ignore_ascii_case(name)))
+        .find(|topology| topology.name.eq_ignore_ascii_case(name))
+    {
+        return Ok(Some(topology));
+    }
+    #[cfg(feature = "mof-data")]
+    if let Some(topology) = full_topologies()?
+        .iter()
+        .find(|topology| topology.name.eq_ignore_ascii_case(name))
+    {
+        return Ok(Some(topology.clone()));
+    }
+    Ok(None)
 }

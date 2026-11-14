@@ -139,10 +139,43 @@ fn cross(first: [f64; 3], second: [f64; 3]) -> [f64; 3] {
 /// Returns [`Error::Data`] when the embedded JSON is invalid, has a duplicate
 /// name, or fails [`Block::validate`].
 pub fn blocks() -> Result<Vec<Block>, Error> {
+    #[cfg(feature = "mof-data")]
+    let entries = {
+        let mut entries = full_blocks()?.to_vec();
+        let curated: Vec<Block> = serde_json::from_str(include_str!("../data/blocks.json"))
+            .map_err(|error| Error::Data(format!("block data: {error}")))?;
+        for block in curated {
+            if !entries
+                .iter()
+                .any(|entry| entry.name.eq_ignore_ascii_case(&block.name))
+            {
+                entries.push(block);
+            }
+        }
+        entries
+    };
+    #[cfg(not(feature = "mof-data"))]
     let entries: Vec<Block> = serde_json::from_str(include_str!("../data/blocks.json"))
         .map_err(|error| Error::Data(format!("block data: {error}")))?;
+    validate_blocks(&entries)?;
+    Ok(entries)
+}
+
+/// The always-embedded curated eight-block subset, independent of `mof-data`.
+///
+/// # Errors
+///
+/// Returns [`Error::Data`] when the embedded JSON is invalid.
+pub fn curated_blocks() -> Result<Vec<Block>, Error> {
+    let entries: Vec<Block> = serde_json::from_str(include_str!("../data/blocks.json"))
+        .map_err(|error| Error::Data(format!("block data: {error}")))?;
+    validate_blocks(&entries)?;
+    Ok(entries)
+}
+
+fn validate_blocks(entries: &[Block]) -> Result<(), Error> {
     let mut names = BTreeSet::new();
-    for block in &entries {
+    for block in entries {
         block
             .validate()
             .map_err(|error| Error::Data(format!("block data: {error}")))?;
@@ -153,7 +186,30 @@ pub fn blocks() -> Result<Vec<Block>, Error> {
             )));
         }
     }
-    Ok(entries)
+    Ok(())
+}
+
+#[cfg(feature = "mof-data")]
+fn full_blocks() -> Result<&'static [Block], Error> {
+    use std::io::Read;
+    use std::sync::OnceLock;
+
+    static FULL: OnceLock<Result<Vec<Block>, String>> = OnceLock::new();
+    let loaded = FULL.get_or_init(|| {
+        let bytes = include_bytes!("../data/pormake-blocks.json.gz");
+        let mut decoder = flate2::read::GzDecoder::new(&bytes[..]);
+        let mut text = String::new();
+        decoder
+            .read_to_string(&mut text)
+            .map_err(|error| format!("block bundle: {error}"))?;
+        let entries: Vec<Block> =
+            serde_json::from_str(&text).map_err(|error| format!("block bundle: {error}"))?;
+        Ok(entries)
+    });
+    match loaded {
+        Ok(entries) => Ok(entries),
+        Err(message) => Err(Error::Data(message.clone())),
+    }
 }
 
 /// Finds a block by case-insensitive name.
@@ -162,7 +218,18 @@ pub fn blocks() -> Result<Vec<Block>, Error> {
 ///
 /// Returns the errors of [`blocks`].
 pub fn find_block(name: &str) -> Result<Option<Block>, Error> {
-    Ok(blocks()?
+    if let Some(block) = curated_blocks()?
         .into_iter()
-        .find(|block| block.name.eq_ignore_ascii_case(name)))
+        .find(|block| block.name.eq_ignore_ascii_case(name))
+    {
+        return Ok(Some(block));
+    }
+    #[cfg(feature = "mof-data")]
+    if let Some(block) = full_blocks()?
+        .iter()
+        .find(|block| block.name.eq_ignore_ascii_case(name))
+    {
+        return Ok(Some(block.clone()));
+    }
+    Ok(None)
 }
