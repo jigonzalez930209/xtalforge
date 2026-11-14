@@ -17,6 +17,8 @@
 //! - [`engines`]: simulation input sets, output parsers and electronic structure.
 //! - [`generation`]: random crystals, molecular and low-dimensional
 //!   generators, global search, prototypes and hypothetical MOFs.
+//! - [`ml`]: crystal graphs, SOAP/ACSF/MBTR, MOF features, datasets, splits,
+//!   inference and active learning.
 //! - [`modules`] and [`agent`]: workspaces, jobs and the agent/MCP surface.
 //!
 //! # Features
@@ -30,6 +32,9 @@
 //! | `mof` | yes | Re-exports `xtalforge-mof` as [`mof`]; implies `ff`. |
 //! | `engines` | yes | Re-exports `xtalforge-engines` as [`engines`]; implies `mof`. |
 //! | `generation` | yes | Re-exports `xtalforge-generation` as [`generation`]; implies `mof`. |
+//! | `ml` | yes | Re-exports `xtalforge-ml` as [`ml`]; implies `analysis`. |
+//! | `ml-onnx` | no | Adds tract-based ONNX inference to [`ml`]. |
+//! | `ml-parquet` | no | Adds Arrow/Parquet datasets to [`ml`]. |
 //! | `modules` | yes | Re-exports `xtalforge-modules` as [`modules`]. |
 //! | `agent` | yes | Re-exports `xtalforge-agent` as [`agent`]; implies `mof` and `modules`. |
 //! | `full` | yes | Shorthand for every surface tier above. |
@@ -75,6 +80,8 @@ pub use xtalforge_ff as ff;
 #[cfg(feature = "generation")]
 pub use xtalforge_generation as generation;
 pub use xtalforge_io as io;
+#[cfg(feature = "ml")]
+pub use xtalforge_ml as ml;
 #[cfg(feature = "modules")]
 pub use xtalforge_modules as modules;
 #[cfg(feature = "mof")]
