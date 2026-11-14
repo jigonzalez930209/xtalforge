@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "engine": "gulp",
+  "provenance": {
+    "version": 1,
+    "task": "18.1.5",
+    "source": "GULP input-command documentation for opti, vectors, fractional, species and uff",
+    "reference": "https://gulp.curtin.edu.au/",
+    "license": "MIT OR Apache-2.0 for this template; GULP is licensed separately by its authors"
+  },
+  "defaults": {
+    "optimize": true,
+    "constant_pressure": false,
+    "max_cycles": 1000
+  },
+  "open": [],
+  "presets": {
+    "relax": {
+      "description": "Ionic relaxation at the fixed cell with the UFF library",
+      "files": ["gulp.gin"],
+      "settings": {
+        "constant_pressure": false
+      }
+    },
+    "lattice-relax": {
+      "description": "Constant-pressure lattice relaxation with the UFF library",
+      "files": ["gulp.gin"],
+      "settings": {
+        "constant_pressure": true,
+        "max_cycles": 2000
+      }
+    }
+  }
+}

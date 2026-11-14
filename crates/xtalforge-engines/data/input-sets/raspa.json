@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "engine": "raspa",
+  "provenance": {
+    "version": 1,
+    "task": "18.1.6",
+    "source": "Byte-compatible adapter for the Phase 10 xtalforge_mof::platform::raspa_input export",
+    "reference": "RASPA2 simulation.input documentation and the TraPPE guest table in crates/xtalforge-mof/data/guests.json",
+    "license": "MIT OR Apache-2.0 for this template; the TraPPE parameters are factual values cited in THIRD_PARTY.md"
+  },
+  "defaults": {
+    "guest": "CO2",
+    "temperature": 298.0,
+    "pressure": 1.0,
+    "cycles": 10000,
+    "initialization_cycles": 1000,
+    "print_every": 1000,
+    "forcefield": "UFF-TraPPE"
+  },
+  "open": [],
+  "presets": {
+    "widom": {
+      "description": "Widom insertion of one rigid TraPPE guest in the framework",
+      "files": ["simulation.input", "framework.cif", "force_field", "mixing_rules"],
+      "settings": {}
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "engine": "cp2k",
+  "provenance": {
+    "version": 1,
+    "task": "18.1.4",
+    "source": "CP2K Quickstep input reference and the MOLOPT/GTH basis and potential naming scheme",
+    "reference": "https://manual.cp2k.org/",
+    "license": "MIT OR Apache-2.0 for this template; CP2K, MOLOPT and GTH data are distributed under their own licenses"
+  },
+  "defaults": {
+    "project": "xtalforge",
+    "run_type": "ENERGY",
+    "print_level": "LOW",
+    "basis_set_file": "BASIS_MOLOPT",
+    "potential_file": "GTH_POTENTIALS",
+    "basis_set": "DZVP-MOLOPT-SR-GTH",
+    "cutoff": 600.0,
+    "rel_cutoff": 60.0,
+    "ngrids": 5,
+    "eps_default": 0.000000000001,
+    "eps_scf": 0.000001,
+    "max_scf": 100,
+    "outer_max_scf": 20,
+    "reference_functional": "PBE",
+    "dft_d3": true,
+    "optimizer": "BFGS",
+    "max_iter": 200,
+    "potentials": {
+      "H": "GTH-PBE-q1",
+      "He": "GTH-PBE-q2",
+      "Li": "GTH-PBE-q3",
+      "Be": "GTH-PBE-q4",
+      "B": "GTH-PBE-q3",
+      "C": "GTH-PBE-q4",
+      "N": "GTH-PBE-q5",
+      "O": "GTH-PBE-q6",
+      "F": "GTH-PBE-q7",
+      "Ne": "GTH-PBE-q8",
+      "Na": "GTH-PBE-q9",
+      "Mg": "GTH-PBE-q10",
+      "Al": "GTH-PBE-q3",
+      "Si": "GTH-PBE-q4",
+      "P": "GTH-PBE-q5",
+      "S": "GTH-PBE-q6",
+      "Cl": "GTH-PBE-q7",
+      "Ar": "GTH-PBE-q8",
+      "K": "GTH-PBE-q9",
+      "Ca": "GTH-PBE-q10",
+      "Sc": "GTH-PBE-q11",
+      "Ti": "GTH-PBE-q12",
+      "V": "GTH-PBE-q13",
+      "Cr": "GTH-PBE-q14",
+      "Mn": "GTH-PBE-q15",
+      "Fe": "GTH-PBE-q16",
+      "Co": "GTH-PBE-q17",
+      "Ni": "GTH-PBE-q18",
+      "Cu": "GTH-PBE-q11",
+      "Zn": "GTH-PBE-q12",
+      "Zr": "GTH-PBE-q12",
+      "Mo": "GTH-PBE-q14",
+      "Ag": "GTH-PBE-q11",
+      "Cd": "GTH-PBE-q12"
+    }
+  },
+  "open": ["potentials"],
+  "presets": {
+    "geo-opt": {
+      "description": "Periodic GPW geometry optimisation with DFT-D3",
+      "files": ["cp2k.inp"],
+      "settings": {
+        "run_type": "GEO_OPT",
+        "dft_d3": true,
+        "max_iter": 200
+      }
+    },
+    "mof-geo-opt": {
+      "description": "Large-cell MOF geometry optimisation with DFT-D3 and a Gamma-point-friendly setup",
+      "files": ["cp2k.inp"],
+      "settings": {
+        "run_type": "GEO_OPT",
+        "dft_d3": true,
+        "cutoff": 600.0,
+        "rel_cutoff": 60.0,
+        "eps_scf": 0.000001,
+        "max_iter": 300
+      }
+    },
+    "single-point": {
+      "description": "Single-point GPW energy with DFT-D3",
+      "files": ["cp2k.inp"],
+      "settings": {
+        "run_type": "ENERGY",
+        "dft_d3": true
+      }
+    }
+  }
+}

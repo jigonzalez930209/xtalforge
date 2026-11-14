@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "engine": "orca",
+  "provenance": {
+    "version": 1,
+    "task": "18.1.6",
+    "source": "Adapter for the existing xtalforge_ff::external::write_orca_input export",
+    "reference": "ORCA simple-input format documentation",
+    "license": "MIT OR Apache-2.0 for this template; ORCA is licensed separately by its authors"
+  },
+  "defaults": {
+    "method": "B3LYP",
+    "basis": "def2-SVP",
+    "charge": 0,
+    "multiplicity": 1,
+    "solvent": null
+  },
+  "open": [],
+  "presets": {
+    "single-point": {
+      "description": "B3LYP/def2-SVP single-point energy",
+      "files": ["orca.inp"],
+      "settings": {}
+    },
+    "pbe0-def2-tzvp": {
+      "description": "PBE0/def2-TZVP single-point energy",
+      "files": ["orca.inp"],
+      "settings": {
+        "method": "PBE0",
+        "basis": "def2-TZVP"
+      }
+    }
+  }
+}

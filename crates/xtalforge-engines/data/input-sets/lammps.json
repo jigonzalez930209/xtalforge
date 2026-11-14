@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "engine": "lammps",
+  "provenance": {
+    "version": 1,
+    "task": "18.1.5",
+    "source": "LAMMPS data and input-command documentation with UFF parameters from xtalforge-ff",
+    "reference": "https://docs.lammps.org/",
+    "license": "MIT OR Apache-2.0 for this template; the UFF parameters are factual values documented in THIRD_PARTY.md"
+  },
+  "defaults": {
+    "parameter_set": "uff4mof",
+    "pair_cutoff": 12.0,
+    "mode": "minimize",
+    "min_style": "cg",
+    "energy_tol": 0.00000001,
+    "force_tol": 0.00000001,
+    "max_iter": 1000,
+    "max_eval": 10000,
+    "steps": 0,
+    "thermo": 100
+  },
+  "open": [],
+  "presets": {
+    "uff": {
+      "description": "Geometry relaxation with the original UFF parameters",
+      "files": ["system.data", "input.lammps"],
+      "settings": {
+        "parameter_set": "uff",
+        "max_iter": 1000
+      }
+    },
+    "uff4mof": {
+      "description": "Geometry relaxation with UFF4MOF parameters",
+      "files": ["system.data", "input.lammps"],
+      "settings": {
+        "parameter_set": "uff4mof",
+        "max_iter": 2000
+      }
+    }
+  }
+}

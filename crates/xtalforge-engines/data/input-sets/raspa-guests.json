@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "version": 1,
+    "task": "18.1.6",
+    "source": "Copied from crates/xtalforge-mof/data/guests.json",
+    "reference": "Martin and Siepmann (1998), Potoff and Siepmann (2001), Chen and Siepmann (2000)",
+    "license": "TraPPE force-field parameters are factual values, cited in THIRD_PARTY.md"
+  },
+  "guests": [
+    {
+      "name": "CO2",
+      "atoms": [
+        {"element": "C", "position": [0.0, 0.0, 0.0], "sigma": 2.80, "epsilon_k": 27.0, "charge": 0.70},
+        {"element": "O", "position": [1.16, 0.0, 0.0], "sigma": 3.05, "epsilon_k": 79.0, "charge": -0.35},
+        {"element": "O", "position": [-1.16, 0.0, 0.0], "sigma": 3.05, "epsilon_k": 79.0, "charge": -0.35}
+      ]
+    },
+    {
+      "name": "N2",
+      "atoms": [
+        {"element": "N", "position": [0.55, 0.0, 0.0], "sigma": 3.31, "epsilon_k": 36.0, "charge": -0.482},
+        {"element": "N", "position": [-0.55, 0.0, 0.0], "sigma": 3.31, "epsilon_k": 36.0, "charge": 0.482}
+      ]
+    },
+    {
+      "name": "CH4",
+      "atoms": [
+        {"element": "C", "position": [0.0, 0.0, 0.0], "sigma": 3.73, "epsilon_k": 148.0, "charge": 0.0}
+      ]
+    },
+    {
+      "name": "H2",
+      "atoms": [
+        {"element": "H", "position": [0.37, 0.0, 0.0], "sigma": 2.958, "epsilon_k": 36.7, "charge": 0.0},
+        {"element": "H", "position": [-0.37, 0.0, 0.0], "sigma": 2.958, "epsilon_k": 36.7, "charge": 0.0}
+      ]
+    },
+    {
+      "name": "H2O",
+      "atoms": [
+        {"element": "O", "position": [0.0, 0.0, 0.0], "sigma": 3.166, "epsilon_k": 78.2, "charge": -0.8476},
+        {"element": "H", "position": [0.9572, 0.0, 0.0], "sigma": 0.0, "epsilon_k": 0.0, "charge": 0.4238},
+        {"element": "H", "position": [-0.2400, 0.9266, 0.0], "sigma": 0.0, "epsilon_k": 0.0, "charge": 0.4238}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "engine": "quantum-espresso",
+  "provenance": {
+    "version": 1,
+    "task": "18.1.3",
+    "source": "Quantum ESPRESSO pw.x namelist and card documentation",
+    "reference": "https://www.quantum-espresso.org/Doc/INPUT_PW.html",
+    "license": "MIT OR Apache-2.0 for this template; pseudopotential file names follow the SSSP library, whose files are distributed by their authors"
+  },
+  "defaults": {
+    "calculation": "scf",
+    "prefix": "xtalforge",
+    "pseudo_dir": "./pseudo",
+    "outdir": "./tmp",
+    "tprnfor": false,
+    "tstress": false,
+    "ecutwfc": 60.0,
+    "ecutrho": 480.0,
+    "occupations": "smearing",
+    "smearing": "mv",
+    "degauss": 0.01,
+    "nbnd": 0,
+    "conv_thr": 0.00000001,
+    "mixing_beta": 0.7,
+    "ion_dynamics": "bfgs",
+    "cell_dynamics": "bfgs",
+    "kpoints": {
+      "mode": "density",
+      "spacing": 0.25,
+      "mesh": [4, 4, 4],
+      "points": 20
+    },
+    "pseudopotentials": {
+      "H": "H.pbe-rrkjus_psl.1.0.0.UPF",
+      "Li": "Li.pbe-s-rrkjus_psl.1.0.0.UPF",
+      "B": "B.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "C": "C.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "N": "N.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "O": "O.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "F": "F.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "Na": "Na.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Mg": "Mg.pbe-spnl-kjpaw_psl.1.0.0.UPF",
+      "Al": "Al.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "Si": "Si.pbe-n-rrkjus_psl.1.0.0.UPF",
+      "P": "P.pbe-n-rrkjus_psl.1.0.0.UPF",
+      "S": "S.pbe-n-rrkjus_psl.1.0.0.UPF",
+      "Cl": "Cl.pbe-n-rrkjus_psl.1.0.0.UPF",
+      "K": "K.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Ca": "Ca.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Sc": "Sc.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Ti": "Ti.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "V": "V.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Cr": "Cr.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Mn": "Mn.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Fe": "Fe.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Co": "Co.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Ni": "Ni.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Cu": "Cu.pbe-dn-kjpaw_psl.1.0.0.UPF",
+      "Zn": "Zn.pbe-dnl-kjpaw_psl.1.0.0.UPF",
+      "Zr": "Zr.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Mo": "Mo.pbe-spn-kjpaw_psl.1.0.0.UPF",
+      "Ag": "Ag.pbe-n-kjpaw_psl.1.0.0.UPF",
+      "Cd": "Cd.pbe-n-kjpaw_psl.1.0.0.UPF"
+    }
+  },
+  "open": ["pseudopotentials"],
+  "presets": {
+    "scf": {
+      "description": "Self-consistent field at the fixed structure",
+      "files": ["pw.in"],
+      "settings": {
+        "calculation": "scf",
+        "kpoints": {"spacing": 0.25}
+      }
+    },
+    "relax": {
+      "description": "Ionic relaxation at the fixed cell",
+      "files": ["pw.in"],
+      "settings": {
+        "calculation": "relax",
+        "tprnfor": true,
+        "kpoints": {"spacing": 0.25}
+      }
+    },
+    "vc-relax": {
+      "description": "Variable-cell ionic relaxation",
+      "files": ["pw.in"],
+      "settings": {
+        "calculation": "vc-relax",
+        "tprnfor": true,
+        "tstress": true,
+        "kpoints": {"spacing": 0.25}
+      }
+    },
+    "nscf": {
+      "description": "Non-self-consistent dense mesh for DOS integration",
+      "files": ["pw.in"],
+      "settings": {
+        "calculation": "nscf",
+        "kpoints": {"spacing": 0.15}
+      }
+    },
+    "bands": {
+      "description": "Band structure along the symmetry path",
+      "files": ["pw.in"],
+      "settings": {
+        "calculation": "bands",
+        "occupations": "fixed",
+        "nbnd": 8,
+        "kpoints": {"mode": "path", "points": 20}
+      }
+    }
+  }
+}
