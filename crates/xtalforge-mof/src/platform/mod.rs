@@ -7,6 +7,7 @@ pub mod database;
 pub mod deconstruct;
 pub mod descriptors;
 pub mod disorder;
+pub mod fetch;
 pub mod modify;
 pub mod mofid;
 pub mod open_metal;
@@ -31,6 +32,7 @@ pub use descriptors::{
     FrameworkDescriptors, LinkerDescriptor, NodeDescriptor, descriptors_from, framework_descriptors,
 };
 pub use disorder::{DisorderOptions, resolve_disorder};
+pub use fetch::{FetchOptions, FetchedDatabase, fetch_core_mof, fetch_database, fetch_qmof};
 pub use modify::{
     CapSpecies, DefectOptions, DefectReport, FunctionalGroup, FunctionalizeOptions, MixtureOptions,
     functionalize, interpenetrate, missing_defects, mixed_framework, stack_layers,
