@@ -19,7 +19,7 @@ default = []
 # Native ONNX inference through tract (pure Rust).
 onnx = ["dep:tract-onnx"]
 # Columnar Parquet datasets through arrow/parquet (pure Rust).
-parquet = ["dep:parquet", "dep:arrow"]
+parquet = ["dep:parquet", "dep:arrow", "dep:bytes"]
 
 [dependencies]
 xtalforge-analysis = { workspace = true }
@@ -30,7 +30,9 @@ xtalforge-mof = { workspace = true }
 xtalforge-symmetry = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+libm = { workspace = true }
 arrow = { version = "60", default-features = false, optional = true }
+bytes = { version = "1", optional = true }
 parquet = { version = "60", default-features = false, features = ["arrow", "snap"], optional = true }
 tract-onnx = { version = "0.23", optional = true }
 
