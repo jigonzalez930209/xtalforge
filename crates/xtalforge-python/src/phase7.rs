@@ -5,8 +5,8 @@ use pyo3::types::{PyDict, PyList};
 
 use xtalforge::analysis::{
     AutomaticOptions, IndexingOptions, PeakOptions, RefineOptions, RietveldOptions,
-    extinction_symbol, find_peaks, free_cell_parameters, index_pattern, refine_phase,
-    rietx_inventory, run_automatic,
+    extinction_symbol, find_peaks, free_cell_parameters, index_pattern, indexing_agreement,
+    refine_phase, rietx_inventory, run_automatic,
 };
 
 use crate::structures::load_structure;
@@ -247,6 +247,58 @@ pub(crate) fn powder_index<'py>(
         candidates.append(item)?;
     }
     dict.set_item("candidates", candidates)?;
+    Ok(dict)
+}
+
+/// Compares the cubic and general indexing engines on a measured pattern.
+///
+/// Returns the verdict with both cubic parameters, the absolute and relative
+/// differences, the completeness of each engine and a human-readable reason.
+#[pyfunction]
+#[allow(clippy::too_many_arguments)] // one keyword per documented search switch
+#[pyo3(signature = (pattern_text, wavelength = 1.54184, max_index = 3, tolerance = 0.05, relative_tolerance = 0.01, background = false, refine = false))]
+pub(crate) fn powder_index_agreement<'py>(
+    py: Python<'py>,
+    pattern_text: &str,
+    wavelength: f64,
+    max_index: i32,
+    tolerance: f64,
+    relative_tolerance: f64,
+    background: bool,
+    refine: bool,
+) -> PyResult<Bound<'py, PyDict>> {
+    let observed = pattern(pattern_text)?;
+    let peaks = find_peaks(
+        &observed,
+        &PeakOptions {
+            background,
+            refine,
+            ..PeakOptions::default()
+        },
+    )
+    .map_err(crate::map_error)?;
+    let result = indexing_agreement(
+        &peaks,
+        wavelength,
+        &IndexingOptions {
+            max_index,
+            tolerance,
+            ..IndexingOptions::default()
+        },
+        relative_tolerance,
+    )
+    .map_err(crate::map_error)?;
+    let dict = PyDict::new(py);
+    dict.set_item("agree", result.agree)?;
+    dict.set_item("cubic_a", result.cubic_a)?;
+    dict.set_item("general_a", result.general_a)?;
+    dict.set_item("delta_a", result.delta_a)?;
+    dict.set_item("relative_delta", result.relative_delta)?;
+    dict.set_item("relative_tolerance", result.relative_tolerance)?;
+    dict.set_item("cubic_completeness", result.cubic_completeness)?;
+    dict.set_item("general_completeness", result.general_completeness)?;
+    dict.set_item("n_peaks", result.n_peaks)?;
+    dict.set_item("message", result.message)?;
     Ok(dict)
 }
 

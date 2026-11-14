@@ -23,6 +23,12 @@ pub(crate) fn porosity<'py>(
     let structure = load_structure(text, format_hint)?;
     let radii = default_radii(&structure).map_err(crate::map_error)?;
     let grid = distance_grid(&structure, &radii, spacing).map_err(crate::map_error)?;
+    let report = xtalforge::analysis::PorosityOptions {
+        probe_radius: probe,
+        spacing,
+    }
+    .report_grid(&structure, &grid)
+    .map_err(crate::map_error)?;
     let dict = PyDict::new(py);
     dict.set_item("cell_volume", grid.cell_volume())?;
     dict.set_item(
@@ -35,6 +41,15 @@ pub(crate) fn porosity<'py>(
         "largest_included_diameter",
         grid.largest_included_diameter(),
     )?;
+    dict.set_item("probe_occupiable_volume", report.probe_occupiable_volume)?;
+    dict.set_item("pov_per_mass", report.pov_per_mass)?;
+    dict.set_item("accessible_surface_area", report.surface_area)?;
+    dict.set_item("asa_per_mass", report.asa_per_mass)?;
+    dict.set_item(
+        "percolating_directions",
+        report.percolating_directions.to_vec(),
+    )?;
+    dict.set_item("pore_limiting_diameter", report.pore_limiting_diameter)?;
     Ok(dict)
 }
 

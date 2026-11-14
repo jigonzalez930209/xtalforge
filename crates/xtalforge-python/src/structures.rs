@@ -24,7 +24,7 @@ use crate::phase9_analysis::json_value;
 ///     parameters and matrix, the asymmetric ``sites``, the expanded ``p1``
 ///     cell and the versioned structure JSON under ``json``.
 #[pyfunction]
-#[pyo3(signature = (text, format_hint))]
+#[pyo3(signature = (text, format_hint = ""))]
 pub(crate) fn read_structure<'py>(
     py: Python<'py>,
     text: &str,

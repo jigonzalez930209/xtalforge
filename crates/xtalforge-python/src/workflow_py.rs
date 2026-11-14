@@ -16,7 +16,7 @@ pub(crate) fn workflow_schema() -> PyResult<String> {
 #[pyfunction]
 pub(crate) fn workflow_validate(text: &str) -> PyResult<String> {
     let workflow =
-        Workflow::from_json(text).map_err(|error| crate::invalid_input(error.to_string()))?;
+        Workflow::from_text(text).map_err(|error| crate::invalid_input(error.to_string()))?;
     let summary = workflow
         .validate()
         .map_err(|error| crate::invalid_input(error.to_string()))?;
@@ -33,7 +33,7 @@ pub(crate) fn workflow_run(
     checkpoint: Option<String>,
 ) -> PyResult<String> {
     let workflow =
-        Workflow::from_json(text).map_err(|error| crate::invalid_input(error.to_string()))?;
+        Workflow::from_text(text).map_err(|error| crate::invalid_input(error.to_string()))?;
     let options = RunOptions {
         inputs: inputs.into_iter().map(PathBuf::from).collect(),
         jobs,

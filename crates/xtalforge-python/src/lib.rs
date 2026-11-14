@@ -52,8 +52,8 @@ use phase6_extra::{
     build_c20, build_carbon, build_polymer, build_schwarzite, build_ztc, ribbon, twist,
 };
 use phase7::{
-    powder_automatic, powder_cells, powder_index, powder_pawley, powder_refine,
-    powder_supported_groups, rietx,
+    powder_automatic, powder_cells, powder_index, powder_index_agreement, powder_pawley,
+    powder_refine, powder_supported_groups, rietx,
 };
 use phase9::{
     deform, edit_structure, group_structures, interpolate, interpolate_structures,
@@ -70,9 +70,9 @@ use phase9_local::{
 };
 use phase10::{
     mof_charge_balance, mof_check, mof_deconstruct, mof_deduplicate, mof_defects, mof_descriptors,
-    mof_disorder, mof_energy_grid, mof_forcefield, mof_functionalize, mof_gcmc, mof_guests,
-    mof_interpenetrate, mof_mixed, mof_mofid, mof_open_metal_sites, mof_pores, mof_raspa,
-    mof_read_database, mof_screen, mof_solvent_remove, mof_stack_layers, mof_widom,
+    mof_disorder, mof_energy_grid, mof_fetch_database, mof_forcefield, mof_functionalize, mof_gcmc,
+    mof_guests, mof_interpenetrate, mof_mixed, mof_mofid, mof_open_metal_sites, mof_pores,
+    mof_raspa, mof_read_database, mof_screen, mof_solvent_remove, mof_stack_layers, mof_widom,
 };
 use phase11::{
     deprecation_warning, fragment_library, fragment_names, fragment_structure,
@@ -408,6 +408,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(build_polymer, module)?)?;
     module.add_function(wrap_pyfunction!(powder_automatic, module)?)?;
     module.add_function(wrap_pyfunction!(powder_index, module)?)?;
+    module.add_function(wrap_pyfunction!(powder_index_agreement, module)?)?;
     module.add_function(wrap_pyfunction!(powder_pawley, module)?)?;
     module.add_function(wrap_pyfunction!(powder_lebail, module)?)?;
     module.add_function(wrap_pyfunction!(powder_refine, module)?)?;
@@ -466,6 +467,7 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(mof_interpenetrate, module)?)?;
     module.add_function(wrap_pyfunction!(mof_stack_layers, module)?)?;
     module.add_function(wrap_pyfunction!(mof_mixed, module)?)?;
+    module.add_function(wrap_pyfunction!(mof_fetch_database, module)?)?;
     module.add_function(wrap_pyfunction!(mof_read_database, module)?)?;
     module.add_function(wrap_pyfunction!(mof_screen, module)?)?;
     module.add_function(wrap_pyfunction!(mof_deduplicate, module)?)?;

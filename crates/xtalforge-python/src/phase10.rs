@@ -385,6 +385,30 @@ pub(crate) fn mof_read_database<'py>(
     Ok(dict)
 }
 
+/// Downloads a database archive into a cache, or reuses the cached copy.
+#[pyfunction]
+#[pyo3(signature = (url, cache = ".xtalforge-cache", sha256 = None, offline = false, kind = "core"))]
+pub(crate) fn mof_fetch_database(
+    url: &str,
+    cache: &str,
+    sha256: Option<&str>,
+    offline: bool,
+    kind: &str,
+) -> PyResult<String> {
+    let mut options = xtalforge::mof::FetchOptions::new(cache).offline(offline);
+    if let Some(sha256) = sha256 {
+        options = options.with_sha256(sha256);
+    }
+    let fetched = if kind.eq_ignore_ascii_case("qmof") {
+        xtalforge::mof::fetch_qmof(url, &options)
+    } else {
+        xtalforge::mof::fetch_core_mof(url, &options)
+    }
+    .map_err(crate::map_error)?;
+    serde_json::to_string(&fetched)
+        .map_err(|error| crate::invalid_input(format!("could not serialize fetch: {error}")))
+}
+
 /// Cleans and screens a database directory.
 #[pyfunction]
 #[pyo3(signature = (path, guest = "CO2", spacing = 0.8, samples = 100, limit = 0))]

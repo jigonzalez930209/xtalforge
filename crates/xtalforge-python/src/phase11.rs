@@ -5,8 +5,8 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList};
 
 use xtalforge::build::{
-    EmbedOptions, embed_smiles, find_fragment, fragments, from_smiles, parse_smiles, place_guest,
-    substitute,
+    EmbedOptions, embed_smiles, embed_smiles_with_hydrogens, find_fragment, fragments, from_smiles,
+    parse_smiles, place_guest, substitute,
 };
 
 use crate::structures::{load_structure, structure_payload};
@@ -49,23 +49,29 @@ pub(crate) fn write<'py>(
 }
 
 /// Parses a SMILES string and embeds it in 3D.
+///
+/// With `hydrogens=True`, the implicit hydrogens of the SMILES graph are
+/// appended after the heavy atoms.
 #[pyfunction]
-#[pyo3(signature = (smiles, seed = 7, iterations = 1500))]
+#[pyo3(signature = (smiles, seed = 7, iterations = 1500, hydrogens = false))]
 pub(crate) fn molecule_from_smiles<'py>(
     py: Python<'py>,
     smiles: &str,
     seed: u64,
     iterations: usize,
+    hydrogens: bool,
 ) -> PyResult<Bound<'py, PyDict>> {
     let graph = parse_smiles(smiles).map_err(crate::map_error)?;
-    let structure = embed_smiles(
-        &graph,
-        &EmbedOptions {
-            seed,
-            iterations,
-            ..EmbedOptions::default()
-        },
-    )
+    let options = EmbedOptions {
+        seed,
+        iterations,
+        ..EmbedOptions::default()
+    };
+    let structure = if hydrogens {
+        embed_smiles_with_hydrogens(&graph, &options)
+    } else {
+        embed_smiles(&graph, &options)
+    }
     .map_err(crate::map_error)?;
     structure_payload(py, &structure)
 }

@@ -46,6 +46,22 @@ impl Structure {
         })
     }
 
+    /// Enters a ``with`` block and returns the same structure.
+    fn __enter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    /// Leaves a ``with`` block; exceptions are not suppressed.
+    #[pyo3(signature = (_exc_type, _exc_value, _traceback))]
+    fn __exit__(
+        &self,
+        _exc_type: Option<&Bound<'_, PyAny>>,
+        _exc_value: Option<&Bound<'_, PyAny>>,
+        _traceback: Option<&Bound<'_, PyAny>>,
+    ) -> bool {
+        false
+    }
+
     #[getter]
     fn name(&self) -> &str {
         self.inner.name()
