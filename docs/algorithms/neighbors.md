@@ -25,6 +25,15 @@ Self-images (`i == j`, nonzero image) are included; the zero image is not.
 When the cutoff is at least one perpendicular width the index degenerates to
 one bin and the search is quadratic, which is the only case where this happens.
 
+## Structure-of-arrays path
+
+`P1Arrays::neighbors` and `neighbors_arrays` read the `x`, `y` and `z` columns
+directly; the linked-cell search is monomorphised over a coordinate view, so
+no `[f64; 3]` row array is materialised. `neighbors()` keeps the row-array
+path. Both views call the same pair test and sort, so the lists are identical
+(covered by `crates/xtalforge-core/tests/soa.rs`). The neighbor columns group
+every neighbor of one atom in a contiguous `row_range`.
+
 ## Determinism
 
 Results are sorted by `(i, j, image, distance)`; the order does not depend on

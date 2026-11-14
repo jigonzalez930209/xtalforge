@@ -26,8 +26,9 @@ the documented subset instead.
 The full RCSR snapshots are bundled in `data/rcsr/` with the maintainer's
 authorisation (2026-11-09) and their checksums; the licensing note is in
 `THIRD_PARTY.md`. The Zeo++ radii table and the PORMAKE recording are not
-copied, and `crates/xtalforge-mof/data/` contains hand-written illustrative
-blocks rather than the upstream package. The DFTB+ and EQeq files are
+copied. `crates/xtalforge-mof/data/` keeps the hand-written illustrative
+subset and, behind `mof-data`, the converted PORMAKE 0.2.3 net and block
+bundle with its license in `THIRD_PARTY.md`. The DFTB+ and EQeq files are
 reference outputs, not third-party data sets; their origin is recorded when
 they are copied.
 
@@ -36,3 +37,12 @@ they are copied.
 A phase copies an item only when its tests use it. The copy lands with the
 subtask that introduces the test and names its source in the provenance file.
 The inventory is reviewed when a new phase starts.
+
+## Refresh (Task 17.4.2)
+
+`scripts/golden/indexing.py` and `scripts/golden/rcsr_index.sh` are
+deterministic. The 1.10 refresh re-ran the indexing generator with no diff;
+the RCSR index rebuild verifies every fingerprint against the bundled
+snapshot. The Crystal-Builder generator (`scripts/golden/generate.py`) still
+needs a Python environment with the reference package, as recorded in its
+header, so the Phase 1 JSON files are unchanged.

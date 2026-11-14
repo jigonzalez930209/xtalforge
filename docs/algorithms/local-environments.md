@@ -27,7 +27,12 @@ Three strategies are available:
 
 - `cutoff`: every neighbor within a distance.
 - `voronoi`: faces with a solid angle above a threshold.
-- `crystalnn`: a CrystalNN-like weight `exp(-((d - d_min)/0.4)^2) * sqrt(Omega/pi)`.
+- `crystalnn`: `exp(-(d - d_min)^2 / (2 * 0.3^2)) * Omega / (4*pi) * c / c_max`,
+  where `c` is the cation-anion electronegativity factor
+  `1 + 3*sqrt(|X_a - X_b| / 3.3)` and `c_max` is the largest factor in the
+  shell. Pairs in the same class or without a tabulated electronegativity get
+  `c = 1`. This is a documented approximation of pymatgen CrystalNN, not a
+  bit-identical port.
 
 Continuous shape measures compare the neighbor vectors with ideal polyhedra
 of the same size. Both sets are centred and normalized to unit RMS radius; the

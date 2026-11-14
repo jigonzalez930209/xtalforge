@@ -82,6 +82,17 @@ index the same lines, so among the candidates with the best completeness and
 an error within a tenth of the tolerance of the smallest, the smallest cell
 wins. A face-centred pattern (NaCl) therefore returns `a = 5.62`, not `7.95`.
 
+## Engine agreement
+
+`indexing_agreement` runs both the cubic search and the general metric-family
+search on the same peaks. The verdict is positive when the general winner is
+cubic and the two `a` values differ by at most the relative tolerance
+(default 1 %). A different family, a missing candidate or a larger difference
+returns `agree = false` with a message naming the reason. Both the cubic and
+the general completeness travel with the verdict, so a disagreement caused by
+weak peaks is visible without rerunning the search. The CLI, Python and WASM
+surfaces expose the same struct.
+
 ## Validation
 
 `crates/xtalforge-analysis/tests/indexing_golden.rs` reads
