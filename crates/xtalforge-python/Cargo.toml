@@ -24,6 +24,8 @@ serde_json = { workspace = true }
 xtalforge = { workspace = true }
 
 [features]
+ml-onnx = ["xtalforge/ml-onnx"]
+ml-parquet = ["xtalforge/ml-parquet"]
 extension-module = ["pyo3/extension-module"]
 
 [lints]
