@@ -18,6 +18,7 @@
 
 mod angles;
 mod geometry;
+mod hydrogens;
 mod relax;
 
 use xtalforge_core::elements::element_by_symbol;
@@ -29,6 +30,7 @@ use geometry::{
     extra_direction, ideal_bond_length, ideal_bonds, is_metal, neighbours_of, radii,
     repulsion_pairs, shape_vertices, spiral,
 };
+use hydrogens::inferred_hydrogens;
 use relax::relax;
 
 /// Default value of [`EmbedOptions::bond_length`], Angstrom.
@@ -100,10 +102,31 @@ pub fn coordination_geometry(element: &str) -> Option<CoordinationGeometry> {
 ///
 /// Returns [`Error::InvalidInput`] for an empty graph, a non-positive or
 /// non-finite bond length, zero iterations, an unknown element, a bond index
-/// outside the graph or a non-positive bond order.
+/// outside the graph, a non-positive bond order, or a valence that asks for
+/// more hydrogens than the ideal geometry can place.
 pub fn embed_smiles(graph: &SmilesMolecule, options: &EmbedOptions) -> Result<Structure, Error> {
     let points = embed_points(graph, options)?;
-    molecule(graph, &points)
+    molecule(graph, &points, false)
+}
+
+/// Embeds a SMILES graph and appends the hydrogens its bond orders imply.
+///
+/// Target valences are C 4, N 3, O 2, B 3, P 3 and S 2, shifted by the formal
+/// charge. Aromatic bonds count as 1.5 and the used valence is rounded to
+/// whole bonds, matching the hydrogen-filling rule of
+/// [`crate::add_hydrogens`]. The heavy-atom embed is identical to
+/// [`embed_smiles`]; the new H sites follow the graph atoms in atom order.
+///
+/// # Errors
+///
+/// Returns the errors of [`embed_smiles`] or a valence that asks for more
+/// hydrogens than the ideal geometry can place.
+pub fn embed_smiles_with_hydrogens(
+    graph: &SmilesMolecule,
+    options: &EmbedOptions,
+) -> Result<Structure, Error> {
+    let points = embed_points(graph, options)?;
+    molecule(graph, &points, true)
 }
 
 /// Embeds a graph, then places the first metal atom's neighbours on `geometry`.
@@ -180,7 +203,7 @@ pub fn apply_coordination(
             ];
         }
     }
-    Ok((molecule(graph, &points)?, warnings))
+    Ok((molecule(graph, &points, false)?, warnings))
 }
 
 /// Returns the embedded Cartesian points, in graph atom order.
@@ -204,13 +227,20 @@ fn embed_points(graph: &SmilesMolecule, options: &EmbedOptions) -> Result<Vec<[f
 }
 
 /// Wraps points as a `Structure::molecule` with the standard padding.
-fn molecule(graph: &SmilesMolecule, points: &[[f64; 3]]) -> Result<Structure, Error> {
-    let named: Vec<(String, [f64; 3])> = graph
+fn molecule(
+    graph: &SmilesMolecule,
+    points: &[[f64; 3]],
+    infer_hydrogens: bool,
+) -> Result<Structure, Error> {
+    let mut named: Vec<(String, [f64; 3])> = graph
         .atoms
         .iter()
         .zip(points.iter())
         .map(|(atom, point)| (atom.element.clone(), *point))
         .collect();
+    if infer_hydrogens {
+        named.extend(inferred_hydrogens(graph, points)?);
+    }
     Structure::molecule("molecule", &named, PADDING)
 }
 
