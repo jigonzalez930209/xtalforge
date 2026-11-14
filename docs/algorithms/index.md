@@ -68,3 +68,9 @@ Pages are added with the feature that introduces them:
 
 The neighbor-search page records the linked-cell index and the scaling
 benchmark in Phase 1.
+
+- [Electronic structure](./electronic-structure)
+- [Magnetic symmetry](./magnetism)
+- [Disorder enumeration](./disorder-enumeration)
+- [Neutron and electron diffraction](./neutron-electron-diffraction)
+- [Vibrational spectroscopy](./spectroscopy)
