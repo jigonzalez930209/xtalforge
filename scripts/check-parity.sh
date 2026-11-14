@@ -47,6 +47,10 @@ check_rust() {
     prepare) name=prepare ;;
     add_hydrogens) name=add_hydrogens ;;
     porosity) name=distance_grid ;;
+    porosity_report) name=porosity_report ;;
+    indexing_agreement) name=indexing_agreement ;;
+    database_fetch) name=fetch_core_mof ;;
+    mof_data) name=build_mof ;;
     net_invariants) name=quotient_graph ;;
     zeo_parse) name=parse_zeo_channels ;;
     groups) name=find_groups ;;
@@ -139,9 +143,15 @@ check_python() {
   esac
   case "$name" in
     prepare) name=ff_prepare ;;
+    porosity_report) name=porosity ;;
+    indexing_agreement) name=powder_index_agreement ;;
+    database_fetch) name=mof_fetch_database ;;
     ring_paths) name=ring_paths ;;
     run_automatic) name=powder_automatic ;;
     powder_index) name=powder_index ;;
+    indexing_agreement) name=powder_index_agreement ;;
+    database_fetch) name=mof_fetch_database ;;
+    mof_data) name=mof_blocks ;;
     powder_pawley) name=powder_pawley ;;
     refine_phase) name=powder_refine ;;
   esac
@@ -204,7 +214,12 @@ check_wasm() {
     prepare) name=ff_prepare_info ;;
     ring_paths) name=rings ;;
     add_hydrogens) name=hydrogens_info ;;
+    workflow) name=run_workflow_memory ;;
     porosity) name=porosity_info ;;
+    porosity_report) name=porosity_info ;;
+    indexing_agreement) name=powder_index_agreement_info ;;
+    database_fetch) name=fetch_data_bundle ;;
+    mof_data) name=mof_topologies_info ;;
     net_invariants) name=net_invariants_info ;;
     zeo_parse) name=zeo_parse_info ;;
     fragment_library) name=fragment_library_info ;;
@@ -246,7 +261,9 @@ check_cli() {
     project_pack) command=project ;;
     prepare) command=ff ;;
     add_hydrogens) command=hydrogens ;;
-    porosity|net_invariants|zeo_parse|ring_paths) command=analysis ;;
+    porosity|porosity_report|net_invariants|zeo_parse|ring_paths) command=analysis ;;
+    indexing_agreement) command=powder ;;
+    database_fetch|mof_data) command=mof ;;
     agent_capabilities|agent_verbs) command=capabilities ;;
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;

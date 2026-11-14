@@ -41,6 +41,8 @@
 # export and net contraction (5398 KiB measured).
 #
 # 5632 KiB since 1.9.0: workflows, provenance and dataset descriptors
+# 5888 KiB since 1.10.0: Phase 17 parity surfaces, YAML, MOF data loader and
+#   the in-memory workflow runner
 # (5606 KiB measured).
 #
 # Build first:
@@ -74,7 +76,7 @@ check_package() {
   fi
 }
 
-check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 5632
+check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 5888
 
 split=(core symmetry analysis build)
 present=0
