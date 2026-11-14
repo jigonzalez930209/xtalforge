@@ -45,6 +45,7 @@
 #   the in-memory workflow runner
 # 6400 KiB since 1.11.0: engine input sets, parsers and electronic-structure
 #   analysis
+# 6656 KiB since 1.12.0: magnetism, disorder, diffraction and spectroscopy
 # (5606 KiB measured).
 #
 # Build first:
@@ -78,7 +79,7 @@ check_package() {
   fi
 }
 
-check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 6400
+check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 6656
 
 split=(core symmetry analysis build)
 present=0
@@ -92,10 +93,10 @@ elif [ "$present" -ne "${#split[@]}" ]; then
   echo "FAIL: only ${present} of ${#split[@]} split packages exist under $PKG" >&2
   status=1
 else
-  check_package "core" "$PKG/core/xtalforge_wasm_core_bg.wasm" 2048
-  check_package "symmetry" "$PKG/symmetry/xtalforge_wasm_symmetry_bg.wasm" 2944
-  check_package "analysis" "$PKG/analysis/xtalforge_wasm_analysis_bg.wasm" 3264
-  check_package "build" "$PKG/build/xtalforge_wasm_build_bg.wasm" 2496
+  check_package "core" "$PKG/core/xtalforge_wasm_core_bg.wasm" 2176
+  check_package "symmetry" "$PKG/symmetry/xtalforge_wasm_symmetry_bg.wasm" 3072
+  check_package "analysis" "$PKG/analysis/xtalforge_wasm_analysis_bg.wasm" 3392
+  check_package "build" "$PKG/build/xtalforge_wasm_build_bg.wasm" 2560
 fi
 
 exit "$status"
