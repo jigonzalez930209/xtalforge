@@ -24,6 +24,7 @@ CRATES=(
   xtalforge-engines
   xtalforge-mof
   xtalforge-generation
+  xtalforge-ml
   xtalforge-modules
   xtalforge-agent
   xtalforge

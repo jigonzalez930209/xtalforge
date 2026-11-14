@@ -135,8 +135,20 @@ check_rust() {
     layer_groups) name=layer_groups ;;
     search_workflow) name=search_workflow_document ;;
     mof_dataset) name=generate_mof_dataset ;;
+    crystal_graph) name=crystal_graph_arrays ;;
+    soap_descriptor) name=soap_power_spectrum ;;
+    acsf_descriptor) name=acsf ;;
+    mbtr_descriptor) name=mbtr ;;
+    mof_ml_features) name=mof_features ;;
+    ml_split) name=split_dataset ;;
+    ml_import) name=import_dataset ;;
+    ml_predict) name=predict_dataset ;;
+    ml_select) name=select_batch ;;
+    ml_active_workflow) name=active_learning_workflow ;;
+    dataset_parquet) name=write_parquet ;;
+    onnx_inference) grep -Rq 'pub struct OnnxModel' crates/xtalforge-ml/src && return ;;
   esac
-  grep -Rq "pub fn $name(" crates/*/src
+  grep -Rq "pub fn $name" crates/*/src
 }
 
 check_python() {
@@ -200,6 +212,16 @@ check_python() {
     mof_dataset) name=mof_dataset ;;
     functionalization_sweep) name=functionalize_sweep ;;
     layer_groups) name=layer_groups ;;
+    crystal_graph) name=crystal_graph_arrays ;;
+    soap_descriptor) name=soap_descriptor ;;
+    acsf_descriptor) name=acsf_descriptor ;;
+    mbtr_descriptor) name=mbtr_descriptor ;;
+    mof_ml_features) name=mof_ml_features ;;
+    ml_split) name=ml_split ;;
+    ml_import) name=ml_import ;;
+    ml_predict) name=ml_predict ;;
+    ml_select) name=ml_select ;;
+    ml_active_workflow) name=ml_active_workflow ;;
   esac
   grep -Rq --include='*.pyi' "def $name(" "$PY_STUB"
 }
@@ -296,6 +318,16 @@ check_wasm() {
     mof_dataset) name=mof_dataset_info ;;
     functionalization_sweep) name=functionalize_sweep_info ;;
     layer_groups) name=layer_groups_info ;;
+    crystal_graph) name=crystal_graph_info ;;
+    soap_descriptor) name=soap_descriptor_info ;;
+    acsf_descriptor) name=acsf_descriptor_info ;;
+    mbtr_descriptor) name=mbtr_descriptor_info ;;
+    mof_ml_features) name=mof_ml_features_info ;;
+    ml_split) name=ml_split_info ;;
+    ml_import) name=ml_import_info ;;
+    ml_predict) name=ml_predict_info ;;
+    ml_select) name=ml_select_info ;;
+    ml_active_workflow) name=ml_active_workflow_info ;;
     fragment_structure) name=fragment_info ;;
     substitute_structure) name=substitute_info ;;
     place_guest_structure) name=place_guest_info ;;
@@ -347,6 +379,7 @@ check_cli() {
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
     generate_crystal|generate_molecule_crystal|generate_layer_crystal|generate_rod_crystal|random_search|evolutionary_search|search_workflow|prototype_library|identify_prototype|substitution_candidates|mof_dataset|functionalization_sweep|layer_groups) command=generate ;;
+    crystal_graph|soap_descriptor|acsf_descriptor|mbtr_descriptor|mof_ml_features|ml_split|ml_import|ml_predict|ml_select|ml_active_workflow) command=ml ;;
     mof_check|mof_solvent_remove|mof_disorder|mof_charge_balance|mof_deconstruct|mof_mofid|mof_open_metal_sites|mof_descriptors|mof_pores|mof_guests|mof_forcefield|mof_widom|mof_gcmc|mof_energy_grid|mof_raspa|mof_functionalize|mof_defects|mof_interpenetrate|mof_stack_layers|mof_mixed|mof_read_database|mof_screen|mof_deduplicate) command=mof ;;
     read) command=info ;;
     write) command=convert ;;
