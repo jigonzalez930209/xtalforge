@@ -90,6 +90,11 @@ pub(crate) enum Command {
         #[command(subcommand)]
         action: PowderAction,
     },
+    /// Structure generation, prototypes and global search.
+    Generate {
+        #[command(subcommand)]
+        action: crate::generate_args::GenerateAction,
+    },
     /// MOF topologies, blocks and framework assembly.
     Mof {
         #[command(subcommand)]

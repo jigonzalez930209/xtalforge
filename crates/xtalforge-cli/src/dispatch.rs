@@ -3,9 +3,9 @@
 use crate::{
     Cli, CliError, agent_commands, analysis_commands, analyze, args, args::Command, basic, build,
     build_structures, commands_extra, convert, docs_commands, doctor, feature_commands,
-    fetch_commands, ff_commands, measure, mesh, model_commands, module_commands, mof_commands,
-    molecule_commands, powder_commands, provenance_commands, pxrd, spacegroup, symmetry,
-    symmetry::SymmetryAction, symmetry_analysis, workflow_commands,
+    fetch_commands, ff_commands, generate_commands, measure, mesh, model_commands, module_commands,
+    mof_commands, molecule_commands, powder_commands, provenance_commands, pxrd, spacegroup,
+    symmetry, symmetry::SymmetryAction, symmetry_analysis, workflow_commands,
 };
 
 pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
@@ -38,6 +38,7 @@ pub(crate) fn run(cli: &Cli) -> Result<(), CliError> {
             format,
         } => build_structures::hydrogens(cli, path, *distance, out.as_deref(), *format),
         Command::Powder { action } => powder_commands::run(cli, action),
+        Command::Generate { action } => generate_commands::run(cli, action),
         Command::Mof { action } => mof_commands::run(cli, action),
         Command::Analysis { action } => analysis_commands::run(cli, action),
         Command::Ff { action } => ff_commands::run(cli, action),
