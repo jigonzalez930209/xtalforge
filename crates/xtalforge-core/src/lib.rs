@@ -85,7 +85,10 @@ pub use scalars::{
 };
 pub use selection::{AtomId, Selection, TrackingTable};
 pub use site::Site;
-pub use slab::{Slab, make_slab, plane_angle, surface_basis};
+pub use slab::{
+    Slab, SlabTermination, SlabTerminationReport, TerminationOptions, make_slab, plane_angle,
+    slab_cut_shifts, slab_terminations, slab_terminations_with_options, surface_basis,
+};
 pub use soa::{NeighborArrays, P1Arrays, neighbors_arrays};
 pub use structure::{
     SCHEMA_VERSION, Structure, StructureBuilder, StructureDocument, StructureSummary,
@@ -93,7 +96,7 @@ pub use structure::{
 };
 pub use surface::{
     AdsorptionKind, AdsorptionSite, SurfaceEnergy, WulffFacet, WulffShape, adsorption_sites,
-    place_molecule, wulff,
+    adsorption_sites_with_options, place_molecule, wulff,
 };
 pub use symop::SymOp;
 pub use transforms::{Ellipsoid, Plane, displacement_ellipsoid};

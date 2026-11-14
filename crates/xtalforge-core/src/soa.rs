@@ -13,7 +13,7 @@
 
 use std::ops::Range;
 
-use crate::neighbors::{Neighbor, search};
+use crate::neighbors::{Neighbor, search_columns};
 use crate::p1::{P1Atom, P1Cell};
 use crate::{Error, Lattice, Structure};
 
@@ -209,8 +209,7 @@ impl P1Arrays {
     /// Returns [`Error::InvalidInput`] for a non-positive or non-finite
     /// cutoff.
     pub fn neighbors(&self, cutoff: f64) -> Result<Vec<Neighbor>, Error> {
-        let fracs = self.fracs();
-        search(&self.lattice, &fracs, cutoff)
+        search_columns(&self.lattice, &self.x, &self.y, &self.z, cutoff)
     }
 
     /// Neighbor list in the column layout.
@@ -221,12 +220,6 @@ impl P1Arrays {
     /// [`NeighborArrays::new`].
     pub fn neighbor_arrays(&self, cutoff: f64) -> Result<NeighborArrays, Error> {
         NeighborArrays::new(&self.neighbors(cutoff)?, self.len())
-    }
-
-    fn fracs(&self) -> Vec<[f64; 3]> {
-        (0..self.len())
-            .filter_map(|index| self.frac(index))
-            .collect()
     }
 
     fn push(&mut self, atom: &P1Atom) {

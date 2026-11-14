@@ -59,8 +59,72 @@ pub(crate) fn search(
     fracs: &[[f64; 3]],
     cutoff: f64,
 ) -> Result<Vec<Neighbor>, Error> {
+    search_view(lattice, FractionalRows(fracs), cutoff)
+}
+
+/// Neighbor search directly over SoA coordinate columns (Task 17.2.3).
+///
+/// No `[f64; 3]` row array is materialised; the linked-cell grid reads the
+/// three columns in place. The result is identical to [`search`].
+pub(crate) fn search_columns(
+    lattice: &crate::Lattice,
+    x: &[f64],
+    y: &[f64],
+    z: &[f64],
+    cutoff: f64,
+) -> Result<Vec<Neighbor>, Error> {
+    if x.len() != y.len() || x.len() != z.len() {
+        return Err(Error::InvalidInput(
+            "neighbor columns must have the same length".to_owned(),
+        ));
+    }
+    search_view(lattice, Columns { x, y, z }, cutoff)
+}
+
+trait Coordinates {
+    fn len(&self) -> usize;
+    fn get(&self, index: usize) -> [f64; 3];
+}
+
+struct FractionalRows<'a>(&'a [[f64; 3]]);
+
+impl Coordinates for FractionalRows<'_> {
+    fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    fn get(&self, index: usize) -> [f64; 3] {
+        self.0.get(index).copied().unwrap_or([0.0; 3])
+    }
+}
+
+struct Columns<'a> {
+    x: &'a [f64],
+    y: &'a [f64],
+    z: &'a [f64],
+}
+
+impl Coordinates for Columns<'_> {
+    fn len(&self) -> usize {
+        self.x.len()
+    }
+
+    fn get(&self, index: usize) -> [f64; 3] {
+        [
+            self.x.get(index).copied().unwrap_or(0.0),
+            self.y.get(index).copied().unwrap_or(0.0),
+            self.z.get(index).copied().unwrap_or(0.0),
+        ]
+    }
+}
+
+fn search_view<C: Coordinates>(
+    lattice: &crate::Lattice,
+    coordinates: C,
+    cutoff: f64,
+) -> Result<Vec<Neighbor>, Error> {
     validate_cutoff(cutoff)?;
-    if fracs.is_empty() {
+    if coordinates.len() == 0 {
         return Ok(Vec::new());
     }
     let spacing = perpendicular_widths(lattice)?;
@@ -68,10 +132,10 @@ pub(crate) fn search(
     let matrix = lattice.matrix();
 
     let mut bins: HashMap<[usize; 3], Vec<usize>> = HashMap::new();
-    let mut atom_bins: Vec<[usize; 3]> = Vec::with_capacity(fracs.len());
+    let mut atom_bins: Vec<[usize; 3]> = Vec::with_capacity(coordinates.len());
     let [count_x, count_y, count_z] = counts;
-    for (index, frac) in fracs.iter().enumerate() {
-        let [x, y, z] = *frac;
+    for index in 0..coordinates.len() {
+        let [x, y, z] = coordinates.get(index);
         let frac = [x.rem_euclid(1.0), y.rem_euclid(1.0), z.rem_euclid(1.0)];
         let [frac_x, frac_y, frac_z] = frac;
         let bin = [
@@ -87,13 +151,13 @@ pub(crate) fn search(
         cutoff,
         spacing,
         matrix,
-        fracs,
+        coordinates: &coordinates,
     };
     let mut found = Vec::new();
     let offsets_x = offsets(count_x);
     let offsets_y = offsets(count_y);
     let offsets_z = offsets(count_z);
-    for i in 0..fracs.len() {
+    for i in 0..coordinates.len() {
         let Some(base) = atom_bins.get(i) else {
             continue;
         };
@@ -144,20 +208,19 @@ pub fn neighbors_of(
         .collect())
 }
 
-struct Search<'a> {
+struct Search<'a, C: Coordinates> {
     cutoff: f64,
     spacing: [f64; 3],
     matrix: [[f64; 3]; 3],
-    fracs: &'a [[f64; 3]],
+    coordinates: &'a C,
 }
 
-impl Search<'_> {
+impl<C: Coordinates> Search<'_, C> {
     fn pair(&self, i: usize, j: usize, found: &mut Vec<Neighbor>) {
-        let Some((first, second)) = self.fracs.get(i).zip(self.fracs.get(j)) else {
-            return;
-        };
-        let [x_i, y_i, z_i] = *first;
-        let [x_j, y_j, z_j] = *second;
+        let first = self.coordinates.get(i);
+        let second = self.coordinates.get(j);
+        let [x_i, y_i, z_i] = first;
+        let [x_j, y_j, z_j] = second;
         let delta = [x_j - x_i, y_j - y_i, z_j - z_i];
         let reach = self.spacing.map(|width| self.cutoff / width + 1e-9);
         let [delta_x, delta_y, delta_z] = delta;

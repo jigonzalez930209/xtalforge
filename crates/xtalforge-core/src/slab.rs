@@ -16,6 +16,13 @@ use crate::bonding::{BondRules, perceive_bonds};
 use crate::{Error, Lattice, Site, Structure, StructureBuilder};
 
 mod carry;
+mod terminations;
+
+pub(crate) use terminations::validate as validate_termination_options;
+pub use terminations::{
+    SlabTermination, SlabTerminationReport, TerminationOptions, slab_cut_shifts, slab_terminations,
+    slab_terminations_with_options,
+};
 
 /// How far above the bottom of the cell a slab starts, in Angstrom.
 pub const SLAB_FLOOR: f64 = 0.5;
