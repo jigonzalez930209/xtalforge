@@ -45,6 +45,9 @@ const expected = {
     'group_structures', 'rattle', 'interpolate', 'optimal_supercell', 'voronoi',
     'coordination', 'oxidation_states', 'unique_miller_indices', 'wulff',
     'adsorption_sites', 'mof_mofid', 'mof_pores', 'mof_widom', 'build_polymer_text',
+    // Phase 18 engine bridge.
+    'engine_presets_info', 'engine_input_set_info', 'engine_parse_info', 'engine_bands_info',
+    'engine_dos_info', 'engine_script_info', 'engine_failures_info',
   ],
 };
 const required = {
