@@ -12,6 +12,7 @@ pub mod dataset;
 pub mod diagnostics;
 pub mod kpath;
 pub mod layer;
+pub mod layer_groups;
 pub mod magnetic;
 pub mod matcher;
 mod matcher_canonical;
@@ -33,6 +34,7 @@ pub use diagnostics::{
 };
 pub use kpath::{KPath, band_path, band_path_for_structure, classify_bravais};
 pub use layer::{LayerDataset, detect_layer_symmetry};
+pub use layer_groups::{LayerGroup, LayerWyckoffPosition, layer_groups, layer_number};
 pub use magnetic::{
     MagneticDataset, MagneticOperation, MagneticSymmetrization, MagneticSymmetryOptions,
     detect_magnetic_symmetry, detect_magnetic_symmetry_with_options, format_magmom, magmom_values,
