@@ -1,0 +1,13 @@
+SimulationType                MonteCarlo
+NumberOfCycles               10000
+NumberOfInitializationCycles 1000
+PrintEvery                  1000
+Forcefield                  UFF-TraPPE
+FrameworkName               framework
+FrameworkNumberofUnitCells  1 1 1
+ChargeMethod                Equil
+Temperature                 298
+Pressure                    1
+Component 0 MoleculeName    CO2
+MoleculeDefinition Local
+WidomInsertion    yes
