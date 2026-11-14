@@ -22,6 +22,8 @@ mod agent_export;
 mod analysis_export;
 #[cfg(target_arch = "wasm32")]
 mod common;
+#[cfg(all(target_arch = "wasm32", feature = "engines"))]
+mod engine_export;
 #[cfg(all(target_arch = "wasm32", feature = "full"))]
 mod forcefield;
 #[cfg(all(target_arch = "wasm32", feature = "analysis"))]
@@ -76,6 +78,11 @@ use common::{array3, array6, set, to_js_error};
 pub use agent_export::{AgentSession, agent_capabilities, agent_run, agent_verbs};
 #[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use analysis_export::{net_invariants_info, porosity_info, zeo_parse_info};
+#[cfg(all(target_arch = "wasm32", feature = "engines"))]
+pub use engine_export::{
+    engine_bands_info, engine_dos_info, engine_failures_info, engine_input_set_info,
+    engine_parse_info, engine_presets_info, engine_script_info,
+};
 #[cfg(all(target_arch = "wasm32", feature = "full"))]
 pub use forcefield::{
     ff_charges_info, ff_energy, ff_ir_info, ff_optimize_info, ff_optimize_text, ff_prepare_info,
