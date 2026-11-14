@@ -38,7 +38,14 @@ const expected = {
   build: [
     'build_graphene_info', 'build_carbon_text', 'molecule_from_smiles', 'hydrogens_info',
   ],
-  full: ['ff_energy', 'mof_check', 'agent_capabilities', 'elastic_tensor', 'workspace_archive'],
+  full: [
+    'ff_energy', 'mof_check', 'agent_capabilities', 'elastic_tensor', 'workspace_archive',
+    // Every WASM symbol named in docs/guide/recipes.md (Task 17.1.5).
+    'to_p1_info', 'bonds', 'distance', 'ff_optimize_text', 'ff_charges_info',
+    'group_structures', 'rattle', 'interpolate', 'optimal_supercell', 'voronoi',
+    'coordination', 'oxidation_states', 'unique_miller_indices', 'wulff',
+    'adsorption_sites', 'mof_mofid', 'mof_pores', 'mof_widom', 'build_polymer_text',
+  ],
 };
 const required = {
   core: expected.core,
