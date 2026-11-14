@@ -5,6 +5,32 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [1.14.1] - 2026-11-14
+
+Closes the Phase 21 validation and packaging gaps.
+
+### Fixed
+
+- SOAP now includes the centre self term and uses the DScribe `oOeta`
+  convolution; ACSF now matches DScribe's G1/G2/G3/G4 layout and ordered
+  triple loop; MBTR now uses the DScribe `k=2` distance and `k=3` degree-angle
+  blocks with integrated Gaussian broadening. Recorded DScribe fixtures match
+  within `5e-4` (SOAP) and `5e-6` (ACSF/MBTR).
+- ONNX ships a PyTorch-exported reference model; energies and forces match the
+  reference within `1e-5 eV` and `2e-4 eV/Angstrom`.
+- `ml_predict`, `ml_select` and `ml_append` are dispatched by the agent, so the
+  active-learning workflow runs with all named verbs.
+- Parquet and ONNX are included in the default wheels, CLI and WASM package;
+  WASM uses byte buffers for both. The full WASM budget is raised accordingly.
+
+### Notes
+
+- The Python wheel tag on this machine may fall back to `linux_x86_64` because
+  the local glibc is newer than the manylinux policy; the release runner uses
+  `ubuntu-24.04` and produces the normal manylinux wheel.
+- The MBTR triple layout follows DScribe's `j E(E+1)/2 + k + iE - i(i+1)/2`
+  enumeration.
+
 ## [1.14.0] - 2026-11-14
 
 Phase 21 makes xtalforge the preprocessing and inference layer for machine

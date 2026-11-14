@@ -30,6 +30,7 @@ allow = [
   "Zlib",
   "ISC",
   "CDLA-Permissive-2.0",
+  "CC0-1.0",
 ]
 confidence-threshold = 0.93
 
@@ -42,13 +43,18 @@ highlight = "all"
 workspace-default-features = "allow"
 external-default-features = "allow"
 deny = [
-  { crate = "cc", wrappers = ["minicov", "ring"], reason = "ring builds its constant-time primitives for the optional net feature; minicov is a wasm-bindgen-test build dependency" },
+  { crate = "cc", wrappers = ["minicov", "ring", "tract-linalg", "iana-time-zone-haiku"], reason = "ring builds its constant-time primitives for the optional net feature; minicov is a wasm-bindgen-test build dependency; tract-linalg and iana-time-zone probe their host at build time" },
   { crate = "cmake", reason = "native builds must stay behind optional features (AGENTS.md rule 3)" },
 ]
 skip = [
   { crate = "syn", reason = "proc-macro build-time duplicate: moyo needs syn 2, clap/pyo3/serde need syn 3" },
   { crate = "getrandom", reason = "ring pins getrandom 0.2; the rest of the graph already uses 0.4" },
   { crate = "windows-sys", reason = "ring pins windows-sys 0.52; the rest of the graph uses 0.61" },
+  { crate = "base64", reason = "tract and the existing net stack use different base64 majors; both are pure Rust and behind optional features" },
+  { crate = "cpufeatures", reason = "arrow/parquet and the existing crypto stack use different cpufeatures majors" },
+  { crate = "hashbrown", reason = "tract and the existing workspace use different hashbrown majors" },
+  { crate = "num-bigint", reason = "arrow and the existing numeric stack use different num-bigint majors" },
+  { crate = "r-efi", reason = "tract and the existing net stack use different r-efi majors" },
 ]
 skip-tree = []
 

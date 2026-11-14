@@ -2852,7 +2852,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde_json",
  "ureq",
@@ -2874,7 +2874,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-agent"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "flate2",
  "serde",
@@ -2887,13 +2887,14 @@ dependencies = [
  "xtalforge-ff",
  "xtalforge-generation",
  "xtalforge-io",
+ "xtalforge-ml",
  "xtalforge-symmetry",
  "xtalforge-view",
 ]
 
 [[package]]
 name = "xtalforge-analysis"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "flate2",
  "serde",
@@ -2906,7 +2907,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-build"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2917,7 +2918,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-cli"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "clap",
  "clap_complete",
@@ -2929,7 +2930,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-commands"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2939,7 +2940,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-core"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "flate2",
  "rayon",
@@ -2951,7 +2952,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-engines"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2965,7 +2966,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-ff"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "rayon",
  "sci-form",
@@ -2980,7 +2981,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-generation"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -2994,7 +2995,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-io"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "flate2",
  "rayon",
@@ -3007,9 +3008,11 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-ml"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "arrow",
+ "bytes",
+ "libm",
  "parquet",
  "serde",
  "serde_json",
@@ -3024,7 +3027,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-modules"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -3034,7 +3037,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-mof"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "flate2",
  "serde",
@@ -3052,7 +3055,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-plugin-example"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde_json",
  "xtalforge",
@@ -3060,7 +3063,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-python"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "pyo3",
  "serde",
@@ -3070,7 +3073,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-symmetry"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "moyo",
  "nalgebra",
@@ -3082,11 +3085,11 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-testkit"
-version = "1.14.0"
+version = "1.14.1"
 
 [[package]]
 name = "xtalforge-view"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "serde",
  "serde_json",
@@ -3095,7 +3098,7 @@ dependencies = [
 
 [[package]]
 name = "xtalforge-wasm"
-version = "1.14.0"
+version = "1.14.1"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",
