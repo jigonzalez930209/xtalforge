@@ -1,0 +1,33 @@
+ CP2K version 2024.1 (Development Version)
+ RUN_TYPE GEO_OPT
+
+ CELL| Vector a [angstrom]:       4.210     0.000     0.000    |a| =       4.210
+ CELL| Vector b [angstrom]:       0.000     4.210     0.000    |b| =       4.210
+ CELL| Vector c [angstrom]:       0.000     0.000     4.210    |c| =       4.210
+
+ *** SCF run converged in    10 steps ***
+
+ ENERGY| Total FORCE_EVAL ( QS ) energy [a.u.]:            -17.123456789
+
+ MODULE QUICKSTEP:  ATOMIC COORDINATES IN angstrom
+
+  Atom  Kind  Element       X           Y           Z          Z(eff)       Mass
+       1     1  Mg       0.000000    0.000000    0.000000     10.00      24.305
+       2     2  O        2.105000    2.105000    2.105000      6.00      15.999
+
+ ATOMIC FORCES in [a.u.]
+
+ # Atom   Kind   Element          X           Y           Z          Z(eff)       Mass
+      1      1  Mg               0.000000    0.000000    0.001000     10.00      24.305
+      2      2  O                0.000000    0.000000   -0.001000      6.00      15.999
+ SUM OF ATOMIC FORCES           0.000000    0.000000    0.000000       0.00000000
+
+ STRESS| Analytical stress tensor [GPa]
+ STRESS|      x                   y                   z
+ STRESS|  x   0.100000    0.000000    0.000000
+ STRESS|  y   0.000000    0.200000    0.000000
+ STRESS|  z   0.000000    0.000000    0.300000
+
+ GEOMETRY OPTIMIZATION COMPLETED
+
+ CP2K                                 1.500  seconds
