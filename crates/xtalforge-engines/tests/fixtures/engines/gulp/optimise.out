@@ -1,0 +1,28 @@
+  GULP 6.0.0
+
+ Total lattice energy =      -123.456789 eV
+
+ Final coordinates (Angstroms)
+
+  Atom       x           y           z
+    1 Mg    0.000000    0.000000    0.000000
+    2 O     2.105000    2.105000    2.105000
+
+ Final cell parameters (Angstroms) and angles (degrees)
+
+    4.210000    4.210000    4.210000   90.000000   90.000000   90.000000
+
+ Forces (eV/Angstroms)
+
+    1 Mg    0.000000    0.000000    0.010000
+    2 O     0.000000    0.000000   -0.010000
+
+ Stress tensor (GPa)
+
+    0.100000    0.000000    0.000000
+    0.000000    0.200000    0.000000
+    0.000000    0.000000    0.300000
+
+ SCF converged
+ Optimisation completed
+ Total CPU time =     0.250 s
