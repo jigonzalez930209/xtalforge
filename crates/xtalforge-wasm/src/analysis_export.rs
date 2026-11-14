@@ -15,6 +15,12 @@ pub fn porosity_info(text: &str, spacing: f64, probe: f64) -> Result<JsValue, Js
     let radii = xtalforge::analysis::default_radii(&structure).map_err(to_js_error)?;
     let grid =
         xtalforge::analysis::distance_grid(&structure, &radii, spacing).map_err(to_js_error)?;
+    let report = xtalforge::analysis::PorosityOptions {
+        probe_radius: probe,
+        spacing,
+    }
+    .report_grid(&structure, &grid)
+    .map_err(to_js_error)?;
     let object = js_sys::Object::new();
     set(
         &object,
@@ -40,6 +46,36 @@ pub fn porosity_info(text: &str, spacing: f64, probe: f64) -> Result<JsValue, Js
         &object,
         "largest_included_diameter",
         JsValue::from_f64(grid.largest_included_diameter()),
+    );
+    set(
+        &object,
+        "probe_occupiable_volume",
+        JsValue::from_f64(report.probe_occupiable_volume),
+    );
+    set(
+        &object,
+        "pov_per_mass",
+        JsValue::from_f64(report.pov_per_mass),
+    );
+    set(
+        &object,
+        "accessible_surface_area",
+        JsValue::from_f64(report.surface_area),
+    );
+    set(
+        &object,
+        "asa_per_mass",
+        JsValue::from_f64(report.asa_per_mass),
+    );
+    let directions = js_sys::Array::new();
+    for value in report.percolating_directions {
+        directions.push(&JsValue::from_bool(value));
+    }
+    set(&object, "percolating_directions", directions.into());
+    set(
+        &object,
+        "pore_limiting_diameter",
+        JsValue::from_f64(report.pore_limiting_diameter),
     );
     Ok(object.into())
 }

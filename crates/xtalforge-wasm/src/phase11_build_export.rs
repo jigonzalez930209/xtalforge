@@ -14,23 +14,27 @@ use crate::phase9_export::{document, json, load, options};
 struct EmbedOptions {
     seed: u64,
     iterations: usize,
+    #[serde(alias = "hydrogens")]
+    infer_hydrogens: bool,
 }
 
 fn embed(smiles: &str, options_json: &str) -> Result<String, JsValue> {
     let options: EmbedOptions = options(options_json)?;
     let graph = xtalforge::build::parse_smiles(smiles).map_err(to_js_error)?;
-    let structure = xtalforge::build::embed_smiles(
-        &graph,
-        &xtalforge::build::EmbedOptions {
-            seed: options.seed,
-            iterations: if options.iterations > 0 {
-                options.iterations
-            } else {
-                1500
-            },
-            ..xtalforge::build::EmbedOptions::default()
+    let embed_options = xtalforge::build::EmbedOptions {
+        seed: options.seed,
+        iterations: if options.iterations > 0 {
+            options.iterations
+        } else {
+            1500
         },
-    )
+        ..xtalforge::build::EmbedOptions::default()
+    };
+    let structure = if options.infer_hydrogens {
+        xtalforge::build::embed_smiles_with_hydrogens(&graph, &embed_options)
+    } else {
+        xtalforge::build::embed_smiles(&graph, &embed_options)
+    }
     .map_err(to_js_error)?;
     document(&structure)
 }

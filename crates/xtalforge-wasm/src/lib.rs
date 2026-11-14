@@ -66,6 +66,8 @@ mod symmetry;
 mod symmetry_analysis;
 #[cfg(target_arch = "wasm32")]
 mod typed_export;
+#[cfg(all(target_arch = "wasm32", feature = "workflow"))]
+mod workflow_export;
 
 #[cfg(target_arch = "wasm32")]
 use common::{array3, array6, set, to_js_error};
@@ -136,11 +138,11 @@ pub use phase11_build_export::{
 pub use phase11_export::{deprecation_warning, error_category, read};
 #[cfg(all(target_arch = "wasm32", feature = "analysis"))]
 pub use powder_export::{
-    powder_automatic_info, powder_cells_info, powder_index_info, powder_pawley_info,
-    powder_pawley_width_info, powder_refine_info, rietx_inventory_info,
+    powder_automatic_info, powder_cells_info, powder_index_agreement_info, powder_index_info,
+    powder_pawley_info, powder_pawley_width_info, powder_refine_info, rietx_inventory_info,
 };
 #[cfg(target_arch = "wasm32")]
-pub use remote_export::{fetch_cod, fetch_optimade};
+pub use remote_export::{fetch_cod, fetch_data_bundle, fetch_optimade};
 #[cfg(target_arch = "wasm32")]
 pub use scene_export::{mesh_gltf, mesh_obj, scene_data};
 #[cfg(target_arch = "wasm32")]
@@ -173,6 +175,8 @@ pub use symmetry_analysis::{
 pub use typed_export::pxrd_buffers;
 #[cfg(target_arch = "wasm32")]
 pub use typed_export::{mesh_buffers, scene_buffers};
+#[cfg(all(target_arch = "wasm32", feature = "workflow"))]
+pub use workflow_export::run_workflow_memory;
 
 /// Installs the panic hook in debug builds only.
 #[cfg(all(target_arch = "wasm32", debug_assertions))]

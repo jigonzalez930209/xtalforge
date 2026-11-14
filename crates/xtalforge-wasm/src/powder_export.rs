@@ -243,6 +243,60 @@ pub fn rietx_inventory_info() -> Result<JsValue, JsValue> {
     Ok(object.into())
 }
 
+/// Compares the cubic and general indexing engines on a measured XY pattern.
+///
+/// Returns `{ agree, cubic_a, general_a, delta_a, relative_delta,
+/// relative_tolerance, cubic_completeness, general_completeness, n_peaks,
+/// message }`.
+///
+/// # Errors
+///
+/// Returns a JavaScript `Error` for invalid text or a failed search.
+#[wasm_bindgen]
+pub fn powder_index_agreement_info(
+    pattern_text: &str,
+    wavelength: f64,
+    max_index: i32,
+    tolerance: f64,
+    relative_tolerance: f64,
+) -> Result<JsValue, JsValue> {
+    let observed = pattern(pattern_text)?;
+    let peaks =
+        xtalforge::analysis::find_peaks(&observed, &xtalforge::analysis::PeakOptions::default())
+            .map_err(to_js_error)?;
+    let result = xtalforge::analysis::indexing_agreement(
+        &peaks,
+        wavelength,
+        &xtalforge::analysis::IndexingOptions {
+            max_index,
+            tolerance,
+            ..xtalforge::analysis::IndexingOptions::default()
+        },
+        relative_tolerance,
+    )
+    .map_err(to_js_error)?;
+    let object = js_sys::Object::new();
+    set(&object, "agree", JsValue::from_bool(result.agree));
+    for (key, value) in [
+        ("cubic_a", result.cubic_a),
+        ("general_a", result.general_a),
+        ("delta_a", result.delta_a),
+        ("relative_delta", result.relative_delta),
+    ] {
+        set(&object, key, value.map_or(JsValue::NULL, JsValue::from_f64));
+    }
+    for (key, value) in [
+        ("relative_tolerance", result.relative_tolerance),
+        ("cubic_completeness", result.cubic_completeness),
+        ("general_completeness", result.general_completeness),
+    ] {
+        set(&object, key, JsValue::from_f64(value));
+    }
+    set(&object, "n_peaks", JsValue::from_f64(result.n_peaks as f64));
+    set(&object, "message", JsValue::from_str(&result.message));
+    Ok(object.into())
+}
+
 /// Finds peaks and indexes the metric families of a measured XY pattern.
 ///
 /// Returns `{ peaks: [{ two_theta, intensity, fwhm }], candidates: [{ system,
