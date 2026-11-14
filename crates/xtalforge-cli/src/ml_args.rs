@@ -27,6 +27,14 @@ pub(crate) enum MlAction {
     Select(SelectArgs),
     /// Emit an active-learning workflow document.
     ActiveWorkflow(ActiveWorkflowArgs),
+    /// Write a JSON Lines dataset as Parquet.
+    ParquetWrite(ParquetWriteArgs),
+    /// Read a Parquet dataset as JSON Lines.
+    ParquetRead(ParquetReadArgs),
+    /// Run a single-input ONNX model.
+    OnnxPredict(OnnxPredictArgs),
+    /// Compute the ONNX Cartesian energy of a structure.
+    OnnxEnergy(OnnxEnergyArgs),
 }
 
 /// Graph options.
@@ -100,9 +108,12 @@ pub(crate) struct MbtrArgs {
     /// Gaussian width.
     #[arg(long, default_value_t = 0.1)]
     pub sigma: f64,
-    /// Skip the angular block.
+    /// Skip the angle block.
     #[arg(long)]
     pub no_angles: bool,
+    /// Skip the distance block.
+    #[arg(long)]
+    pub no_distances: bool,
     /// Write the JSON descriptor here.
     #[arg(long)]
     pub out: Option<String>,
@@ -231,3 +242,52 @@ pub(crate) struct ActiveWorkflowArgs {
 
 /// Keeps the structure-format import used by future options.
 pub(crate) type _StructureFormat = StructureFormat;
+
+/// Parquet write options.
+#[derive(Debug, Args)]
+pub(crate) struct ParquetWriteArgs {
+    /// Dataset JSON Lines file.
+    pub path: String,
+    /// Output Parquet file.
+    #[arg(long)]
+    pub out: String,
+}
+
+/// Parquet read options.
+#[derive(Debug, Args)]
+pub(crate) struct ParquetReadArgs {
+    /// Input Parquet file.
+    pub path: String,
+    /// Output JSON Lines file.
+    #[arg(long)]
+    pub out: Option<String>,
+}
+
+/// ONNX prediction options.
+#[derive(Debug, Args)]
+pub(crate) struct OnnxPredictArgs {
+    /// ONNX model file.
+    pub model: String,
+    /// Feature vector as JSON.
+    #[arg(long)]
+    pub features: String,
+    /// Input width.
+    #[arg(long)]
+    pub n_features: usize,
+}
+
+/// ONNX energy options.
+#[derive(Debug, Args)]
+pub(crate) struct OnnxEnergyArgs {
+    /// Input structure.
+    pub path: String,
+    /// ONNX model file.
+    #[arg(long)]
+    pub model: String,
+    /// Input width.
+    #[arg(long)]
+    pub n_features: usize,
+    /// Finite-difference step.
+    #[arg(long, default_value_t = 0.001)]
+    pub displacement: f64,
+}

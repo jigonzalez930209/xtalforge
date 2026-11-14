@@ -8,6 +8,8 @@ use xtalforge::ml::{
     mof_features, predict_dataset, select_batch, soap_power_spectrum, split_dataset,
 };
 
+use xtalforge::ff::Calculator;
+
 use crate::ml_args::*;
 use crate::{Cli, CliError, input, output};
 
@@ -42,6 +44,10 @@ pub(crate) fn run(cli: &Cli, action: &MlAction) -> Result<(), CliError> {
         MlAction::Predict(args) => predict(cli, args),
         MlAction::Select(args) => select(cli, args),
         MlAction::ActiveWorkflow(args) => active_workflow(cli, args),
+        MlAction::ParquetWrite(args) => parquet_write(cli, args),
+        MlAction::ParquetRead(args) => parquet_read(cli, args),
+        MlAction::OnnxPredict(args) => onnx_predict(cli, args),
+        MlAction::OnnxEnergy(args) => onnx_energy(cli, args),
     }
 }
 
@@ -90,10 +96,24 @@ fn mbtr_command(cli: &Cli, args: &MbtrArgs) -> Result<(), CliError> {
         &structure(&args.path)?,
         &MbtrOptions {
             cutoff: args.cutoff,
-            n_grid: args.grid,
-            sigma: args.sigma,
-            angular: !args.no_angles,
-            ..MbtrOptions::default()
+            k2: if args.no_distances {
+                None
+            } else {
+                Some(xtalforge::ml::MbtrGrid::new(
+                    0.0,
+                    args.cutoff,
+                    args.grid,
+                    args.sigma,
+                ))
+            },
+            k3: if args.no_angles {
+                None
+            } else {
+                Some(xtalforge::ml::MbtrGrid::new(
+                    0.0, 180.0, args.grid, args.sigma,
+                ))
+            },
+            elements: Vec::new(),
         },
     )
     .map_err(CliError::core)?;
@@ -290,4 +310,74 @@ fn active_workflow(cli: &Cli, args: &ActiveWorkflowArgs) -> Result<(), CliError>
 /// Keeps the property model trait visible for downstream imports.
 pub(crate) fn _trait_check(model: &dyn Predictor) -> &str {
     model.name()
+}
+
+fn parquet_write(cli: &Cli, args: &ParquetWriteArgs) -> Result<(), CliError> {
+    let dataset = Dataset::load(&args.path).map_err(CliError::core)?;
+    xtalforge::ml::write_parquet(&dataset, &args.out).map_err(CliError::core)?;
+    if !cli.quiet {
+        println!("wrote {} records to {}", dataset.len(), args.out);
+    }
+    Ok(())
+}
+
+fn parquet_read(cli: &Cli, args: &ParquetReadArgs) -> Result<(), CliError> {
+    let dataset = xtalforge::ml::read_parquet(&args.path).map_err(CliError::core)?;
+    if let Some(path) = &args.out {
+        dataset.save(path).map_err(CliError::core)?;
+        if !cli.quiet {
+            println!("wrote {} records to {path}", dataset.len());
+        }
+    } else {
+        println!("{}", dataset.to_json_lines().map_err(CliError::core)?);
+    }
+    Ok(())
+}
+
+fn onnx_predict(cli: &Cli, args: &OnnxPredictArgs) -> Result<(), CliError> {
+    let model = xtalforge::ml::OnnxModel::from_path(
+        &args.model,
+        &xtalforge::ml::OnnxOptions {
+            n_features: args.n_features,
+            input: None,
+        },
+    )
+    .map_err(CliError::core)?;
+    let features: Vec<f64> = serde_json::from_str(&args.features)
+        .map_err(|error| CliError::input(format!("features JSON: {error}")))?;
+    let values = model.predict(&features).map_err(CliError::core)?;
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&values)
+            .map_err(|error| CliError::new("json", error.to_string()))?
+    );
+    let _ = cli;
+    Ok(())
+}
+
+fn onnx_energy(cli: &Cli, args: &OnnxEnergyArgs) -> Result<(), CliError> {
+    let structure = structure(&args.path)?;
+    let model = xtalforge::ml::OnnxModel::from_path(
+        &args.model,
+        &xtalforge::ml::OnnxOptions {
+            n_features: args.n_features,
+            input: None,
+        },
+    )
+    .map_err(CliError::core)?;
+    let calculator = xtalforge::ml::OnnxCalculator::new(
+        model,
+        xtalforge::ml::OnnxDescriptor::Cartesian,
+        args.displacement,
+        0.001,
+    )
+    .map_err(CliError::core)?;
+    let energy = Calculator::energy(&calculator, &structure)
+        .map_err(|error| CliError::input(error.message()))?;
+    if cli.json {
+        println!("{}", serde_json::json!({ "energy_ev": energy }));
+    } else {
+        println!("{energy:.9} eV");
+    }
+    Ok(())
 }
