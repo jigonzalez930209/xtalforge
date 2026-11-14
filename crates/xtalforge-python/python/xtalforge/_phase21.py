@@ -27,6 +27,16 @@ def crystal_graph_numpy(
     arrays = crystal_graph_arrays(text, cutoff, max_neighbors, format_hint)
     return {key: numpy.asarray(value) for key, value in arrays.items()}
 
+try:
+    from ._xtalforge import ml_read_parquet, ml_write_parquet
+except ImportError:  # built without ml-parquet
+    pass
+
+try:
+    from ._xtalforge import onnx_energy, onnx_predict
+except ImportError:  # built without ml-onnx
+    pass
+
 
 __all__ = [
     "acsf_descriptor",
@@ -42,3 +52,7 @@ __all__ = [
     "mof_ml_features",
     "soap_descriptor",
 ]
+for _optional in ("ml_read_parquet", "ml_write_parquet", "onnx_energy", "onnx_predict"):
+    if _optional in globals():
+        __all__.append(_optional)
+del _optional
