@@ -1,0 +1,393 @@
+{
+  "source": "Curated Strukturbericht/AFLOW prototype labels. Coordinates are the published ideal structures (Pearson's Crystal Data / original structure reports); no AFLOW record was copied. See THIRD_PARTY.md.",
+  "license": "Facts and labels; no copyrightable data set is redistributed.",
+  "prototypes": [
+    {
+      "label": "A1",
+      "name": "Cu",
+      "space_group": 225,
+      "lattice": {
+        "a": 3.615
+      },
+      "sites": [
+        {
+          "element": "Cu",
+          "wyckoff": "a"
+        }
+      ]
+    },
+    {
+      "label": "A2",
+      "name": "W",
+      "space_group": 229,
+      "lattice": {
+        "a": 3.165
+      },
+      "sites": [
+        {
+          "element": "W",
+          "wyckoff": "a"
+        }
+      ]
+    },
+    {
+      "label": "A3",
+      "name": "Mg",
+      "space_group": 194,
+      "lattice": {
+        "a": 3.209,
+        "c_over_a": 1.624,
+        "gamma": 120.0
+      },
+      "sites": [
+        {
+          "element": "Mg",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "A4",
+      "name": "C (diamond)",
+      "space_group": 227,
+      "lattice": {
+        "a": 3.567
+      },
+      "sites": [
+        {
+          "element": "C",
+          "wyckoff": "a"
+        }
+      ]
+    },
+    {
+      "label": "A15",
+      "name": "Cr3Si",
+      "space_group": 223,
+      "lattice": {
+        "a": 4.566
+      },
+      "sites": [
+        {
+          "element": "Cr",
+          "wyckoff": "c"
+        },
+        {
+          "element": "Si",
+          "wyckoff": "a"
+        }
+      ]
+    },
+    {
+      "label": "B1",
+      "name": "NaCl",
+      "space_group": 225,
+      "lattice": {
+        "a": 5.64
+      },
+      "sites": [
+        {
+          "element": "Na",
+          "wyckoff": "a"
+        },
+        {
+          "element": "Cl",
+          "wyckoff": "b"
+        }
+      ]
+    },
+    {
+      "label": "B2",
+      "name": "CsCl",
+      "space_group": 221,
+      "lattice": {
+        "a": 4.123
+      },
+      "sites": [
+        {
+          "element": "Cs",
+          "wyckoff": "a"
+        },
+        {
+          "element": "Cl",
+          "wyckoff": "b"
+        }
+      ]
+    },
+    {
+      "label": "B3",
+      "name": "ZnS (zincblende)",
+      "space_group": 216,
+      "lattice": {
+        "a": 5.409
+      },
+      "sites": [
+        {
+          "element": "Zn",
+          "wyckoff": "a"
+        },
+        {
+          "element": "S",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "B4",
+      "name": "ZnO (wurtzite)",
+      "space_group": 186,
+      "lattice": {
+        "a": 3.25,
+        "c_over_a": 1.602,
+        "gamma": 120.0
+      },
+      "sites": [
+        {
+          "element": "Zn",
+          "wyckoff": "b",
+          "free": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "element": "O",
+          "wyckoff": "b",
+          "free": [
+            0.0,
+            0.0,
+            0.375
+          ]
+        }
+      ]
+    },
+    {
+      "label": "B8",
+      "name": "NiAs",
+      "space_group": 194,
+      "lattice": {
+        "a": 3.61,
+        "c_over_a": 1.39,
+        "gamma": 120.0
+      },
+      "sites": [
+        {
+          "element": "Ni",
+          "wyckoff": "a"
+        },
+        {
+          "element": "As",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "C1",
+      "name": "CaF2 (fluorite)",
+      "space_group": 225,
+      "lattice": {
+        "a": 5.463
+      },
+      "sites": [
+        {
+          "element": "Ca",
+          "wyckoff": "a"
+        },
+        {
+          "element": "F",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "C2",
+      "name": "FeS2 (pyrite)",
+      "space_group": 205,
+      "lattice": {
+        "a": 5.418
+      },
+      "sites": [
+        {
+          "element": "Fe",
+          "wyckoff": "a"
+        },
+        {
+          "element": "S",
+          "wyckoff": "c",
+          "free": [
+            0.385,
+            0.385,
+            0.385
+          ]
+        }
+      ]
+    },
+    {
+      "label": "C14",
+      "name": "MgZn2 (Laves)",
+      "space_group": 194,
+      "lattice": {
+        "a": 5.22,
+        "c_over_a": 1.64,
+        "gamma": 120.0
+      },
+      "sites": [
+        {
+          "element": "Mg",
+          "wyckoff": "f",
+          "free": [
+            0.3333,
+            0.6667,
+            0.062
+          ]
+        },
+        {
+          "element": "Zn",
+          "wyckoff": "a",
+          "free": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "element": "Zn",
+          "wyckoff": "h",
+          "free": [
+            0.83,
+            0.66,
+            0.25
+          ]
+        }
+      ]
+    },
+    {
+      "label": "C16",
+      "name": "CuAl2",
+      "space_group": 140,
+      "lattice": {
+        "a": 6.07,
+        "c_over_a": 0.81
+      },
+      "sites": [
+        {
+          "element": "Cu",
+          "wyckoff": "h",
+          "free": [
+            0.158,
+            0.658,
+            0.0
+          ]
+        },
+        {
+          "element": "Al",
+          "wyckoff": "a"
+        }
+      ]
+    },
+    {
+      "label": "D03",
+      "name": "BiF3",
+      "space_group": 225,
+      "lattice": {
+        "a": 5.85
+      },
+      "sites": [
+        {
+          "element": "Bi",
+          "wyckoff": "a"
+        },
+        {
+          "element": "F",
+          "wyckoff": "b"
+        },
+        {
+          "element": "F",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "E1",
+      "name": "CaTiO3 (perovskite)",
+      "space_group": 221,
+      "lattice": {
+        "a": 3.82
+      },
+      "sites": [
+        {
+          "element": "Ca",
+          "wyckoff": "a"
+        },
+        {
+          "element": "Ti",
+          "wyckoff": "b"
+        },
+        {
+          "element": "O",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "L10",
+      "name": "CuAu",
+      "space_group": 123,
+      "lattice": {
+        "a": 3.98,
+        "c_over_a": 0.93
+      },
+      "sites": [
+        {
+          "element": "Cu",
+          "wyckoff": "a"
+        },
+        {
+          "element": "Au",
+          "wyckoff": "d"
+        }
+      ]
+    },
+    {
+      "label": "L12",
+      "name": "Cu3Au",
+      "space_group": 221,
+      "lattice": {
+        "a": 3.75
+      },
+      "sites": [
+        {
+          "element": "Au",
+          "wyckoff": "a"
+        },
+        {
+          "element": "Cu",
+          "wyckoff": "c"
+        }
+      ]
+    },
+    {
+      "label": "L21",
+      "name": "Cu2MnAl (Heusler)",
+      "space_group": 225,
+      "lattice": {
+        "a": 5.95
+      },
+      "sites": [
+        {
+          "element": "Cu",
+          "wyckoff": "c"
+        },
+        {
+          "element": "Mn",
+          "wyckoff": "a"
+        },
+        {
+          "element": "Al",
+          "wyckoff": "b"
+        }
+      ]
+    }
+  ]
+}
