@@ -6,7 +6,10 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use xtalforge_core::{Error, Lattice, Site, Slab, Structure, StructureBuilder, make_slab};
+use xtalforge_core::{
+    Error, Lattice, Site, Slab, Structure, StructureBuilder, TerminationOptions, make_slab,
+    slab_cut_shifts,
+};
 use xtalforge_symmetry::{SymmetryOptions, detect_symmetry};
 
 use crate::bvs::{BvsOptions, oxidation_states};
@@ -163,52 +166,41 @@ pub fn slab_terminations(
     vacuum: f64,
     symmetric: bool,
 ) -> Result<TerminationReport, Error> {
+    slab_terminations_with_options(
+        structure,
+        hkl,
+        layers,
+        vacuum,
+        symmetric,
+        &TerminationOptions::default(),
+    )
+}
+
+/// Generates every termination with explicit cut and adsorption options.
+///
+/// The defaults of [`TerminationOptions`] reproduce [`slab_terminations`];
+/// `include_intra_layer`, `cuts` and `layer_tolerance` change the cut set.
+/// The adsorption depth is not used here and is read by
+/// [`xtalforge_core::adsorption_sites_with_options`].
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for a bad layer count, vacuum or options,
+/// or the errors of [`make_slab`] and [`oxidation_states`].
+pub fn slab_terminations_with_options(
+    structure: &Structure,
+    hkl: [i32; 3],
+    layers: u32,
+    vacuum: f64,
+    symmetric: bool,
+    options: &TerminationOptions,
+) -> Result<TerminationReport, Error> {
     if layers == 0 {
         return Err(Error::InvalidInput(
             "a termination study needs at least one layer".to_owned(),
         ));
     }
-    let basis = xtalforge_core::surface_basis(hkl)?;
-    let basis_float = basis.map(|row| row.map(f64::from));
-    let inverse = Lattice::new(basis_float)?.inverse();
-    let p1 = structure.p1()?;
-    let mut heights: Vec<f64> = p1
-        .atoms
-        .iter()
-        .map(|atom| {
-            let shifted = [
-                atom.frac[0] * inverse[0][0]
-                    + atom.frac[1] * inverse[1][0]
-                    + atom.frac[2] * inverse[2][0],
-                atom.frac[0] * inverse[0][1]
-                    + atom.frac[1] * inverse[1][1]
-                    + atom.frac[2] * inverse[2][1],
-                atom.frac[0] * inverse[0][2]
-                    + atom.frac[1] * inverse[1][2]
-                    + atom.frac[2] * inverse[2][2],
-            ];
-            shifted[2].rem_euclid(1.0)
-        })
-        .collect();
-    heights.sort_by(|first, second| {
-        first
-            .partial_cmp(second)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-    heights.dedup_by(|first, second| (*first - *second).abs() < 1e-4);
-    if heights.is_empty() {
-        return Err(Error::InvalidInput(
-            "the structure has no layers in this direction".to_owned(),
-        ));
-    }
-    let mut shifts = Vec::with_capacity(heights.len());
-    for (index, height) in heights.iter().enumerate() {
-        let next = heights
-            .get(index + 1)
-            .copied()
-            .unwrap_or_else(|| heights.first().copied().unwrap_or(0.0) + 1.0);
-        shifts.push(((height + next) / 2.0).rem_euclid(1.0));
-    }
+    let shifts = slab_cut_shifts(structure, hkl, options)?;
     let mut terminations: Vec<Termination> = Vec::new();
     let mut signatures: BTreeSet<String> = BTreeSet::new();
     for shift in shifts {

@@ -6,10 +6,15 @@
 //! Smith-Snyder F_N figures of merit, and resolves a cell found by several
 //! families in favour of the highest symmetry.
 
+mod agreement;
 mod cubic;
 mod fom;
 mod general;
 
+pub use agreement::{
+    DEFAULT_RELATIVE_TOLERANCE, IndexingAgreement, indexing_agreement,
+    indexing_agreement_with_result,
+};
 pub use cubic::{CubicIndex, index_cubic};
 pub use fom::{
     FiguresOfMerit, figures_of_merit, match_peaks, peak_q, predict_reflections, two_theta_of_q,

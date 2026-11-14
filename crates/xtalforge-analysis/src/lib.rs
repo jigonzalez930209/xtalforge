@@ -106,11 +106,15 @@ pub use extinction::{
     extinction_classes, is_systematically_absent, space_group_candidates,
 };
 pub use fit::{FitOptions, FitResult, least_squares};
-pub use grid::{DistanceGrid, PoreSizeBin, default_radii, distance_grid};
+pub use grid::{
+    DistanceGrid, Percolation, PoreSizeBin, PorosityOptions, PorosityReport, default_radii,
+    distance_grid, porosity_report,
+};
 pub use indexing::{
-    CellMetric, CubicIndex, FiguresOfMerit, IndexedCell, IndexedPeak, IndexingOptions,
-    IndexingResult, LatticeSystem, figures_of_merit, index_cubic, index_pattern, match_peaks,
-    peak_q, predict_reflections, two_theta_of_q,
+    CellMetric, CubicIndex, FiguresOfMerit, IndexedCell, IndexedPeak, IndexingAgreement,
+    IndexingOptions, IndexingResult, LatticeSystem, figures_of_merit, index_cubic, index_pattern,
+    indexing_agreement, indexing_agreement_with_result, match_peaks, peak_q, predict_reflections,
+    two_theta_of_q,
 };
 pub use instrument::{
     Caglioti, FcjAsymmetry, Geometry, INSTRUMENT_PRESET_COUNT, INSTRUMENT_PRESET_NAMES, Instrument,
@@ -165,7 +169,7 @@ pub use scattering::{electron_scattering_factor, neutron_scattering_length, xray
 pub use sqs::{SqsOptions, SqsResult, SqsShell, special_quasirandom};
 pub use surfaces::{
     MillerIndex, Termination, TerminationReport, minimal_slab, slab_terminations,
-    unique_miller_indices,
+    slab_terminations_with_options, unique_miller_indices,
 };
 pub use topology::{DEPTH, MAX_RING, NetFingerprint, fingerprint};
 pub use vertex_symbols::{VertexSymbol, vertex_symbol_text, vertex_symbols};
