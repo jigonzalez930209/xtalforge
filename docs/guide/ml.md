@@ -83,8 +83,11 @@ print(graph["edge_index"].shape, value)
 
 - The native model is linear; fit it with scikit-learn or another tool and
   export the weights.
-- ONNX inference needs the `ml-onnx` feature and a single-input graph.
-- Parquet needs the `ml-parquet` feature; JSON Lines stays the default.
-- The SOAP normalization differs from DScribe (documented in the algorithm
-  page); use the approximation in `analysis` for large screens.
-- WASM has no filesystem: use JSONL text and the in-memory APIs.
+- ONNX inference is included in the default wheels, CLI and WASM package and
+  needs a single-input graph; message-passing models use the Python bridge.
+- Parquet is included in the default wheels, CLI and WASM package. WASM uses
+  byte buffers because it has no filesystem.
+- SOAP, ACSF and MBTR match the recorded DScribe fixtures within `5e-6`
+  (`5e-4` for SOAP); the fast analysis approximation stays available for large
+  screens.
+- WASM has no filesystem: use JSONL text and the in-memory byte APIs.
