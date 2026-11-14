@@ -1,27 +1,46 @@
-//! IR intensities and a broadened spectrum from Gamma-point modes (Task 4.8.2).
+//! IR intensities and a broadened spectrum from Gamma-point modes (Tasks 4.8.2
+//! and 19.4.1).
 //!
 //! The intensity of a normal mode is proportional to the square of the dipole
-//! derivative along that mode.  No force field in this crate carries a dipole
-//! or Born effective charges, so the dipole is the documented approximation
+//! derivative along that mode.  [`ir_spectrum`] uses the documented fixed-charge
+//! approximation
 //!
 //! ```text
 //! mu = sum_i q_i r_i
 //! ```
 //!
-//! with fixed QEq charges `q_i` from [`crate::qeq_charges`] and the derivative
-//! taken at the reference geometry.  This is the reference implementation's
-//! `fixed` charge model: it captures the charge separation of a polar bond but
-//! not the charge that flows when that bond stretches.  Because the charges are
-//! held fixed the dipole is linear in the coordinates, so this derivative is
+//! with QEq charges `q_i` from [`crate::qeq_charges`] and the derivative taken
+//! at the reference geometry.  This is the reference implementation's `fixed`
+//! charge model: it captures the charge separation of a polar bond but not the
+//! charge that flows when that bond stretches.  Because the charges are held
+//! fixed the dipole is linear in the coordinates, so this derivative is
 //! analytic; a central finite difference of the same dipole is numerically
-//! identical.  The alternative `flux` model, which re-solves EQeq at every
-//! displaced geometry, is not implemented here and is recorded as future work.
+//! identical.  A finite-difference `flux` model that re-solves EQeq at every
+//! displaced geometry remains future work.
 //!
-//! The charges are shifted by their mean before use (the acoustic sum rule),
-//! so a uniform translation moves no dipole and the three acoustic modes carry
-//! no intensity.  The shift is documented but not silently hidden: it changes
-//! a non-neutral cell's charges and is therefore an approximation of the
-//! neutral-cell limit.
+//! [`ir_spectrum_with_born`](super::ir_spectrum_with_born) replaces the scalar
+//! charges by per-atom Born effective-charge tensors
+//! [`BornCharges`](super::BornCharges), the modern form of the same derivative:
+//!
+//! ```text
+//! p_a = sum_i sum_b Z*_{i,a b} u_{i,b}
+//! ```
+//!
+//! so the intensity is `|p|^2 / sum_i m_i |u_i|^2` in the same units.  The
+//! tensors can come from a periodic engine (VASP, Quantum ESPRESSO) through
+//! [`BornCharges::from_text`](super::BornCharges::from_text), from a JSON
+//! tensor file, or from diagonal QEq or EQeq charges through
+//! [`BornCharges::qeq`](super::BornCharges::qeq) and
+//! [`BornCharges::eqeq`](super::BornCharges::eqeq).  The diagonal shortcut is
+//! the fixed-charge model written as a tensor; a real engine tensor also
+//! carries the charge flow that the fixed-charge path misses.
+//!
+//! The fixed-charge path shifts the charges by their mean before use and the
+//! Born path offers the tensor analogue as
+//! [`BornCharges::neutralised`](super::BornCharges::neutralised).  A uniform
+//! translation then moves no dipole and the three acoustic modes carry no
+//! intensity.  Neither shift is applied silently: each changes a non-neutral
+//! cell and is therefore an explicit approximation of the neutral-cell limit.
 //!
 //! Units: frequencies in cm^-1, stick intensities in km/mol, broadened points
 //! as `[wavenumber, intensity]` with the profile area not renormalised.  Only
@@ -37,6 +56,7 @@ use crate::charges::{ChargeOptions, qeq_charges};
 
 use super::constants::E2_PER_AMU_TO_KM_PER_MOL;
 use super::modes::VibrationalModes;
+use super::spectrum::{Broadening, broaden};
 
 /// Default full width at half maximum, in cm^-1.
 pub const DEFAULT_IR_FWHM: f64 = 10.0;
@@ -46,16 +66,6 @@ pub const DEFAULT_IR_STEP: f64 = 5.0;
 
 /// Largest number of spectrum points a request may produce.
 pub const MAX_IR_POINTS: usize = 1_000_000;
-
-/// Shape used to broaden a stick spectrum.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
-pub enum Broadening {
-    /// Gaussian profile, `exp(-4 ln 2 ((x - x0) / fwhm)^2)`.
-    Gaussian,
-    /// Lorentzian profile, `1 / (1 + 4 ((x - x0) / fwhm)^2)`.
-    #[default]
-    Lorentzian,
-}
 
 /// Options for one IR spectrum.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -249,46 +259,17 @@ pub fn ir_spectrum(
             .unwrap_or(std::cmp::Ordering::Equal)
             .then(first.mode.cmp(&second.mode))
     });
-    let points = broadened(&peaks, options)?;
+    let sticks = peaks
+        .iter()
+        .map(|peak| (peak.frequency, peak.intensity))
+        .collect::<Vec<_>>();
+    let points = broaden(
+        &sticks,
+        options.fwhm,
+        options.step,
+        options.broadening,
+        MAX_IR_POINTS,
+        "IR",
+    )?;
     Ok(IrSpectrum { points, peaks })
-}
-
-fn broadened(peaks: &[IrPeak], options: &IrOptions) -> Result<Vec<[f64; 2]>, Error> {
-    if peaks.is_empty() {
-        return Ok(Vec::new());
-    }
-    let first = peaks.first().map(|peak| peak.frequency).unwrap_or(0.0);
-    let last = peaks.last().map(|peak| peak.frequency).unwrap_or(0.0);
-    let margin = 5.0 * options.fwhm;
-    let low = (first - margin).max(0.0);
-    let high = last + margin;
-    if !high.is_finite() || high <= low {
-        return Err(Error::InvalidInput(
-            "IR spectrum range is not finite".to_owned(),
-        ));
-    }
-    let intervals = ((high - low) / options.step).ceil();
-    if !intervals.is_finite() || intervals > (MAX_IR_POINTS.saturating_sub(1)) as f64 {
-        return Err(Error::InvalidInput(format!(
-            "IR spectrum would need more than {MAX_IR_POINTS} points; increase the step"
-        )));
-    }
-    let count = intervals as usize + 1;
-    let mut points = Vec::with_capacity(count);
-    let mut index = 0;
-    while index < count {
-        let x = low + options.step * index as f64;
-        let mut intensity = 0.0;
-        for peak in peaks {
-            let offset = (x - peak.frequency) / options.fwhm;
-            let profile = match options.broadening {
-                Broadening::Gaussian => (-4.0 * std::f64::consts::LN_2 * offset * offset).exp(),
-                Broadening::Lorentzian => 1.0 / (1.0 + 4.0 * offset * offset),
-            };
-            intensity += peak.intensity * profile;
-        }
-        points.push([x, intensity]);
-        index += 1;
-    }
-    Ok(points)
 }
