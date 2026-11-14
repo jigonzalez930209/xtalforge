@@ -47,6 +47,13 @@ class Site:
 
 class Structure:
     def __init__(self, text: str, format_hint: str = "") -> None: ...
+    def __enter__(self) -> Structure: ...
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: object | None,
+    ) -> bool: ...
     @staticmethod
     def from_cif(text: str) -> Structure: ...
     name: str
