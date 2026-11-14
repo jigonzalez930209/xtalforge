@@ -1,7 +1,9 @@
 # Declarative workflows
 
-A workflow is a versioned JSON document that runs the same steps over every
-input, with deterministic output order and a checkpoint after each item.
+A workflow is a versioned JSON (or YAML) document that runs the same steps
+over every input, with deterministic output order and a checkpoint after each
+item. JSON is canonical; the YAML subset is documented in
+[the API page](../api/workflows.md).
 
 ```json
 {
@@ -47,5 +49,7 @@ print(workflow.validate())
 report = workflow.run(["a.cif", "b.cif"], jobs=2)
 ```
 
-`Workflow.schema()` returns the published JSON Schema. The WASM surface can
-validate and render the document, but running workflows needs a filesystem.
+`Workflow.schema()` returns the published JSON Schema. The WASM surface runs
+the same document with `run_workflow_memory`, taking input documents as a
+path-to-text map and returning the written documents as a map; no filesystem
+is needed.

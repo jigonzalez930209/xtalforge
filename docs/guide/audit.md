@@ -234,6 +234,11 @@ Angstrom).
 - The CLI, Python and WASM surfaces have their own integration suites; the
   Playwright battery targets the WASM surface because it is the one a browser
   user sees. `scripts/check-parity.sh` keeps the four surfaces aligned.
+- Task 17.1.8 added the MOF playground tab. Fresh Zeo++/MOFid/RASPA e2e
+  snapshots are not committed because those binaries are not installed in the
+  maintainer environment; the native pore, MOFid and RASPA outputs are covered
+  by unit tests and `scripts/check-surfaces.sh`. The external reference gap is
+  recorded here rather than presented as a passing comparison.
 
 ## Run it
 
