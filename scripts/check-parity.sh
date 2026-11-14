@@ -222,6 +222,8 @@ check_python() {
     ml_predict) name=ml_predict ;;
     ml_select) name=ml_select ;;
     ml_active_workflow) name=ml_active_workflow ;;
+    dataset_parquet) name=ml_write_parquet ;;
+    onnx_inference) name=onnx_predict ;;
   esac
   grep -Rq --include='*.pyi' "def $name(" "$PY_STUB"
 }
@@ -328,6 +330,8 @@ check_wasm() {
     ml_predict) name=ml_predict_info ;;
     ml_select) name=ml_select_info ;;
     ml_active_workflow) name=ml_active_workflow_info ;;
+    dataset_parquet) name=ml_parquet_write_info ;;
+    onnx_inference) name=onnx_predict_info ;;
     fragment_structure) name=fragment_info ;;
     substitute_structure) name=substitute_info ;;
     place_guest_structure) name=place_guest_info ;;
@@ -379,7 +383,7 @@ check_cli() {
     agent_run) command=agent ;;
     ml_backends|models) command=models ;;
     generate_crystal|generate_molecule_crystal|generate_layer_crystal|generate_rod_crystal|random_search|evolutionary_search|search_workflow|prototype_library|identify_prototype|substitution_candidates|mof_dataset|functionalization_sweep|layer_groups) command=generate ;;
-    crystal_graph|soap_descriptor|acsf_descriptor|mbtr_descriptor|mof_ml_features|ml_split|ml_import|ml_predict|ml_select|ml_active_workflow) command=ml ;;
+    crystal_graph|soap_descriptor|acsf_descriptor|mbtr_descriptor|mof_ml_features|ml_split|ml_import|ml_predict|ml_select|ml_active_workflow|dataset_parquet|onnx_inference) command=ml ;;
     mof_check|mof_solvent_remove|mof_disorder|mof_charge_balance|mof_deconstruct|mof_mofid|mof_open_metal_sites|mof_descriptors|mof_pores|mof_guests|mof_forcefield|mof_widom|mof_gcmc|mof_energy_grid|mof_raspa|mof_functionalize|mof_defects|mof_interpenetrate|mof_stack_layers|mof_mixed|mof_read_database|mof_screen|mof_deduplicate) command=mof ;;
     read) command=info ;;
     write) command=convert ;;

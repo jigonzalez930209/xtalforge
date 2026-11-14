@@ -45,6 +45,9 @@
 #   the in-memory workflow runner
 # 6400 KiB since 1.11.0: engine input sets, parsers and electronic-structure
 #   analysis
+# 25600 KiB since 1.14.1: ONNX (tract) and Parquet (arrow/parquet) by default
+#   (24008 KiB measured)
+#
 # 7168 KiB since 1.13.0: Phase 20 generators, global search, prototypes and
 #   MOF enumeration (6788 KiB measured)
 #
@@ -82,7 +85,7 @@ check_package() {
   fi
 }
 
-check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 7168
+check_package "full" "$PKG/xtalforge_wasm_bg.wasm" 25600
 
 split=(core symmetry analysis build)
 present=0
