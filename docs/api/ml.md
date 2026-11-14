@@ -90,3 +90,85 @@ stated rather than implied.
   `periodic=False`; a periodic framework keeps the cell.
 - The stress sign and convention are ASE's; do not mix them with the native
   UFF stress without checking.
+
+## Phase 21 native surface
+
+The `xtalforge-ml` crate (facade feature `ml`) adds the preprocessing and
+inference layer. Optional features: `ml-onnx` (tract) and `ml-parquet`
+(Arrow/Parquet).
+
+- Rust: `xtalforge::ml`
+- CLI: `xtalforge ml graph|soap|acsf|mbtr|mof-features|split|import|predict|select|active-workflow`
+- Python: `crystal_graph_arrays`, `crystal_graph_numpy`, `soap_descriptor`,
+  `acsf_descriptor`, `mbtr_descriptor`, `mof_ml_features`, `ml_split`,
+  `ml_import`, `ml_predict`, `ml_predict_dataset`, `ml_select`,
+  `ml_active_workflow`
+- WASM: `crystal_graph_info`, `soap_descriptor_info`, `acsf_descriptor_info`,
+  `mbtr_descriptor_info`, `mof_ml_features_info`, `ml_split_info`,
+  `ml_import_info`, `ml_predict_info`, `ml_select_info`,
+  `ml_active_workflow_info`
+
+### `crystal_graph`
+
+`crystal_graph(structure, GraphOptions { cutoff, max_neighbors })` expands the
+P1 cell in canonical order, uses the exact linked-cell neighbour search and
+stores both directions of every edge with the target lattice image, the
+Cartesian edge vector and the distance. `max_neighbors` keeps the shortest
+outgoing edges per node and sets `truncated`. `crystal_graph_arrays` returns
+`atomic_numbers`, `positions`, `edge_index`, `edge_vectors`, `distances`,
+`edge_images` and `lattice`; Python converts them to NumPy arrays with
+`crystal_graph_numpy`, and WASM returns JSON arrays.
+
+### `soap_descriptor`
+
+`soap_power_spectrum` implements the SOAP power spectrum with the GTO radial
+basis and real spherical harmonics through degree five. Options are `cutoff`,
+`n_max`, `l_max`, `sigma` and `average`. The layout is `l`, `k`, `k'` with
+`k <= k'`. `soap_feature_count` reports `n_max (n_max + 1) / 2 * (l_max + 1)`.
+The recorded DScribe fixture fixes the layout and feature count; the numerical
+normalization is documented in [the algorithm page](../algorithms/ml).
+
+### `acsf_descriptor` and `mbtr_descriptor`
+
+`acsf` implements the Behler-Parrinello G2/G4 functions with a cosine cutoff.
+`mbtr` implements the k=1 pair and k=2 angle blocks with Gaussian broadening
+on a fixed grid. Both return the element order and feature layout.
+
+### `mof_ml_features`
+
+Revised autocorrelations for `Z`, electronegativity, covalent radius and mass
+at bond-path lengths one to three, plus the pore geometry vector (PLD, LCD,
+ASA in m2/g and m2/cm3, accessible volume, void fraction, channel dimension,
+density, probe radius). `pores = false` skips the distance grid.
+
+### `ml_predict`
+
+`PropertyModel` is a linear model with optional mean/scale normalization. It
+loads from and writes to JSON, implements the `Predictor` trait, and drives
+`ml_predict_dataset` / `predict_dataset`. `Ensemble` reports the mean,
+standard deviation and member values. With `ml-onnx`, `OnnxModel` loads a
+single-input ONNX graph and `OnnxCalculator` exposes it as a force-field
+calculator with finite-difference forces and stress.
+
+### `ml_select`
+
+`select_batch` ranks candidates by uncertainty, farthest point in descriptor
+space or uncertainty-then-diversity. The result is a sorted index list.
+
+### `ml_active_workflow`
+
+`active_learning_workflow` emits a six-step Phase 16 workflow:
+read, search, predict, select, append, write. `active_learning_loop` runs the
+same pipeline over an in-memory dataset with caller-supplied featurizer,
+uncertainty, compute and retrain closures.
+
+## Limits
+
+- ONNX inference is descriptor-based (`OnnxCalculator`); message-passing
+  models stay in the Python ML bridge.
+- Parquet stores `id`, structure document JSON and properties JSON as three
+  UTF-8 columns; it is lossless but not a nested Arrow schema.
+- SOAP follows the published GTO power spectrum; the DScribe absolute
+  normalization differs (documented in the algorithm page).
+- WASM has no filesystem, so Parquet and checkpointed active learning stay
+  host-side.

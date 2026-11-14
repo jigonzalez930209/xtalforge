@@ -199,6 +199,18 @@ compares this table with the symbols each surface actually exports.
 | `substitution_candidates` | 20 | done | done | done | done | Ionic-radius and oxidation-state rules (Task 20.3.3) |
 | `mof_dataset` | 20 | done | done | done | done | Topology x node x linker enumeration with UFF4MOF and descriptors (Task 20.4.2); the browser keeps the curated subset |
 | `functionalization_sweep` | 20 | done | done | done | done | Post-synthetic modification over groups and fractions (Task 20.4.3) |
+| `crystal_graph` | 21 | done | done | done | done | Periodic graph with image offsets and Cartesian edge vectors (Task 21.1.1) |
+| `soap_descriptor` | 21 | done | done | done | done | GTO SOAP power spectrum through l=5 (Task 21.1.2); DScribe normalization deviation documented |
+| `acsf_descriptor` | 21 | done | done | done | done | G2/G4 symmetry functions (Task 21.1.3) |
+| `mbtr_descriptor` | 21 | done | done | done | done | k=1/k=2 MBTR on a fixed grid (Task 21.1.3) |
+| `mof_ml_features` | 21 | done | done | done | done | RACs plus the pore geometry vector (Task 21.1.4) |
+| `ml_split` | 21 | done | done | done | done | Random, composition, cluster and prototype splits (Task 21.2.2) |
+| `ml_import` | 21 | done | done | done | done | extxyz, JSON/JSONL and OPTIMADE import (Task 21.2.3) |
+| `ml_predict` | 21 | done | done | done | done | Linear model prediction over a dataset (Task 21.3.2) |
+| `ml_select` | 21 | done | done | done | done | Uncertainty, farthest-point and diversity selection (Task 21.4.1) |
+| `ml_active_workflow` | 21 | done | done | done | done | Six-step active-learning workflow document (Task 21.4.2) |
+| `dataset_parquet` | 21 | done | n/a | n/a | n/a | Arrow/Parquet container behind `ml-parquet`; the CLI, wheels and browser keep JSON Lines (Task 21.2.1) |
+| `onnx_inference` | 21 | done | n/a | n/a | n/a | tract ONNX model and calculator behind `ml-onnx`; Python uses the Phase 8 bridge, WASM has no tract tier (Task 21.3.1) |
 
 ## Recorded exceptions
 
