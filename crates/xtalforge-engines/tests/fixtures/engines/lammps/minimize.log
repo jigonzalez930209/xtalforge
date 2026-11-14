@@ -1,0 +1,13 @@
+ LAMMPS (2 Aug 2023)
+ units metal
+ atom_style atomic
+ boundary p p p
+
+ Step Temp E_pair E_mol TotEng Press
+        0        300.0     -100.000      0.0   -99.500     1000.0
+       10        310.0     -100.500      0.0   -99.900      900.0
+
+ Minimization stats:
+   Stopping criterion = energy tolerance
+
+ Loop time of 0.125 on 1 procs for 10 steps with 2 atoms
