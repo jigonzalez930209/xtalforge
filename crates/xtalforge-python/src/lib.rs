@@ -17,6 +17,7 @@ mod lebail;
 mod ml;
 mod phase10;
 mod phase11;
+mod phase18;
 mod phase3;
 mod phase4;
 mod phase5;
@@ -468,6 +469,8 @@ fn _xtalforge(module: &Bound<'_, PyModule>) -> PyResult<()> {
     module.add_function(wrap_pyfunction!(mof_stack_layers, module)?)?;
     module.add_function(wrap_pyfunction!(mof_mixed, module)?)?;
     module.add_function(wrap_pyfunction!(mof_fetch_database, module)?)?;
+    phase18::register(module)?;
+
     module.add_function(wrap_pyfunction!(mof_read_database, module)?)?;
     module.add_function(wrap_pyfunction!(mof_screen, module)?)?;
     module.add_function(wrap_pyfunction!(mof_deduplicate, module)?)?;
