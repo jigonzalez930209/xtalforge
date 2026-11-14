@@ -44,7 +44,7 @@ pub use active::{
 };
 pub use dataset::{FeatureTable, feature_table};
 #[cfg(feature = "parquet")]
-pub use dataset::{read_parquet, write_parquet};
+pub use dataset::{read_parquet, read_parquet_bytes, write_parquet, write_parquet_bytes};
 pub use ensemble::{Ensemble, EnsemblePrediction, Prediction, uncertainty};
 pub use graph::{
     CrystalGraph, GraphArrays, GraphOptions, canonical_p1, crystal_graph, crystal_graph_arrays,
@@ -54,12 +54,12 @@ pub use import::{
     ImportFormat, ImportOptions, ImportReport, import_dataset, import_extxyz, import_json_records,
 };
 pub use import_cif::{import_cif_directory, structure_from_arrays};
-pub use mbtr::{MbtrDescriptor, MbtrOptions, mbtr};
+pub use mbtr::{MbtrDescriptor, MbtrGrid, MbtrOptions, mbtr};
 pub use mof_features::{
     MofFeatures, MofFeaturesOptions, mof_features, pore_geometry_vector, revised_autocorrelations,
 };
 #[cfg(feature = "onnx")]
-pub use onnx::{OnnxCalculator, OnnxModel, OnnxOptions};
+pub use onnx::{OnnxCalculator, OnnxDescriptor, OnnxModel, OnnxOptions};
 pub use property::{
     Predictor, PropertyModel, WorkflowPrediction, append_predictions, predict_dataset,
 };

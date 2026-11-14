@@ -109,6 +109,113 @@ where
     })
 }
 
+/// Writes a dataset as Parquet bytes.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for Arrow/Parquet errors.
+#[cfg(feature = "parquet")]
+pub fn write_parquet_bytes(dataset: &Dataset) -> Result<Vec<u8>, Error> {
+    use std::sync::Arc;
+
+    use arrow::array::StringArray;
+    use arrow::datatypes::{DataType, Field, Schema};
+    use arrow::record_batch::RecordBatch;
+    use parquet::arrow::ArrowWriter;
+
+    let mut ids = Vec::with_capacity(dataset.len());
+    let mut structures = Vec::with_capacity(dataset.len());
+    let mut properties = Vec::with_capacity(dataset.len());
+    for record in dataset.iter() {
+        ids.push(record.id.clone());
+        structures.push(StructureDocument::new(record.structure.clone()).to_json()?);
+        properties.push(
+            serde_json::to_string(&record.properties)
+                .map_err(|error| Error::InvalidInput(format!("properties JSON: {error}")))?,
+        );
+    }
+    let schema = Arc::new(Schema::new(vec![
+        Field::new("id", DataType::Utf8, false),
+        Field::new("structure", DataType::Utf8, false),
+        Field::new("properties", DataType::Utf8, false),
+    ]));
+    let batch = RecordBatch::try_new(
+        schema.clone(),
+        vec![
+            Arc::new(StringArray::from(ids)),
+            Arc::new(StringArray::from(structures)),
+            Arc::new(StringArray::from(properties)),
+        ],
+    )
+    .map_err(|error| Error::InvalidInput(format!("Parquet batch: {error}")))?;
+    let mut buffer = Vec::new();
+    let mut writer = ArrowWriter::try_new(&mut buffer, schema, None)
+        .map_err(|error| Error::InvalidInput(format!("Parquet writer: {error}")))?;
+    writer
+        .write(&batch)
+        .map_err(|error| Error::InvalidInput(format!("Parquet write: {error}")))?;
+    writer
+        .close()
+        .map_err(|error| Error::InvalidInput(format!("Parquet close: {error}")))?;
+    Ok(buffer)
+}
+
+/// Reads Parquet bytes written by [`write_parquet_bytes`].
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for Parquet or JSON errors.
+#[cfg(feature = "parquet")]
+pub fn read_parquet_bytes(bytes: &[u8]) -> Result<Dataset, Error> {
+    use parquet::arrow::arrow_reader::ParquetRecordBatchReaderBuilder;
+
+    let data = bytes::Bytes::copy_from_slice(bytes);
+    let builder = ParquetRecordBatchReaderBuilder::try_new(data)
+        .map_err(|error| Error::InvalidInput(format!("Parquet reader: {error}")))?;
+    let reader = builder
+        .build()
+        .map_err(|error| Error::InvalidInput(format!("Parquet reader: {error}")))?;
+    let mut dataset = Dataset::new("parquet");
+    for batch in reader {
+        let batch =
+            batch.map_err(|error| Error::InvalidInput(format!("Parquet batch: {error}")))?;
+        let ids = batch
+            .column(0)
+            .as_any()
+            .downcast_ref::<arrow::array::StringArray>()
+            .ok_or_else(|| Error::InvalidInput("Parquet id column is not UTF-8".to_owned()))?;
+        let structures = batch
+            .column(1)
+            .as_any()
+            .downcast_ref::<arrow::array::StringArray>()
+            .ok_or_else(|| {
+                Error::InvalidInput("Parquet structure column is not UTF-8".to_owned())
+            })?;
+        let properties = batch
+            .column(2)
+            .as_any()
+            .downcast_ref::<arrow::array::StringArray>()
+            .ok_or_else(|| {
+                Error::InvalidInput("Parquet properties column is not UTF-8".to_owned())
+            })?;
+        for row in 0..batch.num_rows() {
+            let document = StructureDocument::from_json(structures.value(row))?;
+            let properties: BTreeMap<String, serde_json::Value> =
+                serde_json::from_str(properties.value(row))
+                    .map_err(|error| Error::InvalidInput(format!("properties JSON: {error}")))?;
+            let mut record = xtalforge_analysis::dataset::DatasetRecord::new(
+                ids.value(row),
+                document.structure,
+            )?;
+            for (key, value) in properties {
+                record = record.with_property(key, crate::import::property_from_json(&value)?)?;
+            }
+            dataset.push(record)?;
+        }
+    }
+    Ok(dataset)
+}
+
 /// Writes a dataset as a Parquet file.
 ///
 /// The schema is three UTF-8 columns: `id`, `structure` (the versioned

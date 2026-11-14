@@ -21,10 +21,8 @@
 //!   sum_m c_klm c_k'lm` (the `pi^3` factor is present for `l > 1`).
 //!
 //! The fixture under `crates/xtalforge-ml/data/soap_dscribe.json` records a
-//! DScribe 2.x run on two carbon atoms. The test checks the layout and feature
-//! count against that fixture. The absolute numerical normalization is **not**
-//! identical to DScribe in this build; the algorithm page records the
-//! deviation. DScribe is not a build dependency.
+//! DScribe 2.x run on two carbon atoms. The test matches every feature within
+//! `5e-4 * max(1, |reference|)`. DScribe is not a build dependency.
 //!
 //! The older [`soap_like_descriptor`](xtalforge_analysis::soap_like_descriptor)
 //! stays as the fast approximation.
@@ -166,6 +164,7 @@ pub fn soap_power_spectrum(
     }
     for (index, list) in neighbour_lists.iter().enumerate() {
         let mut coefficients = vec![0.0; (options.n_max) * (options.l_max + 1).pow(2)];
+        basis.accumulate_self(&mut coefficients);
         for (delta, distance) in list {
             if *distance < 1e-10 || *distance >= options.cutoff {
                 continue;
@@ -248,7 +247,7 @@ fn validate(options: &SoapOptions) -> Result<(), Error> {
 struct RadialBasis {
     n_max: usize,
     l_max: usize,
-    eta: f64,
+    one_over_eta: f64,
     alphas: Vec<Vec<f64>>,
     betas: Vec<Vec<Vec<f64>>>,
 }
@@ -285,12 +284,32 @@ impl RadialBasis {
             betas.push(inverse_sqrt(&overlap));
             alphas.push(alpha_row);
         }
+        let eta = 1.0 / (2.0 * options.sigma * options.sigma);
         Self {
             n_max,
             l_max,
-            eta: 1.0 / (2.0 * options.sigma * options.sigma),
+            one_over_eta: 1.0 / eta,
             alphas,
             betas,
+        }
+    }
+
+    /// Adds the centre atom itself at `r = 0`.
+    ///
+    /// DScribe includes the centre in the neighbour list. Only the `l = 0`
+    /// block is non-zero because every real harmonic of degree one or more
+    /// vanishes at the origin.
+    fn accumulate_self(&self, coefficients: &mut [f64]) {
+        let degree = (self.l_max + 1).pow(2);
+        let mut radial = vec![0.0; self.n_max];
+        for n in 0..self.n_max {
+            for k in 0..self.n_max {
+                let one_over = 1.0 / (1.0 + self.one_over_eta * self.alphas[0][k]);
+                radial[n] += self.betas[0][n][k] * self.one_over_eta.powf(1.5) * one_over.powf(1.5);
+            }
+        }
+        for n in 0..self.n_max {
+            coefficients[n * degree] += radial[n] * 1.570_796_326_794_896_6;
         }
     }
 
@@ -305,10 +324,12 @@ impl RadialBasis {
             let mut aoa = Vec::with_capacity(self.n_max);
             for k in 0..self.n_max {
                 let alpha = self.alphas[l][k];
-                let one_over = 1.0 / (1.0 + self.eta * alpha);
+                let one_over = 1.0 / (1.0 + self.one_over_eta * alpha);
                 aoa.push(-alpha * one_over);
                 exp_terms.push(
-                    self.eta.powf(1.5) * (one_over).powf(l as f64 + 1.5) * (aoa[k] * r2).exp(),
+                    self.one_over_eta.powf(1.5)
+                        * one_over.powf(l as f64 + 1.5)
+                        * (aoa[k] * r2).exp(),
                 );
             }
             let harmonics = dscribe_harmonics(l, x, y, z, r2);

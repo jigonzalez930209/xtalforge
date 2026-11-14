@@ -5,7 +5,7 @@
 //! The `onnx` feature adds a pure-Rust ONNX runtime. [`OnnxModel`] wraps a
 //! single-input, single-output graph whose input is a feature vector of shape
 //! `[1, n_features]` and whose output is one or more scalars. [`OnnxCalculator`]
-//! turns such a model into a [`Calculator`](xtalforge_ff::Calculator) for
+//! turns such a model into a [`Calculator`] for
 //! descriptor-based ML potentials: the energy is the first output, forces are
 //! central differences in Cartesian coordinates, and the stress is a central
 //! difference in the six symmetric strain components.
@@ -164,6 +164,8 @@ impl OnnxModel {
 pub enum OnnxDescriptor {
     /// Average SOAP power spectrum.
     Soap(SoapOptions),
+    /// Flattened Cartesian coordinates of the P1 atoms.
+    Cartesian,
 }
 
 /// A descriptor-based ONNX potential.
@@ -206,17 +208,40 @@ impl OnnxCalculator {
         &self.model
     }
 
-    fn energy(&self, structure: &Structure) -> Result<f64, Error> {
-        let features = match &self.descriptor {
+    fn features(&self, structure: &Structure) -> Result<Vec<f64>, Error> {
+        match &self.descriptor {
             OnnxDescriptor::Soap(options) => {
                 let descriptor = soap_power_spectrum(structure, options)?;
                 descriptor
                     .rows
                     .first()
                     .cloned()
-                    .ok_or_else(|| Error::InvalidInput("SOAP produced no row".to_owned()))?
+                    .ok_or_else(|| Error::InvalidInput("SOAP produced no row".to_owned()))
             }
-        };
+            OnnxDescriptor::Cartesian => {
+                // Keep the coordinates as supplied for a P1 structure so a
+                // finite-difference step across the cell boundary does not
+                // wrap by a full lattice vector.
+                if structure.is_p1() {
+                    let mut features = Vec::with_capacity(3 * structure.sites().len());
+                    for atom in structure.sites() {
+                        features.extend(structure.lattice().to_cart(atom.frac()));
+                    }
+                    Ok(features)
+                } else {
+                    let p1 = structure.p1()?;
+                    let mut features = Vec::with_capacity(3 * p1.atoms.len());
+                    for atom in &p1.atoms {
+                        features.extend(p1.lattice.to_cart(atom.frac));
+                    }
+                    Ok(features)
+                }
+            }
+        }
+    }
+
+    fn energy(&self, structure: &Structure) -> Result<f64, Error> {
+        let features = self.features(structure)?;
         let outputs = self.model.predict(&features)?;
         outputs.first().copied().ok_or_else(|| {
             Error::InvalidInput("the ONNX model returned an empty output".to_owned())
