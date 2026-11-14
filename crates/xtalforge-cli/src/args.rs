@@ -2,7 +2,9 @@
 
 use clap::Subcommand;
 
+pub(crate) use crate::actions::{ModelAction, ProjectAction, SkillAction};
 use crate::analysis_commands::AnalysisAction;
+use crate::build_structures;
 use crate::feature_args::FeatureAction;
 use crate::fetch_commands::FetchAction;
 use crate::ff_commands::FfAction;
@@ -11,10 +13,6 @@ use crate::mof_commands::MofAction;
 use crate::powder_commands::PowderAction;
 use crate::spacegroup;
 use crate::symmetry::SymmetryAction;
-
-use crate::build_structures;
-
-pub(crate) use crate::actions::{ModelAction, ProjectAction, SkillAction};
 
 #[derive(Debug, Subcommand)]
 pub(crate) enum Command {
@@ -89,6 +87,11 @@ pub(crate) enum Command {
     Powder {
         #[command(subcommand)]
         action: PowderAction,
+    },
+    /// Machine-learning representations, datasets and inference.
+    Ml {
+        #[command(subcommand)]
+        action: crate::ml_args::MlAction,
     },
     /// Structure generation, prototypes and global search.
     Generate {
