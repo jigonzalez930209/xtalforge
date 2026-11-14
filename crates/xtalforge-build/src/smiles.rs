@@ -38,7 +38,9 @@ pub struct SmilesMolecule {
 ///
 /// Supports atoms `B C N O P S F Cl Br I`, aromatic lower-case atoms, branches
 /// `()`, ring closures `1`-`9`, bond symbols `- = # : / \` and charge in
-/// brackets (`[NH4+]`). The 3D embedding (Task 6.1.2) is not implemented here.
+/// brackets (`[NH4+]`). A bond between two aromatic atoms without an explicit
+/// symbol receives the aromatic order `1.5`; explicit symbols keep their order.
+/// The 3D embedding (Task 6.1.2) is not implemented here.
 ///
 /// # Errors
 ///
@@ -54,6 +56,7 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
     let mut previous: Option<usize> = None;
     let mut rings: std::collections::BTreeMap<char, usize> = std::collections::BTreeMap::new();
     let mut order = 1.0;
+    let mut explicit = false;
     let mut characters = text.chars().peekable();
     while let Some(character) = characters.next() {
         match character {
@@ -64,6 +67,7 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
                 };
                 stack.push(current);
                 order = 1.0;
+                explicit = false;
             }
             ')' => {
                 let Some(parent) = stack.pop() else {
@@ -71,12 +75,28 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
                 };
                 previous = Some(parent);
                 order = 1.0;
+                explicit = false;
             }
-            '-' => order = 1.0,
-            '=' => order = 2.0,
-            '#' => order = 3.0,
-            ':' => order = 1.5,
-            '/' | '\\' => order = 1.0,
+            '-' => {
+                order = 1.0;
+                explicit = true;
+            }
+            '=' => {
+                order = 2.0;
+                explicit = true;
+            }
+            '#' => {
+                order = 3.0;
+                explicit = true;
+            }
+            ':' => {
+                order = 1.5;
+                explicit = true;
+            }
+            '/' | '\\' => {
+                order = 1.0;
+                explicit = true;
+            }
             '.' => {
                 if previous.is_none() || !rings.is_empty() {
                     return Err(Error::InvalidInput(
@@ -85,6 +105,7 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
                 }
                 previous = None;
                 order = 1.0;
+                explicit = false;
             }
             '1'..='9' => {
                 let Some(current) = previous else {
@@ -93,12 +114,9 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
                     ));
                 };
                 if let Some(other) = rings.remove(&character) {
-                    bonds.push(SmilesBond {
-                        a: other,
-                        b: current,
-                        order,
-                    });
+                    push_bond(other, current, order, explicit, &atoms, &mut bonds);
                     order = 1.0;
+                    explicit = false;
                 } else {
                     rings.insert(character, current);
                 }
@@ -114,17 +132,19 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
                 let atom = bracket_atom(&inner)?;
                 let index = atoms.len();
                 atoms.push(atom);
-                attach(previous, index, order, &mut bonds);
+                attach(previous, index, order, explicit, &atoms, &mut bonds);
                 previous = Some(index);
                 order = 1.0;
+                explicit = false;
             }
             _ => {
                 let (atom, width) = organic_atom(character, &mut characters)?;
                 let index = atoms.len();
                 atoms.push(atom);
-                attach(previous, index, order, &mut bonds);
+                attach(previous, index, order, explicit, &atoms, &mut bonds);
                 previous = Some(index);
                 order = 1.0;
+                explicit = false;
                 let _ = width;
             }
         }
@@ -140,14 +160,43 @@ pub fn parse_smiles(text: &str) -> Result<SmilesMolecule, Error> {
     Ok(SmilesMolecule { atoms, bonds })
 }
 
-fn attach(previous: Option<usize>, index: usize, order: f64, bonds: &mut Vec<SmilesBond>) {
+fn attach(
+    previous: Option<usize>,
+    index: usize,
+    order: f64,
+    explicit: bool,
+    atoms: &[SmilesAtom],
+    bonds: &mut Vec<SmilesBond>,
+) {
     if let Some(previous) = previous {
-        bonds.push(SmilesBond {
-            a: previous,
-            b: index,
-            order,
-        });
+        push_bond(previous, index, order, explicit, atoms, bonds);
     }
+}
+
+fn push_bond(
+    a: usize,
+    b: usize,
+    order: f64,
+    explicit: bool,
+    atoms: &[SmilesAtom],
+    bonds: &mut Vec<SmilesBond>,
+) {
+    bonds.push(SmilesBond {
+        a,
+        b,
+        order: inferred_order(atoms, a, b, order, explicit),
+    });
+}
+
+/// Keeps an explicit bond symbol; otherwise uses the aromatic order `1.5`
+/// between two aromatic atoms.
+fn inferred_order(atoms: &[SmilesAtom], a: usize, b: usize, order: f64, explicit: bool) -> f64 {
+    if explicit {
+        return order;
+    }
+    let aromatic = atoms.get(a).is_some_and(|atom| atom.aromatic)
+        && atoms.get(b).is_some_and(|atom| atom.aromatic);
+    if aromatic { 1.5 } else { order }
 }
 
 fn organic_atom(

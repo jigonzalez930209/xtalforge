@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use xtalforge_core::elements::element_by_symbol;
 use xtalforge_core::{BondGraph, Error, Lattice, P1Cell, Site, Structure, StructureBuilder};
 
-mod geometry;
+pub(crate) mod geometry;
 
 use geometry::{hydrogen_directions, normalized};
 
@@ -224,6 +224,29 @@ fn ideal_angle(element: &str, angles: &BTreeMap<String, f64>) -> f64 {
         "S" => BENT,
         _ => TETRAHEDRAL,
     }
+}
+
+/// Hydrogens implied by a SMILES atom with `used_order` already bonded.
+///
+/// The sum of the bond orders (aromatic bonds count as `1.5`) is rounded to
+/// whole bonds exactly as [`add_hydrogens`] does. The formal charge shifts the
+/// target valence, so `[NH4+]` keeps four hydrogens and `[OH-]` one. Returns
+/// `None` for elements outside the target-valence table.
+pub(crate) fn inference_missing(element: &str, charge: i32, used_order: f64) -> Option<usize> {
+    let target = i32::from(target_valence(element)?) + charge;
+    if target <= 0 {
+        return Some(0);
+    }
+    Some((target as usize).saturating_sub(round_order(used_order)))
+}
+
+/// Ideal X-H length in Angstrom and X-H angle in degrees for inference.
+pub(crate) fn inference_geometry(element: &str) -> (f64, f64) {
+    let options = HydrogenOptions::default();
+    (
+        bond_length(element, &options),
+        ideal_angle(element, &options.angles),
+    )
 }
 
 /// Number of valence units already used, rounded to whole bonds.

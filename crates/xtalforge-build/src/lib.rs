@@ -21,6 +21,7 @@ pub mod ztc;
 pub use carbon::{graphene, nanotube};
 pub use embed::{
     CoordinationGeometry, EmbedOptions, apply_coordination, coordination_geometry, embed_smiles,
+    embed_smiles_with_hydrogens,
 };
 pub use fragments::{Fragment, find_fragment, fragments};
 pub use fullerene::fullerene;
