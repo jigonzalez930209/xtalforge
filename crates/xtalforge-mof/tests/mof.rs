@@ -26,6 +26,9 @@ const EXPECTED_DEGREES: [(&str, usize); 6] = [
 #[test]
 fn every_topology_loads_and_validates() {
     let all = topologies().unwrap();
+    #[cfg(feature = "mof-data")]
+    assert!(all.len() > 2000, "unexpected table size {}", all.len());
+    #[cfg(not(feature = "mof-data"))]
     assert!(
         (6..=8).contains(&all.len()),
         "unexpected table size {}",
@@ -90,12 +93,18 @@ fn topology_validation_rejects_bad_edges() {
 #[test]
 fn every_block_loads_and_validates() {
     let all = blocks().unwrap();
+    #[cfg(feature = "mof-data")]
+    assert!(all.len() >= 8, "unexpected block table size {}", all.len());
+    #[cfg(not(feature = "mof-data"))]
     assert_eq!(all.len(), 8, "unexpected block table size");
     let names: BTreeSet<&str> = all.iter().map(|block| block.name.as_str()).collect();
     assert_eq!(names.len(), all.len(), "block names must be unique");
     for block in &all {
         block.validate().unwrap();
         assert_eq!(block.points.len(), block.elements.len());
+        #[cfg(feature = "mof-data")]
+        assert!(block.atom_count() <= 1000, "{} is too large", block.name);
+        #[cfg(not(feature = "mof-data"))]
         assert!(block.atom_count() <= 60, "{} is too large", block.name);
         assert!(block.connection_count() >= 1);
     }
