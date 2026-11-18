@@ -17,7 +17,9 @@ no-default-features = false
 feature-depth = 1
 
 [advisories]
-ignore = []
+ignore = [
+  { id = "RUSTSEC-2026-0543", reason = "chrono is a transitive dependency of arrow/parquet 60 behind the optional ml-parquet feature; the advisory is an unmaintained notice, not a vulnerability, and no replacement exists in this release line" },
+]
 
 [licenses]
 allow = [

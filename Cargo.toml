@@ -37,7 +37,7 @@ categories = ["science", "simulation"]
 
 [workspace.dependencies]
 # Internal crates. `scripts/sync-version.sh` rewrites the pinned versions.
-xtalforge = { version = "=1.14.1", path = "crates/xtalforge" }
+xtalforge = { version = "=1.14.1", path = "crates/xtalforge", default-features = false }
 xtalforge-agent = { version = "=1.14.1", path = "crates/xtalforge-agent" }
 xtalforge-core = { version = "=1.14.1", path = "crates/xtalforge-core" }
 xtalforge-engines = { version = "=1.14.1", path = "crates/xtalforge-engines" }

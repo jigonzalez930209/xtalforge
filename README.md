@@ -8,13 +8,13 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.12.0` published on 2026-11-14. Phases 0-19 are complete; Phases
-> 20-21 (structure generation, ML) lead to the 2.0 redesign in Phase 22. The
-> public API is frozen; later changes follow the SemVer policy in
-> `docs/api/stability.md`. `1.12.0` adds magnetism, mCIF, disorder and
-> derivative enumeration, neutron/electron diffraction and vibrational
-> spectroscopy. The known reference gaps are
-> listed in [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
+> Status: `1.14.1` published on 2026-11-14. Phases 0-21 are complete; Phase 22
+> is the 2.0 redesign. The public API is frozen; later changes follow the
+> SemVer policy in `docs/api/stability.md`. `1.14.1` closes the Phase 21
+> validation and packaging gaps (exact DScribe descriptors, the PyTorch ONNX
+> fixture, Parquet/ONNX in the default packages and the dispatched ML verbs).
+> The known reference gaps are listed in
+> [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
 > [`AGENTS.md`](AGENTS.md).
 
@@ -85,7 +85,9 @@ cargo clippy --workspace --all-targets -- -D warnings
 cd docs && npm install && npm run docs:dev
 ```
 
-See [`docs/guide/contributing.md`](docs/guide/contributing.md) for the full
+See [`docs/guide/validation-campaign.md`](docs/guide/validation-campaign.md) for
+the 2026-11-17 full validation, and
+[`docs/guide/contributing.md`](docs/guide/contributing.md) for the full
 checklist and the roadmap workflow.
 
 ## License

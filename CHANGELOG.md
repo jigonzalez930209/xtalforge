@@ -5,6 +5,77 @@ All notable changes to this project are documented here. The format follows
 [Semantic Versioning](https://semver.org/) (pre-1.0: `0.0.x` until the first
 essential release, then `0.x.y`).
 
+## [Unreleased]
+
+### Added
+
+- New [validation campaign](/guide/validation-campaign) guide page: the
+  2026-11-17 full corpus, CoRE/QMOF/tmQM archive, real DFTB+/phonopy/MOFid/
+  RASPA, WASM split, cargo-deny and benchmark results, with the environment,
+  exact figures, reproduction commands and known gaps.
+
+### Fixed
+
+- Standardized and primitive cells keep the correct lattice basis for
+  non-orthogonal cells. The wrapper read moyo's column-major basis as a
+  row-major array, which sheared hexagonal and triclinic standardized cells
+  (quartz reported `a = 5.492 A, b = 4.254 A, gamma = 116.6` instead of
+  `a = b = 4.912 A, gamma = 120`) and made `symmetry standardize` return an
+  inconsistent 9-site cell that expanded to 45 atoms. The corpus validation
+  now matches spglib on the standardized and primitive cell parameters,
+  volumes and atom counts for all 70 parseable structures.
+- Niggli, Delaunay and Minkowski reduction read the reduced basis in the same
+  wrong orientation, so every non-orthogonal reduced cell was sheared. The
+  quartz Niggli cell now matches spglib, and the corpus matches within
+  `5e-7 A` in length and `7e-7` degrees in angle for all 71 structures.
+- The workspace manifest loads with current Cargo: the `xtalforge` workspace
+  dependency sets `default-features = false` and the CLI and Python crates opt
+  back in. Cargo 1.97 rejects a member that disables default features when the
+  workspace entry leaves them implicit, which blocked every workspace command
+  before this change.
+- The DFTB+ writer emits a standalone GEN geometry file and a valid HSD
+  reference (`<<< "geometry.gen"`) instead of an inline block that DFTB+ 25.1
+  rejected; the GEN file now carries the species line, fractional coordinates,
+  origin and three cell vectors. H and He use an `s` shell, and
+  `Analysis { PrintForces = Yes }` requests the force block. A real methane
+  run returns `-87.774977538 eV` and `0.015703 eV/A` maximum force.
+- `cargo deny check` passes with a documented ignore for the unmaintained
+  `chrono` transitive advisory (`RUSTSEC-2026-0543`).
+
+### Added
+
+- Numeric spglib magnetic reference for three collinear groups
+  (`tests/golden/phase-19/magnetic-spglib.json`) and
+  `crates/xtalforge-symmetry/tests/magnetic_golden.rs`. The UNI number,
+  operation count and time-reversal count match exactly under the axial
+  convention for collinear spins.
+- The analysis page records the measured native-grid versus Zeo++ 0.3
+  comparison for `D_i`, `D_f` and POAV, including the percolation-threshold
+  semantics of `pore_limiting_diameter`.
+- The audit page records the full CoRE MOF 2019 v2 run: 19,081 CIFs parsed,
+  atom count, volume and density identical to gemmi, and 18,848 space groups
+  compared with nine tolerance-boundary differences that converge at
+  `symprec = 1e-2`.
+- Full QMOF (20,372 CIF) and tmQM (108,541 XYZ, 7.2 M atoms) archives were
+  parsed with no geometry, density or stoichiometry errors; the QMOF space
+  groups agree with spglib for 97.8 % of files and with the tabulated values
+  for 75.6 % (tolerance-dependent).
+- A real phonopy 4.10 run with xtalforge UFF forces reproduces the diamond-Si
+  Gamma optical mode (`749.212` vs `749.213 cm^-1`); the split WASM packages
+  (core, symmetry, analysis, build, full) build, load and stay under budget;
+  and the benchmark baseline is regenerated on this CPU so the gate passes.
+- The Python stubs use `dict[str, object]` for engine overrides and drop two
+  unused `Any` imports, so `scripts/check-python-stubs.sh` passes.
+- The end-to-end PXRD reference applies the CIF Debye-Waller factors (isotropic
+  and anisotropic `U_ij` in the crystal basis). TiO2, MFI and MOF-5 reference
+  intensities change; TiO2 now matches the WASM output within 1 %.
+
+### Changed
+
+- The magnetic symmetry comparison is now numerical rather than hand-built:
+  the spglib magnetic test files are still not redistributed, but the derived
+  numbers are recorded.
+
 ## [1.14.1] - 2026-11-14
 
 Closes the Phase 21 validation and packaging gaps.
