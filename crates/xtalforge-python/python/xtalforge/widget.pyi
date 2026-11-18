@@ -1,5 +1,3 @@
-from typing import Any
-
 class StructureWidget:
     scene: dict[str, object]
     frame: int

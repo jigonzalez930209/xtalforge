@@ -1,10 +1,8 @@
-from typing import Any
-
 def engine_presets() -> list[tuple[str, str]]: ...
 def engine_input_set(
     text: str,
     preset: str,
-    overrides: dict[str, Any] | None = None,
+    overrides: dict[str, object] | None = None,
     format_hint: str | None = None,
 ) -> dict[str, object]: ...
 def engine_parse(text: str, code: str) -> dict[str, object]: ...

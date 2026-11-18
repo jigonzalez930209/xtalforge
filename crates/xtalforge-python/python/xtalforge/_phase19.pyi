@@ -1,5 +1,3 @@
-from typing import Any
-
 def magnetic_orderings(
     text: str,
     supercell: int = 1,
