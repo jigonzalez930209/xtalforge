@@ -133,10 +133,8 @@ fn moyo_matches_spglib_on_the_audit_corpus() {
                     case.name, dataset.wyckoffs, expected_wyckoffs
                 ));
             }
-            if known_std_lattice_exception(&case.name) {
-                continue;
-            }
-            let (lengths, angles) = parameters(&dataset.std_cell.lattice.basis);
+            let basis = dataset.std_cell.lattice.basis.transpose();
+            let (lengths, angles) = parameters(&basis);
             let (expected_lengths, expected_angles) =
                 parameters(&Matrix3::from_fn(|row, column| {
                     expected.std_lattice[row][column]
@@ -166,11 +164,4 @@ fn moyo_matches_spglib_on_the_audit_corpus() {
         "moyo/spglib disagreements:\n{}",
         disagreements.join("\n")
     );
-}
-
-fn known_std_lattice_exception(name: &str) -> bool {
-    matches!(
-        name,
-        "simple/graphite.cif" | "simple/quartz.cif" | "edge/triclinic.cif" | "edge/hexagonal.cif"
-    )
 }
