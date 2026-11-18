@@ -166,13 +166,13 @@ fn dataset_from_moyo(
     let n_atoms = positions.len();
     let operations = crate::convert::operations_from_moyo(&dataset.operations)?;
     let orbits = lift_orbits(dataset, n_atoms, symprec)?;
-    let std_lattice = dataset.std_cell.lattice.basis.transpose().into();
+    let std_lattice = dataset.std_cell.lattice.basis_as_array();
     let std_positions = dataset.std_cell.positions_as_arrays();
     let std_elements = elements_for(&dataset.std_cell, moyo_cell)?;
     let prim_std_positions = dataset.prim_std_cell.positions_as_arrays();
     let prim_std_elements = elements_for(&dataset.prim_std_cell, moyo_cell)?;
     let std_linear: [[f64; 3]; 3] = dataset.std_linear.into();
-    let prim_std_lattice = dataset.prim_std_cell.lattice.basis.transpose().into();
+    let prim_std_lattice = dataset.prim_std_cell.lattice.basis_as_array();
     let mut std_origin_shift = [0.0; 3];
     for (slot, value) in std_origin_shift
         .iter_mut()

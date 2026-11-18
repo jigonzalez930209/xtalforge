@@ -1,15 +1,18 @@
 //! Collinear magnetic space groups and moment symmetrisation (Tasks 2.8.2 and
 //! 19.1.2).
 //!
-//! # Deviation from spglib golden data (Task 19.1.2)
+//! # Comparison with spglib (Task 19.1.2)
 //!
-//! The spglib magnetic test suite is not redistributed with this repository,
-//! so the tests use deterministic hand-built cases (ferromagnetic bcc Fe, a
-//! checkerboard antiferromagnet on a simple-cubic supercell, a two-sublattice
-//! ferrimagnet) and check orbit/stabiliser structure, operation counts and
-//! moment symmetrisation instead of comparing UNI numbers with spglib golden
-//! files. The backend is moyo; its non-magnetic datasets are audited against
-//! spglib in `crates/xtalforge-symmetry/tests/moyo_audit.rs`.
+//! spglib's magnetic test files are not redistributed with this repository.
+//! The numeric reference for three deterministic cases (ferromagnetic bcc Fe,
+//! a checkerboard antiferromagnet on a simple-cubic supercell and a
+//! two-sublattice ferrimagnet) is recorded in
+//! `tests/fixtures/magnetic-spglib.json` and compared by
+//! `tests/magnetic_golden.rs`. UNI numbers, operation counts and
+//! time-reversal counts match spglib 2.8.0 under the axial convention
+//! (`is_axial=True`), which is the action used for collinear spins. The
+//! backend is moyo; its non-magnetic datasets are audited against spglib in
+//! `crates/xtalforge-symmetry/tests/moyo_audit.rs`.
 
 use moyo::MoyoMagneticDataset;
 use moyo::base::{AngleTolerance, Collinear, MagneticCell, RotationMagneticMomentAction};

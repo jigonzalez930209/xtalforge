@@ -44,7 +44,7 @@ pub fn reduce_lattice(
         Reduction::Minkowski => moyo_lattice.minkowski_reduce(),
     }
     .map_err(|error| Error::Symmetry(format!("lattice reduction failed: {error}")))?;
-    let rows: [[f64; 3]; 3] = reduced.basis.transpose().into();
+    let rows: [[f64; 3]; 3] = reduced.basis_as_array();
     let transform: [[f64; 3]; 3] = transform.map(f64::from).into();
     // basis' = basis * T, so rows' = T^T * rows.
     let [[a, b, c], [d, e, f], [g, h, i]] = transform;
