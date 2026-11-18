@@ -57,12 +57,15 @@ compares:
   coordinates when the input basis is conventional
   (`xtalforge-symmetry/src/wyckoff_origin.rs`), so xtalforge reports `8a` like
   spglib; the e2e battery checks the letter counts of all eight samples;
-- standardized lattice parameters: agrees for Si, NaCl, MOF-5 and ZIF-8;
-  differs for graphite, quartz, the triclinic edge case and the hexagonal edge
-  case. The differences are conventions, not detection errors: moyo refines
-  the standardized cell and may choose a different setting/orientation, while
-  spglib idealizes to its own standard setting. The test records these four
-  cases as known exceptions.
+- standardized lattice parameters: **agrees in all 32 cases**. The 1.14.1
+  audit had recorded four exceptions (graphite, quartz, the triclinic and the
+  hexagonal edge cases) because both the comparison helper and the wrapper
+  read moyo's column-major basis as if it were row-major. For orthogonal cells
+  the transpose is invisible; for hexagonal and triclinic cells it sheared the
+  standardized lattice. The 2026-11-17 validation fixed both readers to use
+  `Lattice::basis_as_array`, and the quartz regression test
+  (`crates/xtalforge-symmetry/tests/standardize_lattice.rs`) pins the
+  hexagonal cell. All 32 cases now match spglib.
 
 The comparison uses `Setting::Spglib`; this is the setting the wrapper exposes
 by default to match Crystal-Builder's spglib behaviour.

@@ -42,6 +42,13 @@ with external bonds cut, atom colours are refined five times from
 `(element, degree, neighbour colours)`, the atoms are sorted by colour and a
 depth-first SMILES writer emits the string. MOFkey is the SHA-256 of MOFid.
 
+The 2026-11-17 campaign built the upstream MOFid tool and ran it on the ABAVIJ
+test CIF: it reports `rtl` topology with the pyridine-carboxylate linker
+`[Co].[O-]C(=O)c1ccncc1`. The xtalforge subset reports `unknown` topology with `N`, `O` and `[Co]`
+nodes and an aliphatic linker instead. That is a real parity gap in the
+deconstruction, not just a naming difference; it is recorded here so the
+subset is not presented as a faithful MOFid port.
+
 ## Open metal sites
 
 The coordination shell comes from the Voronoi tessellation with a 3.5

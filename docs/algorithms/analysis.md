@@ -69,8 +69,33 @@ images): negative inside an atom, zero on its surface. From the grid:
   the van der Waals surface, not of the probe-accessible boundary, and
   overestimates a smooth surface at coarse spacing;
 - largest included diameter: twice the largest stored distance;
+- pore limiting diameter: twice the largest probe radius at which one
+  connected component reaches both opposite faces along at least one axis.
+  This is a **percolation threshold along the widest available direction**,
+  not Zeo++'s free-sphere diameter `D_f`: for cage-like frameworks it reports
+  the cavity aperture rather than the window that connects two cavities. The
+  field keeps the Zeo++ name for report compatibility, but comparisons must
+  use the definition above;
 - pore-size bins: histogram of `2 * distance` at every free sample with a
   caller-supplied bin width (a geometric distribution, not a Zeo++ result).
+
+The native grid was compared with Zeo++ 0.3 on the prepared corpus (same
+van der Waals radii, probe 1.2 A, 1000 samples, spacing 0.35 A):
+
+| Structure | `D_i` xtalforge / Zeo++ | `D_f` xtalforge / Zeo++ | POAV xtalforge / Zeo++ |
+|---|---|---|---|
+| MOF-5 | 15.06 / 15.06 A | 14.37 / 7.96 A | 2290 / 3091 A^3 |
+| ZIF-8 | 11.42 / 11.70 A | 10.86 / 3.17 A | 608 / 1074 A^3 |
+| HKUST-1 | 11.33 / 11.33 A | 10.63 / 6.58 A | 1646 / 2470 A^3 |
+| UiO-66 | 8.48 / 8.48 A | 3.88 / 3.84 A | 432 / 897 A^3 |
+| MOF-74 | 10.84 / 11.57 A | 10.10 / 10.88 A | 458 / 716 A^3 |
+| SIFSIX-3-Ni | 3.84 / 3.93 A | 3.69 / 3.49 A | 16 / 85 A^3 |
+
+`D_i` agrees with Zeo++ within the grid resolution. `D_f` and the volumes do
+not, because a voxel count of accessible samples is not Zeo++'s union of probe
+spheres and because a percolating component can cross a periodic face inside a
+cavity. Treat the native report as a fast geometric screen; use
+`run_zeo`/`parse_zeo_channels` when Zeo++ values are required.
 
 Cost is `prod(round(L_i / spacing)) * N_atoms`: every sample is compared with
 every atom, which is exact but meant for small and medium cells. The grid

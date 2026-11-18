@@ -56,6 +56,13 @@ against a phonopy-generated golden file
 (`tests/golden/phase-4/phonons/spring-sc.json`) for the same model; the
 generator is `scripts/golden/phonons_spring.py`.
 
+The 2026-11-17 campaign also ran a real phonopy 4.10 calculation on diamond Si
+with a 3x3x3 UFF supercell: phonopy's Gamma optical mode is `749.212 cm^-1`
+and `ff vibrations` on the same supercell gives `749.213 cm^-1` (acoustic
+modes zero in both). The earlier `697.5 cm^-1` comparison was an atom-order
+artifact from writing the displaced CIF; using POSCAR preserves the order
+phonopy expects.
+
 ## Thermochemistry
 
 `thermochemistry(frequencies, &ThermoOptions)` sums the harmonic oscillator

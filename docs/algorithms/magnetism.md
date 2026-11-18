@@ -47,6 +47,27 @@ The search is bounded; `max_orderings` is honoured and the result is a
 deterministic prefix, never a random sample. The `MAGMOM` helper writes the
 collinear values in POSCAR order, which is what the Phase 18 VASP preset reads.
 
+## Validation
+
+`crates/xtalforge-symmetry/tests/fixtures/magnetic-spglib.json` records the numeric output of
+spglib 2.8.0 (`get_magnetic_symmetry_dataset`, `is_axial=True`, the convention
+for collinear axial spins) for three cases: ferromagnetic bcc Fe, the
+two-sublattice ferrimagnet and a 2x2x2 simple-cubic checkerboard
+antiferromagnet. `crates/xtalforge-symmetry/tests/magnetic_golden.rs` rebuilds
+the same cells and compares the UNI number, the operation count and the
+time-reversal count:
+
+| Case | spglib UNI | xtalforge UNI | operations | time reversal |
+|---|---|---|---|---|
+| bcc Fe ferromagnetic | 1646 | 1646 | 96 | 48 |
+| bcc Fe ferrimagnetic | 1598 | 1598 | 48 | 24 |
+| simple-cubic checkerboard AFM | 1629 | 1629 | 384 | 192 |
+
+With spglib's default `is_axial=False` (polar scalar moments) the same cells
+give UNI 1642, 1594 and 1623, so the convention must be stated whenever UNI
+numbers are compared. xtalforge always uses the axial action for collinear
+spins.
+
 ## Limits
 
 - No magnetic exchange constants or spin dynamics; ordering energies are not
@@ -54,3 +75,5 @@ collinear values in POSCAR order, which is what the Phase 18 VASP preset reads.
 - mCIF propagation-vector symmetry is read from the operations but no
   propagation-vector refinement is performed.
 - The rank is symmetry-first, not energy-first.
+- The golden set covers three collinear groups; a wider UNI sweep is not in
+  the repository.

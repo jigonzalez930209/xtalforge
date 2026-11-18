@@ -43,11 +43,18 @@ independent of thread count because insertion order is fixed.
 The single-component engine uses the ideal-gas chemical potential
 `mu = kT ln(P / P0)` with `P0 = 1 bar` and accepts insertions with
 `min(1, exp((mu - E)/kT))`; deletions are attempted with a small fixed
-probability. The loading is reported per cell and the acceptance ratio is the
-fraction of accepted insertion attempts. The implementation is deliberately a
+probability. The `loading` value is a normalized acceptance count
+(`accepted_steps / steps * 0.6022`), not a rigorous molecules-per-cell value;
+the acceptance ratio is the fraction of accepted insertion attempts. The implementation is deliberately a
 Henry/Langmuir-level isotherm: it omits guest-guest interactions and
 Peng-Robinson fugacity, so the full RASPA engine remains the reference for
 production isotherms.
+
+The 2026-11-17 campaign measured the gap. On HKUST-1 at 323 K the native
+engine gives `0.136`, `0.150` and `0.157` molecules per cell (about
+`0.056`, `0.062` and `0.065 mmol/g`) at 1, 10 and 100 bar, while RASPA 2.0.50 with the published Cu-BTC example gives
+`11.21 mol/kg` at 10 bar. The native curve is therefore a qualitative screen,
+not a quantitative isotherm; this is recorded rather than hidden.
 
 ## Energy grids and RASPA export
 
@@ -60,3 +67,10 @@ the binding sites next to the accessible surface.
 force-field definition and the Lorentz-Berthelot mixing file. The input sets
 `WidomInsertion yes`; a user can switch it to the GCMC block without changing
 the framework or force-field files.
+
+The export is a **skeleton**, not a complete runnable input set: RASPA 2.0.50
+expects `pseudo_atoms.def`, `force_field_mixing_rules.def` and a molecule
+definition file, and the current writer emits only `force_field.def` with a
+flat atom list. The real RASPA examples in the 2026-11-17 campaign were run
+from the upstream `examples/Basic` inputs; completing the export is tracked
+as future work.

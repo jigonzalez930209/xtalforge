@@ -1,5 +1,9 @@
 # Validation and tolerances
 
+The [2026-11-17 validation campaign](/guide/validation-campaign) records the
+full corpus, public-archive and external-program results behind these
+tolerances.
+
 Every algorithm is compared with Crystal-Builder or sci-form golden data. The
 tolerances below are the initial contract; a test that needs a wider tolerance
 must record the reason in the algorithm page.
@@ -30,6 +34,8 @@ must record the reason in the algorithm page.
 | Space group number / Hall number | exact | exact | 2 |
 | Wyckoff letters | exact | exact | 2 |
 | Standardized cell | absolute | 1e-5 Angstrom / 1e-4 degree | 2 |
+| Niggli-reduced cell | absolute | 1e-6 Angstrom / 1e-6 degree against spglib | 2 |
+| Magnetic space group | UNI / operation / time-reversal counts | exact against spglib `is_axial=True` | 19 |
 | K-path | points and labels | 1e-6 fractional | 2 |
 | PXRD positions | absolute | 0.01 degree 2-theta | 5 |
 | PXRD intensities | absolute after normalization | 1e-3 | 5 |
