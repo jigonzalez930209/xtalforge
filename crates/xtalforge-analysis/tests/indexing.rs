@@ -102,17 +102,23 @@ fn check(cell: CellMetric, system: LatticeSystem, max_index: i32) {
             candidate.system == system
                 && matches(&[candidate.cell.a, candidate.cell.b, candidate.cell.c])
                 && (system != LatticeSystem::Monoclinic || {
-                    let mut got = [
+                    // A monoclinic cell has two equivalent settings: swapping
+                    // a and c supplements the unique angle (beta -> 180-beta).
+                    let got = [
                         candidate.cell.alpha,
                         candidate.cell.beta,
                         candidate.cell.gamma,
                     ];
-                    let mut want = [cell.alpha, cell.beta, cell.gamma];
-                    got.sort_by(f64::total_cmp);
-                    want.sort_by(f64::total_cmp);
-                    got.iter()
-                        .zip(want.iter())
-                        .all(|(got, want)| (got - want).abs() < 0.1)
+                    let want = [cell.alpha, cell.beta, cell.gamma];
+                    let unique = |angles: [f64; 3]| {
+                        angles
+                            .into_iter()
+                            .find(|angle| (angle - 90.0).abs() > 1e-6)
+                            .unwrap_or(90.0)
+                    };
+                    let got = unique(got);
+                    let want = unique(want);
+                    (got - want).abs() < 0.1 || (got - (180.0 - want)).abs() < 0.1
                 })
         })
         .unwrap_or_else(|| {
