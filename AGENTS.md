@@ -273,17 +273,22 @@ publishes, and runs no tests. Never create a tag before this gate passes.
 
 ## 6. Current state (update at every release)
 
-- Version: `1.14.1` (published on 2026-11-14 on crates.io, PyPI, npm, the
-  GitHub release and GitHub Pages after the local CI gate; `1.11.0`-`1.14.0`
-  and earlier shipped on 2026-11-13/14). `1.14.1` closes the Phase 21
-  validation and packaging gaps: DScribe-matched SOAP/ACSF/MBTR, the PyTorch
-  ONNX fixture, default Parquet/ONNX everywhere, and the dispatched ML verbs.
+- Version: `1.14.2` (published on 2026-11-18 on crates.io, PyPI, npm, the
+  GitHub release and GitHub Pages after the local CI gate; `1.11.0`-`1.14.1`
+  and earlier shipped on 2026-11-13/14). `1.14.2` is the validation and
+  correctness patch: the full CoRE/QMOF/tmQM archives, real
+  DFTB+/phonopy/MOFid/RASPA runs, the standardized/Niggli basis correction,
+  the standalone DFTB+ geometry, the PXRD Debye-Waller reference and the
+  split WASM package check. `1.14.1` closed the Phase 21 validation and
+  packaging gaps: DScribe-matched SOAP/ACSF/MBTR, the PyTorch ONNX fixture,
+  default Parquet/ONNX everywhere, and the dispatched ML verbs.
 - Remote: https://github.com/jigonzalez930209/xtalforge (public). GitHub
   Actions are enabled (2026-11-08); only the tag-driven release workflow is
   kept. CI runs locally before each tag (section 5.4).
 - Current phase: Phase 22 — 2.0 redesign and freeze
   (`docs/roadmap/phase-22-v2.md`, target `2.0.0`). Phase 21 shipped as
-  `1.14.0` and the validation gaps closed in `1.14.1`; the recorded DScribe
+  `1.14.0` and the validation gaps closed in `1.14.1`; `1.14.2` records the
+  wider external campaign. The recorded DScribe
   fixtures, the PyTorch ONNX model and the ML verbs are part of the release.
   Phase 20 shipped as
   `1.13.0`; the prototype, rod and ionic radius tables are curated subsets and

@@ -8,11 +8,11 @@ A pure Rust library for building, manipulating, analysing and exporting crystal
 structures, with a CLI, Python bindings and WebAssembly bindings developed at
 parity with the Rust API.
 
-> Status: `1.14.1` published on 2026-11-14. Phases 0-21 are complete; Phase 22
+> Status: `1.14.2` published on 2026-11-18. Phases 0-21 are complete; Phase 22
 > is the 2.0 redesign. The public API is frozen; later changes follow the
-> SemVer policy in `docs/api/stability.md`. `1.14.1` closes the Phase 21
-> validation and packaging gaps (exact DScribe descriptors, the PyTorch ONNX
-> fixture, Parquet/ONNX in the default packages and the dispatched ML verbs).
+> SemVer policy in `docs/api/stability.md`. `1.14.2` is the validation patch:
+> full CoRE/QMOF/tmQM archives, real DFTB+/phonopy/MOFid/RASPA runs, the
+> standardized/Niggli basis correction and the standalone DFTB+ geometry.
 > The known reference gaps are listed in
 > [`docs/roadmap/index.md`](docs/roadmap/index.md). The plan is in
 > [`docs/roadmap`](docs/roadmap/index.md); the project rules are in
@@ -59,9 +59,9 @@ parity with the Rust API.
 Install the current release:
 
 ```bash
-cargo add xtalforge@1.14.1
-pip install xtalforge==1.14.1
-npm install xtalforge-wasm@1.14.1
+cargo add xtalforge@1.14.2
+pip install xtalforge==1.14.2
+npm install xtalforge-wasm@1.14.2
 ```
 
 ## Goals
