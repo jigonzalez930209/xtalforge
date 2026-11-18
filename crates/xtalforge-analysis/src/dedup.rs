@@ -301,7 +301,7 @@ fn prefilter(first: &Entry, second: &Entry, options: &DedupOptions) -> bool {
         }
         let ratio = large.atom_count as f64 / small.atom_count as f64;
         let factor = ratio.round();
-        if (ratio - factor).abs() > 1e-9 || factor < 1.0 || factor > 64.0 {
+        if (ratio - factor).abs() > 1e-9 || !(1.0..=64.0).contains(&factor) {
             return false;
         }
         let volume_ratio = large.volume / small.volume;
