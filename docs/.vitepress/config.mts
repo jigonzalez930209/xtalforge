@@ -114,6 +114,7 @@ export default defineConfig({
             { text: 'MOF property models', link: '/guide/ml' },
             { text: 'Deprecation policy', link: '/guide/deprecation' },
             { text: 'End-to-end audit', link: '/guide/audit' },
+            { text: 'Validation campaign', link: '/guide/validation-campaign' },
             { text: 'Contributing', link: '/guide/contributing' },
             { text: 'Cargo features', link: '/guide/features' },
             { text: 'Data bundles', link: '/guide/data' },
