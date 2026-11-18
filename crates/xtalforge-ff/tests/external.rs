@@ -14,8 +14,8 @@
 use xtalforge_core::{Lattice, Site, Structure, StructureBuilder};
 use xtalforge_ff::{
     DftbOptions, EngineKind, EngineStatus, OrcaOptions, XtbOptions, orca_catalogue,
-    parse_dftb_output, parse_xtb_output, probe, probe_binary, write_dftb_hsd, write_orca_input,
-    write_xtb_input,
+    parse_dftb_output, parse_xtb_output, probe, probe_binary, write_dftb_gen, write_dftb_hsd,
+    write_orca_input, write_xtb_input,
 };
 
 fn water() -> Structure {
@@ -42,26 +42,28 @@ fn periodic_nacl() -> Structure {
 fn dftb_writer_contains_the_required_blocks() {
     let text = write_dftb_hsd(&water(), &DftbOptions::default()).unwrap();
     assert!(text.contains("Geometry = GenFormat"));
+    assert!(text.contains("<<< \"geometry.gen\""), "{text}");
     assert!(text.contains("Hamiltonian = DFTB"));
     assert!(text.contains("SlaterKosterFiles = Type2FileNames"));
     assert!(text.contains("Prefix = \"slakos/\""));
     assert!(text.contains("KPointsAndWeights = SupercellFolding"));
     assert!(text.contains("SCC = Yes"));
-    assert!(text.contains("2  S F"), "{text}");
-    let species_line = text
-        .lines()
-        .find(|line| line.trim_start().starts_with('3'))
-        .expect("atom count line");
-    assert_eq!(species_line.split_whitespace().count(), 4, "{text}");
-    assert_eq!(
-        text.lines()
-            .filter(
-                |line| line.trim_start().starts_with(|c: char| c.is_ascii_digit())
-                    && line.split_whitespace().count() == 5
-            )
-            .count(),
-        3,
-        "{text}"
+    assert!(text.contains("Analysis {"), "{text}");
+    assert!(text.contains("PrintForces = Yes"), "{text}");
+    assert!(text.contains("H = \"s\""));
+    assert!(text.contains("O = \"p\""));
+
+    let geometry = write_dftb_gen(&water()).unwrap();
+    let lines: Vec<&str> = geometry.lines().collect();
+    assert_eq!(lines[0].trim(), "3  F", "{geometry}");
+    assert_eq!(lines[1].split_whitespace().collect::<Vec<_>>(), ["O", "H"]);
+    assert_eq!(lines.len(), 2 + 3 + 1 + 3, "{geometry}");
+    let origin = lines[5].split_whitespace().collect::<Vec<_>>();
+    assert_eq!(origin.len(), 3, "{geometry}");
+    assert!(
+        origin
+            .iter()
+            .all(|value| value.parse::<f64>().unwrap() == 0.0)
     );
 }
 
