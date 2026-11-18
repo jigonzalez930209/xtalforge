@@ -68,3 +68,20 @@ xtalforge engines dos vasp-doscar work/mof5-band/DOSCAR --sigma 0.1 --json
 The d-band centre and the smeared total are in the result. See
 [Electronic structure](../algorithms/electronic-structure.md) for the gap
 classification, the effective-mass fit and the smearing normalisation.
+
+## Validated engines
+
+The 2026-11-17 campaign ran the engines on this machine, not only the
+simulated-executable tests:
+
+- **DFTB+ 25.1** with the `mio-1-1` set on methane: the generated
+  `dftb_in.hsd`/`geometry.gen` set runs and parses to `-87.774977538 eV` with
+  `0.015703 eV/A` maximum force. The run exposed and fixed the GenFormat,
+  species and force-request defects described in the
+  [validation campaign](./validation-campaign).
+- **xTB 6.8.0** on methane and water: the in-process GFN2 energy agrees within
+  `6.1e-6 eV` and the forces within `1e-5 eV/A`.
+- **ORCA** remains input-only by design.
+
+The engine probe in `xtalforge capabilities` reports what is installed. A
+missing binary is a normal `Missing` status, not a library error.

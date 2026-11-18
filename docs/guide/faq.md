@@ -38,12 +38,15 @@ external checks are:
 - UFF against sci-form on small molecules (within `1e-4 kcal/mol`) and over 18
   tmQM metals for typing and finiteness;
 - PXRD/Pawley/Rietveld against the Crystal-Builder/rietx rutile data;
-- CoRE MOF 2019 and tmQM 2024 subsets for parsing, formula, cell volume,
-  coordination and porosity bounds;
 - MACE-MP-0 energies, forces and stress within `1e-6 eV`, `1e-5 eV/A` and
-  `1e-6 GPa`.
+  `1e-6 GPa`;
+- the complete CoRE MOF 2019 (19,081 CIF), QMOF (20,372 CIF) and tmQM
+  (108,541 complexes) archives for parsing, formula, cell volume and density;
+- real DFTB+ 25.1, xTB 6.8, phonopy 4.10, MOFid and RASPA 2.0.50 runs on this
+  machine, including the measured gaps.
 
-The full matrix is in
+The full matrix and exact figures are in the
+[validation campaign](./validation-campaign) and
 [external validation](../algorithms/external-validation).
 
 ## Can it replace a DFT code?

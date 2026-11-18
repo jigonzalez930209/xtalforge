@@ -27,6 +27,27 @@ The machine is a laptop; the CPU governor is not pinned. Absolute numbers move
 with temperature and background load, which is why the committed regression
 gate compares the fastest sample rather than the median.
 
+### 2026-11-17 recalibration
+
+The regression baseline was regenerated on the validation host: Intel Xeon
+E5-2680 v4, 28 threads, 14.99 GiB, Linux 7.0.0-43-generic, Rust 1.97.1. The
+gate then passed all seven rows:
+
+| Case | Baseline | Current | Change |
+|---|---|---|---|
+| CIF read | 1.073 ms | 1.122 ms | +4.5 % |
+| Periodic neighbors | 7.133 ms | 7.289 ms | +2.2 % |
+| P1 expansion | 7.379 ms | 7.579 ms | +2.7 % |
+| Porosity | 3530 ms | 3587 ms | +1.6 % |
+| PXRD | 616 ms | 631 ms | +2.5 % |
+| Supercell | 3013 ms | 3042 ms | +1.0 % |
+| Symmetry detection | 92.6 ms | 90.3 ms | -2.5 % |
+
+The absolute values on this page are the 1.8.0 laptop measurements and are not
+comparable with the Xeon baseline; the source of truth for the gate is
+`benches/compare/baseline.json`, which now records the Xeon. The campaign page
+records the run.
+
 ## Methodology
 
 The harness lives in `benches/compare/`:

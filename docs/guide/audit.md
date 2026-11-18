@@ -235,14 +235,144 @@ Angstrom).
   Playwright battery targets the WASM surface because it is the one a browser
   user sees. `scripts/check-parity.sh` keeps the four surfaces aligned.
 - Phase 19 adds magnetic moments, mCIF, disorder/derivative enumeration,
-  neutron/electron patterns and IR/Raman/phonon DOS. The magnetic golden data
-  and engine tensors are not redistributed; the tests use hand-built cells and
-  documented approximations.
-- Task 17.1.8 added the MOF playground tab. Fresh Zeo++/MOFid/RASPA e2e
-  snapshots are not committed because those binaries are not installed in the
-  maintainer environment; the native pore, MOFid and RASPA outputs are covered
-  by unit tests and `scripts/check-surfaces.sh`. The external reference gap is
-  recorded here rather than presented as a passing comparison.
+  neutron/electron patterns and IR/Raman/phonon DOS. spglib's magnetic test
+  files are not redistributed, but the numeric reference for three collinear
+  groups is recorded in `crates/xtalforge-symmetry/tests/fixtures/` and the UNI, operation and
+  time-reversal counts match exactly under the axial convention.
+- Task 17.1.8 added the MOF playground tab. The 2026-11-17 campaign built
+  Zeo++ 0.3 locally and compared six frameworks; the native values and the
+  definitional difference are recorded in the analysis page and the campaign
+  section below. MOFid and RASPA were also run in that campaign, but their
+  binaries/data are not part of the committed battery.
+
+
+## Corpus-wide validation campaign (2026-11-17)
+
+The full campaign page is [Validation campaign](./validation-campaign).
+
+The end-to-end battery above drives the WASM surface. The 2026-11-17 campaign
+ran the same independent libraries against the **whole repository corpus** and
+recorded the numbers below. It uses the CLI as the library entry point, so the
+Rust API is exercised through the same commands users run. Each row compares
+the CLI output with the named Python reference on the same file; the commands
+are listed at the end of this section.
+
+| Check | Reference | Scope | Result |
+|---|---|---|---|
+| Cell, volume, density, atom count | gemmi 0.7.5 | 72 CIF | volume exact; 69 density exact; MIL-100/101 differ by `1e-7` (atomic-weight rounding); UiO-66 clamps occupancies above one |
+| Space group | spglib 2.8.0 | 70 CIF | 70/70 identical number and Hall number |
+| P1 positions | gemmi expansion | 71 CIF | maximum periodic distance `0.021 A` (MIL-100, special-position rounding); 70 within `2e-3 A` |
+| Periodic neighbours | ASE 3.29 `neighbor_list` | 71 CIF x 2 cutoffs | 142/142 identical pair counts; maximum distance difference `2.1e-5 A` (graphene) |
+| PXRD profile | pymatgen 2026.10.24 `XRDCalculator` | 71 CIF | correlation `>= 0.9974`, median `0.99994`; maximum normalized difference `0.038` |
+| Standardized and primitive cell | spglib `standardize_cell` | 70 CIF | lengths and angles exact after the basis fix; volume `<= 2.8e-7` relative; atom counts 70/70; pymatgen `StructureMatcher` confirms the standardized output is the same crystal for MFI, MOF-74, MIL-53, ZIF-8 and the triclinic edge case |
+| Niggli reduction | spglib `niggli_reduce` | 71 CIF | `<= 5e-7 A` in length, `<= 7e-7 deg` in angle, `<= 7e-8` relative volume |
+| CIF round trip | gemmi re-read | 71 CIF | cell parameters and atom counts exact; density differs only where the input has occupancy above one |
+| Element table | mendeleev 1.3 | 118 elements | Pyykko radii 118/118; Bondi vdW 117/118 within `0.011 A` (Br is `1.85` vs `1.83`); masses follow the conventional rounded atomic weights |
+| Magnetic space groups | spglib axial data | 3 collinear cells | UNI, operation and time-reversal counts 3/3 |
+| GFN2-xTB energy and forces | xTB 6.8.0 binary | methane, water | energy `<= 6.1e-6 eV`; forces `<= 1e-5 eV/A` |
+| Native porosity | Zeo++ 0.3 | 6 prepared MOFs | `D_i` agrees within grid resolution; `D_f` and POAV are not Zeo++ values (see the analysis page) |
+| Full CoRE MOF 2019 archive | gemmi 0.7.5 / spglib 2.8.0 | 19,081 CIF | 19,081 parsed; atom count, volume and density identical to gemmi; 18,848 space groups compared, 9 (`0.05 %`) differ at `symprec = 1e-3` and all 9 converge to the spglib answer at `1e-2` (tolerance-boundary cells) |
+| Full QMOF archive | gemmi 0.7.5 / spglib 2.8.0 | 20,372 CIF | 20,372 parsed; atom count, volume and density identical to gemmi; 19,921 (`97.8 %`) space groups agree with spglib at `1e-3`; xtalforge matches the tabulated QMOF group for 15,401 files and spglib for 15,158 (tolerance differences) |
+| Full tmQM release | own XYZ headers | 108,541 XYZ | 34,970 + 36,065 + 37,506 records, 7,217,465 atoms; 0 parse errors and 0 stoichiometry mismatches |
+| Real DFTB+ 25.1 | methane with `mio-1-1` | 1 molecule | generated input runs; energy `-87.774977538 eV`, max force `0.015703 eV/A`, matching `detailed.out` |
+| Real phonopy 4.10 | diamond Si, 3x3x3 UFF supercell | 1 material | Gamma optical mode `749.212 cm^-1` (phonopy) vs `749.213 cm^-1` (`ff vibrations`) |
+| MOFid external | GPL tool, ABAVIJ | 1 framework | tool runs and returns `rtl` topology; xtalforge's subset returns `unknown` and a different linker (documented gap) |
+| RASPA 2.0.50 | Cu-BTC CO2, native example | 1 framework | RASPA `11.21 mol/kg` at 323 K / 10 bar; native GCMC `0.15` molecules/cell (about `0.062 mmol/g`) and nearly pressure-independent (screening heuristic, not parity) |
+| cargo-deny | advisories, bans, licences, sources | workspace | `advisories ok, bans ok, licenses ok, sources ok` after documenting the unmaintained `chrono` transitive advisory |
+
+The CoRE MOF run used the complete public v2 archive (CC BY 4.0, Zenodo
+14184621), not the 18-CIF subset. The nine space-group differences are all
+large flexible frameworks where the two searches sit on different sides of the
+`1e-3 A` tolerance: at `1e-4 A` both return the lower group and at `1e-2 A`
+both return the higher one. The mismatch rate is `0.05 %`; no cell, atom count
+or density differs.
+
+The surface suites on the same commit completed with no failures:
+
+| Surface | Command | Result |
+|---|---|---|
+| Rust workspace | `cargo test --workspace --all-features` | 1,456 passed, 0 failed (303 test targets) |
+| CLI | `scripts/check-cli-start.sh` | `xtalforge info` median 8.0 ms (budget 20 ms) |
+| CLI/Python/WASM parity | `scripts/check-surfaces.sh` | 97 fields compared, 0 differences |
+| Python | `pytest crates/xtalforge-python/tests` | 110 passed, 4 skipped |
+| Python types | `mypy --strict` and `scripts/check-python-stubs.sh` | clean |
+| WASM | `wasm-pack test --node --release` | 58 passed, 0 failed (14 suites) |
+| WASM split tiers | `scripts/build-wasm-packages.sh core symmetry analysis build full` | all five packages load and exercise their tiers; 2051 / 2930 / 3229 / 2469 / 24104 KiB, all under budget |
+| Browser/WASM | `scripts/e2e.sh --skip-build` | 68 passed, 0 failed |
+| Dependency audit | `cargo deny check` | advisories, bans, licences and sources OK after the documented `chrono` ignore |
+| Benchmarks | `scripts/check-bench.sh --reps 1` | baseline regenerated on this CPU; all seven rows within 5 % and the gate passes |
+| Docs | `npm run docs:build` | clean |
+
+The experimental check uses the measured room-temperature cell in each COD
+CIF and compares the density with the handbook value. The CIF cell is the
+experimental input, so a difference means the archived cell differs from the
+handbook value, not that the expansion lost atoms:
+
+| Structure | CIF `a` (A) | handbook `a` (A) | density (g/cm3) | handbook | error |
+|---|---|---|---|---|---|
+| Si | 5.4309 | 5.431 | 2.3291 | 2.3296 | -0.02 % |
+| diamond | 3.5670 | 3.567 | 3.5156 | 3.515 | +0.02 % |
+| NaCl | 5.6200 | 5.6402 | 2.1869 | 2.165 | +1.01 % |
+| bcc Fe | 2.8654 | 2.8665 | 7.8833 | 7.874 | +0.12 % |
+| rutile TiO2 | 4.5937 | 4.5937 | 4.2483 | 4.25 | -0.04 % |
+| quartz | 4.9124 | 4.9134 | 2.6504 | 2.65 | +0.02 % |
+| graphite | 2.4640 | 2.464 | 2.2609 | 2.26 | +0.04 % |
+| Cu | 3.6150 | 3.615 | 8.9345 | 8.96 | -0.28 % |
+| ZnO | 3.2417 | 3.2498 | 5.7247 | 5.606 | +2.12 % |
+| CaF2 | 5.4620 | 5.4626 | 3.1825 | 3.18 | +0.08 % |
+
+Commands used for the reproducible parts:
+
+```bash
+# Rust and all four surfaces
+cargo test --workspace --all-features
+crates/xtalforge-python: maturin build --release
+.venv/bin/python -m pytest crates/xtalforge-python/tests
+.venv/bin/python -m mypy --strict crates/xtalforge-python/python/xtalforge
+scripts/e2e.sh --skip-build
+(cd crates/xtalforge-wasm && wasm-pack test --node --release)
+
+# External references (venv: gemmi, spglib, ase, pymatgen, mendeleev)
+# The ad-hoc drivers are kept in the session log; each row above calls the
+# CLI (`info`, `symmetry detect/p1/standardize/primitive/reduce`, `neighbors`,
+# `pxrd`, `convert`) and the corresponding Python reference on the same file.
+```
+
+The campaign found two real defects, both fixed in this change:
+
+1. **Standardized-cell orientation.** The wrapper read moyo's column-major
+   basis as row-major, shearing every non-orthogonal standardized and primitive
+   cell. Quartz reported `a = 5.492 A, b = 4.254 A, gamma = 116.6` and
+   `symmetry standardize` returned an internally inconsistent 9-site cell that
+   expanded to 45 atoms. All 70 corpus cells now match spglib, and a quartz
+   regression test pins the hexagonal basis.
+2. **Niggli/Delaunay/Minkowski orientation.** The same transpose affected the
+   reduced basis. The quartz Niggli cell now matches spglib, and the corpus
+   matches within the tolerances above.
+
+It also corrected an **audit reference defect**: the PXRD reference omitted
+Debye-Waller factors, so TiO2 (which has anisotropic `U_ij`) differed by 2.1
+percentage points. The reference now applies the CIF `U_ij` in the crystal
+basis, and the TiO2 intensity matches the WASM output.
+
+The real-engine work found a third defect: the DFTB+ writer produced an
+invalid inline `GenFormat` block (missing species line, origin and cell
+vectors) and never requested forces. The writer now emits a standalone
+`geometry.gen`, a valid HSD include, `s` shells for H/He and
+`Analysis { PrintForces = Yes }`. A real DFTB+ 25.1 methane run parses to
+`-87.774977538 eV` and `0.015703 eV/A`, matching its own `detailed.out`.
+
+The campaign also measured two gaps that are **not** fixed in this change:
+the native GCMC is a pressure-insensitive screening heuristic (`0.15`
+molecules/cell, about `0.062 mmol/g`, on HKUST-1 vs RASPA's `11.21 mol/kg`
+at 323 K/10 bar), and the
+MOFid subset does not reproduce the external `rtl`/pyridine-carboxylate
+decomposition on ABAVIJ. Both are recorded in the algorithm pages rather than
+presented as parity.
+
+The native porosity check is not a pass/fail parity test: `pore_limiting_diameter`
+is a voxel percolation threshold, not Zeo++'s free-sphere diameter. The
+analysis page records the measured values and the distinction.
 
 ## Run it
 
