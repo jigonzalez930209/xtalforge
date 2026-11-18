@@ -2,7 +2,7 @@
 
 `xtalforge` is a pure Rust library for crystal structures, exposed through the
 Rust API, a command-line binary, Python bindings and WebAssembly bindings.
-Phases 0-21 are complete; `1.14.1` is the current release, with the public API
+Phases 0-21 are complete; `1.14.2` is the current release, with the public API
 frozen and the parity matrix closed. Phase 22 (the 2.0 redesign) is in
 progress. See the [roadmap](/roadmap/) for the current status.
 

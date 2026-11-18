@@ -14,7 +14,7 @@ sets, with the measured results and the gaps that remain. It complements the
 | OS | Linux 7.0.0-43-generic x86_64 |
 | Rust | 1.97.1 (edition 2024, MSRV 1.89) |
 | Python | 3.14.4 |
-| xtalforge | 1.14.1 working tree (the fixes listed below are not released yet) |
+| xtalforge | 1.14.2 (campaign on the 1.14.1 tree plus the fixes below) |
 | gemmi | 0.7.5 |
 | spglib | 2.8.0 |
 | ASE | 3.29.0 |
