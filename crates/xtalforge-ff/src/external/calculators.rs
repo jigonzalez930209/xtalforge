@@ -12,7 +12,7 @@ use crate::calculator::Calculator;
 
 use super::{
     DftbOptions, EngineResult, RunSpec, RunStatus, XtbOptions, parse_dftb_output, parse_xtb_output,
-    run_in_scratch, write_dftb_hsd, write_xtb_input,
+    run_in_scratch, write_dftb_gen, write_dftb_hsd, write_xtb_input,
 };
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(600);
@@ -85,8 +85,10 @@ impl DftbCalculator {
     /// missing output or a parse failure.
     pub fn run(&self, structure: &Structure) -> Result<EngineResult, Error> {
         let input = write_dftb_hsd(structure, &self.options)?;
+        let geometry = write_dftb_gen(structure)?;
         let mut inputs = BTreeMap::new();
         inputs.insert("dftb_in.hsd".to_owned(), input);
+        inputs.insert("geometry.gen".to_owned(), geometry);
         let mut spec = RunSpec::new(self.program.clone(), Vec::new());
         spec.input_files = inputs;
         spec.timeout = self.timeout;

@@ -53,12 +53,82 @@ impl DftbOptions {
     }
 }
 
+/// Writes the DFTB+ `.gen` geometry used by [`write_dftb_hsd`].
+///
+/// The file is the standalone GEN format: atom count and `F` (fractional),
+/// species names, atom rows and the three lattice vectors. DFTB+ requires a
+/// separate file because its inline `GenFormat` parser does not accept the
+/// free-format block this writer produces.
+///
+/// # Errors
+///
+/// Returns [`Error::InvalidInput`] for an empty structure or a dummy atom, and
+/// a core error when the P1 expansion or an element lookup fails.
+pub fn write_dftb_gen(structure: &Structure) -> Result<String, Error> {
+    let cell = structure.p1()?;
+    if cell.n_atoms() == 0 {
+        return Err(Error::InvalidInput(
+            "cannot write a DFTB+ geometry for an empty structure".to_owned(),
+        ));
+    }
+    let mut types = std::collections::BTreeMap::new();
+    for atom in &cell.atoms {
+        if element_info(&atom.element)?.is_dummy() {
+            return Err(Error::InvalidInput(
+                "external engines do not accept the dummy X species".to_owned(),
+            ));
+        }
+        let next = types.len() + 1;
+        types.entry(atom.element.clone()).or_insert(next);
+    }
+    let mut species = vec![String::new(); types.len()];
+    for (element, index) in &types {
+        if let Some(slot) = species.get_mut(index.saturating_sub(1)) {
+            *slot = element.clone();
+        }
+    }
+    let mut out = String::new();
+    push_line(&mut out, format!("{}  F    ", cell.n_atoms()));
+    push_line(
+        &mut out,
+        species
+            .iter()
+            .map(|symbol| format!("{symbol:<7}"))
+            .collect::<String>(),
+    );
+    for (index, atom) in cell.atoms.iter().enumerate() {
+        let atom_type = types.get(&atom.element).copied().unwrap_or(0);
+        push_line(
+            &mut out,
+            format!(
+                "{:6} {} {:22.15} {:22.15} {:22.15}",
+                index + 1,
+                atom_type,
+                atom.frac[0],
+                atom.frac[1],
+                atom.frac[2]
+            ),
+        );
+    }
+    push_line(
+        &mut out,
+        format!("{:22.15} {:22.15} {:22.15} ", 0.0, 0.0, 0.0),
+    );
+    for row in cell.lattice.matrix() {
+        push_line(
+            &mut out,
+            format!("{:22.15} {:22.15} {:22.15} ", row[0], row[1], row[2]),
+        );
+    }
+    Ok(out)
+}
+
 /// Writes a DFTB+ HSD input for `structure`.
 ///
-/// The geometry is written as `GenFormat` type `S F` in fractional
-/// coordinates; every element gets the configured maximum angular momentum,
-/// and the Slater-Koster files use `Prefix = "slakos/"`,
-/// `Separator = "-"`, `Suffix = ".skf"`.
+/// The geometry is referenced as `<<< "geometry.gen"`; write it with
+/// [`write_dftb_gen`]. Every element gets the configured maximum angular
+/// momentum (`s` for H and He), and the Slater-Koster files use
+/// `Prefix = "slakos/"`, `Separator = "-"`, `Suffix = ".skf"`.
 ///
 /// # Errors
 ///
@@ -84,32 +154,8 @@ pub fn write_dftb_hsd(structure: &Structure, options: &DftbOptions) -> Result<St
         types.entry(atom.element.clone()).or_insert(next);
     }
     let mut out = String::new();
-    push_line(
-        &mut out,
-        format!("# xtalforge DFTB+ input for {}", structure.name()),
-    );
     push_line(&mut out, "Geometry = GenFormat {");
-    push_line(&mut out, format!("  {}  S F", types.len()));
-    let atom_types = cell
-        .atoms
-        .iter()
-        .map(|atom| types.get(&atom.element).copied().unwrap_or(0).to_string())
-        .collect::<Vec<_>>()
-        .join(" ");
-    push_line(&mut out, format!("  {}  {atom_types}", cell.n_atoms()));
-    for (index, atom) in cell.atoms.iter().enumerate() {
-        let atom_type = types.get(&atom.element).copied().unwrap_or(0);
-        push_line(
-            &mut out,
-            format!(
-                "  {}  {atom_type}  {:.10}  {:.10}  {:.10}",
-                index + 1,
-                atom.frac[0],
-                atom.frac[1],
-                atom.frac[2]
-            ),
-        );
-    }
+    push_line(&mut out, "  <<< \"geometry.gen\"");
     push_line(&mut out, "}");
     push_line(&mut out, format!("Hamiltonian = {} {{", options.method));
     push_line(
@@ -118,10 +164,14 @@ pub fn write_dftb_hsd(structure: &Structure, options: &DftbOptions) -> Result<St
     );
     push_line(&mut out, "  MaxAngularMomentum = {");
     for element in types.keys() {
-        push_line(
-            &mut out,
-            format!("    {element} = \"{}\"", options.max_angular_momentum),
-        );
+        // Hydrogen and helium only carry an s shell in the standard Slater-
+        // Koster sets; a "p" maximum would request files that do not exist.
+        let angular = if element == "H" || element == "He" {
+            "s"
+        } else {
+            &options.max_angular_momentum
+        };
+        push_line(&mut out, format!("    {element} = \"{angular}\""));
     }
     push_line(&mut out, "  }");
     push_line(&mut out, "  SlaterKosterFiles = Type2FileNames {");
@@ -138,6 +188,9 @@ pub fn write_dftb_hsd(structure: &Structure, options: &DftbOptions) -> Result<St
         ),
     );
     push_line(&mut out, "  }");
+    push_line(&mut out, "}");
+    push_line(&mut out, "Analysis {");
+    push_line(&mut out, "  PrintForces = Yes");
     push_line(&mut out, "}");
     Ok(out)
 }
