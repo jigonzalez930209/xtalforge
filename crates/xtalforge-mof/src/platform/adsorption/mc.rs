@@ -135,7 +135,10 @@ pub struct GcmcOptions {
 pub struct IsothermPoint {
     /// Pressure in bar.
     pub pressure: f64,
-    /// Loading in molecules per cell.
+    /// Normalized loading estimate (`accepted_steps / steps * 0.6022`).
+    ///
+    /// This is a screening quantity, not a rigorous molecules-per-cell
+    /// count; use RASPA for production isotherms.
     pub loading: f64,
     /// Acceptance ratio.
     pub acceptance: f64,
