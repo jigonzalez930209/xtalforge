@@ -136,6 +136,32 @@ def reciprocal_vectors(lattice: np.ndarray) -> np.ndarray:
     return np.linalg.inv(lattice).T
 
 
+def debye_waller(site, metric: np.ndarray, hkl: tuple[int, int, int]) -> float:
+    """Thermal attenuation of one site.
+
+    ``gemmi.Site.aniso`` keeps the CIF ``U_ij`` in the crystal basis, so the
+    exponent uses the reciprocal metric tensor. Isotropic ``U_iso`` values use
+    the usual ``B s^2`` form with ``B = 8 pi^2 U``.
+    """
+    aniso = site.aniso
+    if aniso is not None and aniso.nonzero():
+        h, k, l = hkl
+        u = [aniso.u11, aniso.u22, aniso.u33, aniso.u12, aniso.u13, aniso.u23]
+        exponent = (
+            h * h * metric[0, 0] * u[0]
+            + k * k * metric[1, 1] * u[1]
+            + l * l * metric[2, 2] * u[2]
+            + 2.0 * h * k * metric[0, 1] * u[3]
+            + 2.0 * h * l * metric[0, 2] * u[4]
+            + 2.0 * k * l * metric[1, 2] * u[5]
+        )
+        return math.exp(-2.0 * math.pi**2 * exponent)
+    if site.u_iso:
+        g = np.array(hkl, dtype=float) @ np.linalg.cholesky(metric)
+        return math.exp(-2.0 * math.pi**2 * float(site.u_iso) * float(g @ g))
+    return 1.0
+
+
 def pxrd_peaks(lattice: np.ndarray, sites) -> list[dict[str, object]]:
     reciprocal = reciprocal_vectors(lattice)
     wavelength = CU_KA
@@ -174,14 +200,17 @@ def pxrd_peaks(lattice: np.ndarray, sites) -> list[dict[str, object]]:
         entry["multiplicity"] = int(entry["multiplicity"]) + 1
         if (h, k, l) < tuple(entry["hkl"]):
             entry["hkl"] = [h, k, l]
-    # Integrated intensity |F|^2 m LP with the gemmi IT92 form factors, as an
-    # independent check of the relative intensities.
+    # Integrated intensity |F|^2 m LP with the gemmi IT92 form factors and the
+    # site Debye-Waller factors, as an independent check of the relative
+    # intensities. The reciprocal metric is G* = A^-1 A^-T.
+    metric = reciprocal @ reciprocal.T
     for entry in peaks.values():
         h, k, l = entry["hkl"]
         s2 = 1.0 / (4.0 * float(entry["d"]) ** 2)
         factor = sum(
             site.occ
             * site.element.it92.calculate_sf(s2)
+            * debye_waller(site, metric, (h, k, l))
             * np.exp(2j * math.pi * (h * site.fract.x + k * site.fract.y + l * site.fract.z))
             for site in sites
         )
