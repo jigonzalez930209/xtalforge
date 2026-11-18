@@ -1,63 +1,63 @@
 {
   "benchmarks": {
     "cif_read/xtalforge": {
-      "max_ms": 0.7438,
-      "median_ms": 0.617,
-      "min_ms": 0.5933,
+      "max_ms": 1.2576,
+      "median_ms": 1.0997,
+      "min_ms": 1.0735,
       "output": {
         "atoms": 114
       },
       "repetitions": 15
     },
     "neighbors/xtalforge": {
-      "max_ms": 5.1429,
-      "median_ms": 4.6284,
-      "min_ms": 4.4407,
+      "max_ms": 8.4923,
+      "median_ms": 7.776,
+      "min_ms": 7.1335,
       "output": {
         "pairs": 1592
       },
       "repetitions": 9
     },
     "p1/xtalforge": {
-      "max_ms": 5.1114,
-      "median_ms": 4.7592,
-      "min_ms": 4.5381,
+      "max_ms": 8.1171,
+      "median_ms": 7.7323,
+      "min_ms": 7.3789,
       "output": {
         "atoms": 424
       },
       "repetitions": 9
     },
     "porosity/xtalforge": {
-      "max_ms": 2890.1975,
-      "median_ms": 2889.1092,
-      "min_ms": 2882.1234,
+      "max_ms": 3562.0059,
+      "median_ms": 3559.762,
+      "min_ms": 3530.2514,
       "output": {
         "accessible_volume": 9452.402672
       },
       "repetitions": 5
     },
     "pxrd/xtalforge": {
-      "max_ms": 306.4709,
-      "median_ms": 303.7224,
-      "min_ms": 303.4416,
+      "max_ms": 642.9722,
+      "median_ms": 617.4176,
+      "min_ms": 615.747,
       "output": {
         "reflections": 314
       },
       "repetitions": 5
     },
     "supercell/xtalforge": {
-      "max_ms": 2296.326,
-      "median_ms": 2242.409,
-      "min_ms": 2223.369,
+      "max_ms": 3061.488,
+      "median_ms": 3019.99,
+      "min_ms": 3012.57,
       "output": {
         "atoms": 1000000
       },
       "repetitions": 5
     },
     "symmetry/xtalforge": {
-      "max_ms": 67.9322,
-      "median_ms": 66.9846,
-      "min_ms": 66.055,
+      "max_ms": 100.0728,
+      "median_ms": 95.458,
+      "min_ms": 92.5541,
       "output": {
         "space_group": 225
       },
@@ -65,20 +65,20 @@
     }
   },
   "environment": {
-    "cpu_model": "AMD Ryzen 9 6900HX with Radeon Graphics",
-    "cpu_threads": 16,
-    "memory_gib": 26.68,
+    "cpu_model": "Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz",
+    "cpu_threads": 28,
+    "memory_gib": 14.99,
     "os": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
     "versions": {
       "ase": "3.29.0",
       "gemmi": "0.7.5",
-      "numpy": "2.5.4",
+      "numpy": "2.5.5",
       "pymatgen": "2026.10.24",
       "python": "3.14.4",
-      "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+      "rustc": "rustc 1.97.1 (8bab26f4f 2026-07-14)",
       "spglib": "2.8.0",
-      "xtalforge": "1.7.0",
-      "xtalforge_cli": "1.7.0"
+      "xtalforge": "1.14.1",
+      "xtalforge_cli": "1.14.1"
     }
   },
   "release": "1.8.0",
