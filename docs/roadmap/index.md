@@ -148,10 +148,12 @@ subsets or simplified ports; they are listed here rather than hidden:
   external Zeo++/MOFid/RASPA e2e snapshots remain documented follow-ups; the
   split npm tier upload needs the maintainer's token. The scripts and native
   coverage are in the repository.
-- 19.x: spglib magnetic golden data is not redistributed, so the magnetic
-  cases are hand-built; mCIF operation loops are stored and round-tripped but
-  a higher-symmetry magnetic asymmetric unit is not expanded. The magnetic
-  form factor is the normalized X-ray shape (spin-only), and Raman needs
+- 19.x: spglib's magnetic test files are not redistributed, but the numeric
+  reference for three collinear groups is recorded (`tests/golden/phase-19/`)
+  and the UNI, operation and time-reversal counts match under the axial
+  convention; mCIF operation loops are stored and round-tripped but a
+  higher-symmetry magnetic asymmetric unit is not expanded. The magnetic form
+  factor is the normalized X-ray shape (spin-only), and Raman needs
   engine-provided polarizability tensors rather than a native model.
 - 8.x: every library error exits the CLI with code 3 and Python raises
   `XtalforgeError` (`InputError` for invalid input); the `code` string is the
