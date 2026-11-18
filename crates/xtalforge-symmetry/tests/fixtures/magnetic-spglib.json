@@ -1,0 +1,186 @@
+{
+  "source": "spglib 2.8.0 get_magnetic_symmetry_dataset with is_axial=True (axial collinear spins)",
+  "note": "Numeric reference only; spglib's magnetic test files are not redistributed.",
+  "cases": [
+    {
+      "name": "bcc-Fe ferromagnetic",
+      "lattice": [
+        [
+          2.87,
+          0,
+          0
+        ],
+        [
+          0,
+          2.87,
+          0
+        ],
+        [
+          0,
+          0,
+          2.87
+        ]
+      ],
+      "positions": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0.5,
+          0.5,
+          0.5
+        ]
+      ],
+      "numbers": [
+        26,
+        26
+      ],
+      "moments": [
+        2.2,
+        2.2
+      ],
+      "symprec": 0.001,
+      "mag_symprec": 0.001,
+      "uni_number": 1646,
+      "n_operations": 96,
+      "n_time_reversal": 48,
+      "msg_type": 3
+    },
+    {
+      "name": "bcc-Fe ferrimagnetic",
+      "lattice": [
+        [
+          2.87,
+          0,
+          0
+        ],
+        [
+          0,
+          2.87,
+          0
+        ],
+        [
+          0,
+          0,
+          2.87
+        ]
+      ],
+      "positions": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0.5,
+          0.5,
+          0.5
+        ]
+      ],
+      "numbers": [
+        26,
+        26
+      ],
+      "moments": [
+        5.0,
+        -3.0
+      ],
+      "symprec": 0.001,
+      "mag_symprec": 0.001,
+      "uni_number": 1598,
+      "n_operations": 48,
+      "n_time_reversal": 24,
+      "msg_type": 3
+    },
+    {
+      "name": "simple-cubic checkerboard antiferromagnet",
+      "lattice": [
+        [
+          5.74,
+          0,
+          0
+        ],
+        [
+          0,
+          5.74,
+          0
+        ],
+        [
+          0,
+          0,
+          5.74
+        ]
+      ],
+      "positions": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.5,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          0.5
+        ],
+        [
+          0.5,
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.5
+        ]
+      ],
+      "numbers": [
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26,
+        26
+      ],
+      "moments": [
+        2.0,
+        -2.0,
+        -2.0,
+        2.0,
+        -2.0,
+        2.0,
+        2.0,
+        -2.0
+      ],
+      "symprec": 0.0001,
+      "mag_symprec": 0.1,
+      "uni_number": 1629,
+      "n_operations": 384,
+      "n_time_reversal": 192,
+      "msg_type": 4
+    }
+  ]
+}
