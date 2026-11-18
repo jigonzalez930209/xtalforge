@@ -29,16 +29,23 @@ external engine binary is needed.
 
 ## DFTB+
 
-`write_dftb_hsd(structure, &DftbOptions)` writes a `dftb_in.hsd` with
-`Geometry = GenFormat`, the `Hamiltonian = DFTB` block, the Slater-Koster
-folder naming and the k-point mesh. `parse_dftb_output` reads `detailed.out`
-(or `results.tag`) for the total energy, forces and the stress tensor.
-`DftbCalculator::new(options)` writes the input into a scratch folder, launches
-`dftb+` through `run_in_scratch`, reads `detailed.out`, checks the force count
-and exposes the result through `Calculator`. `with_program`, `with_timeout`,
-`keep_scratch` and `cancel_handle` configure the run. The parser is validated
-against the recorded `si_scc_detailed.out` fixture, not only against a
-simulated executable.
+`write_dftb_gen(structure)` writes the standalone GEN geometry (atom count and
+`F`, species line, fractional coordinates, origin and three cell vectors).
+`write_dftb_hsd(structure, &DftbOptions)` writes a `dftb_in.hsd` that includes
+that file with `<<< "geometry.gen"`, plus the `Hamiltonian = DFTB` block, the
+Slater-Koster folder naming, the k-point mesh and
+`Analysis { PrintForces = Yes }`. H and He always use an `s` shell because the
+standard `mio` sets do not carry `p` parameters for them.
+
+`DftbCalculator::new(options)` writes both files into a scratch folder,
+launches `dftb+` through `run_in_scratch`, reads `detailed.out`, checks the
+force count and exposes the result through `Calculator`. `with_program`,
+`with_timeout`, `keep_scratch` and `cancel_handle` configure the run.
+`parse_dftb_output` reads `detailed.out` (or `results.tag`) for the total
+energy, forces and the stress tensor. The parser is validated against the
+recorded `si_scc_detailed.out` fixture and against a real DFTB+ 25.1 methane
+run (`-87.774977538 eV`, `0.015703 eV/A` maximum force); see the
+[validation campaign](/guide/validation-campaign).
 
 sci-form carries the SCC-DFTB Fock/gamma building blocks
 (`scf::fock_matrix`) but not a Slater-Koster parameter set or a complete DFTB

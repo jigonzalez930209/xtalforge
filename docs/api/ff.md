@@ -88,8 +88,8 @@ structure as one undoable edit with `xtalforge_commands::ReplaceStructure`.
 ## External engines
 
 `probe(EngineKind)` checks a binary by running `--version`; on WASM it reports
-`Missing`. `write_dftb_hsd`, `write_xtb_input` and `write_orca_input` prepare
-inputs; `parse_dftb_output` and `parse_xtb_output` return an `EngineResult` with the
+`Missing`. `write_dftb_hsd` (with `write_dftb_gen`), `write_xtb_input` and
+`write_orca_input` prepare inputs; `parse_dftb_output` and `parse_xtb_output` return an `EngineResult` with the
 energy, forces and optional stress. ORCA is input-only and `orca_catalogue` lists the bundled methods.
 
 ## Quantum adapter
