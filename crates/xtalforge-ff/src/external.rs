@@ -56,7 +56,7 @@ pub use available::{
     EngineRunOptions, EngineRunStatus, PROBE_ENGINES, available_engines, try_run_engine,
 };
 pub use calculators::{DftbCalculator, XtbCalculator};
-pub use dftb::{DftbOptions, parse_dftb_output, write_dftb_hsd};
+pub use dftb::{DftbOptions, parse_dftb_output, write_dftb_gen, write_dftb_hsd};
 pub use orca::{OrcaOptions, orca_catalogue, write_orca_input};
 pub use probe::{probe, probe_binary};
 pub use runner::{RunOutcome, RunSpec, RunStatus, run_in_scratch};

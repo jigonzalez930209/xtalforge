@@ -60,7 +60,7 @@ pub use external::{
     EngineRunStatus, EngineStatus, HARTREE_PER_BOHR_TO_EV_PER_ANGSTROM, HARTREE_PER_BOHR3_TO_GPA,
     HARTREE_TO_EV, OrcaOptions, PROBE_ENGINES, RunOutcome, RunSpec, RunStatus, XtbCalculator,
     XtbOptions, available_engines, orca_catalogue, parse_dftb_output, parse_xtb_output, probe,
-    probe_binary, run_in_scratch, try_run_engine, write_dftb_hsd, write_orca_input,
+    probe_binary, run_in_scratch, try_run_engine, write_dftb_gen, write_dftb_hsd, write_orca_input,
     write_xtb_input,
 };
 pub use md::{
